@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.AreaMapper">
+    <sql id="rowSearch">
+        <if test="name != null and name != ''">
+            and MG.name ilike '%' || #{name} || '%'
+        </if>
+        <if test="type != null and type != ''">
+            and MG.type ilike '%' || #{type} || '%'
+        </if>
+        <if test="etc2 != null and etc2 != ''">
+            and MG.etc2 ilike '%' || #{etc2} || '%'
+        </if>
+        <if test="constructor != null and constructor != ''">
+            and MG.constructor ilike '%' || #{constructor} || '%'
+        </if>
+        <if test="measure1 != null and measure1 != ''">
+            and MG.measure1 ilike '%' || #{measure1} || '%'
+        </if>
+        <if test="measure2 != null and measure2 != ''">
+            and MG.measure2 ilike '%' || #{measure2} || '%'
+        </if>
+        <if test="lat != null and lat != ''">
+            and MG.lat ilike '%' || #{lat} || '%'
+        </if>
+        <if test="lng != null and lng != ''">
+            and MG.lng ilike '%' || #{lng} || '%'
+        </if>
+        <if test="zoom != null and zoom != ''">
+            and MG.zoom ilike '%' || #{zoom} || '%'
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+				<when test="'name' == sidx and sidx != ''">
+                    MG.name ${sord}
+                </when>
+				<when test="'type' == sidx and sidx != ''">
+                    MG.type ${sord}
+                </when>
+                <when test="'etc2' == sidx and sidx != ''">
+                    MG.etc2 ${sord}
+                </when>
+                <when test="'constructor' == sidx and sidx != ''">
+                    MG.constructor ${sord}
+                </when>
+                <when test="'measure1' == sidx and sidx != ''">
+                    MG.measure1 ${sord}
+                </when>
+                <when test="'measure2' == sidx and sidx != ''">
+                    MG.measure2 ${sord}
+                </when>
+                <otherwise>
+                    MG.area_id::integer
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+    
+    <select id="selectAreaList" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT MG.*
+        FROM (
+			SELECT a.area_id
+				 , a.name
+				 , type
+				 , a.etc1
+				 , a.etc2
+				 , a.etc3
+				 , a.file1
+				 , a.file2
+				 , a.file3
+				 , a.constructor
+				 , a.measure1
+				 , a.measure2
+			     , a.lat
+			     , a.lng
+			     , a.zoom
+			FROM tb_area a
+		) MG
+		WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+    
+    <select id="selectAreaListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			SELECT a.area_id
+				 , a.name
+				 , type
+				 , a.etc1
+				 , a.etc2
+				 , a.etc3
+				 , a.file1
+				 , a.file2
+				 , a.file3
+				 , a.constructor
+				 , a.measure1
+				 , a.measure2
+                 , a.lat
+                 , a.lng
+                 , a.zoom
+			FROM tb_area a
+		) MG
+		WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+    
+    <insert id="insertArea" parameterType="java.util.Map">
+        INSERT INTO tb_area ( area_id
+					          , name
+					          , type
+					          , etc1
+					          , etc2
+					          , etc3
+							  , file1
+							  , file2
+							  , file3
+							  , constructor
+							  , measure1
+							  , measure2
+							  , lat
+							  , lng
+							  , zoom
+		) SELECT COALESCE(max(area_id::integer),0)+1 as area_id
+		         , #{name}
+		         , #{type}
+		         , #{etc1}
+		         , #{etc2}
+		         , #{etc3}
+		         , #{file1}
+				 , #{file2}
+				 , #{file3}
+				 , #{constructor}
+				 , #{measure1}
+				 , #{measure2}
+				 , #{lat}
+				 , #{lng}
+				 , #{zoom}
+		    FROM tb_area
+    </insert>
+    
+    <update id="updateArea" parameterType="java.util.Map">
+        update tb_area set
+            name = #{name}
+        <if test="type != null">
+            , type = #{type}
+        </if>
+        <if test="etc1 != null">
+            , etc1 = #{etc1}
+        </if>
+        <if test="etc2 != null">
+            , etc2 = #{etc2}
+        </if>
+        <if test="etc3 != null">
+            , etc3 = #{etc3}
+        </if>
+        <if test="file1 != null">
+            , file1 = #{file1}
+        </if>
+        <if test="file2 != null">
+            , file2 = #{file2}
+        </if>
+        <if test="file3 != null">
+            , file3 = #{file3}
+        </if>
+        <if test="constructor != null">
+            , constructor = #{constructor}
+        </if>
+        <if test="measure1 != null">
+            , measure1 = #{measure1}
+        </if>
+        <if test="measure2 != null">
+            , measure2 = #{measure2}
+        </if>
+        <if test="lat != null">
+            , lat = #{lat}
+        </if>
+        <if test="lng != null">
+            , lng = #{lng}
+        </if>
+        <if test="zoom != null">
+            , zoom = #{zoom}
+        </if>
+        where area_id = #{area_id}
+    </update>
+    
+    <delete id="deleteArea" parameterType="java.util.Map">
+        DELETE FROM tb_area
+         WHERE area_id = #{area_id}
+    </delete>
+</mapper>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.CalcMapper">
+    <sql id="rowSearch">
+        <if test="asset_kind_name != null and asset_kind_name != ''">
+            and MG.asset_kind_name = #{asset_kind_name}
+        </if>
+        <if test="asset_name != null and asset_name != ''">
+            and MG.asset_name ilike '%' || #{asset_name} || '%'
+        </if>
+        <if test="channel_name != null and channel_name != ''">
+            and MG.channel_name ilike '%' || #{channel_name} || '%'
+        </if>
+        <if test="initial_value != null and initial_value != ''">
+            and MG.initial_value ilike '%' || #{initial_value} || '%'
+        </if>
+        <if test="factor_value != null and factor_value != ''">
+            and MG.factor_value ilike '%' || #{factor_value} || '%'
+        </if>
+        <if test="offset_value != null and offset_value != ''">
+            and MG.offset_value ilike '%' || #{offset_value} || '%'
+        </if>
+        <if test="sensor_id != null and sensor_id != ''">
+            and MG.sensor_id = #{sensor_id}
+        </if>
+        <if test="zone_id != null and zone_id != ''">
+            and MG.zone_id = #{zone_id}
+        </if>
+        <if test="zone_name != null and zone_name != ''">
+            and MG.zone_name ilike #{zone_name} || '%'
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'asset_kind_name' == sidx and sidx != ''">
+                    MG.asset_kind_name ${sord}
+                </when>
+                <when test="'asset_name' == sidx and sidx != ''">
+                    MG.asset_name ${sord}
+                </when>
+                <when test="'channel_name' == sidx and sidx != ''">
+                    MG.channel_name ${sord}
+                </when>
+                <when test="'initial_value' == sidx and sidx != ''">
+                    MG.initial_value ${sord}
+                </when>
+                <when test="'factor_value' == sidx and sidx != ''">
+                    MG.factor_value ${sord}
+                </when>
+                <when test="'offset_value' == sidx and sidx != ''">
+                    MG.offset_value ${sord}
+                </when>
+                <otherwise>
+                    MG.zone_id, MG.asset_name, MG.channel_name
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectCalcByDeviceId" parameterType="java.util.Map" resultType="string">
+        SELECT initial_value
+        FROM tb_calc
+        WHERE 1=1
+        AND sensor_id = #{sensor_id}
+        AND zone_id = #{zone_id}
+    </select>
+    
+    <select id="selectCalcList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.CalcDto">
+        SELECT MG.*
+        FROM (
+			SELECT ak.name as asset_kind_name
+					, ass.name asset_name
+					, ch.name channel_name
+					, cal.calc_id
+					, cal.initial_value
+					, cal.factor_value
+					, cal.offset_value
+					, ch.sensor_id
+			        , ch.zone_id
+                    , zo.name as zone_name
+            from tb_calc cal
+                LEFT JOIN tb_channel ch ON cal.sensor_id = ch.sensor_id and cal.zone_id = ch.zone_id
+                LEFT JOIN tb_asset ass ON ch.asset_id = ass.asset_id
+                LEFT JOIN tb_asset_kind ak ON ass.asset_kind_id = ak.asset_kind_id
+                LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
+            where zo.use_flag = 'Y'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectCalcListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			SELECT ak.name as asset_kind_name
+					, ass.name asset_name
+					, ch.name channel_name
+					, cal.calc_id
+					, cal.initial_value
+					, cal.factor_value
+					, cal.offset_value
+					, ch.sensor_id
+			        , ch.zone_id
+                    , zo.name as zone_name
+			from tb_calc cal
+				LEFT JOIN tb_channel ch ON cal.sensor_id = ch.sensor_id and cal.zone_id = ch.zone_id
+				LEFT JOIN tb_asset ass ON ch.asset_id = ass.asset_id
+                LEFT JOIN tb_asset_kind ak ON ass.asset_kind_id = ak.asset_kind_id
+                LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
+            where zo.use_flag = 'Y'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <update id="updateCalc" parameterType="java.util.Map">
+        update tb_calc set
+            initial_value = #{initial_value}
+        <if test="factor_value != null">
+            , factor_value = #{factor_value}
+        </if>
+        <if test="offset_value != null">
+            , offset_value = #{offset_value}
+        </if>
+        where calc_id = #{calc_id}
+    </update>
+    
+	<update id="initCalc">
+        update tb_calc set
+            initial_value = '0'
+            , factor_value = '0'
+            , offset_value = '0'
+        where 1=1
+    </update>
+</mapper>

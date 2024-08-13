@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.EmergencyCallMapper">
+    <sql id="rowSearch">
+        <if test="area_id != null and area_id != ''">
+            and MG.area_id = #{area_id}
+        </if>
+        <if test="role != null and role != ''">
+            and MG.role ilike '%' || #{role} || '%'
+        </if>
+        <if test="company_name != null and company_name != ''">
+            and MG.company_name ilike '%' || #{company_name} || '%'
+        </if>
+        <if test="name != null and name != ''">
+            and MG.name ilike '%' || #{name} || '%'
+        </if>
+        <if test="tel1 != null and tel1 != ''">
+            and MG.tel1 ilike '%' || #{tel1} || '%'
+        </if>        
+        <if test="tel2 != null and tel2 != ''">
+            and MG.tel2 ilike '%' || #{tel2} || '%'
+        </if>     
+        <if test="email != null and email != ''">
+            and MG.email ilike '%' || #{email} || '%'
+        </if>
+        <if test="etc1 != null and etc1 != ''">
+            and MG.etc1 ilike '%' || #{etc1} || '%'
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'area_id' == sidx and sidx != ''">
+                    MG.area_id ${sord}
+                </when>
+                <when test="'role' == sidx and sidx != ''">
+                    MG.role ${sord}
+                </when>
+                <when test="'company_name' == sidx and sidx != ''">
+                    MG.company_name ${sord}
+                </when>
+                <when test="'name' == sidx and sidx != ''">
+                    MG.name ${sord}
+                </when>
+                <when test="'tel1' == sidx and sidx != ''">
+                    MG.tel1 ${sord}
+                </when>
+                <when test="'tel2' == sidx and sidx != ''">
+                    MG.tel2 ${sord}
+                </when>
+                <when test="'email' == sidx and sidx != ''">
+                    MG.email ${sord}
+                </when>
+                <when test="'etc1' == sidx and sidx != ''">
+                    MG.etc1 ${sord}
+                </when>
+                <otherwise>
+                    MG.emergency_call_id::integer
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectEmergencyCallList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.EmergencyCallDto">
+        SELECT MG.*
+        FROM (
+	        SELECT A.emergency_call_id
+		            , A.area_id
+		            , A.area_id area_id_hid
+		            , A.role
+		            , A.company_name
+		            , A.name
+		            , A.tel1
+		            , A.tel2
+		            , A.email
+		            , A.etc1
+		            , A.etc2
+		            , A.etc3
+	        FROM tb_emergency_call A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectEmergencyCallListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+	        SELECT A.emergency_call_id
+		            , A.area_id
+		            , A.area_id area_id_hid
+		            , A.role
+		            , A.company_name
+		            , A.name
+		            , A.tel1
+		            , A.tel2
+		            , A.email
+		            , A.etc1
+		            , A.etc2
+		            , A.etc3
+	        FROM tb_emergency_call A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertEmergencyCall" parameterType="java.util.Map">
+        INSERT INTO tb_emergency_call ( emergency_call_id
+							          , area_id
+							          , role
+							          , company_name
+							          , name
+							          , tel1
+							          , tel2
+							          , email
+							          , etc1
+							          , etc2
+							          , etc3
+							        ) SELECT COALESCE(max(emergency_call_id::integer),0)+1 as emergency_call_id
+									          , #{area_id_hid}
+									          , #{role}
+									          , #{company_name}
+									          , #{name}
+									          , #{tel1}
+									          , #{tel2}
+									          , #{email}
+									          , #{etc1}
+									          , #{etc2}
+									          , #{etc3}
+							        	FROM tb_emergency_call
+    </insert>
+
+    <update id="updateEmergencyCall" parameterType="java.util.Map">
+        update tb_emergency_call set
+            name = #{name}
+        <if test="area_id_hid != null">
+            , area_id = #{area_id_hid}
+        </if>
+        <if test="role != null">
+            , role = #{role}
+        </if>
+        <if test="company_name != null">
+            , company_name = #{company_name}
+        </if>
+        <if test="tel1 != null">
+            , tel1 = #{tel1}
+        </if>
+        <if test="tel2 != null">
+            , tel2 = #{tel2}
+        </if>
+        <if test="email != null">
+            , email = #{email}
+        </if>
+        <if test="etc1 != null">
+            , etc1 = #{etc1}
+        </if>
+        <if test="etc2 != null">
+            , etc2 = #{etc2}
+        </if>
+        <if test="etc3 != null">
+            , etc3 = #{etc3}
+        </if>
+        where emergency_call_id = #{emergency_call_id}
+    </update>
+
+    <delete id="deleteEmergencyCall" parameterType="java.util.Map">
+        DELETE FROM tb_emergency_call
+         WHERE emergency_call_id = #{emergency_call_id}
+    </delete>
+
+</mapper>

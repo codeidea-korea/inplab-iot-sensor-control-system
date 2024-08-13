@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.ManageMapper">
+    <sql id="rowSearch">
+    	<if test="asset_id != null and asset_id != ''">
+            and MG.asset_id = #{asset_id}
+        </if>
+    	<if test="asset_kind_name != null and asset_kind_name != ''">
+            and MG.asset_kind_name = #{asset_kind_name}
+        </if>
+        <if test="asset_name != null and asset_name != ''">
+            and MG.asset_name ilike '%' || #{asset_name} || '%'
+        </if>
+        <if test="channel_name != null and channel_name != ''">
+            and MG.channel_name ilike '%' || #{channel_name} || '%'
+        </if>
+        <if test="standard_time != null and standard_time != ''">
+            and MG.standard_time ilike '%' || #{standard_time} || '%'
+        </if>
+        <if test="min1 != null and min1 != ''">
+            and MG.min1 ilike '%' || #{min1} || '%'
+        </if>
+        <if test="min2 != null and min2 != ''">
+            and MG.min2 ilike '%' || #{min2} || '%'
+        </if>
+        <if test="min3 != null and min3 != ''">
+            and MG.min3 ilike '%' || #{min3} || '%'
+        </if>
+        <if test="min4 != null and min4 != ''">
+            and MG.min4 ilike '%' || #{min4} || '%'
+        </if>
+        <if test="max1 != null and max1 != ''">
+            and MG.max1 ilike '%' || #{max1} || '%'
+        </if>
+        <if test="max2 != null and max2 != ''">
+            and MG.max2 ilike '%' || #{max2} || '%'
+        </if>
+        <if test="max3 != null and max3 != ''">
+            and MG.max3 ilike '%' || #{max3} || '%'
+        </if>
+        <if test="max4 != null and max4 != ''">
+            and MG.max4 ilike '%' || #{max4} || '%'
+        </if>
+        <if test="sensor_id != null and sensor_id != ''">
+            and MG.sensor_id = #{sensor_id}
+        </if>
+        <if test="zone_id != null and zone_id != ''">
+            and MG.zone_id = #{zone_id}
+        </if>
+        <if test="zone_name != null and zone_name != ''">
+            and MG.zone_name ilike #{zone_name} || '%'
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'asset_kind_name' == sidx and sidx != ''">
+                    MG.asset_kind_name ${sord}
+                </when>
+                <when test="'asset_name' == sidx and sidx != ''">
+                    MG.asset_name ${sord}
+                </when>
+                <when test="'channel_name' == sidx and sidx != ''">
+                    MG.channel_name ${sord}
+                </when>
+                <when test="'standard_time' == sidx and sidx != ''">
+                    MG.standard_time ${sord}
+                </when>
+                <when test="'min1' == sidx and sidx != ''">
+                    MG.min1 ${sord}
+                </when>
+                <when test="'min2' == sidx and sidx != ''">
+                    MG.min2 ${sord}
+                </when>
+                <when test="'min3' == sidx and sidx != ''">
+                    MG.min3 ${sord}
+                </when>
+                <when test="'max1' == sidx and sidx != ''">
+                    MG.max1 ${sord}
+                </when>
+                <when test="'max2' == sidx and sidx != ''">
+                    MG.max2 ${sord}
+                </when>
+                <when test="'max3' == sidx and sidx != ''">
+                    MG.max3 ${sord}
+                </when>
+                <when test="'max4' == sidx and sidx != ''">
+                    MG.max4 ${sord}
+                </when>
+                <otherwise>
+                    MG.zone_id, MG.asset_name, MG.channel_name
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectManageList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.ManageDto">
+        SELECT MG.*
+        FROM (
+			SELECT mng.manage_id
+					, mng.standard_time
+					, mng.min1
+					, mng.min2
+					, mng.min3
+					, mng.min4
+					, mng.max1
+					, mng.max2
+					, mng.max3
+					, mng.max4
+					, mng.etc
+					, ass.asset_id
+			        , ak.name as asset_kind_name
+					, ass.name asset_name
+					, ch.name channel_name
+			        , ch.sensor_id
+			        , ch.zone_id
+                    , zo.name as zone_name
+			FROM tb_manage mng
+				LEFT JOIN tb_channel ch ON mng.sensor_id = ch.sensor_id and mng.zone_id = ch.zone_id
+				LEFT JOIN tb_asset ass ON ch.asset_id = ass.asset_id
+                LEFT JOIN tb_asset_kind ak ON ass.asset_kind_id = ak.asset_kind_id
+                LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
+            WHERE zo.use_flag = 'Y'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectManageListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			SELECT mng.manage_id
+					, mng.standard_time
+					, mng.min1
+					, mng.min2
+					, mng.min3
+					, mng.min4
+					, mng.max1
+					, mng.max2
+					, mng.max3
+					, mng.max4
+					, mng.etc
+					, ass.asset_id
+                    , ak.name as asset_kind_name
+					, ass.name asset_name
+					, ch.name channel_name
+                    , ch.sensor_id
+                    , ch.zone_id
+                    , zo.name as zone_name
+			FROM tb_manage mng
+                LEFT JOIN tb_channel ch ON mng.sensor_id = ch.sensor_id and mng.zone_id = ch.zone_id
+				LEFT JOIN tb_asset ass ON ch.asset_id = ass.asset_id
+                LEFT JOIN tb_asset_kind ak ON ass.asset_kind_id = ak.asset_kind_id
+                LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
+            WHERE zo.use_flag = 'Y'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <update id="updateManage" parameterType="java.util.Map">
+        update tb_manage set
+            standard_time = #{standard_time}
+        <if test="min1 != null">
+            , min1 = #{min1}
+        </if>
+        <if test="min2 != null">
+            , min2 = #{min2}
+        </if>
+        <if test="min3 != null">
+            , min3 = #{min3}
+        </if>
+        <if test="min4 != null">
+            , min4 = #{min4}
+        </if>
+        <if test="max1 != null">
+            , max1 = #{max1}
+        </if>
+        <if test="max2 != null">
+            , max2 = #{max2}
+        </if>
+        <if test="max3 != null">
+            , max3 = #{max3}
+        </if>
+        <if test="max4 != null">
+            , max4 = #{max4}
+        </if>
+        <if test="etc != null">
+            , etc = #{etc}
+        </if>
+        where manage_id = #{manage_id}
+    </update>
+</mapper>

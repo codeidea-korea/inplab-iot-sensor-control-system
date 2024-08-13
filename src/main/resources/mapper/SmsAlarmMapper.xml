@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.SmsAlarmMapper">
+    <sql id="rowSearch">
+        <if test="id != null and id != ''">
+            and MG.id = #{id}
+        </if>
+        <if test="username != null and username != ''">
+            and MG.username ilike '%' || #{username} || '%'
+        </if>
+        <if test="phone != null and phone != ''">
+            and MG.phone ilike '%' || #{phone} || '%'
+        </if>
+        <if test="threshold != null and threshold != ''">
+            and MG.threshold ilike '%' || #{threshold} || '%'
+        </if>
+        <if test="filter_flag != null and filter_flag != ''">
+            and MG.filter_flag ilike '%' || #{filter_flag} || '%'
+        </if>
+        <if test="auto_send_flag != null and auto_send_flag != ''">
+            and MG.auto_send_flag ilike '%' || #{auto_send_flag} || '%'
+        </if>
+        <if test="etc1 != null and etc1 != ''">
+            and MG.etc1 ilike '%' || #{etc1} || '%'
+        </if>
+        <if test="send_date != null and send_date != ''">
+            and MG.send_date = #{send_date}
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+				<when test="'username' == sidx and sidx != ''">
+                    MG.username ${sord}
+                </when>
+				<when test="'phone' == sidx and sidx != ''">
+                    MG.phone ${sord}
+                </when>
+				<when test="'threshold' == sidx and sidx != ''">
+                    MG.threshold ${sord}
+                </when>
+				<when test="'filter_flag' == sidx and sidx != ''">
+                    MG.filter_flag ${sord}
+                </when>
+				<when test="'auto_send_flag' == sidx and sidx != ''">
+                    MG.auto_send_flag ${sord}
+                </when>
+				<when test="'etc1' == sidx and sidx != ''">
+                    MG.etc1 ${sord}
+                </when>
+                <when test="'send_date' == sidx and sidx != ''">
+                    MG.send_date ${sord}
+                </when>
+                <otherwise>
+                    MG.id
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+    
+    <select id="selectSmsAlarmList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.SmsAlarmListDto">
+		SELECT MG.* 
+        FROM (
+			select username, phone, threshold, threshold as threshold_id, filter_flag, auto_send_flag, etc1, send_date, id
+            from tb_sms_alarm tsa
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <!-- 지구 별 강우계 값 -->
+    <select id="selectRainGaugeInfo" parameterType="java.util.Map" resultType="java.util.Map">
+        select ta.asset_id, ta.zone_id, dbc.real_value
+        from tb_asset ta LEFT JOIN tb_channel ch ON ta.asset_id = ch.asset_id
+            LEFT JOIN (
+                SELECT *
+                FROM tb_dps_basecollection
+                WHERE (sensor_id, zone_id, collect_date)
+                IN ( 
+                    SELECT sensor_id, zone_id, MAX(collect_date)
+                    FROM tb_dps_basecollection
+                    GROUP BY sensor_id, zone_id )
+            ) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
+        where asset_kind_id = '4'
+        and ta.zone_id = #{zone_id}
+    </select>
+
+    <select id="selectAlarmInfo" parameterType="java.util.Map" resultType="java.util.Map">
+        select 
+            ta.asset_id,
+            ta.asset_kind_id,
+            tak2."name" asset_kind_name,
+            ta.name asset_name,
+            tz.name zone_name,
+            ta2.name area_name,
+            ta2.etc2 address,
+            ta2.constructor,
+            ta2.measure1,
+            ta2.measure2,
+            ta2.type,
+            tak.risk_level,
+            fn_common(tak.risk_level::integer, '위험레벨') risk_name,
+            tak.description,
+            tak.name alarm_name
+        from tb_asset ta , tb_asset_kind tak2, tb_zone tz, tb_area ta2, tb_alarm_kind tak
+        where ta.asset_id = #{asset_id}
+            and ta.zone_id = tz.zone_id 
+            and ta.asset_kind_id = tak2.asset_kind_id 
+            and tak.alarm_kind_id = #{alarm_kind_id}
+            and tz.area_id = ta2.area_id 
+    </select>
+
+    <select id="selectSmsCountPerDay" parameterType="string" resultType="int">
+        select count(*) 
+        from tb_sms_log
+        where phone = #{value}
+        <![CDATA[ 
+            and reg_date::timestamp >= now() - interval '24 hour'
+        ]]>
+    </select>
+
+    <select id="selectSmsAlarmListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			select * 
+            from tb_sms_alarm tsa
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertSmsLog" parameterType="java.util.Map">
+        INSERT INTO tb_sms_log
+            (id, phone, message, reg_date)
+        SELECT COALESCE(max(id::integer),0)+1 as id,
+                #{phone}, 
+                #{message}, 
+                now()
+        FROM tb_sms_log RETURNING id
+    </insert>
+
+    <insert id="insertSmsAlarm" parameterType="java.util.Map">
+        INSERT INTO tb_sms_alarm
+            (id, username, phone, threshold, filter_flag, auto_send_flag, etc1, send_date)
+        SELECT COALESCE(max(id::integer),0)+1 as id
+                , #{username}
+                , #{phone}
+                , #{threshold_id}
+                , #{filter_flag}
+                , #{auto_send_flag}
+                , #{etc1}
+                , now()
+        FROM tb_sms_alarm RETURNING id
+    </insert>
+
+    <update id="updateSmsAlarm" parameterType="java.util.Map">
+        update tb_sms_alarm set
+            etc1 = null
+        <if test="phone != null and phone != ''">
+            , phone = #{phone}::varchar
+        </if>
+        <if test="username != null">
+            , username = #{username}
+        </if>
+        <if test="threshold_id != null">
+            , threshold = #{threshold_id}
+        </if>
+        <if test="filter_flag != null">
+            , filter_flag = #{filter_flag}
+        </if>
+        <if test="auto_send_flag != null">
+            , auto_send_flag = #{auto_send_flag}
+        </if>
+        <if test="etc1 != null">
+            , etc1 = #{etc1}
+        </if>
+        where id = #{id}::varchar
+    </update>
+
+    <delete id="deleteSmsAlarm" parameterType="java.util.Map">
+        DELETE FROM tb_sms_alarm
+         WHERE id = #{id}
+    </delete>
+</mapper>

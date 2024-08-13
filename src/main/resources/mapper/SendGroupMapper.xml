@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.SendGroupMapper">
+    <sql id="rowSearch">
+        <if test="send_group_id != null and send_group_id != ''">
+            and MG.send_group_id = #{send_group_id}
+        </if>
+        <if test="send_group_name != null and send_group_name != ''">
+            and MG.send_group_name ilike '%' || #{send_group_name} || '%'
+        </if>
+        <if test="description != null and description != ''">
+            and MG.description ilike '%' || #{description} || '%'
+        </if>
+        <if test="use_yn != null and use_yn != ''">
+            and MG.use_yn = #{use_yn}
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'send_group_id' == sidx and sidx != ''">
+                    MG.send_group_id ${sord}
+                </when>
+                <when test="'send_group_name' == sidx and sidx != ''">
+                    MG.send_group_name ${sord}
+                </when>
+                <when test="'description' == sidx and sidx != ''">
+                    MG.description ${sord}
+                </when>
+                <when test="'use_yn' == sidx and sidx != ''">
+                    MG.use_yn ${sord}
+                </when>
+                <otherwise>
+                    MG.send_group_id, MG.send_group_name
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+    
+    <select id="selectSendGroupList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.SendGroupDto">
+        SELECT MG.*
+        FROM (
+            SELECT send_group_id
+                 , send_group_name
+                 , description
+                 , use_yn
+            from tb_send_group tsg
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectSendGroupListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			SELECT send_group_id
+                , send_group_name
+                , description
+                , use_yn
+            from tb_send_group tsg
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <update id="updateSendGroup" parameterType="java.util.Map">
+        update tb_send_group
+        <set>
+            <if test="send_group_name != null">
+                , send_group_name = #{send_group_name}
+            </if>
+            <if test="description != null">
+                , description = #{description}
+            </if>
+            <if test="use_yn != null">
+                , use_yn = #{use_yn}
+            </if>
+        </set>
+        where send_group_id = #{send_group_id}
+    </update>
+
+    <insert id="insertSendGroup" parameterType="java.util.Map">
+        insert into tb_send_group (send_group_id, send_group_name, description, use_yn)
+        SELECT COALESCE(max(send_group_id::integer),0)+1 as tb_send_group
+             , #{send_group_name}
+             , #{description}
+             , 'Y'
+        FROM tb_send_group
+    </insert>
+
+    <delete id="deleteSendGroup" parameterType="java.util.Map">
+        DELETE FROM tb_send_group
+        WHERE send_group_id = #{send_group_id}
+    </delete>
+
+</mapper>

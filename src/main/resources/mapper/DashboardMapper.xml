@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.DashboardMapper">
+    <select id="selectAlarm" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+            alarm_uid,
+            ta.reg_date,
+            ta.risk_level,
+            fn_common(ta.risk_level::integer, '위험레벨') risk_name, 
+            fn_common(ta.alarm_type::integer, '알람종류타입') alarm_type,
+            ta.alarm_desc,
+            ta.alarm_title,
+            fn_common(tak2.status::integer, '센서상태') asset_status,
+            tak2.asset_id,
+            tak2."name" asset_name,
+            tak3."name" asset_kind_name,
+            tak2.etc1,
+            tak2.x,
+            tak2.y,
+            tz.zone_id,
+            tz."name" zone_name,
+            tz.etc1 zone_etc1,
+            tz.lat,
+            tz.lng,
+            tz.file1,
+            tz.file2
+        from tb_alarm ta, tb_asset tak2, tb_asset_kind tak3, tb_zone tz 
+        where ta.asset_id = tak2.asset_id 
+          and tak2.zone_id = tz.zone_id     
+          and tak2.asset_kind_id = tak3.asset_kind_id 
+        <if test="reg_date != null and reg_date != ''">
+            <![CDATA[
+            and ta.reg_date > to_timestamp(#{reg_date}::numeric / 1000)
+            ]]>
+        </if>
+        order by reg_date desc
+        limit 5
+    </select>
+
+    <select id="selectAreaInfo" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+            tz.zone_id,
+            ta.area_id,
+            ta.name area_name,
+            ta.etc2 area_fullname,
+            ta.file1 area_img,
+            ta."constructor" ,
+            CASE
+                WHEN ta.measure2 IS NOT NULL THEN ta.measure1 || ', ' || ta.measure2
+                ELSE ta.measure1
+            END as measures,
+            ta."type" ,
+            tz.zone_id ,
+            tz."name" zone_name,
+            tz.lat,
+            tz.lng,
+            tz.file1,
+            tz.file2
+        from tb_area ta, tb_zone tz
+        where ta.area_id = tz.area_id 
+        <if test="area_id != null and area_id != ''">
+            and ta.area_id = #{area_id}
+        </if>
+        <if test="zone_id != null and zone_id != ''">
+            and tz.zone_id = #{zone_id}
+        </if>
+    </select>
+
+    <select id="selectDashboardData" parameterType="java.util.Map" resultType="java.util.Map">
+        select * from tb_dashboarddata
+        where 1=1
+        <choose>
+            <when test="cdate != null and cdate != ''">
+        <![CDATA[
+                and _cdate > #{cdate}
+        ]]>
+            </when>
+            <otherwise>
+        <![CDATA[            
+                and _cdate::timestamp > now() - interval '24 hour'
+        ]]>
+            </otherwise>
+        </choose>
+        order by "_cdate" asc
+        limit 5
+    </select>
+
+    <select id="selectAssetAlarm" parameterType="java.util.Map" resultType="java.util.Map">
+        select 
+            ta.asset_id,
+            ta.area_id,
+            ta.zone_id,	
+            max(ta2.risk_level) risk_level
+        <![CDATA[
+            from tb_asset ta left outer join (select * from tb_alarm where reg_date::timestamp >= now() - interval '1 minutes') ta2 on ta.asset_id = ta2.asset_id 
+        ]]>
+        group by ta.asset_id, ta.area_id, ta.zone_id
+    </select>
+
+    <select id="selectMarkerList" parameterType="java.util.Map" resultType="java.util.Map">
+        select ta.asset_id, ta.name asset_name, ta.etc1, ta.area_id, ta.zone_id, ta.status, tak.name, tak.description, ta.x, ta.y 
+        from tb_asset ta, tb_asset_kind tak 
+        where ta.asset_kind_id = tak.asset_kind_id 
+        <if test="zone_id != null and zone_id != ''">
+            and ta.zone_id = #{zone_id}
+        </if>
+    </select>
+
+    <select id="selectSensorCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT count(*) as total_cnt
+             , count(CASE WHEN status = '1' THEN 1 END) AS receive_cnt
+             , count(CASE WHEN status = '2' THEN 1 END) AS not_receive_cnt
+        FROM tb_asset
+        WHERE asset_kind_id IN ('2','3','4','6','7')
+    </select>
+
+    <select id="selectCCTVCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT count(*) as total_cnt
+             , count(CASE WHEN status = '1' THEN 1 END) AS receive_cnt
+             , count(CASE WHEN status = '2' THEN 1 END) AS not_receive_cnt
+        FROM tb_asset
+        WHERE asset_kind_id = '8'
+    </select>
+
+    <select id="selectSystemCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            CASE
+                WHEN ta.asset_kind_id IN ('2', '3', '4', '6', '7') THEN '2-7'
+                ELSE ta.asset_kind_id
+                END AS grouped_asset_kind_id,
+            COUNT(*) AS total_count,
+            COUNT(CASE WHEN ta.status = '1' THEN 1 END) AS status_1_count,
+            COUNT(CASE WHEN ta.status = '2' THEN 1 END) AS status_2_count
+        FROM
+            tb_asset ta
+        left join tb_zone tz on (ta.zone_id = tz.zone_id)
+        WHERE 1=1
+            and ta.asset_kind_id IN ('2', '3', '4', '6', '7', '8')
+            and tz.use_flag = 'Y'
+        GROUP BY
+            grouped_asset_kind_id
+        ORDER BY
+            grouped_asset_kind_id
+    </select>
+
+    <select id="selectSensorChartData" parameterType="java.util.Map" resultType="java.util.Map">
+        WITH TimeSlotData AS (
+            SELECT
+                mng.manage_id,
+                mng.standard_time,
+                mng.min1,
+                mng.min2,
+                mng.min3,
+                mng.min4,
+                mng.max1,
+                mng.max2,
+                mng.max3,
+                mng.max4,
+                mng.sensor_id,
+                mng.zone_id,
+                ch.channel_id,
+                ch."name" channel_name,
+                ch.asset_id,
+                ass.asset_kind_id,
+                tak.name asset_kind_name,
+                ass."name" AS asset_name,
+                ass.etc1,
+                ass.etc2,
+                ass.area_id,
+                tdb.real_value,
+                TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS') as collect_date,
+                tdb.calc_value,
+                tdb.raw_value,
+                tdb."type",
+                #{itv} as intervalValue,
+                <choose>
+                    <when test="itv.equals('4hour')">
+                        date_trunc('day', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) + floor(extract(hour from TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) / 4.0) * 4 * interval '1 hour' as time_slot
+                    </when>
+                    <when test="itv.equals('hour')">
+                        date_trunc('hour', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) +
+                        (((date_part('minute', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS'))::integer / 60) * 60) || ' minutes')::interval AS time_slot
+                    </when>
+                    <when test="itv.equals('5min')">                        
+                        date_trunc('hour', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) +
+                            (((date_part('minute', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS'))::integer / 5) * 5) || ' minutes')::interval AS time_slot
+                    </when>
+                    <otherwise>
+                        date_trunc('hour', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) +
+                            (((date_part('minute', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS'))::integer / 1) * 1) || ' minutes')::interval AS time_slot
+                    </otherwise>
+                </choose>
+            FROM tb_manage mng
+                LEFT JOIN tb_channel ch ON mng.sensor_id = ch.sensor_id and mng.zone_id = ch.zone_id
+                LEFT JOIN tb_asset ass ON ch.asset_id = ass.asset_id
+                LEFT OUTER JOIN tb_dps_basecollection tdb ON mng.zone_id = tdb.zone_id and mng.sensor_id = tdb.sensor_id
+                left outer join tb_asset_kind tak on ass.asset_kind_id = tak.asset_kind_id 
+            <![CDATA[    
+            WHERE TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS') >= #{start_date}::timestamp AND
+                TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS') <= '${end_date} 23:59:59'
+            ]]>
+        )
+        select distinct
+            tsd.asset_id,
+            tsd.time_slot,
+            to_char(tsd.time_slot, 'YYYY-MM-DD HH24:MI:SS') as data_time,
+            tsd.asset_kind_id,
+            tsd.asset_kind_name,
+            tsd.asset_name,
+            tsd.channel_id,
+            tsd.channel_name,
+            tsd.min1,
+            tsd.min2,
+            tsd.min3,
+            tsd.min4,
+            tsd.max1,
+            tsd.max2,
+            tsd.max3,
+            tsd.max4,
+            <choose>
+                <when test="valueType.equals('raw')">
+                    AVG(raw_value::float) OVER (PARTITION BY time_slot, tsd.asset_id) AS avg_value,
+                    MIN(raw_value::float) OVER (PARTITION BY time_slot, tsd.asset_id) AS min_value,
+                    MAX(raw_value::float) OVER (PARTITION BY time_slot, tsd.asset_id) AS max_value,
+                    FIRST_VALUE(raw_value::float) OVER (PARTITION BY time_slot, tsd.asset_id ORDER BY collect_date) AS start_value,
+                    LAST_VALUE(raw_value::float) OVER (PARTITION BY time_slot, tsd.asset_id ORDER BY collect_date RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) AS end_value,
+                    FIRST_VALUE(raw_value) OVER (order by raw_value::float desc) AS tar_value
+                </when>
+                <otherwise>
+                    AVG(real_value::float) OVER (PARTITION BY time_slot, tsd.asset_id) AS avg_value,
+                    MIN(real_value::float) OVER (PARTITION BY time_slot, tsd.asset_id) AS min_value,
+                    MAX(real_value::float) OVER (PARTITION BY time_slot, tsd.asset_id) AS max_value,
+                    FIRST_VALUE(real_value::float) OVER (PARTITION BY time_slot, tsd.asset_id ORDER BY collect_date) AS start_value,
+                    LAST_VALUE(real_value::float) OVER (PARTITION BY time_slot, tsd.asset_id ORDER BY collect_date RANGE BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) AS end_value,
+                    FIRST_VALUE(real_value) OVER (order by real_value::float desc) AS tar_value
+                </otherwise>
+            </choose>
+        FROM TimeSlotData tsd
+        where asset_id in 
+        <foreach item="asset_id" collection="asset_ids" open="(" separator="," close=")">
+            #{asset_id}::varchar
+        </foreach>        
+        ORDER BY asset_id, channel_id, time_slot
+    </select>
+
+    <select id="selectSensorChartRealData" parameterType="java.util.Map" resultType="java.util.Map">
+        WITH TimeSlotData AS (
+            SELECT
+                mng.manage_id,
+                mng.standard_time,
+                mng.min1,
+                mng.min2,
+                mng.min3,
+                mng.min4,
+                mng.max1,
+                mng.max2,
+                mng.max3,
+                mng.max4,
+                mng.sensor_id,
+                mng.zone_id,
+                ch.channel_id,
+                ch."name" channel_name,
+                ch.asset_id,
+                ass.asset_kind_id,
+                tak.name asset_kind_name,
+                ass."name" AS asset_name,
+                ass.etc1,
+                ass.etc2,
+                ass.area_id,
+                tdb.real_value,
+                TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS') as collect_date,
+                tdb.calc_value,
+                tdb.raw_value,
+                tdb."type",
+                #{itv} as intervalValue,
+                <choose>
+                    <when test="itv.equals('4hour')">
+                        date_trunc('day', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) + floor(extract(hour from TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) / 4.0) * 4 * interval '1 hour' as time_slot
+                    </when>
+                    <when test="itv.equals('hour')">
+                        date_trunc('hour', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) +
+                        (((date_part('minute', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS'))::integer / 60) * 60) || ' minutes')::interval AS time_slot
+                    </when>
+                    <when test="itv.equals('5min')">
+                        date_trunc('hour', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) +
+                            (((date_part('minute', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS'))::integer / 5) * 5) || ' minutes')::interval AS time_slot
+                    </when>
+                    <otherwise>
+                        date_trunc('hour', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS')) +
+                            (((date_part('minute', TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS'))::integer / 1) * 1) || ' minutes')::interval AS time_slot
+                    </otherwise>
+                </choose>
+            FROM tb_manage mng
+                LEFT JOIN tb_channel ch ON mng.sensor_id = ch.sensor_id and mng.zone_id = ch.zone_id
+                LEFT JOIN tb_asset ass ON ch.asset_id = ass.asset_id
+                LEFT OUTER JOIN tb_dps_basecollection tdb ON mng.zone_id = tdb.zone_id and mng.sensor_id = tdb.sensor_id
+                left outer join tb_asset_kind tak on ass.asset_kind_id = tak.asset_kind_id
+            <![CDATA[
+            WHERE TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS') >= #{start_date}::timestamp AND
+                TO_TIMESTAMP(tdb.collect_date , 'YYYY/MM/DD HH24:MI:SS') <= '${end_date} 23:59:59'
+            ]]>
+        )
+        select distinct
+            tsd.asset_id,
+            tsd.time_slot,
+            to_char(tsd.time_slot, 'YYYY-MM-DD HH24:MI:SS') as data_time,
+            tsd.asset_kind_id,
+            tsd.asset_kind_name,
+            tsd.asset_name,
+            tsd.channel_id,
+            tsd.channel_name,
+            tsd.min1,
+            tsd.min2,
+            tsd.min3,
+            tsd.min4,
+            tsd.max1,
+            tsd.max2,
+            tsd.max3,
+            tsd.max4,
+            tsd.real_value::float AS real_value,
+            FIRST_VALUE(tsd.real_value) OVER (order by tsd.real_value::float desc) AS tar_value
+        FROM TimeSlotData tsd
+        where asset_id in
+        <foreach item="asset_id" collection="asset_ids" open="(" separator="," close=")">
+            #{asset_id}::varchar
+        </foreach>
+        ORDER BY asset_id, channel_id, time_slot
+    </select>
+
+
+    <select id="selectDeviceCount" parameterType="java.util.Map" resultType="java.util.Map">
+        select count(case when ta.asset_kind_id = '2' then '1' end)  as tm_count
+             , count(case when ta.asset_kind_id = '3' then '1' end)  as tw_count
+             , count(case when ta.asset_kind_id = '4' then '1' end)  as wr_count
+             , count(case when ta.asset_kind_id = '8' then '1' end)  as cctv_count
+--              , count(case when asset_kind_id not in ('2','3','4','6','7','8') then '1' end) as etc_count
+        from tb_asset ta
+        left join tb_zone tz on (ta.zone_id = tz.zone_id)
+        where 1=1
+        and tz.use_flag = 'Y'
+        <if test="zone_id != null and zone_id != ''">
+            and ta.zone_id = #{zone_id}
+        </if>
+    </select>
+
+    <select id="selectDetailSystemCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            ta.asset_kind_id,
+            COUNT(*) AS total_count,
+            COUNT(CASE WHEN ta.status = '1' THEN 1 END) AS status_1_count,
+            COUNT(CASE WHEN ta.status = '2' THEN 1 END) AS status_2_count
+        FROM
+            tb_asset ta
+        left join tb_zone tz on (ta.zone_id = tz.zone_id)
+        WHERE 1=1
+            and ta.asset_kind_id IN ('2','3','4','6','7','8')
+            and tz.use_flag = 'Y'
+        <if test="zone_id != null and zone_id != ''">
+            and ta.zone_id = #{zone_id}
+        </if>
+        GROUP BY
+            ta.asset_kind_id
+        order by
+            ta.asset_kind_id
+    </select>
+
+    <select id="selectMaintenanceInfo" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT MG.*
+        FROM (
+             SELECT
+                 A.manager_name
+                  , (select "name" from tb_common_code where category = '유지보수종류' and code = A.type::int  ) AS type_name
+                  , asset.name as asset_name
+                  , asset.zone_id
+                  , A.reg_date
+             FROM tb_maintenance A
+                      LEFT OUTER JOIN tb_asset asset ON A.asset_id = asset.asset_id
+             ) MG
+        WHERE 1=1
+        <if test="zone_id != null and zone_id != ''">
+            and MG.zone_id = #{zone_id}
+        </if>
+        order by MG.reg_date desc
+    </select>
+</mapper>

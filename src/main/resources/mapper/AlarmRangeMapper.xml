@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.AlarmRangeMapper">
+    <sql id="rowSearch">
+        <if test="asset_kind_id != null and asset_kind_id != ''">
+            and MG.asset_kind_id = #{asset_kind_id}
+        </if>
+        <if test="asset_kind_name != null and asset_kind_name != ''">
+            and MG.asset_kind_name = #{asset_kind_name}
+        </if>
+        <if test="range_value1 != null and range_value1 != ''">
+            and MG.range_value1 ilike '%' || #{range_value1} || '%'
+        </if>
+        <if test="range_value2 != null and range_value2 != ''">
+            and MG.range_value2 ilike '%' || #{range_value2} || '%'
+        </if>
+        <if test="range_value3 != null and range_value3 != ''">
+            and MG.range_value3 ilike '%' || #{range_value3} || '%'
+        </if>
+        <if test="range_value4 != null and range_value4 != ''">
+            and MG.range_value4 ilike '%' || #{range_value4} || '%'
+        </if>
+        <if test="range_value5 != null and range_value5 != ''">
+            and MG.range_value5 ilike '%' || #{range_value5} || '%'
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'asset_kind_name' == sidx and sidx != ''">
+                    MG.asset_kind_name ${sord}
+                </when>
+                <when test="'range_value1' == sidx and sidx != ''">
+                    MG.range_value1 ${sord}
+                </when>
+                <when test="'range_value2' == sidx and sidx != ''">
+                    MG.range_value2 ${sord}
+                </when>
+                <when test="'range_value3' == sidx and sidx != ''">
+                    MG.range_value3 ${sord}
+                </when>
+                <when test="'range_value4' == sidx and sidx != ''">
+                    MG.range_value4 ${sord}
+                </when>
+                <when test="'range_value5' == sidx and sidx != ''">
+                    MG.range_value5 ${sord}
+                </when>
+                <otherwise>
+                    
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectAlarmRangeList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.AlarmRangeDto">
+        SELECT MG.*
+        FROM (
+			select 
+                tak.asset_kind_id,
+                tak.name asset_kind_name,
+                tar.*
+            from tb_asset_kind tak left outer join tb_alarm_range tar on tak.asset_kind_id = tar.asset_kind_id
+            where tak.asset_kind_id IN ('2','3','4','6','7')
+        ) MG
+        WHERE 1=1          
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectAlarmRangeListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			select
+                tak.asset_kind_id,
+                tak.name asset_kind_name,
+                tar.*
+            from tb_asset_kind tak left outer join tb_alarm_range tar on tak.asset_kind_id = tar.asset_kind_id
+            where tak.asset_kind_id IN ('2','3','4','6','7')
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <update id="updateAlarmRange" parameterType="java.util.Map">
+        with update_alarm_range as (
+            update tb_alarm_range set
+                range_value1 = #{range_value1}
+                , range_value2 = #{range_value2}
+                , range_value3 = #{range_value3}
+                , range_value4 = #{range_value4}
+                , range_value5 = #{range_value5}
+            where asset_kind_id = #{asset_kind_id}
+            returning *
+        )
+        insert into tb_alarm_range (asset_kind_id, range_value1, range_value2, range_value3, range_value4, range_value5)
+        select #{asset_kind_id}, #{range_value1}, #{range_value2}, #{range_value3}, #{range_value4}, #{range_value5}
+        where not exists (select #{asset_kind_id} from update_alarm_range)
+    </update>
+</mapper>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.AlarmListMapper">
+    <sql id="rowSearch">
+        <if test="risk_level != null and risk_level != ''">
+            and MG.risk_level = #{risk_level}
+        </if>
+        <if test="area_name != null and area_name != ''">
+            and MG.area_name ilike '%' || #{area_name} || '%'
+        </if>
+        <if test="asset_kind_name != null and asset_kind_name != ''">
+            and MG.asset_kind_name ilike '%' || #{asset_kind_name} || '%'
+        </if>
+        <if test="asset_name != null and asset_name != ''">
+            and MG.asset_name ilike '%' || #{asset_name} || '%'
+        </if>
+        <if test="alarm_kind_id != null and alarm_kind_id != ''">
+            and MG.alarm_kind_id = #{alarm_kind_id}
+        </if>
+        <if test="reg_time != null and reg_time != ''">
+            and MG.reg_time ilike '%' || #{reg_time} || '%'
+        </if>
+        <if test="zone_id != null and zone_id != ''">
+            and MG.zone_id = #{zone_id}
+        </if>
+        <if test="view_flag != null and view_flag != ''">
+            and MG.view_flag = #{view_flag}
+        </if>
+        <if test="reg_date_start != null and reg_date_start != '' and reg_date_end != null and reg_date_end != ''">
+            and MG.reg_date::timestamp between concat(#{reg_date_start},' 00:00:00')::timestamp and concat(#{reg_date_end},' 23:59:59')::timestamp
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'risk_level' == sidx and sidx != ''">
+                    MG.risk_level ${sord}
+                </when>
+                <when test="'area_name' == sidx and sidx != ''">
+                    MG.area_name ${sord}
+                </when>
+                <when test="'asset_kind_name' == sidx and sidx != ''">
+                    MG.asset_kind_name ${sord}
+                </when>
+                <when test="'asset_name' == sidx and sidx != ''">
+                    MG.asset_name ${sord}
+                </when>
+                <when test="'alarm_kind_id' == sidx and sidx != ''">
+                    MG.alarm_kind_id ${sord}
+                </when>
+                <when test="'reg_day' == sidx and sidx != ''">
+                    MG.reg_day ${sord}
+                </when>
+                <when test="'reg_time' == sidx and sidx != ''">
+                    MG.reg_time ${sord}
+                </when>
+                <otherwise>
+                    MG.reg desc
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectAlarmHistory" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT A.alarm_uid
+        , asset.zone_id
+        , A.asset_id
+        , A.asset_kind_id
+        , A.alarm_kind_id
+        , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD PM HH24:MI:SS') AS reg_date
+        , A.description
+        , ak.risk_level
+        , ak.name as alarm_kind_name
+        , (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) asset_kind_name
+        , asset.name asset_name
+        , ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) area_name
+        , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
+        , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
+        FROM tb_alarm A
+        LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
+        LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id
+        ORDER BY A.reg_date desc LIMIT 4
+    </select>
+
+    <select id="selectAlarmCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            count(CASE WHEN ak.risk_level= '1' THEN 1 END) AS interest_cnt,
+            count(CASE WHEN ak.risk_level= '2' THEN 1 END) AS notice_cnt,
+            count(CASE WHEN ak.risk_level= '3' THEN 1 END) AS warning_cnt,
+            count(CASE WHEN ak.risk_level= '4' THEN 1 END) AS danger_cnt
+        FROM
+            tb_alarm A
+            LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id
+            LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
+        WHERE 1=1
+            and A.view_flag = 'Y'
+            and A.reg_date::timestamp > now() - interval '5 minutes'
+        <if test="zone_id != null and zone_id != ''">
+            and asset.zone_id = #{zone_id}
+        </if>
+    </select>
+
+    <select id="selectAlarmList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.AlarmListDto">
+        SELECT MG.*
+        FROM (
+            SELECT A.alarm_uid
+                    , asset.zone_id
+		            , A.asset_id
+		            , A.asset_kind_id
+		            , A.alarm_kind_id
+		            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_date
+		            , A.description
+		            , ak.risk_level
+					, (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) asset_kind_name
+					, asset.name asset_name
+					, ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) area_name
+					, TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
+					, TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
+                    , A.view_flag
+                    , zo.name zone_name
+                    , A.reg_date AS reg
+            FROM tb_alarm A
+				LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
+				LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id
+                LEFT JOIN tb_zone zo ON asset.zone_id = zo.zone_id
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectAlarmListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+            SELECT A.alarm_uid
+                    , asset.zone_id
+		            , A.asset_id
+		            , A.asset_kind_id
+		            , A.alarm_kind_id
+		            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_date
+		            , A.description
+		            , ak.risk_level
+					, (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) asset_kind_name
+					, asset.name asset_name
+<!-- 					, ( SELECT NAME FROM tb_zone WHERE zone_id = asset.zone_id ) zone_name -->
+					, ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) area_name
+					, TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
+					, TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
+                    , A.view_flag
+                    , zo.name zone_name
+            FROM tb_alarm A
+            	LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
+				LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id
+                LEFT JOIN tb_zone zo ON asset.zone_id = zo.zone_id
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertAlarm" parameterType="java.util.Map">
+        INSERT INTO tb_alarm ( alarm_uid
+                            , asset_id
+                            , asset_kind_id
+                            , alarm_kind_id
+                            , reg_date
+                            , description
+                            , risk_level
+                            , alarm_type
+                            , alarm_title
+                            , alarm_desc
+                            , view_flag
+        ) SELECT COALESCE(max(alarm_uid::integer),0)+1 as alarm_uid
+               , #{asset_id}
+               , #{asset_kind_id}
+               , #{alarm_kind_id}
+               , now()
+               , #{description}
+               , #{risk_level}
+               , #{type}
+               , #{name}
+               , #{description}
+               , 'Y'
+        FROM tb_alarm
+    </insert>
+</mapper>

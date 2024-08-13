@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.DeviceMapper">
+    <sql id="rowSearch">
+        <if test="mapping_id != null and mapping_id != ''">
+            and MG.mapping_id = #{mapping_id}
+        </if>
+        <if test="device_id != null and device_id != ''">
+            and MG.device_id ilike '%' || #{device_id} || '%'
+        </if>
+        <if test="description != null and description != ''">
+            and MG.description ilike '%' || #{description} || '%'
+        </if>
+        <if test="mod_date_start != null and mod_date_start != '' and mod_date_end != null and mod_date_end != ''">
+            and MG.mod_date::timestamp between (#{mod_date_start}::timestamp) and (#{mod_date_end}::timestamp)
+        </if>
+        <if test="mod_user != null and mod_user != ''">
+            and MG.mod_user ilike '%' || #{mod_user} || '%'
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'mapping_id' == sidx and sidx != ''">
+                    MG.mapping_id::integer ${sord}
+                </when>
+                <when test="'device_id' == sidx and sidx != ''">
+                    MG.device_id ${sord}
+                </when>
+                <when test="'description' == sidx and sidx != ''">
+                    MG.description ${sord}
+                </when>
+                <when test="'mod_date' == sidx and sidx != ''">
+                    MG.mod_date ${sord}
+                </when>
+                <when test="'mod_user' == sidx and sidx != ''">
+                    MG.mod_user ${sord}
+                </when>
+                <otherwise>
+                    MG.mapping_id::integer
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectDeviceList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.DeviceDto">
+        SELECT MG.*
+        FROM (
+            SELECT
+            A.mapping_id
+            , A.device_id
+            , A.description
+            , TO_CHAR(A.mod_date::timestamp, 'YYYY-MM-DD') AS mod_date
+            , A.mod_user
+            FROM tb_mapping A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectDeviceListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+        SELECT
+        A.mapping_id
+        , A.device_id
+        , A.description
+        , TO_CHAR(A.mod_date::timestamp, 'YYYY-MM-DD') AS mod_date
+        , A.mod_user
+        FROM tb_mapping A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertDevice" parameterType="java.util.Map">
+        INSERT INTO tb_mapping (
+        mapping_id
+          , device_id
+          , description
+          , mod_date
+          , mod_user
+        )
+        SELECT
+          COALESCE(max(mapping_id::integer),0)+1 as mapping_id
+          , #{device_id}
+          , #{description}
+          , now()
+          , #{mod_user}
+        FROM tb_mapping
+    </insert>
+
+    <update id="updateDevice" parameterType="java.util.Map">
+        update tb_mapping set
+            mod_date = now()
+        <if test="device_id != null">
+            , device_id = #{device_id}
+        </if>
+        <if test="description != null">
+            , description = #{description}
+        </if>
+        <if test="mod_user != null and mod_user != ''">
+            , mod_user = #{mod_user}
+        </if>
+        where mapping_id = #{mapping_id}
+    </update>
+
+    <delete id="deleteDevice" parameterType="java.util.Map">
+        DELETE FROM tb_mapping
+         WHERE mapping_id = #{mapping_id}
+    </delete>
+</mapper>

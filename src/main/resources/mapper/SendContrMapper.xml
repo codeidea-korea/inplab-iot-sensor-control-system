@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.SendContrMapper">
+    <select id="selectSendContrList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.SendContrDto">
+        select send_contr_id,
+               send_group_id,
+               dp_effect,
+               (select name from tb_common_code where code = a.dp_effect::numeric and category='표시효과') as dp_effect_name,
+               dp_time,
+               url_path,
+               filename,
+               send_type,
+               use_yn
+        from tb_send_contr a
+        where send_group_id = #{send_group_id, jdbcType=VARCHAR}
+        <if test="send_type != null and send_type != ''">
+            and send_type = #{send_type}
+        </if>
+        order by reg_date asc
+    </select>
+
+    <select id="selectAssetList" resultType="com.safeone.dashboard.dto.AssetListDto">
+        select asset_id, name, etc1, etc2, etc3, description, area_id
+        from tb_asset
+        where asset_kind_id = '10'
+          and use_flag = 'Y'
+        <if test="asset_id != null and asset_id != ''">
+            and asset_id = #{asset_id}
+        </if>
+    </select>
+
+    <select id="selectSendLog" resultType="HashMap">
+        select TO_CHAR(send_time::timestamp, 'YYYY-MM-DD HH24:MI:SS') as  send_time
+             , asset_id
+             , (select name from tb_asset where a.asset_id = asset_id ) as asset_name
+             , case when send_type = 'normal' then '평시' else '긴급' end send_type
+             , send_group_id
+             , (select send_group_name from tb_send_group where a.send_group_id = send_group_id ) as send_group_name
+             , send_result
+        from tb_send_log a
+        order by send_time desc
+        limit 1
+    </select>
+
+    <update id="updateSendContr" parameterType="java.util.Map">
+        update tb_send_contr
+        <set>
+            <if test="send_group_id != null">
+                send_group_id = #{send_group_id, jdbcType=VARCHAR},
+            </if>
+            <if test="dp_effect != null">
+                dp_effect = #{dp_effect, jdbcType=VARCHAR},
+            </if>
+            <if test="dp_time != null">
+                dp_time = #{dp_time, jdbcType=VARCHAR},
+            </if>
+            <if test="url_path != null">
+                url_path = #{url_path, jdbcType=VARCHAR},
+            </if>
+            <if test="filename != null">
+                filename = #{filename, jdbcType=VARCHAR},
+            </if>
+            <if test="send_type != null">
+                send_type = #{send_type, jdbcType=VARCHAR},
+            </if>
+            <if test="use_yn != null">
+                use_yn = #{use_yn, jdbcType=VARCHAR},
+            </if>
+        </set>
+        where send_contr_id = #{send_contr_id, jdbcType=VARCHAR}
+    </update>
+
+    <insert id="insertSendContr" parameterType="java.util.Map">
+        insert into tb_send_contr(
+            send_contr_id
+            , send_group_id
+            , dp_effect
+            , dp_time
+            , url_path
+            , filename
+            , send_type
+            , use_yn
+            , reg_date
+        )
+        SELECT COALESCE(max(send_contr_id::integer),0)+1 as send_contr_id
+             , #{send_group_id, jdbcType=VARCHAR}
+             , #{dp_effect, jdbcType=VARCHAR}
+             , #{dp_time, jdbcType=VARCHAR}
+             , #{url_path, jdbcType=VARCHAR}
+             , #{filename, jdbcType=VARCHAR}
+             , #{send_type, jdbcType=VARCHAR}
+             , 'Y'
+             , now()
+        FROM tb_send_contr
+    </insert>
+
+    <delete id="deleteSendContr" parameterType="java.util.Map">
+        delete from tb_send_contr
+        where  send_contr_id = #{send_contr_id, jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="insertSendLog" parameterType="java.util.Map">
+        insert into tb_send_log ( send_time, asset_id, send_type, send_group_id, send_result )
+        values (now(), #{asset_id, jdbcType=VARCHAR}, #{send_type, jdbcType=VARCHAR}, #{send_group_id, jdbcType=VARCHAR}, #{send_result, jdbcType=VARCHAR})
+    </insert>
+
+
+
+</mapper>

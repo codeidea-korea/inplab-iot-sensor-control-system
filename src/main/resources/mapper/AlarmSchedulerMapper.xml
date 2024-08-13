@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.AlarmSchedulerMapper">
+    <select id="selectCommDelayAlarm" resultType="java.util.Map" parameterType="string">
+        SELECT a.*, tak.*
+        FROM
+            (
+            SELECT
+                ass.asset_id,
+                ass.asset_kind_id,
+                MAX(TO_TIMESTAMP(dbc.collect_date , 'YYYY/MM/DD HH24:MI:SS')) AS last_cdate,
+                ass.zone_id
+            FROM
+                tb_asset ass
+            LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
+            LEFT JOIN (
+                SELECT
+                    sensor_id,
+                    zone_id,
+                    collect_date
+                FROM
+                    tb_dps_basecollection
+                WHERE
+                    (sensor_id, zone_id, collect_date) IN (
+                        SELECT
+                            sensor_id,
+                            zone_id,
+                            MAX(collect_date)
+                        FROM
+                            tb_dps_basecollection
+                        GROUP BY
+                            sensor_id,zone_id
+                    )
+            ) dbc ON ch.sensor_id = dbc.sensor_id AND ch.zone_id = dbc.zone_id
+            WHERE
+                ass.asset_kind_id IN ('2','3','4','6','7')
+            <![CDATA[
+                AND (
+                dbc.collect_date IS NULL OR
+                TO_TIMESTAMP(dbc.collect_date , 'YYYY/MM/DD HH24:MI:SS') < now() - #{value}::interval
+                )
+            ]]>
+            GROUP BY ass.asset_id, ass.asset_kind_id
+            ) a
+        LEFT JOIN tb_alarm_kind tak ON a.asset_kind_id = tak.asset_kind_id
+        LEFT JOIN tb_zone tz on tz.zone_id = a.zone_id
+        WHERE 1=1
+        and tak.type = '1'
+        and tz.use_flag = 'Y'
+    </select>
+
+    <select id="selectThresholdAlarm" parameterType="java.util.Map" resultType="java.util.Map">
+        select 
+            ass.asset_id,
+            ass.asset_kind_id,
+            ass."name" asset_name,
+            ass.etc1 asset_etc1,
+            ass.area_id,
+            ass.zone_id,
+            ass.x lng,
+            ass.y lat,
+            ass.status,
+            ch.channel_id,
+            ch."name" channel_name,
+            ch.sensor_id,
+            dbc.real_value,
+            TO_TIMESTAMP(dbc.collect_date , 'YYYY/MM/DD HH24:MI:SS') as collect_date,
+            dbc.raw_value,
+            tar.range_value1,
+            tar.range_value2,
+            tar.range_value3,
+            tar.range_value4,
+            tar.range_value5,
+            tak.name asset_kind_name,
+        <![CDATA[
+            CASE
+                WHEN dbc.real_value::numeric >= range_value2::numeric AND dbc.real_value::numeric < range_value3::numeric THEN 1
+                WHEN dbc.real_value::numeric >= range_value3::numeric AND dbc.real_value::numeric < range_value4::numeric THEN 2
+                WHEN dbc.real_value::numeric >= range_value4::numeric AND dbc.real_value::numeric < range_value5::numeric THEN 3
+                WHEN dbc.real_value::numeric >= range_value5::numeric THEN 4
+                ELSE 0
+            END AS risk_level
+        ]]>
+        FROM tb_asset ass
+            LEFT JOIN tb_asset_kind tak ON (ass.asset_kind_id = tak.asset_kind_id)
+            LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
+            LEFT JOIN (
+                SELECT *
+                    FROM tb_dps_basecollection
+                    WHERE (sensor_id, zone_id, collect_date)
+                    IN ( 
+                        SELECT sensor_id, zone_id, MAX(collect_date)
+                        FROM tb_dps_basecollection
+                        GROUP BY sensor_id, zone_id )
+            ) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id, tb_alarm_range tar
+        WHERE ass.asset_kind_id IN ('2','3','4','6','7')
+        and ass.asset_kind_id  = tar.asset_kind_id
+        and dbc.real_value is not null
+        <![CDATA[
+        and dbc.real_value::numeric >= tar.range_value2::numeric
+        ]]>
+        <choose>
+            <when test="cdate != null and cdate != ''">
+        <![CDATA[
+                and TO_TIMESTAMP(dbc.collect_date , 'YYYY/MM/DD HH24:MI:SS') > #{cdate}::timestamp
+        ]]>
+            </when>
+            <otherwise>
+        <![CDATA[            
+                and TO_TIMESTAMP(dbc.collect_date , 'YYYY/MM/DD HH24:MI:SS') > now() - interval '24 hour'
+        ]]>
+            </otherwise>
+        </choose>
+        order by dbc.collect_date desc
+    </select>
+
+    <select id="selectCCTVAlarm" resultType="java.util.Map">
+        select *
+        from tb_alarm_kind
+        where asset_kind_id = '8'
+    </select>
+
+    <update id="updateDefaultStatus">
+        update tb_asset
+        set status = '1'
+        where asset_kind_id IN ('2','3','4','6','7')
+    </update>
+
+    <update id="updateViewFlag">
+        update tb_alarm
+        set view_flag = 'N'
+    </update>
+
+</mapper>

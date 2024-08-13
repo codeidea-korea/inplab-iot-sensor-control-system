@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.AlarmSettingMapper">
+    <sql id="rowSearch">
+        <if test="risk_level != null and risk_level != ''">
+            and MG.risk_level = #{risk_level}
+        </if>
+        <if test="name != null and name != ''">
+            and MG.name ilike '%' || #{name} || '%'
+        </if>
+        <if test="category != null and category != ''">
+            and MG.category = #{category}
+        </if>
+        <if test="type != null and type != ''">
+            and MG.type = #{type}
+        </if>
+        <if test="description != null and description != ''">
+            and MG.description ilike '%' || #{description} || '%'
+        </if>
+        <if test="asset_kind_id != null and asset_kind_id != ''">
+            and MG.asset_kind_id = #{asset_kind_id}
+        </if>
+        <if test="use_flag != null and use_flag != ''">
+            and MG.use_flag = #{use_flag}
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'risk_level' == sidx and sidx != ''">
+                    MG.risk_level ${sord}
+                </when>
+                <when test="'name' == sidx and sidx != ''">
+                    MG.name ${sord}
+                </when>    
+                <when test="'category' == sidx and sidx != ''">
+                    MG.category ${sord}
+                </when>
+                <when test="'type' == sidx and sidx != ''">
+                    MG.type ${sord}
+                </when>
+                <when test="'description' == sidx and sidx != ''">
+                    MG.description ${sord}
+                </when>
+                <when test="'asset_kind_id' == sidx and sidx != ''">
+                    MG.asset_kind_id ${sord}
+                </when>
+                <otherwise>
+                    MG.alarm_kind_id::integer
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectAlarmSettingList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.AlarmSettingDto">
+        SELECT MG.*
+        FROM (
+	        SELECT A.alarm_kind_id
+		            , A.name
+		            , A.description
+		            , A.risk_level
+		            , A.category
+		            , A.type     
+		            , A.risk_level risk_level_hid
+		            , A.category category_hid
+		            , A.type type_hid
+		            , A.asset_kind_id
+		            , A.asset_kind_id asset_kind_id_hid
+		            , A.use_flag
+		            , A.dupe_check_min
+		            , TO_CHAR(A.mod_date::timestamp, 'YYYY-MM-DD') AS mod_date
+		            , A.mod_user
+		    FROM tb_alarm_kind A
+		    WHERE A.type = '1'
+        ) MG
+        WHERE 1=1
+
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectAlarmSettingListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+	        SELECT A.alarm_kind_id
+		            , A.name
+		            , A.description
+		            , A.risk_level
+		            , A.category
+		            , A.type     
+		            , A.risk_level risk_level_hid
+		            , A.category category_hid
+		            , A.type type_hid
+		            , A.asset_kind_id
+		            , A.asset_kind_id asset_kind_id_hid
+		            , A.use_flag
+		            , A.dupe_check_min
+		            , TO_CHAR(A.mod_date::timestamp, 'YYYY-MM-DD') AS mod_date
+		            , A.mod_user
+		    FROM tb_alarm_kind A
+            WHERE A.type = '1'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <update id="updateAlarmSetting" parameterType="java.util.Map">
+        update tb_alarm_kind set
+            mod_date = now()
+        <if test="name != null">
+            , name = #{name}
+        </if>
+        <if test="description != null">
+            , description = #{description}
+        </if>
+        <if test="risk_level_hid != null">
+            , risk_level = #{risk_level_hid}
+        </if>
+        <if test="category_hid != null">
+            , category = #{category_hid}
+        </if>
+        <if test="type_hid != null">
+            , type = #{type_hid}
+        </if>
+        <if test="asset_kind_id_hid != null">
+            , asset_kind_id = #{asset_kind_id_hid}
+        </if>
+        <if test="use_flag != null">
+            , use_flag = #{use_flag}
+        </if>
+        <if test="dupe_check_min != null">
+            , dupe_check_min = #{dupe_check_min}
+        </if>
+        <if test="mod_user != null and mod_user != ''">
+            , mod_user = #{mod_user}
+        </if>
+        where alarm_kind_id = #{alarm_kind_id}
+    </update>
+</mapper>

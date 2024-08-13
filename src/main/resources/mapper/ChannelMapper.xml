@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.ChannelMapper">
+    <sql id="rowSearch">
+        <if test="asset_kind_name != null and asset_kind_name != ''">
+            and MG.asset_kind_name = #{asset_kind_name}
+        </if>
+        <if test="asset_name != null and asset_name != ''">
+            and MG.asset_name ilike '%' || #{asset_name} || '%'
+        </if>
+        <if test="name != null and name != ''">
+            and MG.name ilike '%' || #{name} || '%'
+        </if>
+        <if test="seq != null and seq != ''">
+            and MG.seq ilike '%' || #{seq} || '%'
+        </if>
+        <if test="sensor_id != null and sensor_id != ''">
+            and MG.sensor_id = #{sensor_id}
+        </if>
+        <if test="zone_id != null and zone_id != ''">
+            and MG.zone_id = #{zone_id}
+        </if>
+        <if test="zone_name != null and zone_name != ''">
+            and MG.zone_name ilike #{zone_name} || '%'
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'asset_kind_name' == sidx and sidx != ''">
+                    MG.asset_kind_name ${sord}
+                </when>
+                <when test="'asset_name' == sidx and sidx != ''">
+                    MG.asset_name ${sord}
+                </when>
+                <when test="'name' == sidx and sidx != ''">
+                    MG.name ${sord}
+                </when>
+                <when test="'seq' == sidx and sidx != ''">
+                    MG.seq ${sord}
+                </when>
+                <otherwise>
+                    MG.zone_id, MG.asset_name, MG.name
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectChannelList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.ChannelDto">
+        SELECT MG.*
+        FROM (
+            SELECT ch.channel_id
+					, ch.name
+					, ch.seq
+					, ch.asset_id 
+					, ass.name asset_name
+                    , ak.name as asset_kind_name
+                    , ch.sensor_id
+                    , ch.zone_id
+                    , zo.name as zone_name
+			FROM tb_channel ch
+				LEFT JOIN tb_asset ass ON ch.asset_id = ass.asset_id
+                LEFT JOIN tb_asset_kind ak ON ass.asset_kind_id = ak.asset_kind_id
+                LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
+            WHERE zo.use_flag = 'Y'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectChannelListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+	        SELECT ch.channel_id
+					, ch.name
+					, ch.seq
+					, ch.asset_id 
+					, ass.name asset_name
+                    , ak.name as asset_kind_name
+                    , ch.sensor_id
+                    , ch.zone_id
+                    , zo.name as zone_name
+			FROM tb_channel ch
+				LEFT JOIN tb_asset ass ON ch.asset_id = ass.asset_id
+                LEFT JOIN tb_asset_kind ak ON ass.asset_kind_id = ak.asset_kind_id
+                LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
+            WHERE zo.use_flag = 'Y'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <update id="updateChannel" parameterType="java.util.Map">
+        update tb_channel set
+            seq = #{seq}
+        where channel_id = #{channel_id}
+    </update>
+</mapper>

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.ZoneMapper">
+    <sql id="rowSearch">
+        <if test="zone_id != null and zone_id != ''">
+            and MG.zone_id = #{zone_id}
+        </if>
+        <if test="name != null and name != ''">
+            and MG.name ilike '%' || #{name} || '%'
+        </if>
+        <if test="area_id != null and area_id != ''">
+            and MG.area_id ilike '%' || #{area_id} || '%'
+        </if>
+		<if test="etc1 != null and etc1 != ''">
+			and MG.etc1 ilike '%' || #{etc1} || '%'
+		</if>
+		<if test="etc2 != null and etc2 != ''">
+			and MG.etc2 ilike '%' || #{etc2} || '%'
+		</if>
+		<if test="etc3 != null and etc3 != ''">
+			and MG.etc3 ilike '%' || #{etc3} || '%'
+		</if>
+		<if test="lat != null and lat != ''">
+			and MG.lat ilike '%' || #{lat} || '%'
+		</if>
+		<if test="lng != null and lng != ''">
+			and MG.lng ilike '%' || #{lng} || '%'
+		</if>
+		<if test="height != null and height != ''">
+			and MG.height ilike '%' || #{height} || '%'
+		</if>
+        <if test="use_flag != null and use_flag != ''">
+            and MG.use_flag = #{use_flag}
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+				<when test="'name' == sidx and sidx != ''">
+                    MG.name ${sord}
+                </when>
+				<when test="'area_id' == sidx and sidx != ''">
+                    MG.area_id ${sord}
+                </when>
+				<when test="'etc1' == sidx and sidx != ''">
+                    MG.etc1 ${sord}
+                </when>
+				<when test="'etc2' == sidx and sidx != ''">
+                    MG.etc2 ${sord}
+                </when>
+				<when test="'etc3' == sidx and sidx != ''">
+                    MG.etc3 ${sord}
+                </when>
+				<when test="'lat' == sidx and sidx != ''">
+                    MG.lat ${sord}
+                </when>    
+				<when test="'lng' == sidx and sidx != ''">
+                    MG.lng ${sord}
+                </when>   
+				<when test="'height' == sidx and sidx != ''">
+                    MG.height ${sord}
+                </when>
+                <when test="'use_flag' == sidx and sidx != ''">
+                    MG.use_flag ${sord}
+                </when>
+                <otherwise>
+                    MG.zone_id::integer
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectZoneList" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT MG.*
+        FROM (
+			SELECT z.zone_id
+				 , z.area_id
+				 , z.area_id area_id_hid
+				 , z.name
+				 , z.etc1
+				 , z.etc1 etc1_hid
+				 , z.etc2
+				 , z.etc3
+				 , z.lat
+				 , z.lng
+				 , z.height
+				 , z.file1
+				 , z.file2
+				 , z.file3
+			     , COALESCE(z.use_flag, 'N') as use_flag
+			FROM tb_zone z
+		) MG	
+		WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+    
+    <select id="selectZoneListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			SELECT z.zone_id
+				 , z.area_id
+				 , z.area_id area_id_hid
+				 , z.name
+				 , z.etc1
+				 , z.etc1 etc1_hid
+				 , z.etc2
+				 , z.etc3
+				 , z.lat
+				 , z.lng
+				 , z.height
+				 , z.file1
+				 , z.file2
+				 , z.file3
+                 , COALESCE(z.use_flag, 'N') as use_flag
+			FROM tb_zone z
+		) MG
+		WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+    
+	<select id="getZoneIdByEtc1" parameterType="string" resultType="string">
+        SELECT zone_id
+        FROM tb_zone tz
+                 left outer join tb_mapping tm on(tz.etc1 = tm.mapping_id)
+        where tm.device_id = #{device_id}
+        and tz.use_flag = 'Y'
+	</select>
+    
+    <insert id="insertZone" parameterType="java.util.Map">
+        INSERT INTO tb_zone ( zone_id
+					         , name
+					         , area_id
+							 , etc1
+							 , etc2
+							 , etc3
+							 , lat
+							 , lng
+							 , height
+							 , file1
+							 , file2
+							 , file3
+                             , use_flag
+		) SELECT COALESCE(max(zone_id::integer),0)+1 as zone_id
+		         , #{name}
+		         , #{area_id_hid}
+				 , #{etc1_hid}
+				 , #{etc2}
+				 , #{etc3}
+				 , #{lat}
+				 , #{lng}
+				 , #{height}
+				 , #{file1}
+				 , #{file2}
+				 , #{file3}
+		         , #{use_flag}
+		    FROM tb_zone
+    </insert>
+    
+    <update id="updateZone" parameterType="java.util.Map">
+        update tb_zone set
+            name = #{name}
+        <if test="area_id_hid != null">
+            , area_id = #{area_id_hid}
+        </if>
+        <if test="etc1_hid != null">
+            , etc1 = #{etc1_hid}
+        </if>
+        <if test="etc2 != null">
+            , etc2 = #{etc2}
+        </if>
+        <if test="etc3 != null">
+            , etc3 = #{etc3}
+        </if>
+        <if test="lat != null">
+            , lat = #{lat}
+        </if>
+        <if test="lng != null">
+            , lng = #{lng}
+        </if>
+        <if test="height != null">
+            , height = #{height}
+        </if>
+        <if test="file1 != null">
+            , file1 = #{file1}
+        </if>
+        <if test="file2 != null">
+            , file2 = #{file2}
+        </if>
+        <if test="file3 != null">
+            , file3 = #{file3}
+        </if>
+        <if test="use_flag != null">
+            , use_flag = #{use_flag}
+        </if>
+        where zone_id = #{zone_id}
+    </update>
+
+    <update id="updateZoneLocation" parameterType="java.util.Map">
+        update tb_zone set
+            lat = #{lat}
+            , lng = #{lng}
+        where zone_id = #{zone_id}
+    </update>
+    
+    <delete id="deleteZone" parameterType="java.util.Map">
+        DELETE FROM tb_zone
+         WHERE zone_id = #{zone_id}
+    </delete>
+</mapper>

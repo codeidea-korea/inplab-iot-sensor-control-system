@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.AssetListMapper">
+    <sql id="rowSearch">
+        <if test="asset_id != null and asset_id != ''">
+            and MG.asset_id = #{asset_id}
+        </if>
+        <if test="asset_kind_id != null and asset_kind_id != ''">
+            and MG.asset_kind_id = #{asset_kind_id}
+        </if>
+        <if test="name != null and name != ''">
+            and MG.name ilike '%' || #{name} || '%'
+        </if>
+        <if test="etc1 != null and etc1 != ''">
+            and MG.etc1 ilike '%' || #{etc1} || '%'
+        </if>
+        <if test="etc2 != null and etc2 != ''">
+            and MG.etc2 ilike '%' || #{etc2} || '%'
+        </if>
+        <if test="etc3 != null and etc3 != ''">
+            and MG.etc3 ilike '%' || #{etc3} || '%'
+        </if>
+        <if test="channel_name != null and channel_name != ''">
+            and MG.channel_name ilike '%' || #{channel_name} || '%'
+        </if>
+        <if test="area_id != null and area_id != ''">
+            and MG.area_id = #{area_id}
+        </if>
+        <if test="zone_id != null and zone_id != ''">
+            and MG.zone_id = #{zone_id}
+        </if>
+        <if test="install_date_start != null and install_date_start != '' and install_date_end != null and install_date_end != ''">
+            and MG.install_date::timestamp between concat(#{install_date_start},' 00:00:00')::timestamp and concat(#{install_date_end},' 23:59:59')::timestamp
+        </if>
+        <if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
+            and to_date(MG.collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
+        </if>
+        <if test="status != null and status != ''">
+            and MG.status = #{status}
+        </if>
+        <if test="real_value != null and real_value != ''">
+            and MG.real_value ilike '%' || #{real_value} || '%'
+        </if>
+        <if test="device_id != null and device_id != ''">
+			and MG.device_id  ilike '%' || #{device_id} || '%'
+		</if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+				<when test="'asset_kind_id' == sidx and sidx != ''">
+                    MG.asset_kind_id ${sord}
+                </when>
+				<when test="'name' == sidx and sidx != ''">
+                    MG.name ${sord}
+                </when>
+				<when test="'etc1' == sidx and sidx != ''">
+                    MG.etc1 ${sord}
+                </when>
+				<when test="'etc2' == sidx and sidx != ''">
+                    MG.etc2 ${sord}
+                </when>
+				<when test="'etc3' == sidx and sidx != ''">
+                    MG.etc3 ${sord}
+                </when>
+				<when test="'channel_name' == sidx and sidx != ''">
+                    MG.channel_name ${sord}
+                </when>
+                <when test="'area_id' == sidx and sidx != ''">
+                    MG.area_id ${sord}
+                </when>
+                <when test="'zone_id' == sidx and sidx != ''">
+                    MG.zone_id ${sord}
+                </when>
+                <when test="'install_date' == sidx and sidx != ''">
+                    MG.install_date ${sord}
+                </when>
+                <when test="'collect_date' == sidx and sidx != ''">
+                    MG.collect_date ${sord}
+                </when>
+                <when test="'status' == sidx and sidx != ''">
+                    MG.status ${sord}
+                </when>
+                <when test="'real_value' == sidx and sidx != ''">
+                    MG.real_value ${sord}
+                </when>
+                <otherwise>
+                    MG.zone_id, MG.name
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+    
+    <select id="selectAssetList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.AssetListDto">
+		SELECT MG.* 
+        FROM (
+			SELECT ass.asset_id 
+				 , ass.asset_kind_id
+				 , ass.asset_kind_id asset_kind_id_hid
+				 , ass.area_id
+				 , ass.area_id area_id_hid
+				 , ass.zone_id
+				 , ass.zone_id zone_id_hid
+				 , ass.status
+				 , ass.status status_hid
+				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date				 
+				 -- 센서
+				 , ass.name				-- 센서명
+				 , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id ORDER BY ch.seq),',') sensor_id
+                 , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
+				 , MAX(dbc.real_value) real_value 	-- 센서값
+				-- 센서 외
+				 , ass.device_id 		-- 장비 ID
+			--	 , ass.description 
+			--	 , ass.use_flag				 
+				 , ass.etc1
+				 , ass.etc2
+				 , ass.etc3
+			--	 , ass.mod_date
+			--	 , ass.mod_user
+			--	 , ass.reg_date
+				 , ass.x
+				 , ass.y
+			--	 , ass.z
+			FROM tb_asset ass
+				LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
+					LEFT JOIN (SELECT *
+									FROM tb_dps_basecollection
+									WHERE (sensor_id, zone_id, collect_date)
+									IN ( SELECT sensor_id, zone_id, MAX(collect_date)
+										 FROM tb_dps_basecollection
+										GROUP BY sensor_id, zone_id ) 
+									) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
+			GROUP BY ass.asset_id 
+				 , ass.asset_kind_id
+				 , ass.area_id
+				 , ass.zone_id
+				 , ass.status
+				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD')
+				 , ass.name
+				 , ass.device_id
+        ) MG
+            LEFT JOIN tb_zone tz on MG.zone_id = tz.zone_id
+        WHERE 1=1
+            and tz.use_flag = 'Y'
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectAssetListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			SELECT ass.asset_id 
+				 , ass.asset_kind_id
+				 , ass.asset_kind_id asset_kind_id_hid
+				 , ass.area_id
+				 , ass.area_id area_id_hid
+				 , ass.zone_id
+				 , ass.zone_id zone_id_hid
+				 , ass.status
+				 , ass.status status_hid
+				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
+				 
+				 -- 센서
+				 , ass.name				-- 센서명
+				 , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id ORDER BY ch.seq),',') sensor_id
+
+				 , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
+				 , MAX(dbc.real_value) real_value 	-- 센서값
+				 
+				-- 센서 외
+				 , ass.device_id 		-- 장비 ID
+			--	 , ass.description 
+			--	 , ass.use_flag				 
+			--	 , ass.etc1
+			--	 , ass.etc2
+			--	 , ass.etc3
+			--	 , ass.mod_date
+			--	 , ass.mod_user
+			--	 , ass.reg_date
+			--	 , ass.x
+			--	 , ass.y
+			--	 , ass.z
+			FROM tb_asset ass
+				LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
+					LEFT JOIN (SELECT *
+									FROM tb_dps_basecollection
+									WHERE (sensor_id, zone_id, collect_date)
+									IN ( SELECT sensor_id, zone_id, MAX(collect_date)
+										 FROM tb_dps_basecollection
+										GROUP BY sensor_id, zone_id ) 
+									) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
+			GROUP BY ass.asset_id 
+				 , ass.asset_kind_id
+				 , ass.area_id
+				 , ass.zone_id
+				 , ass.status
+				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD')
+				 , ass.name
+				 , ass.device_id
+        ) MG
+            LEFT JOIN tb_zone tz on MG.zone_id = tz.zone_id
+        WHERE 1=1
+            and tz.use_flag = 'Y'
+        <include refid="rowSearch"/>
+    </select>
+
+    <select id="insertAsset" parameterType="java.util.Map" resultType="int">
+        INSERT INTO tb_asset ( asset_id
+					          , asset_kind_id
+					          , name
+					          , etc1
+					          , etc2
+					          , etc3
+					          , mod_date
+					          , mod_user
+					          , reg_date
+					          
+					          , area_id
+					          
+					          , device_id
+					          
+					          , use_flag
+					          , zone_id
+					          , install_date
+					          
+					          , status
+        ) SELECT COALESCE(max(asset_id::integer),0)+1 as asset_id
+		          , #{asset_kind_id_hid}
+		          , #{name}
+		          , #{etc1}
+		          , #{etc2}
+		          , #{etc3}
+
+		          , now()
+		          , #{mod_user}
+		          , now()
+		          
+		          , '0'
+
+		          , #{device_id}
+		          
+		          , 'Y'
+		          , #{zone_id_hid}
+		          , #{install_date}::timestamp
+		          
+		          , '1'
+        	FROM tb_asset RETURNING asset_id
+    </select>
+    
+    <insert id="insertChannel" parameterType="java.util.Map">
+        INSERT INTO tb_channel ( channel_id
+					          , name
+					          
+					          , seq
+					          , asset_id
+					          , sensor_id
+					          , zone_id
+        ) SELECT COALESCE(max(channel_id::integer),0)+1 as channel_id
+		          , #{name}
+		          
+		          , #{seq}
+		          , #{asset_id}
+		          , #{sensor_id}
+		          , #{zone_id_hid}
+        	FROM tb_channel
+    </insert>
+
+    <delete id="deleteChannel" parameterType="java.util.Map">
+        DELETE FROM tb_channel
+         WHERE asset_id = #{asset_id}
+    </delete>
+    
+    <delete id="deleteCalc" parameterType="java.util.Map">
+		DELETE FROM tb_calc
+		WHERE (sensor_id, zone_id)
+		IN ( SELECT sensor_id, zone_id
+			 FROM tb_channel
+			 WHERE asset_id = #{asset_id})
+    </delete>
+    
+    <insert id="insertCalc" parameterType="java.util.Map">
+        INSERT INTO tb_calc ( calc_id
+					          , sensor_id
+					          , zone_id
+        ) SELECT COALESCE(max(calc_id::integer),0)+1 as calc_id
+		          , #{sensor_id}
+		          , #{zone_id_hid}
+        	FROM tb_calc
+    </insert>
+    
+    <delete id="deleteManage" parameterType="java.util.Map">
+		DELETE FROM tb_manage
+		WHERE (sensor_id, zone_id)
+		IN ( SELECT sensor_id, zone_id
+			 FROM tb_channel
+			 WHERE asset_id = #{asset_id})
+    </delete>
+    
+    <insert id="insertManage" parameterType="java.util.Map">
+        INSERT INTO tb_manage ( manage_id
+					          , sensor_id
+					          , zone_id
+        ) SELECT COALESCE(max(manage_id::integer),0)+1 as manage_id
+		          , #{sensor_id}
+		          , #{zone_id_hid}
+        	FROM tb_manage
+    </insert>
+
+    <update id="updateAsset" parameterType="java.util.Map">
+        update tb_asset set
+            mod_date = now()
+        <if test="asset_kind_id_hid != null and asset_kind_id_hid != ''">
+            , asset_kind_id = #{asset_kind_id_hid}::varchar
+        </if>
+        <if test="name != null">
+            , name = #{name}
+        </if>
+        <if test="lng != null">
+            , x = #{lng}
+        </if>
+        <if test="lat != null">
+            , y = #{lat}
+        </if>
+        <if test="etc1 != null">
+            , etc1 = #{etc1}
+        </if>
+        <if test="etc2 != null">
+            , etc2 = #{etc2}
+        </if>
+        <if test="etc3 != null">
+            , etc3 = #{etc3}
+        </if>
+        <if test="mod_user != null and mod_user != ''">
+            , mod_user = #{mod_user}
+        </if>        
+<!--        <if test="area_id_hid != null and area_id_hid != ''">-->
+<!--            , area_id = #{area_id_hid}::varchar-->
+<!--        </if>-->
+        <if test="use_flag != null and use_flag != ''">
+            , use_flag = #{use_flag}
+        </if>
+        <if test="device_id != null and device_id != ''">
+            , device_id = #{device_id}
+        </if>
+        <if test="zone_id_hid != null and zone_id_hid != ''">
+            , zone_id = #{zone_id_hid}
+        </if>
+        <if test="install_date != null and install_date != ''">
+            , install_date = #{install_date}::timestamp
+        </if>
+        <if test="status_hid != null and status_hid != ''">
+            , status = #{status_hid}
+        </if>
+        where asset_id = #{asset_id}::varchar
+    </update>
+
+    <delete id="deleteAsset" parameterType="java.util.Map">
+        DELETE FROM tb_asset
+         WHERE asset_id = #{asset_id}
+    </delete>
+
+    <select id="selectAssetInfo" parameterType="String" resultType="java.util.Map">
+        select
+            ta.asset_id,
+            ta.asset_kind_id,
+            ta."name",
+            ta.etc1,
+            ta.etc2,
+            ta.etc3,
+            to_char(ta.install_date, 'YYYY-MM-DD') install_date,
+            ta.area_id,
+            ta.zone_id,
+            ta.x,
+            ta.y,
+            ta.z,
+            ta.status,
+            tak.name asset_kind_name,
+            tak.description asset_kind_desc,
+            tak.etc1 asset_kind_etc1,
+            taa.name area_name,
+            taa.etc1 area_etc1,
+            taa.etc2 area_etc2,
+            taa.file1 area_file1,
+            taa.constructor,
+            taa.measure1,
+            taa.measure2,
+            taa.type area_type,
+            tz.name zone_name,
+            tz.etc1 zone_etc1,
+            tz.lat zone_lat,
+            tz.lng zone_lng,
+            tz.file1 zone_file1,
+            tz.file2 zone_file2
+        from tb_asset ta 
+            left outer join tb_asset_kind tak on ta.asset_kind_id = tak.asset_kind_id  
+            left outer join tb_area taa on ta.area_id = taa.area_id 
+            left outer join tb_zone tz on ta.zone_id = tz.zone_id 
+        where ta.asset_id = #{assetId}
+    </select>
+</mapper>

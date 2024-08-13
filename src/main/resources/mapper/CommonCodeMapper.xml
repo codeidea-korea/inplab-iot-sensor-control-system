@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.CommonCodeMapper">
+    <select id="selectCommonCodeList" parameterType="java.util.Map" resultType="java.util.Map">
+	    SELECT * 
+	    FROM tb_common_code cc 
+	    WHERE cc.category = #{category}
+		ORDER BY cc.code
+    </select>
+    
+    <select id="selectAssetKindList" resultType="java.util.Map">
+	    SELECT ak.asset_kind_id code
+	    		, ak.name 
+	    FROM tb_asset_kind ak
+		ORDER BY ak.asset_kind_id::integer
+    </select>
+    
+    <select id="selectAreaList" resultType="java.util.Map">
+	    SELECT a.area_id code
+	    		, a.name 
+	    FROM tb_area a
+    </select>
+    
+    <select id="selectSensorList" resultType="java.util.Map">
+	    SELECT ass.asset_id code
+	    		, ass.name 
+	    FROM tb_asset ass
+	    WHERE ass.asset_kind_id IN ('2','3','4','6','7') -- 센서
+	    ORDER BY ass.name
+    </select>
+
+    <select id="selectSensorListByZone" parameterType="java.util.Map" resultType="java.util.Map">
+	    SELECT ass.asset_id code
+	    		, ass.name
+	    FROM tb_asset ass
+	    WHERE ass.asset_kind_id IN ('2','3','4','6','7') -- 센서
+	    AND ass.zone_id = #{zone_id}
+		ORDER BY asset_id::integer
+    </select>
+
+    <select id="selectZoneList" resultType="java.util.Map">
+	    SELECT z.zone_id code
+	    		, z.name 
+	    FROM tb_zone z
+	    WHERE z.use_flag = 'Y'
+		ORDER BY z.zone_id::integer
+    </select>
+
+    <select id="selectAlarmKindList" resultType="java.util.Map">
+	    SELECT ta.alarm_kind_id code
+	    		, ta.name
+	    FROM tb_alarm_kind ta
+		ORDER BY ta.alarm_kind_id::integer
+    </select>
+
+    <select id="selectAssetKindBySensorList" resultType="java.util.Map">
+		SELECT ak.asset_kind_id code
+			 , ak.name
+		FROM tb_asset_kind ak
+		WHERE ak.asset_kind_id IN ('2','3','4','6','7','8')
+		ORDER BY ak.asset_kind_id::integer
+    </select>
+
+	<select id="selectMappingList" resultType="java.util.Map">
+		SELECT z.mapping_id code
+			 , z.device_id as name
+		FROM tb_mapping z
+		ORDER BY z.device_id
+	</select>
+
+</mapper>
