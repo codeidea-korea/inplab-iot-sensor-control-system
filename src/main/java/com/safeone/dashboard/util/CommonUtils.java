@@ -1,5 +1,7 @@
 package com.safeone.dashboard.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,6 +10,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class CommonUtils {
@@ -120,4 +126,47 @@ public class CommonUtils {
         return data;
     }
 
+    public static Map<String, Object> dtoToMap(Object dto) {
+        Map<String, Object> map = new HashMap<>();
+        Field[] fields = dto.getClass().getDeclaredFields();
+
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                map.put(field.getName(), field.get(dto));
+            } catch (IllegalAccessException e) {
+                e.getStackTrace();
+            }
+        }
+
+        // 상속된 필드 가져오기
+        Class<?> superclass = dto.getClass().getSuperclass();
+        if (superclass != null) {
+            Field[] inheritedFields = superclass.getDeclaredFields();
+            for (Field field : inheritedFields) {
+                field.setAccessible(true);
+                try {
+                    map.put(field.getName(), field.get(dto));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return map;
+    }
+
+    public static void setCountInfo(String type, Integer count, ObjectNode on) {
+        ObjectMapper om = new ObjectMapper();
+        ObjectNode countNode = om.createObjectNode();
+
+        if (on.has("count")) {
+            countNode = om.valueToTree(on.get("count"));
+            countNode.put(type, count);
+            on.putPOJO("count", countNode);
+        } else {
+            countNode.put(type, count);
+            on.putPOJO("count", countNode);
+        }
+    }
 }
