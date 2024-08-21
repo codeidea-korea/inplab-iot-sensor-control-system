@@ -12,15 +12,12 @@ import com.safeone.dashboard.service.CctvService;
 import com.safeone.dashboard.util.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
@@ -52,32 +49,31 @@ public class CctvServiceIml implements CctvService {
         return on;
     }
 
-    public ObjectNode insCctv(InsAdminAddCctvDto insAdminAddCctvDto) {
+    public ObjectNode insCctv(List<InsAdminAddCctvDto> insAdminAddCctvDtoList) {
         ObjectMapper om = new ObjectMapper();
         ObjectNode on = om.createObjectNode();
         ArrayNode an = om.createArrayNode();
 
         int insCount = 0;
         int passCount = 0;
-        /*
-        for (InsCodeDTO dto : insCodeDTOList) {
-            CommonUtil.dtoSetInsInfo(dto, jwtTokenProvider);
-            Map<String, Object> map = CommonUtil.dtoToMap(dto);
-            List<HashMap<String, Object>> list = commonDAO.getCodeList(map);
+
+        for (InsAdminAddCctvDto dto : insAdminAddCctvDtoList) {
+            Map<String, Object> map = CommonUtils.dtoToMap(dto);
+            List<HashMap<String, Object>> list = cctvMapper.getCctvList(map);
 
             if (!list.isEmpty()) {
-                map.put("message", messageSource.getMessage("common.msg.01", null, Locale.getDefault()));
+                map.put("message", "CCTV_NO 가 " + map.get("cctv_no") + " 인 데이터가 이미 존재합니다.");
                 an.add(om.valueToTree(map));
                 passCount++;
                 continue;
             }
 
-            insCount += commonDAO.insCode(map);
+            insCount += cctvMapper.insCctv(map);
         }
 
-        CommonUtil.setCountInfo("ins", insCount, on);
-        CommonUtil.setCountInfo("pass", passCount, on);
-        */
+        CommonUtils.setCountInfo("ins", insCount, on);
+        CommonUtils.setCountInfo("pass", passCount, on);
+
         on.put("pass_list", an);
 
         return on;
@@ -89,32 +85,31 @@ public class CctvServiceIml implements CctvService {
         ArrayNode an = om.createArrayNode();
 
         int count = 0;
-        /*
-        for (UdtCodeDTO dto : udtCodeDTOList) {
-            CommonUtil.dtoSetUdtInfo(dto, jwtTokenProvider);
-            Map<String, Object> map = CommonUtil.dtoToMap(dto);
-            count += commonDAO.udtCode(map);
+
+        for (UdtAdminAddCctvDto dto : udtAdminAddCctvDtoList) {
+            Map<String, Object> map = CommonUtils.dtoToMap(dto);
+            count += cctvMapper.udtCctv(map);
         }
 
-        CommonUtil.setCountInfo("udt", count, on);
-        */
+        CommonUtils.setCountInfo("udt", count, on);
+
         return on;
     }
 
-    public ObjectNode delCctv(DelAdminAddCctvDto delAdminAddCctvDto) {
+    public ObjectNode delCctv(List<DelAdminAddCctvDto> delAdminAddCctvDtoList) {
         ObjectMapper om = new ObjectMapper();
         ObjectNode on = om.createObjectNode();
         ArrayNode an = om.createArrayNode();
 
         int count = 0;
-        /*
-        for (DelCodeDTO dto : delCodeDTOList) {
-            Map<String, Object> map = CommonUtil.dtoToMap(dto);
-            count += commonDAO.delCode(map);
+
+        for (DelAdminAddCctvDto dto : delAdminAddCctvDtoList) {
+            Map<String, Object> map = CommonUtils.dtoToMap(dto);
+            count += cctvMapper.delCctv(map);
         }
 
-        CommonUtil.setCountInfo("del", count, on);
-        */
+        CommonUtils.setCountInfo("del", count, on);
+
         return on;
     }
 }

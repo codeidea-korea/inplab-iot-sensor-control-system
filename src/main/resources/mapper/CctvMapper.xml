@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.CctvMapper">
+	<select id="getCctvListTotalCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		/* CctvMapper.getCctvListTotalCnt */
+		SELECT
+		COUNT(1)
+		FROM tb_cctv_info A
+		<include refid="getCctvList-where"/>
+	</select>
+
+	<select id="getCctvList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CctvMapper.getCctvList */
+		SELECT
+		ROW_NUMBER() OVER (ORDER BY A.mod_dt DESC, A.reg_dt DESC) AS row_num
+		,A.cctv_no
+		,A.cctv_nm
+		,A.district_no
+		,A.model_nm
+		,A.cctv_maker
+		,A.inst_ymd
+		,A.cctv_ip
+		,A.web_port
+		,A.rtsp_port
+		,A.cctv_conn_id
+		,A.cctv_conn_pwd
+		,A.relay_nm
+		,A.relay_ip
+		,A.relay_port
+		,A.maint_sts_cd
+		,A.cctv_lon
+		,A.cctv_lat
+		,DATE_FORMAT(A.reg_dt, '%Y-%m-%d %H:%i:%s') AS reg_dt
+		,DATE_FORMAT(A.mod_dt, '%Y-%m-%d %H:%i:%s') AS mod_dt
+		FROM tb_cctv_info A
+		<include refid="getCctvList-where"/>
+		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+			LIMIT ${limit} OFFSET ${offset}
+		</if>
+	</select>
+
+	<sql id="getCctvList-where">
+		/* getCctvList-wheree */
+		WHERE 1=1
+		<if test="cctv_nm != null and !cctv_nm.equals('')">
+			AND A.cctv_nm like #{cctv_nm}
+		</if>
+	</sql>
+
+	<insert id="insCctv" parameterType="java.util.HashMap">
+		/* CctvMapper.insCctv */
+		INSERT INTO tb_cctv_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test='cctv_no != null'>cctv_no = #{cctv_no},</if>
+			<if test='cctv_nm != null'>cctv_nm = #{cctv_nm},</if>
+			<if test='district_no != null'>district_no = #{district_no},</if>
+			<if test='model_nm != null'>model_nm = #{model_nm},</if>
+			<if test='cctv_maker != null'>cctv_maker = #{cctv_maker},</if>
+			<if test='inst_ymd != null'>inst_ymd = #{inst_ymd},</if>
+			<if test='cctv_ip != null'>cctv_ip = #{cctv_ip},</if>
+			<if test='web_port != null'>web_port = #{web_port},</if>
+			<if test='rtsp_port != null'>rtsp_port = #{rtsp_port},</if>
+			<if test='cctv_conn_id != null'>cctv_conn_id = #{cctv_conn_id},</if>
+			<if test='cctv_conn_pwd != null'>cctv_conn_pwd = #{cctv_conn_pwd},</if>
+			<if test='relay_nm != null'>relay_nm = #{relay_nm},</if>
+			<if test='relay_ip != null'>relay_ip = #{relay_ip},</if>
+			<if test='relay_port != null'>relay_port = #{relay_port},</if>
+			<if test='maint_sts_cd != null'>maint_sts_cd = #{maint_sts_cd},</if>
+			<if test='cctv_lon != null'>cctv_lon = #{cctv_lon},</if>
+			<if test='cctv_lat != null'>cctv_lat = #{cctv_lat},</if>
+			<if test='reg_dt != null'>reg_dt = #{reg_dt},</if>
+			<if test='mod_dt != null'>mod_dt = #{mod_dt},</if>
+		</trim>
+	</insert>
+
+	<update id="udtCctv" parameterType="java.util.HashMap">
+		/* CctvMapper.udtCctv */
+		UPDATE tb_cctv_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test='cctv_nm != null'>cctv_nm = #{cctv_nm},</if>
+			<if test='district_no != null'>district_no = #{district_no},</if>
+			<if test='model_nm != null'>model_nm = #{model_nm},</if>
+			<if test='cctv_maker != null'>cctv_maker = #{cctv_maker},</if>
+			<if test='inst_ymd != null'>inst_ymd = #{inst_ymd},</if>
+			<if test='cctv_ip != null'>cctv_ip = #{cctv_ip},</if>
+			<if test='web_port != null'>web_port = #{web_port},</if>
+			<if test='rtsp_port != null'>rtsp_port = #{rtsp_port},</if>
+			<if test='cctv_conn_id != null'>cctv_conn_id = #{cctv_conn_id},</if>
+			<if test='cctv_conn_pwd != null'>cctv_conn_pwd = #{cctv_conn_pwd},</if>
+			<if test='relay_nm != null'>relay_nm = #{relay_nm},</if>
+			<if test='relay_ip != null'>relay_ip = #{relay_ip},</if>
+			<if test='relay_port != null'>relay_port = #{relay_port},</if>
+			<if test='maint_sts_cd != null'>maint_sts_cd = #{maint_sts_cd},</if>
+			<if test='cctv_lon != null'>cctv_lon = #{cctv_lon},</if>
+			<if test='cctv_lat != null'>cctv_lat = #{cctv_lat},</if>
+			mod_dt = #{mod_dt},
+		</trim>
+		WHERE 1 = 1
+		AND cctv_no = #{cctv_no}
+	</update>
+
+	<delete id="delCctv" parameterType="java.util.HashMap">
+		/* CctvMapper.delCctv */
+		DELETE FROM tb_cctv_info
+		WHERE 1=1
+		  AND cctv_no = #{cctv_no}
+	</delete>
+</mapper>
