@@ -7,51 +7,44 @@ import java.io.Serializable;
 
 @Data
 public class UserDto implements Serializable {
-    @FieldLabel(title="사용자 ID", width = 120)
-    String user_id;
+    @FieldLabel(title = "사용자 ID")
+    String usr_id;
 
-    @FieldLabel(title="사용자명", width = 120)
-    String name;
-    
-    @FieldLabel(title="역할", width = 120)
-    String part;
-    
-    @FieldLabel(title="소속", width = 120)
-    String company_name;
-    
-    @FieldLabel(title="이메일", width = 200)
-    String email;
-    
-    @FieldLabel(title="사용자 비밀번호", type="password")
-    String password;
-    
-    @FieldLabel(title="사용자 연락처", width = 120)
-    String phone;
-    
-    @FieldLabel(title="사용자 구분", width = 120)
-    String grade;
-    
-    @FieldLabel(title="사용자 구분", type="hidden")
-    String grade_hid;
-    
-    @FieldLabel(title="등록일자", type="range", width = 120)
-    String reg_date;
-    
-    @FieldLabel(title="수정일자", type="range", width = 120)
-    String mod_date;
+    @FieldLabel(title = "사용자명")
+    String usr_nm;
 
-    @FieldLabel(title="수정인", width = 120)
-    String mod_user;
-    
-    @FieldLabel(title="기타1", width = 120)
-    String etc1;
+    @FieldLabel(title = "사용자 비밀번호")
+    String usr_pwd;
 
-    @FieldLabel(title="기타2", type="hidden")
-    String etc2;
+    @FieldLabel(title = "사용자 비밀번호 확인")
+    String usr_pwd_confm;
 
-    @FieldLabel(title="기타3", type="hidden")
-    String etc3;
-    
-    @FieldLabel(title="사용여부", type="hidden")
-    String use_flag;
+    @FieldLabel(title = "사용여부", type = "hidden")
+    String use_yn;
+
+    @FieldLabel(title = "사용자 연락처")
+    String usr_ph;
+
+    @FieldLabel(title = "이메일")
+    String e_mail;
+
+//    @FieldLabel(title = "사용자 구분")
+//    String usr_flag_nm;
+
+    @FieldLabel(title = "사용자 구분")
+    String usr_flag;
+
+    @FieldLabel(title = "사용자 구분", type = "hidden")
+    String usr_flag_hid;
+
+    @FieldLabel(title = "사용만료일")
+    String usr_exp_ymd;
+
+//    @FieldLabel(title = "등록일자", type = "range")
+    @FieldLabel(title = "등록일자")
+    String reg_dt;
+
+    @FieldLabel(title = "수정일자")
+    String mod_dt;
+
 }

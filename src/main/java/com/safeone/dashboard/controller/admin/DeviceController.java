@@ -74,7 +74,7 @@ public class DeviceController extends JqGridAbstract<DeviceDto> {
     @GetMapping("/add")
     public boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
     	HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return deviceService.create(param);
     }
 
@@ -82,7 +82,7 @@ public class DeviceController extends JqGridAbstract<DeviceDto> {
     @GetMapping("/mod")
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
     	HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return deviceService.update(param);
     }
 }

@@ -86,7 +86,7 @@ public class AlarmSettingController extends JqGridAbstract<AlarmSettingDto> {
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
     	
         HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return alarmSettingService.update(param);
     }
 }

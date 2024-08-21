@@ -78,7 +78,7 @@
                             <a class="deleteBtn">삭제</a>
                         </div>
                         <div class="contents-in">
-                            <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>
+<%--                            <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>--%>
                         </div>
                     </div>
                 </div>

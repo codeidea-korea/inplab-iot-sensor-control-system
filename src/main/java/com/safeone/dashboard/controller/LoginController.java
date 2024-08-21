@@ -1,12 +1,12 @@
 package com.safeone.dashboard.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
+import com.safeone.dashboard.config.annotate.NoLoginCheck;
+import com.safeone.dashboard.dto.UserDto;
+import com.safeone.dashboard.service.LoginLogService;
+import com.safeone.dashboard.service.UserService;
+import com.safeone.dashboard.util.CommonUtils;
+import com.safeone.dashboard.util.HttpUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,14 +16,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
-import com.safeone.dashboard.config.annotate.NoLoginCheck;
-import com.safeone.dashboard.dto.UserDto;
-import com.safeone.dashboard.service.LoginLogService;
-import com.safeone.dashboard.service.UserService;
-import com.safeone.dashboard.util.CommonUtils;
-import com.safeone.dashboard.util.HttpUtils;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Controller
 @RequestMapping(value = "/login")
@@ -53,15 +51,18 @@ public class LoginController {
                 log.info("Login - " + param);
 
                 UserDto result = userService.getUserLogin(param);
-                loginLog.put("user_id", result.getUser_id());
+                loginLog.put("usr_id", result.getUsr_id());
                 loginLog.put("login_ip", HttpUtils.getRemoteAddr(request));
                 loginLog.put("login_pc_name", getBrowser(request));
                 loginLog.put("status", "N");
-                if (CommonUtils.isMatch(param.get("userPw").toString(), result.getPassword())) {
-                    result.setPassword(null);
+                if (CommonUtils.isMatch(param.get("userPw").toString(), result.getUsr_pwd())) {
+                    result.setUsr_pwd(null);
                     session.setAttribute("login", result);
                     loginLog.put("status", "Y");
-                    returnPage = "redirect:/dashboard";
+
+                    // 수정해야됨 임시!!!
+//                    returnPage = "redirect:/dashboard";
+                    returnPage = "redirect:/admin/loginLog";
 
 //                    Map user = (Map) session.getAttribute("login");
 //                    if(user.get("user_lv").equals("3"))
@@ -107,5 +108,10 @@ public class LoginController {
         HttpSession session = request.getSession();
         session.removeAttribute("login");
         return "redirect:/login";
+    }
+
+    @RequestMapping(value = {"/test"})
+    public String test(HttpServletRequest request, HttpServletResponse response) {
+        return "test";
     }
 }

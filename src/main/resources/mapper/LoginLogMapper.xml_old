@@ -3,11 +3,11 @@
     
 <mapper namespace="com.safeone.dashboard.dao.LoginLogMapper">
     <sql id="rowSearch">
-        <if test="usr_id != null and usr_id != ''">
-            and MG.usr_id ilike '%' || #{usr_id} || '%'
+        <if test="user_id != null and user_id != ''">
+            and MG.user_id ilike '%' || #{user_id} || '%'
         </if>
-        <if test="usr_nm != null and usr_nm != ''">
-            and MG.usr_nm ilike '%' || #{usr_nm} || '%'
+        <if test="name != null and name != ''">
+            and MG.name ilike '%' || #{name} || '%'
         </if>
         <if test="login_date_start != null and login_date_start != '' and login_date_end != null and login_date_end != ''">
             and to_date(MG.login_date, 'YYYY-MM-DD') between #{login_date_start}::date and #{login_date_end}::date
@@ -26,11 +26,11 @@
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
-                <when test="'usr_id' == sidx and sidx != ''">
-                    MG.usr_id ${sord}
+                <when test="'user_id' == sidx and sidx != ''">
+                    MG.user_id ${sord}
                 </when>
-                <when test="'usr_nm' == sidx and sidx != ''">
-                    MG.usr_nm ${sord}
+                <when test="'name' == sidx and sidx != ''">
+                    MG.name ${sord}
                 </when>
                 <when test="'login_date' == sidx and sidx != ''">
                     MG.login_date ${sord}
@@ -54,13 +54,13 @@
     <insert id="insertLoginLog" parameterType="java.util.Map">
         INSERT INTO tb_login_log (
                                    login_log_id
-                                 , usr_id
+                                 , user_id
                                  , login_date
                                  , login_ip
                                  , login_pc_name
                                  , status
         ) SELECT COALESCE(max(login_log_id::integer),0)+1 as login_log_id
-                 , #{usr_id}
+                 , #{user_id}
                  , now()
                  , #{login_ip}
                  , #{login_pc_name}
@@ -72,8 +72,8 @@
         SELECT MG.*
         FROM (
 	        SELECT login_log_id
-	        	   , usr_id
-	        	   , ( select usr_nm from tb_user_info where usr_id = a.usr_id ) AS usr_nm
+	        	   , user_id
+	        	   , ( select name from tb_user where user_id = a.user_id ) AS name
                    , to_char(a.login_date::timestamp , 'YYYY-MM-DD HH24:MI:SS') as login_date
 	        	   , login_ip
 	        	   , login_pc_name
@@ -92,8 +92,8 @@
         SELECT count(*)
         FROM (
 	        SELECT login_log_id
-	        	   , usr_id
-	        	   , ( select usr_nm from tb_user_info where usr_id = a.usr_id ) AS usr_nm
+	        	   , user_id
+	        	   , ( select name from tb_user where user_id = a.user_id ) AS name
                    , to_char(a.login_date::timestamp , 'YYYY-MM-DD HH24:MI:SS') as login_date
 	        	   , login_ip
 	        	   , login_pc_name

@@ -39,7 +39,8 @@ public class MainController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpSession session = request.getSession();
-        param.put("user_id", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("user_id", ((UserDto) session.getAttribute("login")).getUser_id());
+        param.put("user_id", ((UserDto) session.getAttribute("login")).getUsr_id());
         if (!param.get("password").toString().equals(param.get("password_confirm").toString())) {
             param.put("resultMessage", "비밀번호가 일치하지 않습니다.");
         } else if (param.get("password") == "" || param.get("password_confirm") == "") {

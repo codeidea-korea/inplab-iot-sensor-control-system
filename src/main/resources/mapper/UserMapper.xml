@@ -3,79 +3,55 @@
     
 <mapper namespace="com.safeone.dashboard.dao.UserMapper">
     <sql id="rowSearch">
-        <if test="user_id != null and user_id != ''">
-            and MG.user_id  ilike '%' || #{user_id} || '%'
+        <if test="usr_id != null and usr_id != ''">
+            and MG.usr_id  ilike '%' || #{usr_id} || '%'
         </if>
-        <if test="name != null and name != ''">
-            and MG.name ilike '%' || #{name} || '%'
+        <if test="usr_nm != null and usr_nm != ''">
+            and MG.usr_nm ilike '%' || #{usr_nm} || '%'
         </if>
-        <if test="grade != null and grade != ''">
-            and MG.grade = #{grade}
-        </if>        
-        <if test="company_name != null and company_name != ''">
-            and MG.company_name ilike '%' || #{company_name} || '%'
+        <if test="usr_flag != null and usr_flag != ''">
+            and MG.usr_flag = #{usr_flag}
         </if>
-        <if test="email != null and email != ''">
-            and MG.email ilike '%' || #{email} || '%'
+        <if test="e_mail != null and e_mail != ''">
+            and MG.e_mail ilike '%' || #{e_mail} || '%'
         </if>
-        <if test="phone != null and phone != ''">
-            and MG.phone ilike '%' || #{phone} || '%'
-        </if>
-        <if test="part != null and part != ''">
-            and MG.part ilike '%' || #{part} || '%'
+        <if test="usr_ph != null and usr_ph != ''">
+            and MG.usr_ph ilike '%' || #{usr_ph} || '%'
         </if>
         <if test="reg_date_start != null and reg_date_start != '' and reg_date_end != null and reg_date_end != ''">
-            and MG.reg_date::timestamp between (#{reg_date_start}::timestamp) and (#{reg_date_end}::timestamp)
+            and MG.reg_dt::timestamp between (#{reg_date_start}::timestamp) and (#{reg_date_end}::timestamp)
         </if>      
         <if test="mod_date_start != null and mod_date_start != '' and mod_date_end != null and mod_date_end != ''">
-            and MG.mod_date::timestamp between (#{mod_date_start}::timestamp) and (#{mod_date_end}::timestamp)
-        </if>
-        <if test="mod_user != null and mod_user != ''">
-            and MG.mod_user ilike '%' || #{mod_user} || '%'
-        </if>        
-        <if test="etc1 != null and etc1 != ''">
-            and MG.etc1 ilike '%' || #{etc1} || '%'
+            and MG.mod_dt::timestamp between (#{mod_date_start}::timestamp) and (#{mod_date_end}::timestamp)
         </if>
     </sql>
 
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
-                <when test="'user_id' == sidx and sidx != ''">
-                    MG.user_id ${sord}
+                <when test="'usr_id' == sidx and sidx != ''">
+                    MG.usr_id ${sord}
                 </when>
-                <when test="'name' == sidx and sidx != ''">
-                    MG.name ${sord}
+                <when test="'usr_nm' == sidx and sidx != ''">
+                    MG.usr_nm ${sord}
                 </when>
-                <when test="'part' == sidx and sidx != ''">
-                    MG.part ${sord}
+                <when test="'e_mail' == sidx and sidx != ''">
+                    MG.e_mail ${sord}
                 </when>
-                <when test="'company_name' == sidx and sidx != ''">
-                    MG.company_name ${sord}
+                <when test="'usr_ph' == sidx and sidx != ''">
+                    MG.usr_ph ${sord}
                 </when>
-                <when test="'email' == sidx and sidx != ''">
-                    MG.email ${sord}
-                </when>
-                <when test="'phone' == sidx and sidx != ''">
-                    MG.phone ${sord}
-                </when>
-                <when test="'grade' == sidx and sidx != ''">
-                    MG.grade ${sord}
+                <when test="'usr_flag' == sidx and sidx != ''">
+                    MG.usr_flag ${sord}
                 </when>                
-                <when test="'reg_date' == sidx and sidx != ''">
-                    MG.reg_date ${sord}
+                <when test="'reg_dt' == sidx and sidx != ''">
+                    MG.reg_dt ${sord}
                 </when>
-                <when test="'mod_date' == sidx and sidx != ''">
-                    MG.mod_date ${sord}
-                </when>
-                <when test="'mod_user' == sidx and sidx != ''">
-                    MG.mod_user ${sord}
-                </when>
-                <when test="'etc1' == sidx and sidx != ''">
-                    MG.etc1 ${sord}
+                <when test="'mod_dt' == sidx and sidx != ''">
+                    MG.mod_dt ${sord}
                 </when>
                 <otherwise>
-                    MG.user_id
+                    MG.usr_id
                 </otherwise>
             </choose>
         </trim>
@@ -85,22 +61,21 @@
         SELECT MG.*
         FROM (
             SELECT
-	            A.user_id
-	            , A.name
-	            , A.phone
-	            , A.company_name
-	            , A.etc1
-	            , A.etc2
-	            , A.etc3
-	            , TO_CHAR(A.mod_date::timestamp, 'YYYY-MM-DD') AS mod_date
-	            , A.mod_user
-	            , A.grade
-	            , A.grade grade_hid
-	            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_date
-	            , A.email
-	            , A.part
-	            , use_flag
-            FROM tb_user A
+	            A.usr_id
+        --                 , A.usr_pwd
+        --                 , A.usr_pwd_confm
+                , '' as usr_pwd
+                , '' as usr_pwd_confm
+	            , A.usr_nm
+	            , A.usr_ph
+	            , TO_CHAR(A.mod_dt::timestamp, 'YYYY-MM-DD') AS mod_dt
+                , fn_common(usr_flag ,'회원구분') as usr_flag
+-- 	            , A.usr_flag
+	            , A.usr_flag usr_flag_hid
+	            , TO_CHAR(A.reg_dt::timestamp, 'YYYY-MM-DD') AS reg_dt
+	            , A.e_mail
+	            , A.usr_exp_ymd
+            FROM tb_user_info A
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
@@ -114,124 +89,98 @@
         SELECT count(*)
         FROM (
 	        SELECT
-	            A.user_id
-	            , A.name
-	            , A.phone
-	            , A.company_name
-	            , A.etc1
-	            , A.etc2
-	            , A.etc3
-	            , TO_CHAR(A.mod_date::timestamp, 'YYYY-MM-DD') AS mod_date
-	            , A.mod_user
-	            , A.grade
-	            , A.grade grade_hid
-	            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_date
-	            , A.email
-	            , part
-	            , use_flag
-	        FROM tb_user A
+	            A.usr_id
+--                 , A.usr_pwd
+--                 , A.usr_pwd_confm
+                , '' as usr_pwd
+                , '' as usr_pwd_confm
+	            , TO_CHAR(A.mod_dt::timestamp, 'YYYY-MM-DD') AS mod_dt
+                , fn_common(usr_flag ,'회원구분') as usr_flag
+-- 	            , A.usr_flag
+	            , A.usr_flag usr_flag_hid
+	            , TO_CHAR(A.reg_dt::timestamp, 'YYYY-MM-DD') AS reg_dt
+	            , A.e_mail
+	            , A.usr_exp_ymd
+	        FROM tb_user_info A
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>
 
     <insert id="insertUser" parameterType="java.util.Map">
-        INSERT INTO tb_user ( user_id
-        					 , password
-					         , name
-					         , phone
-					         , company_name
-					         , etc1
-					         , etc2
-					         , etc3
-							 , mod_date
-							 , mod_user
-							 , grade
-							 , reg_date
-							 , email
-							 , part
-							 , use_flag
-		)VALUES( #{user_id}
-				 , #{password}
-		         , #{name}
-		         , #{phone}
-		         , #{company_name}
-		         , #{etc1}
-		         , #{etc2}
-		         , #{etc3}
+        INSERT INTO tb_user_info ( usr_id
+        					 , usr_pwd
+        					 , usr_pwd_confm
+					         , usr_nm
+					         , usr_ph
+							 , mod_dt
+							 , usr_flag
+							 , reg_dt
+							 , e_mail
+							 , usr_exp_ymd
+		)VALUES( #{usr_id}
+				 , #{usr_pwd}
+				 , #{usr_pwd_confm}
+		         , #{usr_nm}
+		         , #{usr_ph}
 				 , now()
-				 , #{mod_user}
-				 , #{grade_hid}
+				 , #{usr_flag_hid}
 				 , now()				 
-				 , #{email}
-				 , #{part}
-				 , 'Y'
+				 , #{e_mail}
+				 , #{usr_exp_ymd}
 		)
     </insert>
 
     <update id="updateUser" parameterType="java.util.Map">
-        update tb_user set
-            mod_date = now()
-        <if test="password != null and password != ''">
-            , password = #{password}
+        update tb_user_info set
+            mod_dt = now()
+        <if test="usr_pwd != null and usr_pwd != ''">
+            , usr_pwd = #{usr_pwd}
         </if>
-        <if test="name != null">
-            , name = #{name}
+        <if test="usr_pwd_confm != null and usr_pwd_confm != ''">
+            , usr_pwd_confm = #{usr_pwd_confm}
         </if>
-        <if test="phone != null">
-            , phone = #{phone}
+        <if test="usr_nm != null">
+            , usr_nm = #{usr_nm}
         </if>
-        <if test="company_name != null">
-            , company_name = #{company_name}
+        <if test="usr_ph != null">
+            , usr_ph = #{usr_ph}
         </if>
-        <if test="etc1 != null">
-            , etc1 = #{etc1}
+        <if test="usr_flag_hid != null">
+            , usr_flag = #{usr_flag_hid}
         </if>
-        <if test="etc2 != null">
-            , etc2 = #{etc2}
+        <if test="e_mail != null">
+            , e_mail = #{e_mail}
         </if>
-        <if test="etc3 != null">
-            , etc3 = #{etc3}
+        <if test="use_yn != null">
+            , use_yn = #{use_yn}
         </if>
-        <if test="mod_user != null">
-            , mod_user = #{mod_user}
+        <if test="usr_exp_ymd != null">
+            , usr_exp_ymd = #{usr_exp_ymd}
         </if>
-        <if test="grade_hid != null">
-            , grade = #{grade_hid}
-        </if>
-        <if test="email != null">
-            , email = #{email}
-        </if>
-        <if test="part != null">
-            , part = #{part}
-        </if>
-        <if test="use_flag != null">
-            , use_flag = #{use_flag}
-        </if>
-        where user_id = #{user_id}
+        where usr_id = #{usr_id}
     </update>
 
     <delete id="deleteUser" parameterType="java.util.Map">
-        DELETE FROM tb_user
-         WHERE user_id = #{user_id}
+        DELETE FROM tb_user_info
+         WHERE usr_id = #{usr_id}
     </delete>
 
     <select id="isUserIdExists" parameterType="java.util.Map" resultType="int">
-        select count(*) from tb_user
-        where user_id = #{user_id}
+        select count(*) from tb_user_info
+        where usr_id = #{usr_id}
     </select>
 
     <select id="selectUserLogin" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.UserDto">
-        select * from tb_user
-        where 1=1
-          and user_id = #{userId}
+        select * from tb_user_info
+        where usr_id = #{userId}
     </select>
 
     <update id="updatePassword" parameterType="java.util.Map">
-        update tb_user
-        set password = #{password}
-          , mod_date = now()
-        where user_id = #{user_id}
+        update tb_user_info
+        set usr_pwd = #{usr_pwd}
+          , mod_dt = now()
+        where usr_id = #{usr_id}
     </update>
 
 </mapper>

@@ -133,7 +133,7 @@ public class UserController extends JqGridAbstract<UserDto> {
     	param.put("password", CommonUtils.encrypt(param.get("password").toString()));
     	
     	HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return userService.create(param);
     }
 
@@ -144,7 +144,7 @@ public class UserController extends JqGridAbstract<UserDto> {
 		if (!param.get("password").equals("")) param.put("password", CommonUtils.encrypt(param.get("password").toString()));
     	
     	HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return userService.update(param);
     }
 }

@@ -84,7 +84,7 @@ public class AssetKindController extends JqGridAbstract<AssetKindDto> {
     @GetMapping("/add")
     public boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
     	HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return assetKindService.create(param);
     }
 
@@ -92,7 +92,7 @@ public class AssetKindController extends JqGridAbstract<AssetKindDto> {
     @GetMapping("/mod")
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
     	HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return assetKindService.update(param);
     }
 }

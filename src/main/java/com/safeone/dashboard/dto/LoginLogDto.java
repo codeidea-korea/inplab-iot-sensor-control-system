@@ -12,10 +12,12 @@ public class LoginLogDto implements Serializable {
     String login_log_id;
 	
     @FieldLabel(title="사용자 ID", width=200)
-    String user_id;
+    String usr_id;
+//    String user_id;
     
     @FieldLabel(title="사용자 명", width=250)
-    String name;
+    String usr_nm;
+//    String name;
     
     @FieldLabel(title="로그인 일시", width=250, type = "timestamp_range")
     String login_date;

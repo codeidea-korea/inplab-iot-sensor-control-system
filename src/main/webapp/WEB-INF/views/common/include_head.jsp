@@ -91,7 +91,7 @@
 
     <script type="text/javascript" src="/html2canvas.min.js"></script>
     <script type="text/javascript" src="/vwmap_util.js"></script>
-    <script type="text/javascript" src="/jqgrid_util.js"></script>    
+    <script type="text/javascript" src="/jqgrid_util.js"></script>
     <script type="text/javascript" src="/common.js"></script>
 
     <script>

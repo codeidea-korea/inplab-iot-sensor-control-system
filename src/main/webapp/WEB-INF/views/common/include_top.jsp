@@ -37,16 +37,19 @@
         });
 
         // 상단 영역 사용자 이름 표출
-        $('.login span').html('<%=loginUser.getName()%>');
+        <%--$('.login span').html('<%=loginUser.getName()%>');--%>
+        $('.login span').html('<%=loginUser.getUsr_nm()%>');
 
         // 상단 사용자 상세 정보
-        let grade = '<%=loginUser.getGrade()%>'
+        <%--let grade = '<%=loginUser.getGrade()%>'--%>
+        let grade = '<%=loginUser.getUsr_flag()%>'
         if (grade === '1') $('.login-info strong').html('관리자:');
         else $('.login-info strong').html('일반 사용자:');
-        $('.login-info span').html('<%=loginUser.getName()%>');
-
+        <%--$('.login-info span').html('<%=loginUser.getName()%>');--%>
+        $('.login-info span').html('<%=loginUser.getUsr_nm()%>');
         // 비밀번호 변경 이메일 표출
-        $('#lay-find-pw .mem-form .email').html('<%=loginUser.getEmail()%>');
+        <%--$('#lay-find-pw .mem-form .email').html('<%=loginUser.getEmail()%>');--%>
+        $('#lay-find-pw .mem-form .email').html('<%=loginUser.getUsr_flag()%>');
 
         // 비밀번호 변경 버튼 클릭시
         $('#lay-find-pw .change-btn').on('click', function() {
@@ -280,7 +283,8 @@
             <p class="tooltip">로드뷰</p>
         </li>
 
-        <c:if test="${sessionScope.login.grade eq '1'}">
+<%--        <c:if test="${sessionScope.login.grade eq '1'}">--%>
+        <c:if test="${sessionScope.login.usr_flag eq '1'}">
         <li>
             <button type="button" data-type="mask" class="editmode">
                 <img src="/images/btn_editmode.png" alt="Edit Mode"/>

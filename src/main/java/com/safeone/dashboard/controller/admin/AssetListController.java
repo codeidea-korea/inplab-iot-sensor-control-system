@@ -139,7 +139,7 @@ public class AssetListController extends JqGridAbstract<AssetListDto> {
     public boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
     	
     	HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return assetListService.create(param);
     }
     
@@ -148,7 +148,7 @@ public class AssetListController extends JqGridAbstract<AssetListDto> {
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
     	
     	HttpSession session = request.getSession();
-        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
+//        param.put("mod_user", ((UserDto) session.getAttribute("login")).getUser_id());
         return assetListService.update(param);
     }
 }
