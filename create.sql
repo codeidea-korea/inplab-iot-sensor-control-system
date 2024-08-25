@@ -395,6 +395,10 @@ CREATE TABLE tb_CCTV_info (
                               maint_sts_cd VARCHAR(6) DEFAULT 'MTN001' NOT NULL,
                               cctv_lon FLOAT DEFAULT 0.0 NOT NULL,
                               cctv_lat FLOAT DEFAULT 0.0 NOT NULL,
+                              admin_center varchar DEFAULT '' NOT NULL,
+                              partner_comp_id varchar(3) DEFAULT '' NOT NULL,
+                              partner_comp_user_nm varchar DEFAULT '' NOT NULL,
+                              partner_comp_user_phone varchar DEFAULT '' NOT NULL,
                               reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
                               mod_dt TIMESTAMP,
                               PRIMARY KEY (cctv_no),
@@ -419,6 +423,10 @@ COMMENT ON COLUMN tb_CCTV_info.relay_port IS '릴레이_port';
 COMMENT ON COLUMN tb_CCTV_info.maint_sts_cd IS '유지보수상태_cd  0.정상/1.망실/2.점검/3망실(철거)';
 COMMENT ON COLUMN tb_CCTV_info.cctv_lon IS '경도';
 COMMENT ON COLUMN tb_CCTV_info.cctv_lat IS '위도';
+COMMENT ON COLUMN tb_CCTV_info.admin_center IS '관리사무소';
+COMMENT ON COLUMN tb_CCTV_info.partner_comp_id IS '계측사';
+COMMENT ON COLUMN tb_CCTV_info.partner_comp_user_nm IS '계측사담당자';
+COMMENT ON COLUMN tb_CCTV_info.partner_comp_user_phone IS '계측사담당자연락처';
 COMMENT ON COLUMN tb_CCTV_info.reg_dt IS '등록일시';
 COMMENT ON COLUMN tb_CCTV_info.mod_dt IS '수정일시';
 

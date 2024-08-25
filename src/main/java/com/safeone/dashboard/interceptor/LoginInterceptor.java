@@ -25,7 +25,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         try {
 //            log.info("preHandle handler :: {}", request.getRequestURI());
 //            log.info("preHandle handler :: {}", handler.getClass());
-
+            //return true;
             NoLoginCheck usingAuth = ((HandlerMethod) handler).getMethodAnnotation(NoLoginCheck.class);
 
             if (usingAuth != null)

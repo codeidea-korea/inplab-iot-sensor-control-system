@@ -5,7 +5,7 @@
 	<select id="getCctvListTotalCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
 		/* CctvMapper.getCctvListTotalCnt */
 		SELECT
-		COUNT(1)
+			COUNT(1)
 		FROM tb_cctv_info A
 		<include refid="getCctvList-where"/>
 	</select>
@@ -13,26 +13,26 @@
 	<select id="getCctvList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
 		/* CctvMapper.getCctvList */
 		SELECT
-		ROW_NUMBER() OVER (ORDER BY A.mod_dt DESC, A.reg_dt DESC) AS row_num
-		,A.cctv_no
-		,A.cctv_nm
-		,A.district_no
-		,A.model_nm
-		,A.cctv_maker
-		,A.inst_ymd
-		,A.cctv_ip
-		,A.web_port
-		,A.rtsp_port
-		,A.cctv_conn_id
-		,A.cctv_conn_pwd
-		,A.relay_nm
-		,A.relay_ip
-		,A.relay_port
-		,A.maint_sts_cd
-		,A.cctv_lon
-		,A.cctv_lat
-		,DATE_FORMAT(A.reg_dt, '%Y-%m-%d %H:%i:%s') AS reg_dt
-		,DATE_FORMAT(A.mod_dt, '%Y-%m-%d %H:%i:%s') AS mod_dt
+			ROW_NUMBER() OVER (ORDER BY A.mod_dt DESC, A.reg_dt DESC) AS row_num
+			,A.cctv_no
+			,A.cctv_nm
+			,A.district_no
+			,A.model_nm
+			,A.cctv_maker
+			,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
+			,A.cctv_ip
+			,A.web_port
+			,A.rtsp_port
+			,A.cctv_conn_id
+			,A.cctv_conn_pwd
+			,A.relay_nm
+			,A.relay_ip
+			,A.relay_port
+			,A.maint_sts_cd
+			,A.cctv_lon
+			,A.cctv_lat
+			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
 		FROM tb_cctv_info A
 		<include refid="getCctvList-where"/>
 		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
@@ -41,37 +41,55 @@
 	</select>
 
 	<sql id="getCctvList-where">
-		/* getCctvList-wheree */
+		/* getCctvList-where */
 		WHERE 1=1
+		<if test="cctv_no != null and !cctv_no.equals('')">
+			AND A.cctv_no = #{cctv_no}
+		</if>
 		<if test="cctv_nm != null and !cctv_nm.equals('')">
-			AND A.cctv_nm like #{cctv_nm}
+			AND A.cctv_nm ILIKE '%' || #{cctv_nm} || '%'
 		</if>
 	</sql>
 
 	<insert id="insCctv" parameterType="java.util.HashMap">
 		/* CctvMapper.insCctv */
-		INSERT INTO tb_cctv_info
-		<trim prefix="SET" suffixOverrides=",">
-			<if test='cctv_no != null'>cctv_no = #{cctv_no},</if>
-			<if test='cctv_nm != null'>cctv_nm = #{cctv_nm},</if>
-			<if test='district_no != null'>district_no = #{district_no},</if>
-			<if test='model_nm != null'>model_nm = #{model_nm},</if>
-			<if test='cctv_maker != null'>cctv_maker = #{cctv_maker},</if>
-			<if test='inst_ymd != null'>inst_ymd = #{inst_ymd},</if>
-			<if test='cctv_ip != null'>cctv_ip = #{cctv_ip},</if>
-			<if test='web_port != null'>web_port = #{web_port},</if>
-			<if test='rtsp_port != null'>rtsp_port = #{rtsp_port},</if>
-			<if test='cctv_conn_id != null'>cctv_conn_id = #{cctv_conn_id},</if>
-			<if test='cctv_conn_pwd != null'>cctv_conn_pwd = #{cctv_conn_pwd},</if>
-			<if test='relay_nm != null'>relay_nm = #{relay_nm},</if>
-			<if test='relay_ip != null'>relay_ip = #{relay_ip},</if>
-			<if test='relay_port != null'>relay_port = #{relay_port},</if>
-			<if test='maint_sts_cd != null'>maint_sts_cd = #{maint_sts_cd},</if>
-			<if test='cctv_lon != null'>cctv_lon = #{cctv_lon},</if>
-			<if test='cctv_lat != null'>cctv_lat = #{cctv_lat},</if>
-			<if test='reg_dt != null'>reg_dt = #{reg_dt},</if>
-			<if test='mod_dt != null'>mod_dt = #{mod_dt},</if>
-		</trim>
+		INSERT INTO tb_cctv_info (
+			cctv_no,
+			cctv_nm,
+			district_no,
+			model_nm,
+			cctv_maker,
+			inst_ymd,
+			cctv_ip,
+			web_port,
+			rtsp_port,
+			cctv_conn_id,
+			cctv_conn_pwd,
+			relay_nm,
+			relay_ip,
+			relay_port,
+			maint_sts_cd,
+			cctv_lon,
+			cctv_lat
+		) VALUES (
+			#{cctv_no},
+			#{cctv_nm},
+			#{district_no},
+			#{model_nm},
+			#{cctv_maker},
+			#{inst_ymd},
+			#{cctv_ip},
+			#{web_port},
+			#{rtsp_port},
+			#{cctv_conn_id},
+			#{cctv_conn_pwd},
+			#{relay_nm},
+			#{relay_ip},
+			#{relay_port},
+			#{maint_sts_cd},
+			${cctv_lon},
+			${cctv_lat}
+		)
 	</insert>
 
 	<update id="udtCctv" parameterType="java.util.HashMap">
@@ -104,6 +122,121 @@
 		/* CctvMapper.delCctv */
 		DELETE FROM tb_cctv_info
 		WHERE 1=1
-		  AND cctv_no = #{cctv_no}
+		AND cctv_no = #{cctv_no}
 	</delete>
+
+	<select id="getDistrictListTotalCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		/* CctvMapper.getDistrictListTotalCnt */
+		SELECT
+			COUNT(1)
+		FROM tb_district_info A
+		<include refid="getDistrictList-where"/>
+	</select>
+
+	<select id="getDistrictList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CctvMapper.getDistrictList */
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY A.mod_dt DESC, A.reg_dt DESC) AS row_num
+			,A.district_no
+			,A.site_no
+			,A.district_nm
+			,A.dist_addr
+			,A.dist_road_addr
+			,A.dist_type_cd
+			,A.dist_abbr
+			,A.dist_pic
+			,A.dist_view_pic
+			,A.dist_lon
+			,A.dist_lat
+			,A.inst_comp_id1
+			,A.meas_comp_id1
+			,A.inst_comp_id2
+			,A.meas_comp_id2
+			,A.meas_str_ymd
+			,A.meas_end_ymd
+			,A.dist_offi_nm
+			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
+			,A.dist_zip
+		FROM tb_district_info A
+		<include refid="getDistrictList-where"/>
+		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+			LIMIT ${limit} OFFSET ${offset}
+		</if>
+	</select>
+
+	<sql id="getDistrictList-where">
+		/* getDistrictList-where */
+		WHERE 1=1
+		<if test="site_no != null and !site_no.equals('')">
+			AND A.site_no = #{site_no}
+		</if>
+	</sql>
+
+	<select id="getMaintCompListTotalCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		/* CctvMapper.getMaintCompListTotalCnt */
+		SELECT
+			COUNT(1)
+		FROM tb_maintcomp_info A
+		<include refid="getMaintCompList-where"/>
+	</select>
+
+	<select id="getMaintCompList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CctvMapper.getMaintCompList */
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY A.mod_dt DESC, A.reg_dt DESC) AS row_num
+			,A.partner_comp_id
+			,A.partner_comp_nm
+			,A.partner_type_flag
+			,A.partner_comp_addr
+			,A.comp_biz_no
+			,A.maint_rep_nm
+			,A.maint_rep_ph
+			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
+		FROM tb_maintcomp_info A
+		<include refid="getDistrictList-where"/>
+		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+			LIMIT ${limit} OFFSET ${offset}
+		</if>
+	</select>
+
+	<sql id="getMaintCompList-where">
+		/* getMaintCompList-where */
+		WHERE 1=1
+		<if test="partner_type_flag != null and !partner_type_flag.equals('')">
+			AND A.partner_type_flag = #{partner_type_flag}
+		</if>
+	</sql>
+
+	<select id="getGenerationKey" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CctvMapper.getGenerationKey */
+		SELECT
+			A.table_nm
+			 ,A.column_nm
+			 ,A.pre_code
+			 ,A.length
+			 ,A.max
+			 ,CONCAT(A.pre_code, RIGHT(CONCAT(REPEAT('0',LENGTH),A.max+1),LENGTH)) AS new_id
+		FROM generation_key A
+		WHERE 1=1
+		  AND table_nm = #{table_nm}
+		  AND column_nm = #{column_nm}
+	</select>
+
+	<update id="incMaxGenerationKey" parameterType="java.util.HashMap">
+		/* CctvMapper.incMaxGenerationKey */
+		UPDATE generation_key
+		SET max = max+1
+		WHERE table_nm = #{table_nm}
+		  AND column_nm = #{column_nm}
+	</update>
+
+	<update id="nextPreCodeGenerationKey" parameterType="java.util.HashMap">
+		/* CctvMapper.nextPreCodeGenerationKey */
+		UPDATE generation_key
+		SET pre_code = CHAR(ASCII(pre_code)+1)
+		WHERE table_nm = #{table_nm}
+		  AND column_nm = #{column_nm}
+	</update>
 </mapper>

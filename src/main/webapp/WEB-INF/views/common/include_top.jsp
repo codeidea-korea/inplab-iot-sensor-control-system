@@ -3,6 +3,8 @@
 <%@ page import="com.safeone.dashboard.dto.UserDto" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%
+    System.out.println("include_top.jsp");
+    System.out.println("session.getAttribute(\"login\") :: " + session.getAttribute("login"));
     UserDto loginUser = (UserDto)session.getAttribute("login");
 %>
 <script>

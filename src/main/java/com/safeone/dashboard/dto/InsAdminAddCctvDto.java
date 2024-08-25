@@ -8,7 +8,6 @@ import lombok.Setter;
 @Schema
 @Getter
 @Setter
-@Builder
 public class InsAdminAddCctvDto {
 
     @Schema(example = "JC1CCTV-01", description = "cctv명")

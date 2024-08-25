@@ -253,9 +253,9 @@
                 <dl>
                     <dt>장치관리</dt>
                     <dd>
-                        <a href="/adminAdd/cctvInfo" class="menu-link">CCTV 관리</a>
-                        <a href="/adminAdd/dispboardInfo" class="menu-link">전광판 관리</a>
-                        <a href="/adminAdd/broadcastInfo" class="menu-link">방송장비 관리</a>
+                        <a href="/adminAdd/view/cctvInfo" class="menu-link">CCTV 관리</a>
+                        <a href="/adminAdd/view/dispboardInfo" class="menu-link">전광판 관리</a>
+                        <a href="/adminAdd/view/broadcastInfo" class="menu-link">방송장비 관리</a>
                     </dd>
                 </dl>
             </li>
@@ -263,7 +263,7 @@
                 <dl>
                     <dt>데이터관리</dt>
                     <dd>
-                        <a href="/adminAdd/measureDetails" class="menu-link">계측기 데이터 관리</a>
+                        <a href="/adminAdd/view/measureDetails" class="menu-link">계측기 데이터 관리</a>
                     </dd>
                 </dl>
             </li>

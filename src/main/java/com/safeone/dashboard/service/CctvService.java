@@ -1,10 +1,8 @@
 package com.safeone.dashboard.service;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.safeone.dashboard.dto.DelAdminAddCctvDto;
-import com.safeone.dashboard.dto.GetAdminAddCctvDto;
-import com.safeone.dashboard.dto.InsAdminAddCctvDto;
-import com.safeone.dashboard.dto.UdtAdminAddCctvDto;
+import com.safeone.dashboard.dto.*;
+
 import java.util.List;
 
 public interface CctvService {
@@ -17,4 +15,7 @@ public interface CctvService {
 
   ObjectNode delCctv(List<DelAdminAddCctvDto> delAdminAddCctvDtoList);
 
+  ObjectNode getDistrict(GetAdminAddDistrictDto getAdminAddDistrictDto);
+
+  ObjectNode getMaintComp(GetAdminAddMaintCompDto getAdminAddDistrictDto);
 }

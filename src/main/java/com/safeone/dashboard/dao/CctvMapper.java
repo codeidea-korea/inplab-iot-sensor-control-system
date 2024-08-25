@@ -36,4 +36,31 @@ public class CctvMapper {
         return sqlSession.delete("delCctv", map);
     }
 
+    public List<HashMap<String, Object>> getDistrictList(Map<String, Object> map) {
+        return sqlSession.selectList("getDistrictList", map);
+    }
+
+    public int getDistrictListTotalCnt(Map<String, Object> map) {
+        return sqlSession.selectOne("getDistrictListTotalCnt", map);
+    }
+
+    public List<HashMap<String, Object>> getGenerationKey(Map<String, Object> map) {
+        return sqlSession.selectList("getGenerationKey", map);
+    }
+
+    public int nextPreCodeGenerationKey(Map<String, Object> map) {
+        return sqlSession.update("nextPreCodeGenerationKey", map);
+    }
+
+    public int incMaxGenerationKey(Map<String, Object> map) {
+        return sqlSession.insert("incMaxGenerationKey", map);
+    }
+
+    public List<HashMap<String, Object>> getMaintCompList(Map<String, Object> map) {
+        return sqlSession.selectList("getMaintCompList", map);
+    }
+
+    public int getMaintCompListTotalCnt(Map<String, Object> map) {
+        return sqlSession.selectOne("getMaintCompListTotalCnt", map);
+    }
 }

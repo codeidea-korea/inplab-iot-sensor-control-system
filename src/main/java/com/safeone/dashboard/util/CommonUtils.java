@@ -169,4 +169,18 @@ public class CommonUtils {
             on.putPOJO("count", countNode);
         }
     }
+
+    /**
+     * 문자열이 Null이면 ""을 리턴한다.
+     *
+     * @param value 바꿀 문자열
+     * @return value null이면 ""리턴
+     */
+    public static String isNull(Object o) {
+        if (o == null) {
+            return "";
+        } else {
+            return o.toString().trim();
+        } // end of if
+    }
 }
