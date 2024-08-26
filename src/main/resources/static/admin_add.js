@@ -200,3 +200,8 @@ const listExcelDown = (obj) => {
     };
     request.send(JSON.stringify(obj));
 };
+
+$(window).on('resize', function() {
+    const gridWidth = $('#gbox_jqGrid').width();  // jqGrid가 포함된 컨테이너의 너비
+    $('#jqGrid').jqGrid('setGridWidth', gridWidth); // 그리드의 너비를 설정
+});
