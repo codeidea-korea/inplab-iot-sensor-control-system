@@ -106,27 +106,33 @@
 
     <insert id="insertSensorType" parameterType="java.util.Map">
         INSERT INTO tb_sensor_type (
-             senstype_no
-           , site_no
-           , sens_tp_nm
-           , sens_abbr
-           , basic_formul
-           , sens_chnl_cnt
-           , logr_idx_str
-           , logr_idx_end
-           , logr_flag
-        ) VALUES (
-              #{senstype_no}
-               , #{site_no}
-               , #{sens_tp_nm}
-               , #{sens_abbr}
-               , #{basic_formul}
-               , #{sens_chnl_cnt}::integer
-               , #{logr_idx_str}
-               , #{logr_idx_end}
-               , #{logr_flag}
-       )
+        <trim suffixOverrides=",">
+            <if test="senstype_no != null">senstype_no,</if>
+            <if test="site_no != null">site_no,</if>
+            <if test="sens_tp_nm != null">sens_tp_nm,</if>
+            <if test="sens_abbr != null">sens_abbr,</if>
+            <if test="basic_formul != null">basic_formul,</if>
+            <if test="sens_chnl_cnt != null">sens_chnl_cnt,</if>
+            <if test="logr_idx_str != null">logr_idx_str,</if>
+            <if test="logr_idx_end != null">logr_idx_end,</if>
+            <if test="logr_flag != null">logr_flag,</if>
+        </trim>
+        )
+        VALUES (
+        <trim suffixOverrides=",">
+            <if test="senstype_no != null">#{senstype_no},</if>
+            <if test="site_no != null">#{site_no},</if>
+            <if test="sens_tp_nm != null">#{sens_tp_nm},</if>
+            <if test="sens_abbr != null">#{sens_abbr},</if>
+            <if test="basic_formul != null">#{basic_formul},</if>
+            <if test="sens_chnl_cnt != null">#{sens_chnl_cnt}::integer,</if>
+            <if test="logr_idx_str != null">#{logr_idx_str},</if>
+            <if test="logr_idx_end != null">#{logr_idx_end},</if>
+            <if test="logr_flag != null">#{logr_flag},</if>
+        </trim>
+        )
     </insert>
+
 
     <update id="updateSensorType" parameterType="java.util.Map">
         update tb_sensor_type set

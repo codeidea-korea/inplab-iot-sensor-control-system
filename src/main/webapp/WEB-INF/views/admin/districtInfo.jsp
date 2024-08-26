@@ -172,7 +172,7 @@
                     if (!validate()){
                         return;
                     }
-                    console.log("등록")
+                    // console.log("등록")
                     const form = $('#lay-form-write')[0]; // 폼 요소 선택
                     const formData = new FormData(form); // FormData 객체 생성
 
@@ -262,7 +262,7 @@
                     try {
                         window.vworld.setPanBy([
                             parseFloat($('#lay-form-write input[name=dist_lon]').val()),
-                            parseFloat($('#lay-form-write input[name=dist_lat]').val())], parseFloat($('#lay-form-write input[name=zoom]').val())
+                            parseFloat($('#lay-form-write input[name=dist_lat]').val())], parseFloat($('#lay-form-write input[name=dist_zoom]').val())
                         );
                     } catch (e) {
                     }
@@ -284,8 +284,10 @@
 
             $('.locationApply').on('click', function () {
                 let coords = window.vworld.getCenter();
+                let zoom = window.vworld.getZoom();
                 $('#lay-form-write input[name=dist_lat]').val(coords[1]);
                 $('#lay-form-write input[name=dist_lon]').val(coords[0]);
+                $('#lay-form-write input[name=dist_zoom]').val(zoom);
                 popFancyClose('#lay-form-address');
             });
 
@@ -301,7 +303,7 @@
             $('#lay-form-write input[name=dist_zip]').val('');
             $('#lay-form-write input[name=dist_addr]').val('');
 
-            $('#lay-form-write input[name=zoom]').val('');
+            $('#lay-form-write input[name=dist_zoom]').val('');
             $('#lay-form-write select[name=inst_comp_id1]').val('');
             $('#lay-form-write select[name=inst_comp_id2]').val('');
 
@@ -467,8 +469,8 @@
                     <input type="text" class="search_input"  id="search" name="search" placeholder="현장명/주소/시공사/계측사"/>
                     <a class="searchBtn">검색</a>
 
-                    <a class="insertBtn">등록</a>
-                    <a class="modifyBtn">수정</a>
+                    <a class="insertBtn">신규 등록</a>
+                    <a class="modifyBtn">상세정보</a>
                     <%--<a class="deleteBtn">삭제</a>--%>
                     <a class="excelBtn">다운로드</a>
                 </div>
@@ -482,7 +484,7 @@
 
     <!--[s] 현장 등록 팝업 -->
     <form id="lay-form-write" class="layer-base wide">
-        <input type="hidden" id="district_no" name="district_no"/>
+<%--        <input type="hidden" id="district_no" name="district_no"/>--%>
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
@@ -504,7 +506,7 @@
                             <td colspan=""><input type="text" name="site_no" value="S01" readonly/></td>
 
                             <th>현장ID</th>
-                            <td colspan=""><input type="text" name="district_no"  readonly/></td>
+                            <td colspan=""><input type="text" id="district_no" name="district_no"  readonly/></td>
                         </tr>
                         <tr>
                             <th class="required_th" style="vertical-align: middle;">우편번호</th>
@@ -530,7 +532,7 @@
                             <th>지도 Zoom</th>
                             <td colspan="3">
                                 <div style="display: flex; align-items: center;">
-                                    <input type="text" name="zoom" class="" readonly
+                                    <input type="text" name="dist_zoom" class="" readonly
                                            style="flex: 1; margin-right: 10px;"/>
                                     <div class="btn-btm" style="width: auto; margin-top: 0px;">
                                         <button type="button" id="mapSearchBtn"

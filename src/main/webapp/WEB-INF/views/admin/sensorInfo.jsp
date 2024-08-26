@@ -320,8 +320,10 @@
                            placeholder="센서타입명 / 센서ID / 로거명 / 센서상태"/>
                     <a class="searchBtn">검색</a>
 
-                    <a class="insertBtn">등록</a>
-                    <a class="modifyBtn">수정</a>
+<%--                    <a class="insertBtn">등록</a>--%>
+<%--                    <a class="modifyBtn">수정</a>--%>
+                    <a class="insertBtn">신규 등록</a>
+                    <a class="modifyBtn">상세정보</a>
 <%--                    <a class="deleteBtn">삭제</a>--%>
 
                     <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>

@@ -59,6 +59,9 @@
 			 , cc.code_nm name
 		FROM tb_common_code cc
 		WHERE cc.code_grp_nm = #{code_grp_nm}
+		<if test="code_nm != null">
+			AND cc.code_nm = #{code_nm}
+		</if>
 		ORDER BY cc.code_id
 	</select>
 

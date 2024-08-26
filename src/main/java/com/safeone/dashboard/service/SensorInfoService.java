@@ -61,18 +61,18 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
     public synchronized String saveExcelData(MultipartFile file) throws Exception {
         int failureCount = 0;  // 실패 카운트 초기화
         int successCount = 0;  // 성공 카운트 초기화
-        DataFormatter formatter = new DataFormatter();  // 셀 데이터를 문자열로 변환하는데 사용
+        DataFormatter formatter = new DataFormatter();
 
         try (InputStream is = file.getInputStream()) {
             Workbook workbook = WorkbookFactory.create(is);
             Sheet sheet = workbook.getSheetAt(0);
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue;  // 헤더 행 건너뛰기
+                if (row.getRowNum() == 0) continue;
 
-                List<Map> senstypeNo = commonCodeEditService.getNewSensorSeq(Collections.singletonMap("sens_tp_nm", formatter.formatCellValue(row.getCell(0))));
-                List<Map> logrNo = commonCodeEditService.getNewSensorSeq(Collections.singletonMap("logr_nm", formatter.formatCellValue(row.getCell(2))));
-                List<Map> sensAbbr = commonCodeEditService.getSensorAbbr(Collections.singletonMap("senstype_no", senstypeNo));
+                List<Map> senstypeNo = commonCodeEditService.getSensorTypeSenstypeNo(Collections.singletonMap("sens_tp_nm", formatter.formatCellValue(row.getCell(0))));
+                List<Map> logrNo = commonCodeEditService.getLoggerInfoLogrNo(Collections.singletonMap("logr_nm", formatter.formatCellValue(row.getCell(1))));
+                List<Map> sensAbbr = commonCodeEditService.getSensorAbbr(Collections.singletonMap("senstype_no", senstypeNo.get(0).get("senstype_no")));
 
                 Map<String, Object> newMap = new HashMap<>();
                 newMap.put("table_nm", "tb_sensor_info");
@@ -80,26 +80,32 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                 ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
 
                 Map<String, Object> sens = new HashMap<>();
-                sens.put("sensor_seq",sensAbbr);
-                sens.put("logr_no", logrNo);
+                sens.put("sensor_seq",sensAbbr.get(0).get("sens_abbr"));
+                sens.put("logr_no", logrNo.get(0).get("logr_no"));
                 List<Map> sensNm = commonCodeEditService.getNewSensorSeq(sens);
+
+
+                Map<String, Object> maintSts = new HashMap<>();
+                maintSts.put("code_grp_nm", "유지보수상태");
+                maintSts.put("code_nm", formatter.formatCellValue(row.getCell(3)));
+                List<Map> maintStsCd = commonCodeEditService.getCommonCodeEditList(maintSts);
 
                 Map<String, Object> sensorInfo = new HashMap<>();
 
                 sensorInfo.put("sens_no", generationKeyOn.get("newId").asText());
-                sensorInfo.put("senstype_no", senstypeNo); //센서타입명으로 0번 formatter.formatCellValue(row.getCell(0))
-                sensorInfo.put("sens_nm", sensNm);
-                sensorInfo.put("logr_no", logrNo); // 로거명으로 2번 formatter.formatCellValue(row.getCell(2))
-                sensorInfo.put("sect_no", formatter.formatCellValue(row.getCell(3)));
-                sensorInfo.put("maint_sts_cd", formatter.formatCellValue(row.getCell(4)));
-                sensorInfo.put("logrnonrecv_limit_min_lon", formatter.formatCellValue(row.getCell(5)));
-                sensorInfo.put("alarm_use_yn", formatter.formatCellValue(row.getCell(6)));
-                sensorInfo.put("sms_snd_yn", formatter.formatCellValue(row.getCell(7)));
-                sensorInfo.put("sens_disp_yn", formatter.formatCellValue(row.getCell(8)));
-                sensorInfo.put("inst_ymd", formatter.formatCellValue(row.getCell(9)));
+                sensorInfo.put("senstype_no", senstypeNo.get(0).get("senstype_no"));
+                sensorInfo.put("sens_nm", sensNm.get(0).get("new_sensor_seq"));
+                sensorInfo.put("logr_no", logrNo.get(0).get("logr_no"));
+                sensorInfo.put("sect_no", formatter.formatCellValue(row.getCell(2)));
+                sensorInfo.put("maint_sts_cd", maintStsCd.get(0).get("code"));
+                sensorInfo.put("logrnonrecv_limit_min_lon", formatter.formatCellValue(row.getCell(4)));
+                sensorInfo.put("alarm_use_yn", formatter.formatCellValue(row.getCell(5)));
+                sensorInfo.put("sms_snd_yn", formatter.formatCellValue(row.getCell(6)));
+                sensorInfo.put("sens_disp_yn", formatter.formatCellValue(row.getCell(7)));
+                sensorInfo.put("inst_ymd", formatter.formatCellValue(row.getCell(8)));
 
-                System.out.println("sensorInfo: " + sensorInfo);
-                // mapper.insertSensorInfo(sensorInfo);
+//                System.out.println("sensorInfo: " + sensorInfo);
+                 mapper.insertSensorInfo(sensorInfo);
                 successCount++;  // 성공 카운트 증가
             }
         } catch (Exception e) {

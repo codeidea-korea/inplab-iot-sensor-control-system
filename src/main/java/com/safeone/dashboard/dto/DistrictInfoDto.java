@@ -49,6 +49,9 @@ public class DistrictInfoDto implements Serializable {
     @FieldLabel(title = "위도", type = "hidden")
     String dist_lat;
 
+    @FieldLabel(title = "지도 Zoom", type = "hidden")
+    String dist_zoom;
+
     @FieldLabel(title = "시공사1", type = "hidden")
     String inst_comp_id1;
 

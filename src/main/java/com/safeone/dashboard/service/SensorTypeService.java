@@ -76,7 +76,9 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
                 ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
                 loggerType.put("senstype_no", generationKeyOn.get("newId").asText());
 
-                loggerType.put("site_no", "S01");
+                List<Map> siteInfo = commonCodeEditService.getSiteInfo();
+
+                loggerType.put("site_no", siteInfo.get(0).get("code"));
                 loggerType.put("sens_tp_nm", formatter.formatCellValue(row.getCell(0)));
                 loggerType.put("sens_abbr", formatter.formatCellValue(row.getCell(1)));
                 loggerType.put("basic_formul", formatter.formatCellValue(row.getCell(2)));
@@ -84,8 +86,8 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
                 loggerType.put("logr_idx_str", formatter.formatCellValue(row.getCell(4)));
                 loggerType.put("logr_idx_end", formatter.formatCellValue(row.getCell(5)));
 
-                System.out.println("loggerType: " + loggerType);
-                // mapper.insertSensorType(loggerType);
+//                System.out.println("loggerType: " + loggerType);
+                 mapper.insertSensorType(loggerType);
                 successCount++;  // 성공 카운트 증가
             }
         } catch (Exception e) {

@@ -119,8 +119,8 @@ public class LoggerInfoService implements JqGridService<LoggerInfoDto> {
                 loggerInfo.put("logr_maker", formatter.formatCellValue(row.getCell(8)));
                 loggerInfo.put("model_nm", formatter.formatCellValue(row.getCell(9)));
 
-                System.out.println("loggerInfo: " + loggerInfo);
-                // mapper.insertLoggerInfo(loggerInfo);
+//                System.out.println("loggerInfo: " + loggerInfo);
+                 mapper.insertLoggerInfo(loggerInfo);
                 successCount++;  // 성공 카운트 증가
             }
         } catch (Exception e) {

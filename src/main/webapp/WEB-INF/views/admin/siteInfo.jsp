@@ -140,7 +140,7 @@
                 // 저장버튼 클릭시
                 $('#lay-form-write input[type=submit]').off().on('click', function () {
                     if (!validate()) return;
-
+                    $('#site_no').prop('disabled', false);
                     const form = $('#lay-form-write')[0]; // 폼 요소 선택
                     const formData = new FormData(form); // FormData 객체 생성
 
@@ -219,8 +219,8 @@
             <div class="contents-re">
                 <h3 class="txt">현장 관리</h3>
                 <div class="btn-group">
-                    <%--                            <a class="insertBtn" style="display:none;">등록</a>--%>
-                    <a class="modifyBtn" style="display:none;">수정</a>
+                    <%--                            <a class="insertBtn" style="display:none;">신규 등록</a>--%>
+                    <a class="modifyBtn" style="display:none;">상세정보</a>
                     <%--<a class="deleteBtn">삭제</a>--%>
                     <%--<a class="excelBtn">다운로드</a>--%>
                 </div>

@@ -108,38 +108,45 @@
 
     <insert id="insertLoggerInfo" parameterType="java.util.Map">
         INSERT INTO tb_logger_info (
-            logr_no
-           , district_no
-           , logr_nm
-           , logr_MAC
-           , logr_ip
-           , logr_port
-           , logr_svr_ip
-           , logr_svr_port
-           , maint_sts_cd
-           , logr_lon
-           , logr_lat
-           , inst_ymd
-           , logr_maker
-           , model_nm
-           , logr_flag
-        ) VALUES ( #{logr_no}
-                 , #{district_no}
-                 , #{logr_nm}
-                 , #{logr_MAC}
-                 , #{logr_ip}
-                 , #{logr_port}
-                 , #{logr_svr_ip}
-                 , #{logr_svr_port}
-                 , #{maint_sts_cd}
-                 , #{logr_lon}::double precision
-                 , #{logr_lat}::double precision
-                 , #{inst_ymd}
-                 , #{logr_maker}
-                 , #{model_nm}
-                 , #{logr_flag}
-         )
+        <trim suffixOverrides=",">
+            <if test="logr_no != null">logr_no,</if>
+            <if test="district_no != null">district_no,</if>
+            <if test="logr_nm != null">logr_nm,</if>
+            <if test="logr_MAC != null">logr_MAC,</if>
+            <if test="logr_ip != null">logr_ip,</if>
+            <if test="logr_port != null">logr_port,</if>
+            <if test="logr_svr_ip != null">logr_svr_ip,</if>
+            <if test="logr_svr_port != null">logr_svr_port,</if>
+            <if test="maint_sts_cd != null">maint_sts_cd,</if>
+            <if test="logr_lon != null">logr_lon,</if>
+            <if test="logr_lat != null">logr_lat,</if>
+            <if test="inst_ymd != null">inst_ymd,</if>
+            <if test="logr_maker != null">logr_maker,</if>
+            <if test="model_nm != null">model_nm,</if>
+            <if test="logr_flag != null">logr_flag,</if>
+        </trim>
+        )
+        VALUES (
+        <trim suffixOverrides=",">
+            <if test="logr_no != null">#{logr_no},</if>
+            <if test="district_no != null">#{district_no},</if>
+            <if test="logr_nm != null">#{logr_nm},</if>
+            <if test="logr_MAC != null">#{logr_MAC},</if>
+            <if test="logr_ip != null">#{logr_ip},</if>
+            <if test="logr_port != null">#{logr_port},</if>
+            <if test="logr_svr_ip != null">#{logr_svr_ip},</if>
+            <if test="logr_svr_port != null">#{logr_svr_port},</if>
+            <if test="maint_sts_cd != null">#{maint_sts_cd},</if>
+            <if test="logr_lon != null">#{logr_lon}::double precision,</if>
+            <if test="logr_lat != null">#{logr_lat}::double precision,</if>
+            <if test="inst_ymd != null">#{inst_ymd},</if>
+            <if test="logr_maker != null">#{logr_maker},</if>
+            <if test="model_nm != null">#{model_nm},</if>
+            <if test="logr_flag != null">#{logr_flag},</if>
+        </trim>
+        )
     </insert>
+
 
     <update id="updateLoggerInfo" parameterType="java.util.Map">
         update tb_logger_info set
@@ -152,6 +159,9 @@
         </if>
         <if test="logr_MAC != null">
             , logr_MAC = #{logr_MAC}
+        </if>
+        <if test="logr_ip != null">
+            , logr_ip = #{logr_ip}
         </if>
         <if test="logr_port != null">
             , logr_port = #{logr_port}

@@ -241,8 +241,10 @@
                             <input class="search_input" type="text" id="search" name="search" placeholder="센서타입명 / 약어 "/>
                             <a class="searchBtn">검색</a>
 
-                            <a class="insertBtn">등록</a>
-                            <a class="modifyBtn">수정</a>
+<%--                            <a class="insertBtn">등록</a>--%>
+<%--                            <a class="modifyBtn">수정</a>--%>
+                            <a class="insertBtn">신규 등록</a>
+                            <a class="modifyBtn">상세정보</a>
 <%--                            <a class="deleteBtn">삭제</a>--%>
 
                             <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>
@@ -262,7 +264,7 @@
             <!--[s] 센서 타입 등록 팝업 -->
             <div id="lay-form-write" class="layer-base">
 
-            	<input type="hidden" id="senstype_no" name="senstype_no"/>
+<%--            	<input type="hidden" id="senstype_no" name="senstype_no"/>--%>
 
                 <div class="layer-base-btns">
                     <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
@@ -281,7 +283,7 @@
                                 <tr>
                                     <th>센서 타입 ID</th>
                                     <td colspan="3">
-                                        <input type="text" name="senstype_no" readonly/>
+                                        <input type="text" id="senstype_no" name="senstype_no" readonly/>
                                     </td>
                                 </tr>
 

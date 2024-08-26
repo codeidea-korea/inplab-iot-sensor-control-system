@@ -18,13 +18,19 @@
         </if>
 
         <if test="searchKeyword  != null and searchKeyword  != ''">
-            and (select B.sens_tp_nm from tb_sensor_type B where B.sens_chnl_id = MG.sens_chnl_id) LIKE '%' || #{searchKeyword} || '%' OR
-            (SELECT B.sens_nm FROM tb_sensor_info B WHERE B.sens_no = A.sens_no) LIKE '%' || #{searchKeyword} || '%' OR
-            (SELECT C.district_nm
-            FROM tb_district_info C
-            WHERE C.district_no = (SELECT B.district_no
-            FROM tb_logger_info B
-            WHERE B.logr_no = MG.logr_no)) LIKE '%' || #{searchKeyword} || '%'
+            AND (SELECT B.sens_tp_nm
+                FROM tb_sensor_type B
+                WHERE B.senstype_no = ( SELECT B.senstype_no
+                                        FROM tb_sensor_info B
+                                        WHERE B.sens_no = MG.sens_no)) LIKE '%' || #{searchKeyword} || '%' OR
+                (SELECT C.district_nm
+                 FROM tb_district_info C
+                 WHERE C.district_no = (SELECT B.district_no
+                                        FROM tb_logger_info B
+                                        WHERE B.logr_no = MG.logr_no)) LIKE '%' || #{searchKeyword} || '%' or
+                (SELECT C.logr_nm
+                 FROM tb_logger_info C
+                 WHERE C.logr_no = MG.logr_no) LIKE '%' || #{searchKeyword} || '%'
         </if>
 
     </sql>
@@ -75,6 +81,7 @@
                 , A.logr_chnl_seq
                 , A.sect_no
                 , A.district_no
+                , A.sens_chnl_id
                 , to_char(A.reg_dt, 'YYYY-MM-DD') AS reg_dt
             FROM tb_logr_idx_map A
         ) MG
@@ -111,6 +118,7 @@
             , A.logr_chnl_seq
             , A.sect_no
             , A.district_no
+            , A.sens_chnl_id
             , to_char(A.reg_dt, 'YYYY-MM-DD') AS reg_dt
         FROM tb_logr_idx_map A
         ) MG

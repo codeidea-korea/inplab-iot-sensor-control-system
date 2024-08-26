@@ -204,7 +204,7 @@ function validate() {
     // 약어 검증 (3글자 영문자 형식)
     if ($('.abbr').length > 0) {
         var distAbbrPattern = /^[A-Za-z]{3}$/;
-        if (!distAbbrPattern.test($('.dist_abbr').val().trim())) {
+        if (!distAbbrPattern.test($('.abbr').val().trim())) {
             alert($('.dist_abbr').closest('tr').find('.required_th').text() + "은(는) 정확히 3글자의 영문자 형식이어야 합니다.");
             $('.dist_abbr').focus();
             return false;
