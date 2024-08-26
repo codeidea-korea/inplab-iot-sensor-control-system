@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.SiteInfoMapper">
+    <sql id="rowSearch">
+        <if test="site_nm != null and site_nm != ''">
+            and MG.site_nm ilike '%' || #{site_nm} || '%'
+        </if>
+        <if test="site_zip != null and site_zip != ''">
+            and MG.site_zip ilike '%' || #{site_zip} || '%'
+        </if>
+        <if test="site_addr != null and site_addr != ''">
+            and MG.site_addr ilike '%' || #{site_addr} || '%'
+        </if>
+        <if test="site_road_addr != null and site_road_addr != ''">
+            and MG.site_road_addr ilike '%' || #{site_road_addr} || '%'
+        </if>
+        <if test="site_sys_nm != null and site_sys_nm != ''">
+            and MG.site_sys_nm ilike '%' || #{site_sys_nm} || '%'
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+				<when test="'site_nm' == sidx and sidx != ''">
+                    MG.site_nm ${sord}
+                </when>
+                <when test="'site_zip' == sidx and sidx != ''">
+                    MG.site_zip ${sord}
+                </when>
+                <when test="'site_addr' == sidx and sidx != ''">
+                    MG.site_addr ${sord}
+                </when>
+                <when test="'site_road_addr' == sidx and sidx != ''">
+                    MG.site_road_addr ${sord}
+                </when>
+                <when test="'site_sys_nm' == sidx and sidx != ''">
+                    MG.site_sys_nm ${sord}
+                </when>
+                <otherwise>
+                    MG.site_no
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+    
+    <select id="selectSiteInfoList" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT MG.*
+        FROM (
+			SELECT a.site_no
+				 , a.site_nm
+				 , a.site_zip
+				 , a.site_addr
+				 , a.site_road_addr
+				 , a.site_logo_nm
+                 , encode(a.site_logo, 'base64') AS site_logo
+				 , a.site_sys_nm
+			FROM tb_site_info a
+		) MG
+		WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+<!--        <if test="page != null and page > 0">-->
+<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+<!--        </if>-->
+    </select>
+    
+    <select id="selectSiteInfoListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+			SELECT a.site_no
+				 , a.site_nm
+				 , a.site_zip
+				 , a.site_addr
+				 , a.site_road_addr
+				 , a.site_logo_nm
+				 , encode(a.site_logo, 'base64') AS site_logo
+				 , a.site_sys_nm
+			FROM tb_site_info a
+		) MG
+		WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+    
+    <insert id="insertSiteInfo" parameterType="java.util.Map">
+        INSERT INTO tb_site_info ( site_no
+					          , site_nm
+					          , site_zip
+							  , site_addr
+							  , site_road_addr
+							  , site_logo
+							  , site_sys_nm
+							  , site_logo_nm
+		) SELECT   #{site_no}
+		         , #{site_nm}
+		         , #{site_zip}
+				 , #{site_addr}
+				 , #{site_road_addr}
+				 , #{site_logo}
+				 , #{site_sys_nm}
+				 , #{site_logo_nm}
+		    FROM tb_site_info
+    </insert>
+    
+    <update id="updateSiteInfo" parameterType="java.util.Map">
+        update tb_site_info set
+            site_nm = #{site_nm}
+        <if test="site_zip != null">
+            , site_zip = #{site_zip}
+        </if>
+        <if test="site_addr != null">
+            , site_addr = #{site_addr}
+        </if>
+        <if test="site_road_addr != null">
+            , site_road_addr = #{site_road_addr}
+        </if>
+        <if test="site_logo != null">
+            , site_logo = #{site_logo}
+        </if>
+        <if test="site_sys_nm != null">
+            , site_sys_nm = #{site_sys_nm}
+        </if>
+        <if test="site_logo_nm != null">
+            , site_logo_nm = #{site_logo_nm}
+        </if>
+        where site_no = #{site_no}
+    </update>
+    
+    <delete id="deleteSiteInfo" parameterType="java.util.Map">
+        DELETE FROM tb_site_info
+         WHERE site_no = #{site_no}
+    </delete>
+</mapper>

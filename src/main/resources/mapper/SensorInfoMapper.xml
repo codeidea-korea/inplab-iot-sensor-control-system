@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.SensorInfoMapper">
+    <sql id="rowSearch">
+        <if test="sens_no != null and sens_no != ''">
+            and MG.sens_no = #{sens_no}
+        </if>
+        <if test="logr_no != null and logr_no != ''">
+            and MG.logr_no = #{logr_no}
+        </if>
+        <if test="senstype_no != null and senstype_no != ''">
+            and MG.senstype_no ilike '%' || #{senstype_no} || '%'
+        </if>
+        <if test="sens_nm != null and sens_nm != ''">
+            and MG.sens_nm ilike '%' || #{sens_nm} || '%'
+        </if>
+
+        <if test="mod_dt_start != null and mod_dt_start != '' and mod_dt_end != null and mod_dt_end != ''">
+            and MG.mod_dt::timestamp between (#{mod_dt_start}::timestamp) and (#{mod_dt_end}::timestamp)
+        </if>
+
+        <if test="searchKeyword  != null and searchKeyword  != ''">
+            and (select B.sens_tp_nm from tb_sensor_type B where B.senstype_no = MG.senstype_no) LIKE '%' || #{searchKeyword} || '%' OR
+            MG.sens_no LIKE '%' || #{searchKeyword} || '%' OR
+            (select B.logr_nm from tb_logger_info B where B.logr_no = MG.logr_no) LIKE '%' || #{searchKeyword} || '%' OR
+            (select B.code_nm from tb_common_code B where B.code_id = MG.maint_sts_cd) LIKE '%' || #{searchKeyword} || '%'
+        </if>
+
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'sens_no' == sidx and sidx != ''">
+                    MG.sens_no ${sord}
+                </when>
+                <when test="'logr_no' == sidx and sidx != ''">
+                    MG.logr_no ${sord}
+                </when>
+                <when test="'senstype_no' == sidx and sidx != ''">
+                    MG.senstype_no ${sord}
+                </when>
+                <when test="'mod_dt' == sidx and sidx != ''">
+                    MG.mod_dt ${sord}
+                </when>
+                <otherwise>
+                    MG.sens_no
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectSensorInfoList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.SensorInfoDto">
+        SELECT MG.*
+        FROM (
+            SELECT
+            A.sens_no
+            , A.logr_no
+            , (SELECT B.sens_tp_nm FROM tb_sensor_type B WHERE B.senstype_no = A.senstype_no) AS senstype_nm
+            , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm
+            , (SELECT B.code_nm FROM tb_common_code B WHERE B.code_id = A.maint_sts_cd) AS maint_sts_nm
+            , A.senstype_no
+            , A.sens_nm
+            , A.inst_ymd
+            , A.sect_no
+            , A.multi_sens_yn
+            , A.disp_prior_yn
+            , A.multi_senstype_no
+            , A.multi_sens_no
+            , A.nonrecv_limit_min
+            , A.alarm_use_yn
+            , A.sms_snd_yn
+            , A.sens_disp_yn
+            , A.maint_sts_cd
+            , A.sens_lon
+            , A.sens_lat
+            , A.sens_maker
+            , A.model_nm
+            FROM tb_sensor_info A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+<!--        <if test="page != null and page > 0">-->
+<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+<!--        </if>-->
+    </select>
+
+    <select id="selectSensorInfoListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+        SELECT
+            A.sens_no
+            , A.logr_no
+            , (SELECT B.sens_tp_nm FROM tb_sensor_type B WHERE B.senstype_no = A.senstype_no) AS senstype_nm
+            , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm
+            , (SELECT B.code_nm FROM tb_common_code B WHERE B.code_id = A.maint_sts_cd) AS maint_sts_nm
+            , A.senstype_no
+            , A.sens_nm
+            , A.inst_ymd
+            , A.sect_no
+            , A.multi_sens_yn
+            , A.disp_prior_yn
+            , A.multi_senstype_no
+            , A.multi_sens_no
+            , A.nonrecv_limit_min
+            , A.alarm_use_yn
+            , A.sms_snd_yn
+            , A.sens_disp_yn
+            , A.maint_sts_cd
+            , A.sens_lon
+            , A.sens_lat
+            , A.sens_maker
+            , A.model_nm
+        FROM tb_sensor_info A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertSensorInfo" parameterType="java.util.Map">
+        INSERT INTO tb_sensor_info (
+                     sens_no
+                   , logr_no
+                   , senstype_no
+                   , sens_nm
+                   , inst_ymd
+                   , sect_no
+                   , nonrecv_limit_min
+                   , alarm_use_yn
+                   , sms_snd_yn
+                   , sens_disp_yn
+                   , maint_sts_cd
+                   , sens_lon
+                   , sens_lat
+                   , sens_maker
+                   , model_nm
+        ) VALUES (
+                   #{sens_no}
+                 , #{logr_no}
+                 , #{senstype_no}
+                 , #{sens_nm}
+                 , #{inst_ymd}
+                 , #{sect_no}::int
+                 , #{nonrecv_limit_min}::int
+                 , #{alarm_use_yn}
+                 , #{sms_snd_yn}
+                 , #{sens_disp_yn}
+                 , #{maint_sts_cd}
+                 , #{sens_lon}::double precision
+                 , #{sens_lat}::double precision
+                 , #{sens_maker}
+                 , #{model_nm}
+         )
+    </insert>
+
+    <update id="updateSensorInfo" parameterType="java.util.Map">
+        update tb_sensor_info set
+            mod_dt = now()
+        <if test="logr_no != null">
+            , logr_no = #{logr_no}
+        </if>
+        <if test="senstype_no != null">
+            , senstype_no = #{senstype_no}
+        </if>
+        <if test="sens_nm != null">
+            , sens_nm = #{sens_nm}
+        </if>
+        <if test="inst_ymd != null">
+            , inst_ymd = #{inst_ymd}
+        </if>
+        <if test="sect_no != null">
+            , sect_no = #{sect_no}::int
+        </if>
+        <if test="multi_sens_yn != null">
+            , multi_sens_yn = #{multi_sens_yn}
+        </if>
+        <if test="disp_prior_yn != null">
+            , disp_prior_yn = #{disp_prior_yn}
+        </if>
+        <if test="multi_senstype_no != null">
+            , multi_senstype_no = #{multi_senstype_no}
+        </if>
+        <if test="multi_sens_no != null">
+            , multi_sens_no = #{multi_sens_no}
+        </if>
+        <if test="nonrecv_limit_min != null">
+            , nonrecv_limit_min = #{nonrecv_limit_min}::int
+        </if>
+        <if test="alarm_use_yn != null">
+            , alarm_use_yn = #{alarm_use_yn}
+        </if>
+        <if test="sms_snd_yn != null">
+            , sms_snd_yn = #{sms_snd_yn}
+        </if>
+        <if test="sens_disp_yn != null">
+            , sens_disp_yn = #{sens_disp_yn}
+        </if>
+        <if test="maint_sts_cd != null">
+            , maint_sts_cd = #{maint_sts_cd}
+        </if>
+        <if test="sens_lon != null">
+            , sens_lon = #{sens_lon}::double precision
+        </if>
+        <if test="sens_lat != null">
+            , sens_lat = #{sens_lat}::double precision
+        </if>
+        <if test="sens_maker != null">
+            , sens_maker = #{sens_maker}
+        </if>
+        <if test="model_nm != null">
+            , model_nm = #{model_nm}
+        </if>
+        where sens_no = #{sens_no}
+    </update>
+
+    <delete id="deleteSensorInfo" parameterType="java.util.Map">
+        DELETE FROM tb_sensor_info
+         WHERE sens_no = #{sens_no}
+    </delete>
+</mapper>

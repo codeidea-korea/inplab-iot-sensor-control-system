@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.SensorTypeMapper">
+    <sql id="rowSearch">
+        <if test="senstype_no != null and senstype_no != ''">
+            and MG.senstype_no = #{senstype_no}
+        </if>
+        <if test="site_no != null and site_no != ''">
+            and MG.site_no = #{site_no}
+        </if>
+        <if test="sens_tp_nm != null and sens_tp_nm != ''">
+            and MG.sens_tp_nm = #{sens_tp_nm}
+        </if>
+        <if test="sens_abbr != null and sens_abbr != ''">
+            and MG.sens_abbr = #{sens_abbr}
+        </if>
+
+        <if test="basic_formul != null and basic_formul != ''">
+            and MG.basic_formul ilike '%' || #{basic_formul} || '%'
+        </if>
+        <if test="sens_chnl_cnt != null and sens_chnl_cnt != ''">
+            and MG.sens_chnl_cnt ilike '%' || #{sens_chnl_cnt} || '%'
+        </if>
+        <if test="logr_idx_str != null and logr_idx_str != ''">
+            and MG.logr_idx_str ilike '%' || #{logr_idx_str} || '%'
+        </if>
+        <if test="logr_idx_end != null and logr_idx_end != ''">
+            and MG.logr_idx_end ilike '%' || #{logr_idx_end} || '%'
+        </if>
+
+        <if test="mod_dt_start != null and mod_dt_start != '' and mod_dt_end != null and mod_dt_end != ''">
+            and MG.mod_dt::timestamp between (#{mod_dt_start}::timestamp) and (#{mod_dt_end}::timestamp)
+        </if>
+
+        <if test="searchKeyword  != null and searchKeyword  != ''">
+            and MG.sens_tp_nm LIKE '%' || #{searchKeyword} || '%' OR
+            MG.sens_abbr LIKE '%' || #{searchKeyword} || '%'
+        </if>
+
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'senstype_no' == sidx and sidx != ''">
+                    MG.senstype_no ${sord}
+                </when>
+                <when test="'site_no' == sidx and sidx != ''">
+                    MG.site_no ${sord}
+                </when>
+                <when test="'sens_tp_nm' == sidx and sidx != ''">
+                    MG.sens_tp_nm ${sord}
+                </when>
+                <when test="'mod_dt' == sidx and sidx != ''">
+                    MG.mod_dt ${sord}
+                </when>
+                <otherwise>
+                    MG.senstype_no
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectSensorTypeList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.SensorTypeDto">
+        SELECT MG.*
+        FROM (
+            SELECT
+            A.senstype_no
+            , A.site_no
+            , A.sens_tp_nm
+            , A.sens_abbr
+            , A.basic_formul
+            , A.sens_chnl_cnt
+            , A.logr_idx_str
+            , A.logr_idx_end
+            , A.logr_flag
+            FROM tb_sensor_type A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+<!--        <if test="page != null and page > 0">-->
+<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+<!--        </if>-->
+    </select>
+
+    <select id="selectSensorTypeListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+        SELECT
+        A.senstype_no
+        , A.site_no
+        , A.sens_tp_nm
+        , A.sens_abbr
+        , A.basic_formul
+        , A.sens_chnl_cnt
+        , A.logr_idx_str
+        , A.logr_idx_end
+        , A.logr_flag
+        FROM tb_sensor_type A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertSensorType" parameterType="java.util.Map">
+        INSERT INTO tb_sensor_type (
+             senstype_no
+           , site_no
+           , sens_tp_nm
+           , sens_abbr
+           , basic_formul
+           , sens_chnl_cnt
+           , logr_idx_str
+           , logr_idx_end
+           , logr_flag
+        ) VALUES (
+              #{senstype_no}
+               , #{site_no}
+               , #{sens_tp_nm}
+               , #{sens_abbr}
+               , #{basic_formul}
+               , #{sens_chnl_cnt}::integer
+               , #{logr_idx_str}
+               , #{logr_idx_end}
+               , #{logr_flag}
+       )
+    </insert>
+
+    <update id="updateSensorType" parameterType="java.util.Map">
+        update tb_sensor_type set
+            mod_dt = now()
+        <if test="site_no != null">
+            , site_no = #{site_no}
+        </if>
+        <if test="sens_tp_nm != null">
+            , sens_tp_nm = #{sens_tp_nm}
+        </if>
+        <if test="sens_abbr != null">
+            , sens_abbr = #{sens_abbr}
+        </if>
+        <if test="basic_formul != null">
+            , basic_formul = #{basic_formul}
+        </if>
+        <if test="sens_chnl_cnt != null">
+            , sens_chnl_cnt = #{sens_chnl_cnt}::integer
+        </if>
+        <if test="logr_idx_str != null">
+            , logr_idx_str = #{logr_idx_str}
+        </if>
+        <if test="logr_idx_end != null">
+            , logr_idx_end = #{logr_idx_end}
+        </if>
+        <if test="logr_flag != null">
+            , logr_flag = #{logr_flag}
+        </if>
+        where senstype_no = #{senstype_no}
+    </update>
+
+    <delete id="deleteSensorType" parameterType="java.util.Map">
+        DELETE FROM tb_sensor_type
+         WHERE senstype_no = #{senstype_no}
+    </delete>
+</mapper>

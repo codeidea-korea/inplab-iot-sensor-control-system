@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.LogrIdxMapMapper">
+    <sql id="rowSearch">
+        <if test="mapping_no != null and mapping_no != ''">
+            and MG.mapping_no = #{mapping_no}
+        </if>
+        <if test="sens_no != null and sens_no != ''">
+            and MG.sens_no = #{sens_no}
+        </if>
+        <if test="sens_chnl_id != null and sens_chnl_id != ''">
+            and MG.sens_chnl_id ilike '%' || #{sens_chnl_id} || '%'
+        </if>
+
+        <if test="mod_dt_start != null and mod_dt_start != '' and mod_dt_end != null and mod_dt_end != ''">
+            and MG.mod_dt::timestamp between (#{mod_dt_start}::timestamp) and (#{mod_dt_end}::timestamp)
+        </if>
+
+        <if test="searchKeyword  != null and searchKeyword  != ''">
+            and (select B.sens_tp_nm from tb_sensor_type B where B.sens_chnl_id = MG.sens_chnl_id) LIKE '%' || #{searchKeyword} || '%' OR
+            (SELECT B.sens_nm FROM tb_sensor_info B WHERE B.sens_no = A.sens_no) LIKE '%' || #{searchKeyword} || '%' OR
+            (SELECT C.district_nm
+            FROM tb_district_info C
+            WHERE C.district_no = (SELECT B.district_no
+            FROM tb_logger_info B
+            WHERE B.logr_no = MG.logr_no)) LIKE '%' || #{searchKeyword} || '%'
+        </if>
+
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'mapping_no' == sidx and sidx != ''">
+                    MG.mapping_no ${sord}
+                </when>
+                <when test="'sens_no' == sidx and sidx != ''">
+                    MG.sens_no ${sord}
+                </when>
+                <when test="'sens_chnl_id' == sidx and sidx != ''">
+                    MG.sens_chnl_id ${sord}
+                </when>
+                <when test="'mod_dt' == sidx and sidx != ''">
+                    MG.mod_dt ${sord}
+                </when>
+                <otherwise>
+                    MG.mapping_no
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectLogrIdxMapList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.LogrIdxMapDto">
+        SELECT MG.*
+        FROM (
+            SELECT
+                A.mapping_no
+                , A.sens_no
+                , (SELECT C.sens_tp_nm
+                    FROM tb_sensor_type C
+                    WHERE C.senstype_no = (SELECT B.senstype_no
+                                            FROM tb_sensor_info B
+                                            WHERE B.sens_no = A.sens_no)) AS senstype_nm
+                , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm
+                , (SELECT B.sens_nm FROM tb_sensor_info B WHERE B.sens_no = A.sens_no) AS sens_nm
+                , (SELECT C.district_nm
+                    FROM tb_district_info C
+                    WHERE C.district_no = (SELECT B.district_no
+                                            FROM tb_logger_info B
+                                            WHERE B.logr_no = A.logr_no)) AS district_nm
+                , A.logr_no
+                , A.logr_idx_no
+                , A.sens_chnl_nm
+                , A.logr_chnl_seq
+                , A.sect_no
+                , A.district_no
+                , to_char(A.reg_dt, 'YYYY-MM-DD') AS reg_dt
+            FROM tb_logr_idx_map A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+<!--        <if test="page != null and page > 0">-->
+<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+<!--        </if>-->
+    </select>
+
+    <select id="selectLogrIdxMapListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+        SELECT
+            A.mapping_no
+            , A.sens_no
+            , (SELECT C.sens_tp_nm
+                    FROM tb_sensor_type C
+                    WHERE C.senstype_no = (SELECT B.senstype_no
+                                            FROM tb_sensor_info B
+                                            WHERE B.sens_no = A.sens_no)) AS senstype_nm
+            , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm
+            , (SELECT B.sens_nm FROM tb_sensor_info B WHERE B.sens_no = A.sens_no) AS sens_nm
+            , (SELECT C.district_nm
+                FROM tb_district_info C
+                WHERE C.district_no = (SELECT B.district_no
+                                        FROM tb_logger_info B
+                                        WHERE B.logr_no = A.logr_no)) AS district_nm
+            , A.sens_chnl_id
+            , A.logr_no
+            , A.logr_idx_no
+            , A.sens_chnl_nm
+            , A.logr_chnl_seq
+            , A.sect_no
+            , A.district_no
+            , to_char(A.reg_dt, 'YYYY-MM-DD') AS reg_dt
+        FROM tb_logr_idx_map A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertLogrIdxMap" parameterType="java.util.Map">
+        INSERT INTO tb_logr_idx_map (
+            mapping_no
+            <if test="sens_no != null">, sens_no</if>
+            <if test="sens_chnl_id != null">, sens_chnl_id</if>
+            <if test="logr_no != null">, logr_no</if>
+            <if test="logr_idx_no != null">, logr_idx_no</if>
+            <if test="sens_chnl_nm != null">, sens_chnl_nm</if>
+            <if test="logr_chnl_seq != null">, logr_chnl_seq</if>
+            <if test="sect_no != null">, sect_no</if>
+            <if test="district_no != null">, district_no</if>
+        ) VALUES (
+            #{mapping_no}::int
+            <if test="sens_no != null">, #{sens_no}</if>
+            <if test="sens_chnl_id != null">, #{sens_chnl_id}</if>
+            <if test="logr_no != null">, #{logr_no}</if>
+            <if test="logr_idx_no != null">, #{logr_idx_no}</if>
+            <if test="sens_chnl_nm != null">, #{sens_chnl_nm}</if>
+            <if test="logr_chnl_seq != null">, #{logr_chnl_seq}::int</if>
+            <if test="sect_no != null">, #{sect_no}::int</if>
+            <if test="district_no != null">, #{district_no}</if>
+        )
+    </insert>
+
+
+    <update id="updateLogrIdxMap" parameterType="java.util.Map">
+        update tb_logr_idx_map set
+            mod_dt = now()
+        <if test="sens_no != null">
+            , sens_no = #{sens_no}
+        </if>
+        <if test="sens_chnl_id != null">
+            , sens_chnl_id = #{sens_chnl_id}
+        </if>
+        <if test="logr_no != null">
+            , logr_no = #{logr_no}
+        </if>
+        <if test="logr_idx_no != null">
+            , logr_idx_no = #{logr_idx_no}
+        </if>
+        <if test="sens_chnl_nm != null">
+            , sens_chnl_nm = #{sens_chnl_nm}
+        </if>
+        <if test="logr_chnl_seq != null">
+            , logr_chnl_seq = #{logr_chnl_seq}::int
+        </if>
+        <if test="sect_no != null">
+            , sect_no = #{sect_no}::int
+        </if>
+        <if test="district_no != null">
+            , district_no = #{district_no}
+        </if>
+        where mapping_no = #{mapping_no}
+    </update>
+
+    <delete id="deleteLogrIdxMap" parameterType="java.util.Map">
+        DELETE FROM tb_logr_idx_map
+         WHERE sens_no = #{sens_no}
+    </delete>
+</mapper>
