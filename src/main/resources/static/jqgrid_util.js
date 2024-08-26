@@ -1,11 +1,11 @@
 /**
- * jquery 기반 jqgrid 
- * 
+ * jquery 기반 jqgrid
+ *
  * $gridElement : 그리드로 전환시 사용될 컨테이너 jquery 엘리먼트
  * params : 그리드내부 전송할 파라메터 객체 params.listPathUrl 필수 (jqgrid 뷰 컨트롤러 경로)
  * columnsJson : 그리드 헤더 정보
  * visiblePage : 그리드의 페이징 부분 표시 여부
- * 
+ *
  */
 function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, callback2) {
     var _columns = columnsJson;
@@ -30,7 +30,7 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
 
     if (typeof params.listPathUrl == 'undefined' || params.listPathUrl == null || params.listPathUrl == '') {
         alert('그리드와 연결할 뷰 컨트롤러를 설정해주세요.');
-        
+
         return;
     }
 
@@ -145,7 +145,7 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
             column.stype = 'select';
             column.searchoptions = {
                 value: _types[idx]
-            };       
+            };
             var data = _types[idx].split(";");
             column.formatter = function (cellValue, options, rowObject) {
                 var res = '';
@@ -305,12 +305,12 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
 
             console.log('beforeRequest');
         },
-        loadComplete: function (rowId) { 
-			
+        loadComplete: function (rowId) {
+
             // console.log(rowId);
             // var rowData = jQuery(this).getRowData(rowId);            
             $('.ui-jqgrid .ui-search-table input').attr('autocomplete', 'new-password');
-            
+
             jqgridModify = false;
 
             if (visiblePage) {
@@ -327,9 +327,9 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
         },
         gridComplete: function () {
             $('.loading').hide();
-            
+
             if(callback2 != undefined) callback2();
-            
+
         },
         ondblClickRow: function (rowId) { // 더블클릭시 색상해제
             $grid.find('tr').removeClass('custom_selected');
@@ -369,7 +369,7 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
 
             // var rowData = jQuery(this).getRowData(rowId);
             // $(window).trigger('onSelectRow', rowData);
-            
+
             var rowData = {rowId, ...jQuery(this).getRowData(rowId)} ;
             rowData.currentTarget = $(this).find('tr[id=' + rowId + ']')[0];
 
@@ -440,7 +440,7 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
     });
 
     // select 태그 동작때문에 기존 click 이벤트를 unbind 해야함 (안그러면 beforeRequest 이벤트가 먼저 실행되어 초기화된 데이터가 반영되질 않음)
-    $grid.closest('.ui-jqgrid').find('.ui-jqgrid-htable a.clearsearchclass').off('click').on('click', function () {        
+    $grid.closest('.ui-jqgrid').find('.ui-jqgrid-htable a.clearsearchclass').off('click').on('click', function () {
         $(this).closest('tr').find('select option:eq(0)').prop('selected', true);
         $grid[0].clearToolbar();
         reloadJqGrid($grid);
@@ -453,11 +453,11 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
         del: false,
         refresh: false
     });
- 
+
     $grid.destroy = function() {
         let tableClassName = this[0].getAttribute("class");
         let $container = $(this[0]).closest('.ui-jqgrid').parent();
-        
+
         if ($container.length == 0)
             return;
 
@@ -470,7 +470,7 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
 
 /**
  * 그리드 관련 global 함수 ******************************************************************************************
-*/
+ */
 
 function getSelectedData($grid) {
     if (typeof $grid == 'undefined') {
@@ -519,15 +519,16 @@ function reloadJqGrid($grid) {
         $grid = $('.jqGrid');
     }
 
-    $grid[0].triggerToolbar();
+    //필터 사용안함
+    // $grid[0].triggerToolbar();
     $grid.trigger('reloadGrid');
 
-    console.log('reloadJqGrid');
+    // console.log('reloadJqGrid');
 }
 
 /**
- * 그리드 페이징 
- * 
+ * 그리드 페이징
+ *
  * @param gridId
  * @param pagerId
  * @param pI : 페이지 정보를 나타낼 것인지 / boolean / 생략시 false
@@ -539,7 +540,7 @@ function reloadJqGrid($grid) {
 function initPage($grid, $pager, pI, pit, pageCount) {
     var customPageInfo = ""; // 페이지 정보를 나타낼 것인지 / boolean / 생략시 false
     var customPageInfoType = ""; // 페이지 정보의 종류
-    
+
     if (pI == null || pI == "") {
         customPageInfo = false;
     } else {
@@ -574,7 +575,7 @@ function initPage($grid, $pager, pI, pit, pageCount) {
     }
 
     // 페이지 리스트가 총 페이지 리스트보다 커지면 총 페이지 리스트로 설정
-    if (pageList > totalPageList) 
+    if (pageList > totalPageList)
         pageList = totalPageList;
 
     // 시작 페이지
@@ -592,12 +593,12 @@ function initPage($grid, $pager, pI, pit, pageCount) {
 
     if (endPageList > totalPage) {
         endPageList = totalPage;
-    } 
+    }
 
     if (endPageList < 1) {
         endPageList = 1;
     }
-    
+
     // 페이징 DIV에 넣어줄 태그 생성변수
     var pageInner = "";
 
@@ -617,12 +618,12 @@ function initPage($grid, $pager, pI, pit, pageCount) {
 
         if (i == currentPage) {
             pageInner = pageInner + "<span class='customPageNumberBtn current'><button target='_top' href='#' num='" + (
-            i) + "' title='" + titleGoPage + "'><strong>" + (
-            i) + "</strong></button></span>";
+                i) + "' title='" + titleGoPage + "'><strong>" + (
+                i) + "</strong></button></span>";
         } else {
             pageInner = pageInner + "<span class='customPageNumberBtn'><button target='_top' href='#' num='" + (
-            i) + "' title='" + titleGoPage + "'>" + (
-            i) + "</button></span>";
+                i) + "' title='" + titleGoPage + "'>" + (
+                i) + "</button></span>";
         }
     }
 

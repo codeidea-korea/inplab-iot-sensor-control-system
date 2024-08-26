@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.CommonCodeEditMapper">
+
+	<select id="getGenerationKey" parameterType="java.util.Map" resultType="java.util.Map">
+		/* CommonCodeEditMapper.getGenerationKey */
+		SELECT
+			A.table_nm
+			 ,A.column_nm
+			 ,A.pre_code
+			 ,A.pre_type
+			 ,A.length
+			 ,A.max
+			 ,CONCAT(A.pre_code, RIGHT(CONCAT(REPEAT('0',LENGTH),A.max+1),LENGTH)) AS new_id
+		FROM generation_key A
+		WHERE 1=1
+		  AND table_nm = #{table_nm}
+		  AND column_nm = #{column_nm}
+		<if test="pre_type != null">
+			AND pre_type = #{pre_type}
+		</if>
+		<if test="pre_type == null">
+			AND pre_type = ''
+		</if>
+	</select>
+
+	<update id="incMaxGenerationKey" parameterType="java.util.Map">
+		/* CommonCodeEditMapper.incMaxGenerationKey */
+		UPDATE generation_key
+		SET max = max+1
+		WHERE table_nm = #{table_nm}
+		  AND column_nm = #{column_nm}
+		<if test="pre_type != null">
+			AND pre_type = #{pre_type}
+		</if>
+		<if test="pre_type == null">
+			AND pre_type = ''
+		</if>
+	</update>
+
+	<update id="nextPreCodeGenerationKey" parameterType="java.util.Map">
+		/* CommonCodeEditMapper.nextPreCodeGenerationKey */
+		UPDATE generation_key
+		SET pre_code = CHAR(ASCII(pre_code)+1)
+		WHERE table_nm = #{table_nm}
+		  AND column_nm = #{column_nm}
+		<if test="pre_type != null">
+			AND pre_type = #{pre_type}
+		</if>
+		<if test="pre_type == null">
+			AND pre_type = ''
+		</if>
+	</update>
+
+
+	<select id="selectCommonCodeEditList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT cc.code_id code
+			 , cc.code_nm name
+		FROM tb_common_code cc
+		WHERE cc.code_grp_nm = #{code_grp_nm}
+		<if test="code_nm != null">
+			AND cc.code_nm = #{code_nm}
+		</if>
+		ORDER BY cc.code_id
+	</select>
+
+	<select id="selectMaintcompInfoList" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT ak.partner_comp_id code
+			 , ak.partner_comp_nm name
+		FROM tb_maintcomp_info ak
+		<where>
+			<if test="partner_type_flag != null and partner_type_flag != ''">
+				ak.partner_type_flag = #{partner_type_flag}
+			</if>
+		</where>
+		ORDER BY ak.partner_comp_id
+	</select>
+
+	<select id="selectDistrictInfoList" resultType="java.util.Map">
+		SELECT cc.district_no code
+			 , cc.district_nm name
+		FROM tb_district_info cc
+		ORDER BY cc.district_no
+	</select>
+
+	<select id="selectLoggerInfo" resultType="java.util.Map">
+		SELECT logr_no code
+			 , logr_nm name
+		FROM tb_logger_info
+		ORDER BY logr_no
+	</select>
+
+	<select id="selectLoggerInfoLogrNo" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT logr_no
+		FROM tb_logger_info
+		WHERE logr_nm = #{logr_nm}
+	</select>
+
+	<select id="selectSensorTypeSenstypeNo" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT senstype_no
+		FROM tb_sensor_type
+		WHERE sens_tp_nm = #{sens_tp_nm}
+	</select>
+
+	<select id="selectSensorType" resultType="java.util.Map">
+		SELECT senstype_no code
+			 , sens_tp_nm name
+		FROM tb_sensor_type
+		ORDER BY senstype_no
+	</select>
+
+	<select id="selectSensorAbbr" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT sens_abbr
+		FROM tb_sensor_type
+		WHERE senstype_no = #{senstype_no}
+		LIMIT 1
+	</select>
+
+	<select id="selectDistrictInfoDistAbbr" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT dist_abbr
+		FROM tb_district_info
+		WHERE district_no = #{district_no}
+	</select>
+
+	<select id="selectDistrictInfoNmAbbr" parameterType="string" resultType="java.util.Map">
+		SELECT B.district_no
+			 , B.dist_abbr
+		FROM tb_district_info B
+		WHERE B.district_nm = #{district_nm}
+		LIMIT 1
+	</select>
+
+	<select id="selectNewSensorSeq" parameterType="java.util.Map" resultType="java.util.Map">
+		WITH MaxSensorSeq AS (
+			SELECT
+				MAX(CAST(SUBSTRING(sens_nm FROM '[0-9]+$') AS INTEGER)) AS max_seq
+			FROM
+				tb_sensor_info
+			WHERE
+				sens_nm LIKE  '%' || #{sensor_seq} || '%'
+			AND logr_no = #{logr_no}
+					)
+		SELECT
+			CONCAT(#{sensor_seq}, '-', LPAD(CAST(COALESCE(max_seq, 0) + 1 AS TEXT), 2, '0')) AS new_sensor_seq
+		FROM MaxSensorSeq
+	</select>
+
+	<select id="selectSiteInfo" resultType="java.util.Map">
+		SELECT site_no code
+			 , site_nm name
+		FROM tb_site_info
+		WHERE site_no = 'S01'
+	</select>
+
+	<select id="isLoggerNoExists" parameterType="java.util.Map" resultType="boolean">
+		SELECT EXISTS (
+			SELECT 1
+			FROM tb_logger_info
+			WHERE district_no = #{district_no}
+		)
+	</select>
+
+	<select id="isSensNoExists" parameterType="java.util.Map" resultType="boolean">
+		SELECT EXISTS (
+			SELECT 1
+			FROM tb_sensor_info
+			WHERE sens_no = #{sens_no}
+		)
+	</select>
+
+	<select id="isLogrIdxNoExists" parameterType="java.util.Map" resultType="boolean">
+		SELECT EXISTS (
+			SELECT 1
+			FROM tb_logr_idx_map
+			WHERE sens_no = #{sensNo}
+		)
+	</select>
+
+</mapper>

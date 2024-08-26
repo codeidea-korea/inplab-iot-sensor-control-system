@@ -64,10 +64,10 @@ function setRangePicker($el, applyCallback) {
             '지난 6개월': [moment().subtract(6, 'month'), moment()],
             '1년': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
         },
-        locale: { 
+        locale: {
             format: 'YYYY-MM-DD',
             "separator": " ~ ",
-            cancelLabel: '취소', 
+            cancelLabel: '취소',
             applyLabel: '적용',
             "customRangeLabel": "사용자 정의",
             "fromLabel": "From",
@@ -194,10 +194,10 @@ $(function () {
             '지난 6개월': [moment().subtract(6, 'month'), moment()],
             '1년': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
         },
-        locale: { 
+        locale: {
             format: 'YYYY-MM-DD',
             "separator": " ~ ",
-            cancelLabel: '취소', 
+            cancelLabel: '취소',
             applyLabel: '적용',
             "customRangeLabel": "사용자 정의",
             "fromLabel": "From",
@@ -229,6 +229,31 @@ $(function () {
         "alwaysShowCalendars": true,
         opens: 'right'
     });
+
+
+    $(".datetimepickerOne").daterangepicker({
+        singleDatePicker: true, // 단일 날짜 선택 모드
+        showDropdowns: true, // 연도와 월을 드롭다운으로 선택 가능
+        locale: {
+            format: 'YYYY-MM-DD',
+            cancelLabel: '취소',
+            applyLabel: '적용',
+            daysOfWeek: [
+                "일", "월", "화", "수", "목", "금", "토"
+            ],
+            monthNames: [
+                "1월", "2월", "3월", "4월", "5월", "6월",
+                "7월", "8월", "9월", "10월", "11월", "12월"
+            ],
+        },
+        alwaysShowCalendars: true,
+        opens: 'right'
+    }, function(start, end, label) {
+        // 날짜 선택 후 실행될 함수
+        // $(".datetimepickerOne").val(start.format('YYYY-MM-DD'));
+        $(this).val(start.format('YYYY-MM-DD'));
+    });
+
 });
 
 function popFancy(name) {
@@ -467,7 +492,7 @@ function drawLineChart($el, seriesData, guideLine, xAxisFormat) {
     return Highcharts.chart($el[0], {
         chart: {
             height: (parseInt($el.height()) * 0.95) + 'px',
-            zoomType: 'x'                     
+            zoomType: 'x'
         },
         title: {
             text: null
@@ -707,4 +732,15 @@ function debounce(func, wait) {
             func.apply(context, args);
         }, wait);
     };
+}
+
+function openDaumPostcode(zonecode_col, jibunAddress_col, roadAddress_col) {
+    console.log(zonecode_col);
+    new daum.Postcode({
+        oncomplete: function (data) {
+            $('input[name="' + zonecode_col + '"]').val(data.zonecode);
+            $('input[name="' + jibunAddress_col + '"]').val(data.jibunAddress);
+            $('input[name="' + roadAddress_col + '"]').val(data.roadAddress);
+        }
+    }).open();
 }

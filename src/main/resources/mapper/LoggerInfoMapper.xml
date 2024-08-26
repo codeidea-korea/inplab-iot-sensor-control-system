@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.LoggerInfoMapper">
+    <sql id="rowSearch">
+        <if test="logr_no != null and logr_no != ''">
+            and MG.logr_no = #{logr_no}
+        </if>
+        <if test="district_no != null and district_no != ''">
+            and MG.district_no = #{district_no}
+        </if>
+        <if test="logr_nm != null and logr_nm != ''">
+            and MG.logr_nm ilike '%' || #{logr_nm} || '%'
+        </if>
+        <if test="logr_maker != null and logr_maker != ''">
+            and MG.logr_maker ilike '%' || #{logr_maker} || '%'
+        </if>
+        <if test="mod_dt_start != null and mod_dt_start != '' and mod_dt_end != null and mod_dt_end != ''">
+            and MG.mod_dt::timestamp between (#{mod_dt_start}::timestamp) and (#{mod_dt_end}::timestamp)
+        </if>
+
+        <if test="searchKeyword  != null and searchKeyword  != ''">
+            and MG.logr_nm LIKE '%' || #{searchKeyword} || '%' OR
+            (select B.district_nm from tb_district_info B where B.district_no = MG.district_no) LIKE '%' || #{searchKeyword} || '%' OR
+            MG.model_nm LIKE '%' || #{searchKeyword} || '%' OR
+            MG.logr_maker LIKE '%' || #{searchKeyword} || '%'
+        </if>
+
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'logr_no' == sidx and sidx != ''">
+                    MG.logr_no ${sord}
+                </when>
+                <when test="'district_no' == sidx and sidx != ''">
+                    MG.district_no ${sord}
+                </when>
+                <when test="'logr_nm' == sidx and sidx != ''">
+                    MG.logr_nm ${sord}
+                </when>
+                <when test="'mod_dt' == sidx and sidx != ''">
+                    MG.mod_dt ${sord}
+                </when>
+                <otherwise>
+                    MG.logr_no
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectLoggerInfoList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.LoggerInfoDto">
+        SELECT MG.*
+        FROM (
+            SELECT
+            A.logr_no
+            , A.district_no
+            , (SELECT B.district_nm FROM tb_district_info B WHERE B.district_no = A.district_no) AS district_nm
+            , A.logr_nm
+            , A.logr_MAC
+            , A.logr_ip
+            , A.logr_port
+            , A.logr_svr_ip
+            , A.logr_svr_port
+            , A.maint_sts_cd
+            , A.logr_lon
+            , A.logr_lat
+            , A.inst_ymd
+            , A.logr_maker
+            , A.model_nm
+            , A.logr_flag
+            FROM tb_logger_info A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+<!--        <if test="page != null and page > 0">-->
+<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+<!--        </if>-->
+    </select>
+
+    <select id="selectLoggerInfoListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(*)
+        FROM (
+        SELECT
+        A.logr_no
+        , A.district_no
+        , (SELECT B.district_nm FROM tb_district_info B WHERE B.district_no = A.district_no) AS district_nm
+        , A.logr_nm
+        , A.logr_MAC
+        , A.logr_ip
+        , A.logr_port
+        , A.logr_svr_ip
+        , A.logr_svr_port
+        , A.maint_sts_cd
+        , A.logr_lon
+        , A.logr_lat
+        , A.inst_ymd
+        , A.logr_maker
+        , A.model_nm
+        , A.logr_flag
+        FROM tb_logger_info A
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertLoggerInfo" parameterType="java.util.Map">
+        INSERT INTO tb_logger_info (
+        <trim suffixOverrides=",">
+            <if test="logr_no != null">logr_no,</if>
+            <if test="district_no != null">district_no,</if>
+            <if test="logr_nm != null">logr_nm,</if>
+            <if test="logr_MAC != null">logr_MAC,</if>
+            <if test="logr_ip != null">logr_ip,</if>
+            <if test="logr_port != null">logr_port,</if>
+            <if test="logr_svr_ip != null">logr_svr_ip,</if>
+            <if test="logr_svr_port != null">logr_svr_port,</if>
+            <if test="maint_sts_cd != null">maint_sts_cd,</if>
+            <if test="logr_lon != null">logr_lon,</if>
+            <if test="logr_lat != null">logr_lat,</if>
+            <if test="inst_ymd != null">inst_ymd,</if>
+            <if test="logr_maker != null">logr_maker,</if>
+            <if test="model_nm != null">model_nm,</if>
+            <if test="logr_flag != null">logr_flag,</if>
+        </trim>
+        )
+        VALUES (
+        <trim suffixOverrides=",">
+            <if test="logr_no != null">#{logr_no},</if>
+            <if test="district_no != null">#{district_no},</if>
+            <if test="logr_nm != null">#{logr_nm},</if>
+            <if test="logr_MAC != null">#{logr_MAC},</if>
+            <if test="logr_ip != null">#{logr_ip},</if>
+            <if test="logr_port != null">#{logr_port},</if>
+            <if test="logr_svr_ip != null">#{logr_svr_ip},</if>
+            <if test="logr_svr_port != null">#{logr_svr_port},</if>
+            <if test="maint_sts_cd != null">#{maint_sts_cd},</if>
+            <if test="logr_lon != null">#{logr_lon}::double precision,</if>
+            <if test="logr_lat != null">#{logr_lat}::double precision,</if>
+            <if test="inst_ymd != null">#{inst_ymd},</if>
+            <if test="logr_maker != null">#{logr_maker},</if>
+            <if test="model_nm != null">#{model_nm},</if>
+            <if test="logr_flag != null">#{logr_flag},</if>
+        </trim>
+        )
+    </insert>
+
+
+    <update id="updateLoggerInfo" parameterType="java.util.Map">
+        update tb_logger_info set
+            mod_dt = now()
+        <if test="district_no != null">
+            , district_no = #{district_no}
+        </if>
+        <if test="logr_nm != null">
+            , logr_nm = #{logr_nm}
+        </if>
+        <if test="logr_MAC != null">
+            , logr_MAC = #{logr_MAC}
+        </if>
+        <if test="logr_ip != null">
+            , logr_ip = #{logr_ip}
+        </if>
+        <if test="logr_port != null">
+            , logr_port = #{logr_port}
+        </if>
+        <if test="logr_svr_ip != null">
+            , logr_svr_ip = #{logr_svr_ip}
+        </if>
+        <if test="logr_svr_port != null">
+            , logr_svr_port = #{logr_svr_port}
+        </if>
+        <if test="maint_sts_cd != null">
+            , maint_sts_cd = #{maint_sts_cd}
+        </if>
+        <if test="logr_lon != null">
+            , logr_lon = #{logr_lon}::double precision
+        </if>
+        <if test="logr_lat != null">
+            , logr_lat = #{logr_lat}::double precision
+        </if>
+        <if test="inst_ymd != null">
+            , inst_ymd = #{inst_ymd}
+        </if>
+        <if test="logr_maker != null">
+            , logr_maker = #{logr_maker}
+        </if>
+        <if test="model_nm != null">
+            , model_nm = #{model_nm}
+        </if>
+        <if test="logr_flag != null">
+            , logr_flag = #{logr_flag}
+        </if>
+        where logr_no = #{logr_no}
+    </update>
+
+    <delete id="deleteLoggerInfo" parameterType="java.util.Map">
+        DELETE FROM tb_logger_info
+         WHERE logr_no = #{logr_no}
+    </delete>
+</mapper>
