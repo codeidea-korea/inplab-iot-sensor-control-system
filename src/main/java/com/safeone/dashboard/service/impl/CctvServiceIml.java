@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -52,25 +53,39 @@ public class CctvServiceIml implements CctvService {
         int insCount = 0;
         int passCount = 0;
 
-        Map<String, Object> newMap = new HashMap<>();
-        newMap.put("table_nm", "tb_cctv_info");
-        newMap.put("column_nm", "cctv_no");
-        ObjectNode generationKeyOn = newGenerationKey(newMap);
-        String newCctvNo = generationKeyOn.get("newId").asText();
-
         for (InsAdminAddCctvDto dto : insAdminAddCctvDtoList) {
+            Map<String, Object> newMap = new HashMap<>();
+            newMap.put("table_nm", "tb_cctv_info");
+            newMap.put("column_nm", "cctv_no");
+            ObjectNode generationKeyOn = newGenerationKey(newMap);
+            String newCctvNo = generationKeyOn.get("newId").asText();
+
             Map<String, Object> map = CommonUtils.dtoToMap(dto);
+            Map<String, Object> getMap = new HashMap<>();
             map.put("cctv_no", newCctvNo);
-            List<HashMap<String, Object>> list = cctvMapper.getCctvList(map);
+            getMap.put("cctv_no", newCctvNo);
+            List<HashMap<String, Object>> list = cctvMapper.getCctvList(getMap);
+            getMap.clear();
+            getMap.put("cctv_nm", map.get("cctv_nm"));
+            List<HashMap<String, Object>> list2 = cctvMapper.getCctvList(getMap);
 
             if (!list.isEmpty()) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 map.put("message", "CCTV_NO 가 " + map.get("cctv_no") + " 인 데이터가 이미 존재합니다.");
                 an.add(om.valueToTree(map));
                 passCount++;
                 continue;
-            } else {
-                insCount += cctvMapper.insCctv(map);
             }
+
+            if (!list2.isEmpty()) {
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                map.put("message", "CCTV_NM 이 " + map.get("cctv_nm") + " 인 데이터가 이미 존재합니다.");
+                an.add(om.valueToTree(map));
+                passCount++;
+                continue;
+            }
+
+            insCount += cctvMapper.insCctv(map);
         }
 
         CommonUtils.setCountInfo("ins", insCount, on);

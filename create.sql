@@ -381,6 +381,7 @@ CREATE TABLE tb_CCTV_info (
                               cctv_no VARCHAR(3) DEFAULT '' NOT NULL,
                               cctv_nm VARCHAR DEFAULT '' NOT NULL,
                               district_no VARCHAR(3) DEFAULT '' NOT NULL,
+                              del_yn VARCHAR(1) DEFAULT 'N' NOT NULL,
                               model_nm VARCHAR DEFAULT '',
                               cctv_maker VARCHAR DEFAULT '',
                               inst_ymd VARCHAR(8) DEFAULT '',
@@ -409,6 +410,7 @@ COMMENT ON TABLE tb_CCTV_info IS 'CCTV정보';
 COMMENT ON COLUMN tb_CCTV_info.cctv_no IS 'CCTV_no  T+01 (seq) site내에서는 unique';
 COMMENT ON COLUMN tb_CCTV_info.cctv_nm IS 'CCTV명  현장약어(3 chars) + CCTV + - + 01 (seq)';
 COMMENT ON COLUMN tb_CCTV_info.district_no IS '현장_no  D+01 (seq)';
+COMMENT ON COLUMN tb_cctv_info.del_yn IS '삭제여부';
 COMMENT ON COLUMN tb_CCTV_info.model_nm IS '모델명  selectbox';
 COMMENT ON COLUMN tb_CCTV_info.cctv_maker IS '제조사명';
 COMMENT ON COLUMN tb_CCTV_info.inst_ymd IS '설치일자';

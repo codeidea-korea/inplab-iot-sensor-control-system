@@ -58,5 +58,15 @@ public class InsAdminAddCctvDto {
     @Schema(example = "127.123123123", description = "위도")
     private String cctv_lat;
 
+    @Schema(example = "진척관리사무소", description = "관리사무소")
+    private String admin_center;
 
+    @Schema(example = "C01", description = "계측사아이디")
+    private String partner_comp_id;
+
+    @Schema(example = "홍길동", description = "계측사담당자명")
+    private String partner_comp_user_nm;
+
+    @Schema(example = "010-1234-5678", description = "계측사담당자연락처")
+    private String partner_comp_user_phone;
 }

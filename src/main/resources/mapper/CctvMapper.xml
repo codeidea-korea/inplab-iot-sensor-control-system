@@ -13,7 +13,7 @@
 	<select id="getCctvList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
 		/* CctvMapper.getCctvList */
 		SELECT
-			ROW_NUMBER() OVER (ORDER BY A.mod_dt DESC, A.reg_dt DESC) AS row_num
+			ROW_NUMBER() OVER (ORDER BY A.mod_dt IS NULL ASC, A.mod_dt DESC, A.reg_dt DESC) AS row_num
 			,A.cctv_no
 			,A.cctv_nm
 			,A.district_no
@@ -31,10 +31,15 @@
 			,A.maint_sts_cd
 			,A.cctv_lon
 			,A.cctv_lat
+		    ,A.admin_center
+		    ,A.partner_comp_id
+		    ,A.partner_comp_user_nm
+		    ,A.partner_comp_user_phone
 			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
 			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
 		FROM tb_cctv_info A
 		<include refid="getCctvList-where"/>
+		AND A.del_yn = 'N'
 		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
 			LIMIT ${limit} OFFSET ${offset}
 		</if>
@@ -70,7 +75,11 @@
 			relay_port,
 			maint_sts_cd,
 			cctv_lon,
-			cctv_lat
+			cctv_lat,
+			admin_center,
+			partner_comp_id,
+			partner_comp_user_nm,
+			partner_comp_user_phone
 		) VALUES (
 			#{cctv_no},
 			#{cctv_nm},
@@ -88,7 +97,11 @@
 			#{relay_port},
 			#{maint_sts_cd},
 			${cctv_lon},
-			${cctv_lat}
+			${cctv_lat},
+			#{admin_center},
+			#{partner_comp_id},
+			#{partner_comp_user_nm},
+			#{partner_comp_user_phone}
 		)
 	</insert>
 
@@ -98,6 +111,7 @@
 		<trim prefix="SET" suffixOverrides=",">
 			<if test='cctv_nm != null'>cctv_nm = #{cctv_nm},</if>
 			<if test='district_no != null'>district_no = #{district_no},</if>
+			<if test='del_yn != null'>del_yn = #{del_yn},</if>
 			<if test='model_nm != null'>model_nm = #{model_nm},</if>
 			<if test='cctv_maker != null'>cctv_maker = #{cctv_maker},</if>
 			<if test='inst_ymd != null'>inst_ymd = #{inst_ymd},</if>
@@ -110,9 +124,13 @@
 			<if test='relay_ip != null'>relay_ip = #{relay_ip},</if>
 			<if test='relay_port != null'>relay_port = #{relay_port},</if>
 			<if test='maint_sts_cd != null'>maint_sts_cd = #{maint_sts_cd},</if>
-			<if test='cctv_lon != null'>cctv_lon = #{cctv_lon},</if>
-			<if test='cctv_lat != null'>cctv_lat = #{cctv_lat},</if>
-			mod_dt = #{mod_dt},
+			<if test='cctv_lon != null'>cctv_lon = ${cctv_lon},</if>
+			<if test='cctv_lat != null'>cctv_lat = ${cctv_lat},</if>
+			<if test='admin_center != null'>admin_center = #{admin_center},</if>
+			<if test='partner_comp_id != null'>partner_comp_id = #{partner_comp_id},</if>
+			<if test='partner_comp_user_nm != null'>partner_comp_user_nm = #{partner_comp_user_nm},</if>
+			<if test='partner_comp_user_phone != null'>partner_comp_user_phone = #{partner_comp_user_phone},</if>
+			mod_dt = current_timestamp,
 		</trim>
 		WHERE 1 = 1
 		AND cctv_no = #{cctv_no}
@@ -136,7 +154,7 @@
 	<select id="getDistrictList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
 		/* CctvMapper.getDistrictList */
 		SELECT
-			ROW_NUMBER() OVER (ORDER BY A.mod_dt DESC, A.reg_dt DESC) AS row_num
+			ROW_NUMBER() OVER (ORDER BY A.mod_dt IS NULL ASC, A.mod_dt DESC, A.reg_dt DESC) AS row_num
 			,A.district_no
 			,A.site_no
 			,A.district_nm
@@ -184,7 +202,7 @@
 	<select id="getMaintCompList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
 		/* CctvMapper.getMaintCompList */
 		SELECT
-			ROW_NUMBER() OVER (ORDER BY A.mod_dt DESC, A.reg_dt DESC) AS row_num
+			ROW_NUMBER() OVER (ORDER BY A.mod_dt IS NULL ASC, A.mod_dt DESC, A.reg_dt DESC) AS row_num
 			,A.partner_comp_id
 			,A.partner_comp_nm
 			,A.partner_type_flag
@@ -195,7 +213,7 @@
 			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
 			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
 		FROM tb_maintcomp_info A
-		<include refid="getDistrictList-where"/>
+		<include refid="getMaintCompList-where"/>
 		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
 			LIMIT ${limit} OFFSET ${offset}
 		</if>

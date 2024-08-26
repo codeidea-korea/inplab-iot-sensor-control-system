@@ -8,7 +8,6 @@ import lombok.Setter;
 @Schema
 @Getter
 @Setter
-@Builder
 public class UdtAdminAddCctvDto {
 
     @Schema(example = "T01", description = "cctv 아이디")
@@ -19,6 +18,9 @@ public class UdtAdminAddCctvDto {
 
     @Schema(example = "D01", description = "현장명")
     private String district_no;
+
+    @Schema(example = "N", description = "삭제여부")
+    private String del_yn;
 
     @Schema(example = "JIT-P4271RH", description = "모델명")
     private String model_nm;
@@ -62,5 +64,15 @@ public class UdtAdminAddCctvDto {
     @Schema(example = "127.123123123", description = "위도")
     private String cctv_lat;
 
+    @Schema(example = "진척관리사무소", description = "관리사무소")
+    private String admin_center;
 
+    @Schema(example = "C01", description = "계측사아이디")
+    private String partner_comp_id;
+
+    @Schema(example = "홍길동", description = "계측사담당자명")
+    private String partner_comp_user_nm;
+
+    @Schema(example = "010-1234-5678", description = "계측사담당자연락처")
+    private String partner_comp_user_phone;
 }
