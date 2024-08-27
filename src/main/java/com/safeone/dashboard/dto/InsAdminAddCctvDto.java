@@ -13,7 +13,7 @@ public class InsAdminAddCctvDto {
     @Schema(example = "JC1CCTV-01", description = "cctv명")
     private String cctv_nm;
 
-    @Schema(example = "D01", description = "현장명")
+    @Schema(example = "D01", description = "현장아이디")
     private String district_no;
 
     @Schema(example = "JIT-P4271RH", description = "모델명")

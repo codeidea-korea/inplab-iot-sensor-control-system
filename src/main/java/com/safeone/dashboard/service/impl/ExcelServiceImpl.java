@@ -1,13 +1,7 @@
 package com.safeone.dashboard.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.safeone.dashboard.dao.CctvMapper;
 import com.safeone.dashboard.dto.*;
-import com.safeone.dashboard.service.CctvService;
 import com.safeone.dashboard.service.ExcelService;
-import com.safeone.dashboard.util.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -18,22 +12,18 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Transactional
 @Service("excelService")
 @RequiredArgsConstructor
-public class ExcelServiceIml implements ExcelService {
+public class ExcelServiceImpl implements ExcelService {
 
     public void excelDown(ExcelDto excelDto, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Workbook workbook = new XSSFWorkbook();

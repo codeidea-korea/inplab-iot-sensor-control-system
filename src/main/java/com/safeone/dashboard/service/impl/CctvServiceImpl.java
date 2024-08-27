@@ -22,7 +22,7 @@ import java.util.Map;
 @Transactional
 @Service("cctvService")
 @RequiredArgsConstructor
-public class CctvServiceIml implements CctvService {
+public class CctvServiceImpl implements CctvService {
 
     @Resource(name = "cctvMapper")
     private final CctvMapper cctvMapper;
@@ -176,7 +176,7 @@ public class CctvServiceIml implements CctvService {
         int count = 0;
         int length = 0;
 
-        List<HashMap<String, Object>> list = cctvMapper.getGenerationKey(map);
+        List<HashMap<String, Object>> list = cctvMapper.getGenerationKey2(map);
 
         if (list.size() == 1) {
             newId = CommonUtils.isNull(list.get(0).get("new_id"));
@@ -187,7 +187,7 @@ public class CctvServiceIml implements CctvService {
                 // id값을 화면에서 미리 만들어서 주기에 사용안함
                 if(CommonUtils.isNull(map.get("table_name")).equals("common_code_list")
                         && CommonUtils.isNull(map.get("columne_name")).equals("code_id")) {
-                    cctvMapper.nextPreCodeGenerationKey(map);
+                    cctvMapper.nextPreCodeGenerationKey2(map);
                     newGenerationKey(map);
                 } else {
                     on.put("code", "OVER_NUM");
@@ -195,7 +195,7 @@ public class CctvServiceIml implements CctvService {
                 }
             }
 
-            count = cctvMapper.incMaxGenerationKey(map);
+            count = cctvMapper.incMaxGenerationKey2(map);
 
             on.put("newId", newId);
         } else {

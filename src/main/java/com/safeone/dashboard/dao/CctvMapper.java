@@ -44,16 +44,16 @@ public class CctvMapper {
         return sqlSession.selectOne("getDistrictListTotalCnt", map);
     }
 
-    public List<HashMap<String, Object>> getGenerationKey(Map<String, Object> map) {
-        return sqlSession.selectList("getGenerationKey", map);
+    public List<HashMap<String, Object>> getGenerationKey2(Map<String, Object> map) {
+        return sqlSession.selectList("getGenerationKey2", map);
     }
 
-    public int nextPreCodeGenerationKey(Map<String, Object> map) {
-        return sqlSession.update("nextPreCodeGenerationKey", map);
+    public int nextPreCodeGenerationKey2(Map<String, Object> map) {
+        return sqlSession.update("nextPreCodeGenerationKey2", map);
     }
 
-    public int incMaxGenerationKey(Map<String, Object> map) {
-        return sqlSession.insert("incMaxGenerationKey", map);
+    public int incMaxGenerationKey2(Map<String, Object> map) {
+        return sqlSession.insert("incMaxGenerationKey2", map);
     }
 
     public List<HashMap<String, Object>> getMaintCompList(Map<String, Object> map) {

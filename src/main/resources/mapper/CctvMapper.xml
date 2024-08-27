@@ -227,8 +227,8 @@
 		</if>
 	</sql>
 
-	<select id="getGenerationKey" parameterType="java.util.HashMap" resultType="java.util.HashMap">
-		/* CctvMapper.getGenerationKey */
+	<select id="getGenerationKey2" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CctvMapper.getGenerationKey2 */
 		SELECT
 			A.table_nm
 			 ,A.column_nm
@@ -238,23 +238,23 @@
 			 ,CONCAT(A.pre_code, RIGHT(CONCAT(REPEAT('0',LENGTH),A.max+1),LENGTH)) AS new_id
 		FROM generation_key A
 		WHERE 1=1
-		  AND table_nm = #{table_nm}
-		  AND column_nm = #{column_nm}
+		AND table_nm = #{table_nm}
+		AND column_nm = #{column_nm}
 	</select>
 
-	<update id="incMaxGenerationKey" parameterType="java.util.HashMap">
-		/* CctvMapper.incMaxGenerationKey */
+	<update id="incMaxGenerationKey2" parameterType="java.util.HashMap">
+		/* CctvMapper.incMaxGenerationKey2 */
 		UPDATE generation_key
 		SET max = max+1
 		WHERE table_nm = #{table_nm}
-		  AND column_nm = #{column_nm}
+		AND column_nm = #{column_nm}
 	</update>
 
-	<update id="nextPreCodeGenerationKey" parameterType="java.util.HashMap">
-		/* CctvMapper.nextPreCodeGenerationKey */
+	<update id="nextPreCodeGenerationKey2" parameterType="java.util.HashMap">
+		/* CctvMapper.nextPreCodeGenerationKey2 */
 		UPDATE generation_key
 		SET pre_code = CHAR(ASCII(pre_code)+1)
 		WHERE table_nm = #{table_nm}
-		  AND column_nm = #{column_nm}
+		AND column_nm = #{column_nm}
 	</update>
 </mapper>

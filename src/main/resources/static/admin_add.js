@@ -38,16 +38,16 @@ const gridComplete = () => {
     });
 };
 
-const actFormattedData = (data) => {
+const actFormattedData = (data, key) => {
     return data.map(item => ({
-        id: item.cctv_no, // cctv_no 값을 id로 설정
+        id: item[key], // cctv_no 값을 id로 설정
         ...item
     }));
 };
 
-const setJqGridTable = (data, column, gridComplete, onSelectRow) => {
+const setJqGridTable = (data, column, gridComplete, onSelectRow, key) => {
 
-    const formattedData = actFormattedData(data);
+    const formattedData = actFormattedData(data, key);
 
     $("#jqGrid").jqGrid({
         datatype: "local",
@@ -199,6 +199,43 @@ const listExcelDown = (obj) => {
         }
     };
     request.send(JSON.stringify(obj));
+};
+
+const getDistrictInfo = () => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: 'GET',
+            url: `/adminAdd/cctv/district`,
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            async: true,
+        }).done(function(res) {
+            resolve(res);
+        }).fail(function(fail) {
+            reject(fail);
+            console.log('getDistrictInfo fail > ', fail);
+            alert2('현장 정보를 가져오는데 실패했습니다.', function() {});
+        });
+    });
+};
+
+const getMaintCompInfo = (obj) => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: 'GET',
+            url: `/adminAdd/cctv/maintComp`,
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            async: true,
+            data: obj
+        }).done(function(res) {
+            resolve(res);
+        }).fail(function(fail) {
+            reject(fail);
+            console.log('getMaintCompInfo fail > ', fail);
+            alert2('유지보수 업체 정보를 가져오는데 실패했습니다.', function() {});
+        });
+    });
 };
 
 $(window).on('resize', function() {

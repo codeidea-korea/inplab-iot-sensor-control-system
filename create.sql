@@ -459,10 +459,12 @@ CREATE TABLE "tb_broadcast_info" (
                                      brdcast_no varchar(3) primary key not null,
                                      brdcast_nm varchar not null,
                                      district_no varchar(3) not null,
+                                     del_yn varchar(1) default 'N' not null,
                                      brdcast_svr_ip varchar not null,
                                      brdcast_svr_port varchar not null,
                                      brdcast_conn_id varchar not null,
                                      brdcast_conn_pwd varchar not null,
+                                     iot_no varchar not null,
                                      inst_ymd varchar(8) default '',
                                      maint_sts_cd varchar(6)  default 'MTN001' not null,
                                      brdcast_lat float default 0 not null,
@@ -476,10 +478,12 @@ COMMENT ON table "tb_broadcast_info" IS '방송장비정보';
 COMMENT ON COLUMN "tb_broadcast_info".brdcast_no IS '방송장비_no, B + "01", seq, site내에서는 unique, NA';
 COMMENT ON COLUMN "tb_broadcast_info".brdcast_nm IS '방송장비명';
 COMMENT ON COLUMN "tb_broadcast_info".district_no IS '현장_no';
+COMMENT ON COLUMN "tb_broadcast_info".del_yn IS '삭제여부';
 COMMENT ON COLUMN "tb_broadcast_info".brdcast_svr_ip IS '방송서버_ip';
 COMMENT ON COLUMN "tb_broadcast_info".brdcast_svr_port IS '방송서버_port';
 COMMENT ON COLUMN "tb_broadcast_info".brdcast_conn_id IS '서버접속_id';
 COMMENT ON COLUMN "tb_broadcast_info".brdcast_conn_pwd IS '서버접속_pwd';
+COMMENT ON COLUMN "tb_broadcast_info".iot_no IS 'IOT장비_no';
 COMMENT ON COLUMN "tb_broadcast_info".inst_ymd IS '설치일자';
 COMMENT ON COLUMN "tb_broadcast_info".maint_sts_cd IS '유지보수상태_cd, 0.정상/1.망실/2.점검/3망실(철거)';
 COMMENT ON COLUMN "tb_broadcast_info".brdcast_lat IS '위도';
@@ -516,6 +520,7 @@ CREATE TABLE "tb_dispboard_info" (
                                      dispbd_no varchar(3) primary key not null,
                                      dispbd_nm varchar not null,
                                      district_no varchar(3) not null,
+                                     del_yn varchar(1) default 'N' not null,
                                      dispbd_ip varchar not null,
                                      dispbd_port varchar not null,
                                      dispbd_conn_id varchar not null,
@@ -534,6 +539,7 @@ COMMENT ON table "tb_dispboard_info" IS '전광판정보';
 COMMENT ON COLUMN "tb_dispboard_info".dispbd_no IS '전광판_no, P+"01", seq, site내에서는 unique';
 COMMENT ON COLUMN "tb_dispboard_info".dispbd_nm IS '전광판명, 현장약어+"전광판"+"시점"';
 COMMENT ON COLUMN "tb_dispboard_info".district_no IS '현장_no';
+COMMENT ON COLUMN "tb_dispboard_info".del_yn IS '삭제여부';
 COMMENT ON COLUMN "tb_dispboard_info".dispbd_ip IS '전광판_ip';
 COMMENT ON COLUMN "tb_dispboard_info".dispbd_port IS '전광판_port';
 COMMENT ON COLUMN "tb_dispboard_info".dispbd_conn_id IS '접속_id';

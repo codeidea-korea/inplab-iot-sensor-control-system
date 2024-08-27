@@ -92,43 +92,6 @@
 				});
 			};
 
-			const getDistrictInfo = () => {
-				return new Promise((resolve, reject) => {
-					$.ajax({
-						type: 'GET',
-						url: `/adminAdd/cctv/district`,
-						dataType: 'json',
-						contentType: 'application/json; charset=utf-8',
-						async: true,
-					}).done(function(res) {
-						resolve(res);
-					}).fail(function(fail) {
-						reject(fail);
-						console.log('getDistrictInfo fail > ', fail);
-						alert2('현장 정보를 가져오는데 실패했습니다.', function() {});
-					});
-				});
-			};
-
-			const getMaintCompInfo = (obj) => {
-				return new Promise((resolve, reject) => {
-					$.ajax({
-						type: 'GET',
-						url: `/adminAdd/cctv/maintComp`,
-						dataType: 'json',
-						contentType: 'application/json; charset=utf-8',
-						async: true,
-						data: obj
-					}).done(function(res) {
-						resolve(res);
-					}).fail(function(fail) {
-						reject(fail);
-						console.log('getMaintCompInfo fail > ', fail);
-						alert2('유지보수 업체 정보를 가져오는데 실패했습니다.', function() {});
-					});
-				});
-			};
-
 			const actionDelCctv = (cctv_no) => {
 				udtCctv([{cctv_no: cctv_no, del_yn: 'Y'}]).then((res) => {
 					if (res.count?.pass > 0) {
@@ -144,7 +107,7 @@
 						const search_cctv_nm = $('input[name=search_cctv_nm]').val();
 						offset = 0;
 						getCctv({cctv_nm: search_cctv_nm, limit: limit, offset: offset}).then((res) => {
-							const formattedData = actFormattedData(res.rows);
+							const formattedData = actFormattedData(res.rows, 'cctv_no');
 							$("#jqGrid").jqGrid('clearGridData');
 							$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
 						}).catch((fail) => {
@@ -306,7 +269,7 @@
 
 				getCctv({limit : limit, offset : offset}).then((res) => {
 					console.log('res > ', res);
-					setJqGridTable(res.rows, column, function () {}, onSelectRow);
+					setJqGridTable(res.rows, column, function () {}, onSelectRow, 'cctv_no');
 				}).catch((fail) => {
 					console.log('setJqGridTable fail > ', fail);
 				});
@@ -315,7 +278,7 @@
 					const cctv_nm = $('input[name=search_cctv_nm]').val();
 					offset = 0;
 					getCctv({cctv_nm : cctv_nm, limit : limit, offset : offset}).then((res) => {
-						const formattedData = actFormattedData(res.rows);
+						const formattedData = actFormattedData(res.rows, 'cctv_no');
 						$("#jqGrid").jqGrid('clearGridData');
 						$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
 					}).catch((fail) => {
@@ -374,7 +337,7 @@
 							const search_cctv_nm = $('input[name=search_cctv_nm]').val();
 							offset = 0;
 							getCctv({cctv_nm : search_cctv_nm, limit : limit, offset : offset}).then((res) => {
-								const formattedData = actFormattedData(res.rows);
+								const formattedData = actFormattedData(res.rows, 'cctv_no');
 								$("#jqGrid").jqGrid('clearGridData');
 								$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
 							}).catch((fail) => {
@@ -411,7 +374,7 @@
 							const search_cctv_nm = $('input[name=search_cctv_nm]').val();
 							offset = 0;
 							getCctv({cctv_nm : search_cctv_nm, limit : limit, offset : offset}).then((res) => {
-								const formattedData = actFormattedData(res.rows);
+								const formattedData = actFormattedData(res.rows, 'cctv_no');
 								$("#jqGrid").jqGrid('clearGridData');
 								$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
 							}).catch((fail) => {
@@ -606,10 +569,10 @@
 									<td>
 										<select name="maint_sts_cd">
 											<option value="">선택</option>
-											<option value="0">정상</option>
-											<option value="1">망실</option>
-											<option value="2">점검</option>
-											<option value="3">망실(철거)</option>
+											<option value="MTN001">정상</option>
+											<option value="MTN002">망실</option>
+											<option value="MTN003">점검</option>
+											<option value="MTN004">망실(철거)</option>
 										</select>
 									</td>
 								</tr>

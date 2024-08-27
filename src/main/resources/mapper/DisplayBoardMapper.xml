@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.DisplayBoardMapper">
+	<select id="getDisplayBoardListTotalCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		/* DisplayBoardMapper.getDisplayBoardListTotalCnt */
+		SELECT
+			COUNT(1)
+		FROM tb_dispboard_info A
+		<include refid="getDisplayBoardList-where"/>
+	</select>
+
+	<select id="getDisplayBoardList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* DisplayBoardMapper.getDisplayBoardList */
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY A.mod_dt IS NULL ASC, A.mod_dt DESC, A.reg_dt DESC) AS row_num
+			,A.dispbd_no
+			,A.dispbd_nm
+			,A.district_no
+		    ,B.district_nm
+			,A.dispbd_ip
+			,A.dispbd_port
+			,A.dispbd_conn_id
+			,A.dispbd_conn_pwd
+			,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
+			,A.maint_sts_cd
+		    ,C.code_nm AS maint_sts_nm
+			,A.dispbd_lat
+			,A.dispbd_lon
+		    ,A.model_nm
+		    ,A.dispbd_maker
+			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
+		FROM tb_dispboard_info A
+		LEFT OUTER JOIN tb_district_info B ON A.district_no = B.district_no
+		LEFT OUTER JOIN (select * from tb_common_code where code_grp_id = 'MTN000') C on A.maint_sts_cd = C.code_id
+		<include refid="getDisplayBoardList-where"/>
+		AND A.del_yn = 'N'
+		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+			LIMIT ${limit} OFFSET ${offset}
+		</if>
+	</select>
+
+	<sql id="getDisplayBoardList-where">
+		/* getDisplayBoardList-where */
+		WHERE 1=1
+		<if test="dispbd_no != null and !dispbd_no.equals('')">
+			AND A.dispbd_no = #{dispbd_no}
+		</if>
+		<if test="dispbd_nm != null and !dispbd_nm.equals('')">
+			AND A.dispbd_nm ILIKE '%' || #{dispbd_nm} || '%'
+		</if>
+		<if test="search_text != null and !search_text.equals('')">
+			AND (A.dispbd_nm ILIKE '%' || #{search_text} || '%'
+				OR B.district_nm ILIKE '%' || #{search_text} || '%'
+				OR maint_sts_nm ILIKE '%' || #{search_text} || '%')
+		</if>
+	</sql>
+
+	<insert id="insDisplayBoard" parameterType="java.util.HashMap">
+		/* DisplayBoardMapper.insDisplayBoard */
+		INSERT INTO tb_dispboard_info (
+			dispbd_no,
+			dispbd_nm,
+			district_no,
+			dispbd_ip,
+			dispbd_port,
+			dispbd_conn_id,
+			dispbd_conn_pwd,
+			inst_ymd,
+			maint_sts_cd,
+			dispbd_lon,
+			dispbd_lat,
+			model_nm,
+			dispbd_maker
+		) VALUES (
+			#{dispbd_no},
+			#{dispbd_nm},
+			#{district_no},
+			#{dispbd_ip},
+			#{dispbd_port},
+			#{dispbd_conn_id},
+			#{dispbd_conn_pwd},
+			#{inst_ymd},
+			#{maint_sts_cd},
+			${dispbd_lon},
+			${dispbd_lat},
+			#{model_nm},
+			#{dispbd_maker}
+		)
+	</insert>
+
+	<update id="udtDisplayBoard" parameterType="java.util.HashMap">
+		/* DisplayBoardMapper.udtDisplayBoard */
+		UPDATE tb_dispboard_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="dispbd_nm != null">dispbd_nm = #{dispbd_nm},</if>
+			<if test="district_no != null">district_no = #{district_no},</if>
+			<if test="dispbd_ip != null">dispbd_ip = #{dispbd_ip},</if>
+			<if test="dispbd_port != null">dispbd_port = #{dispbd_port},</if>
+			<if test="dispbd_conn_id != null">dispbd_conn_id = #{dispbd_conn_id},</if>
+			<if test="dispbd_conn_pwd != null">dispbd_conn_pwd = #{dispbd_conn_pwd},</if>
+			<if test="inst_ymd != null">inst_ymd = #{inst_ymd},</if>
+			<if test="maint_sts_cd != null">maint_sts_cd = #{maint_sts_cd},</if>
+			<if test="dispbd_lon != null">dispbd_lon = ${dispbd_lon},</if>
+			<if test="dispbd_lat != null">dispbd_lat = ${dispbd_lat},</if>
+			<if test="model_nm != null">model_nm = #{model_nm},</if>
+			<if test="dispbd_maker != null">dispbd_maker = #{dispbd_maker},</if>
+			mod_dt = current_timestamp,
+		</trim>
+		WHERE 1 = 1
+		AND dispbd_no = #{dispbd_no}
+	</update>
+
+	<delete id="delDisplayBoard" parameterType="java.util.HashMap">
+		/* DisplayBoardMapper.delDisplayBoard */
+		DELETE FROM tb_dispboard_info
+		WHERE 1=1
+		AND dispbd_no = #{dispbd_no}
+	</delete>
+</mapper>

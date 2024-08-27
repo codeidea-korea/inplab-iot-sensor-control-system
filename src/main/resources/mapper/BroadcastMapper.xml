@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.BroadcastMapper">
+	<select id="getBroadcastListTotalCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		/* BroadcastMapper.getBroadcastListTotalCnt */
+		SELECT
+			COUNT(1)
+		FROM tb_broadcast_info A
+		<include refid="getBroadcastList-where"/>
+	</select>
+
+	<select id="getBroadcastList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* BroadcastMapper.getBroadcastList */
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY A.mod_dt IS NULL ASC, A.mod_dt DESC, A.reg_dt DESC) AS row_num
+			,A.brdcast_no
+			,A.brdcast_nm
+			,A.district_no
+		    ,B.district_nm
+			,A.brdcast_svr_ip
+			,A.brdcast_svr_port
+			,A.brdcast_conn_id
+			,A.brdcast_conn_pwd
+			,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
+			,A.maint_sts_cd
+		    ,C.code_nm AS maint_sts_nm
+			,A.brdcast_lat
+			,A.brdcast_lon
+		    ,A.model_nm
+		    ,A.brdcast_maker
+			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
+		FROM tb_broadcast_info A
+		LEFT OUTER JOIN tb_district_info B ON A.district_no = B.district_no
+		LEFT OUTER JOIN (select * from tb_common_code where code_grp_id = 'MTN000') C on A.maint_sts_cd = C.code_id
+		<include refid="getBroadcastList-where"/>
+		AND A.del_yn = 'N'
+		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+			LIMIT ${limit} OFFSET ${offset}
+		</if>
+	</select>
+
+	<sql id="getBroadcastList-where">
+		/* getBroadcastList-where */
+		WHERE 1=1
+		<if test="brdcast_no != null and !brdcast_no.equals('')">
+			AND A.brdcast_no = #{brdcast_no}
+		</if>
+		<if test="brdcast_nm != null and !brdcast_nm.equals('')">
+			AND A.brdcast_nm ILIKE '%' || #{brdcast_nm} || '%'
+		</if>
+		<if test="search_text != null and !search_text.equals('')">
+			AND (A.brdcast_nm ILIKE '%' || #{search_text} || '%'
+				OR B.district_nm ILIKE '%' || #{search_text} || '%'
+				OR maint_sts_nm ILIKE '%' || #{search_text} || '%')
+		</if>
+	</sql>
+
+	<insert id="insBroadcast" parameterType="java.util.HashMap">
+		/* BroadcastMapper.insBroadcast */
+		INSERT INTO tb_broadcast_info (
+			brdcast_no,
+			brdcast_nm,
+			district_no,
+			brdcast_svr_ip,
+			brdcast_svr_port,
+			brdcast_conn_id,
+			brdcast_conn_pwd,
+			inst_ymd,
+			maint_sts_cd,
+			brdcast_lon,
+			brdcast_lat,
+			model_nm,
+			brdcast_maker,
+			reg_dt
+		) VALUES (
+			#{brdcast_no},
+			#{brdcast_nm},
+			#{district_no},
+			#{brdcast_svr_ip},
+			#{brdcast_svr_port},
+			#{brdcast_conn_id},
+			#{brdcast_conn_pwd},
+			#{inst_ymd},
+			#{maint_sts_cd},
+			${brdcast_lon},
+			${brdcast_lat},
+			#{model_nm},
+			#{brdcast_maker},
+			current_timestamp
+		)
+	</insert>
+
+	<update id="udtBroadcast" parameterType="java.util.HashMap">
+		/* BroadcastMapper.udtBroadcast */
+		UPDATE tb_broadcast_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="brdcast_nm != null">brdcast_nm = #{brdcast_nm},</if>
+			<if test="district_no != null">district_no = #{district_no},</if>
+		    <if test="del_yn != null">del_yn = #{del_yn},</if>
+			<if test="brdcast_svr_ip != null">brdcast_svr_ip = #{brdcast_svr_ip},</if>
+			<if test="brdcast_svr_port != null">brdcast_svr_port = #{brdcast_svr_port},</if>
+			<if test="brdcast_conn_id != null">brdcast_conn_id = #{brdcast_conn_id},</if>
+			<if test="brdcast_conn_pwd != null">brdcast_conn_pwd = #{brdcast_conn_pwd},</if>
+			<if test="inst_ymd != null">inst_ymd = #{inst_ymd},</if>
+			<if test="maint_sts_cd != null">maint_sts_cd = #{maint_sts_cd},</if>
+			<if test="brdcast_lon != null">brdcast_lon = ${brdcast_lon},</if>
+			<if test="brdcast_lat != null">brdcast_lat = ${brdcast_lat},</if>
+			<if test="model_nm != null">model_nm = #{model_nm},</if>
+			<if test="brdcast_maker != null">brdcast_maker = #{brdcast_maker},</if>
+			mod_dt = current_timestamp,
+		</trim>
+		WHERE 1 = 1
+		AND brdcast_no = #{brdcast_no}
+	</update>
+
+	<delete id="delBroadcast" parameterType="java.util.HashMap">
+		/* BroadcastMapper.delBroadcast */
+		DELETE FROM tb_broadcast_info
+		WHERE 1=1
+		AND brdcast_no = #{brdcast_no}
+	</delete>
+</mapper>
