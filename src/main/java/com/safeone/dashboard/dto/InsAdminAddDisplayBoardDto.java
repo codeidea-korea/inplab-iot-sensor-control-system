@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 public class InsAdminAddDisplayBoardDto {
 
-    @Schema(example = "P01", description = "전광판명")
-    private String dispbd_no;
+    @Schema(example = "brdcast-01", description = "전광판명")
+    private String dispbd_nm;
 
     @Schema(example = "D01", description = "현장아이디")
     private String district_no;
@@ -19,7 +19,7 @@ public class InsAdminAddDisplayBoardDto {
     private String dispbd_ip;
 
     @Schema(example = "9000", description = "전광판 port")
-    private String displbd_svr_port;
+    private String dispbd_port;
 
     @Schema(example = "admin", description = "접속 id")
     private String dispbd_conn_id;

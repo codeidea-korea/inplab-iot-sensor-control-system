@@ -483,7 +483,7 @@
 	                    <div class="contents-re">
 	                        <h3 class="txt">CCTV 관리</h3>
 	                        <div class="btn-group">
-								<input type="text" name="search_cctv_nm" placeholder="CCTV 명" style="background-color: white; font-size: medium;"/>
+								<input type="text" name="search_cctv_nm" placeholder="CCTV명" style="background-color: white; font-size: medium;"/>
 								<a class="searchtBtn">검색</a>
 	                            <a class="insertBtn">신규등록</a>
 	                            <a class="modifyBtn">상세정보</a>

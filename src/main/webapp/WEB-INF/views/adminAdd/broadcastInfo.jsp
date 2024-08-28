@@ -424,7 +424,7 @@
 	                    <div class="contents-re">
 	                        <h3 class="txt">방송장비 관리</h3>
 	                        <div class="btn-group">
-								<input type="text" name="search_text" placeholder="CCTV 명" style="background-color: white; font-size: medium;"/>
+								<input type="text" name="search_text" placeholder="방송장비명 / 현장명 / 설치상태" style="background-color: white; font-size: medium;"/>
 								<a class="searchtBtn">검색</a>
 	                            <a class="insertBtn">신규등록</a>
 	                            <a class="modifyBtn">상세정보</a>
@@ -444,7 +444,7 @@
 				<div class="layer-base-btns">
 					<a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
 				</div>
-				<div class="layer-base-title">CCTV <span id="form_sub_title"></span></div>
+				<div class="layer-base-title">전광판 <span id="form_sub_title"></span></div>
 				<div class="layer-base-conts">
 					<div class="bTable">
 						<table>

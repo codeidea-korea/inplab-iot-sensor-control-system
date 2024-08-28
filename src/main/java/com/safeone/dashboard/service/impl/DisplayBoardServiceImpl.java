@@ -62,23 +62,23 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
 
         for (InsAdminAddDisplayBoardDto dto : insAdminAddDisplayBoardDtoList) {
             Map<String, Object> newMap = new HashMap<>();
-            newMap.put("table_nm", "tb_DisplayBoard_info");
-            newMap.put("column_nm", "DisplayBoard_no");
+            newMap.put("table_nm", "tb_dispboard_info");
+            newMap.put("column_nm", "dispbd_no");
             ObjectNode generationKeyOn = cctvService.newGenerationKey(newMap);
             String newDisplayBoardNo = generationKeyOn.get("newId").asText();
 
             Map<String, Object> map = CommonUtils.dtoToMap(dto);
             Map<String, Object> getMap = new HashMap<>();
-            map.put("DisplayBoard_no", newDisplayBoardNo);
-            getMap.put("DisplayBoard_no", newDisplayBoardNo);
+            map.put("dispbd_no", newDisplayBoardNo);
+            getMap.put("dispbd_no", newDisplayBoardNo);
             List<HashMap<String, Object>> list = displayBoardMapper.getDisplayBoardList(getMap);
             getMap.clear();
-            getMap.put("DisplayBoard_nm", map.get("DisplayBoard_nm"));
+            getMap.put("dispbd_nm", map.get("dispbd_nm"));
             List<HashMap<String, Object>> list2 = displayBoardMapper.getDisplayBoardList(getMap);
 
             if (!list.isEmpty()) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                map.put("message", "방송장비 아이디가 " + map.get("DisplayBoard_no") + " 인 데이터가 이미 존재합니다.");
+                map.put("message", "전광판 아이디가 " + map.get("dispbd_no") + " 인 데이터가 이미 존재합니다.");
                 an.add(om.valueToTree(map));
                 passCount++;
                 continue;
@@ -86,7 +86,7 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
 
             if (!list2.isEmpty()) {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-                map.put("message", "방송장비명이 " + map.get("DisplayBoard_nm") + " 인 데이터가 이미 존재합니다.");
+                map.put("message", "전광판명이 " + map.get("dispbd_nm") + " 인 데이터가 이미 존재합니다.");
                 an.add(om.valueToTree(map));
                 passCount++;
                 continue;
