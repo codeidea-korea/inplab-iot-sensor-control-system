@@ -68,26 +68,38 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
                 if (row.getRowNum() == 0) continue;  // 헤더 행 건너뛰기
 
 
-                Map<String, Object> loggerType = new HashMap<>();
+                Map<String, Object> sensorType = new HashMap<>();
 
                 Map<String, Object> newMap = new HashMap<>();
                 newMap.put("table_nm", "tb_sensor_type");
                 newMap.put("column_nm", "senstype_no");
                 ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-                loggerType.put("senstype_no", generationKeyOn.get("newId").asText());
+                sensorType.put("senstype_no", generationKeyOn.get("newId").asText());
 
                 List<Map> siteInfo = commonCodeEditService.getSiteInfo();
 
-                loggerType.put("site_no", siteInfo.get(0).get("code"));
-                loggerType.put("sens_tp_nm", formatter.formatCellValue(row.getCell(0)));
-                loggerType.put("sens_abbr", formatter.formatCellValue(row.getCell(1)));
-                loggerType.put("basic_formul", formatter.formatCellValue(row.getCell(2)));
-                loggerType.put("sens_chnl_cnt", formatter.formatCellValue(row.getCell(3)));
-                loggerType.put("logr_idx_str", formatter.formatCellValue(row.getCell(4)));
-                loggerType.put("logr_idx_end", formatter.formatCellValue(row.getCell(5)));
+                String logrFlag;
 
-//                System.out.println("loggerType: " + loggerType);
-                 mapper.insertSensorType(loggerType);
+                if ("GNSS".equals(formatter.formatCellValue(row.getCell(0)))) {
+                    logrFlag = "G";
+                } else if ("강우량계".equals(formatter.formatCellValue(row.getCell(0)))) {
+                    logrFlag = "R";
+                } else {
+                    logrFlag = "L";
+                }
+
+
+                sensorType.put("site_no", siteInfo.get(0).get("code"));
+                sensorType.put("sens_tp_nm", formatter.formatCellValue(row.getCell(0)));
+                sensorType.put("sens_abbr", formatter.formatCellValue(row.getCell(1)));
+                sensorType.put("basic_formul", formatter.formatCellValue(row.getCell(2)));
+                sensorType.put("sens_chnl_cnt", formatter.formatCellValue(row.getCell(3)));
+                sensorType.put("logr_idx_str", formatter.formatCellValue(row.getCell(4)));
+                sensorType.put("logr_idx_end", formatter.formatCellValue(row.getCell(5)));
+                sensorType.put("logr_flag", logrFlag);
+
+//                System.out.println("sensorType: " + sensorType);
+                 mapper.insertSensorType(sensorType);
                 successCount++;  // 성공 카운트 증가
             }
         } catch (Exception e) {
