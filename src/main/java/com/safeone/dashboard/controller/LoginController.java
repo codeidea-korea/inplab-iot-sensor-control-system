@@ -62,7 +62,7 @@ public class LoginController {
 
                     // 수정해야됨 임시!!!
 //                    returnPage = "redirect:/dashboard";
-                    returnPage = "redirect:/admin/loginLog";
+                    returnPage = "redirect:/adminAdd/siteInfo";
 
 //                    Map user = (Map) session.getAttribute("login");
 //                    if(user.get("user_lv").equals("3"))

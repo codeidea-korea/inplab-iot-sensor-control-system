@@ -26,7 +26,9 @@ public class MainController {
     public String main(Model model, HttpServletRequest request) {
         HttpSession session = request.getSession();
         if (session.getAttribute("login") != null) {
-            return "redirect:/dashboard";
+//            return "redirect:/dashboard";
+            // 수정해야됨 임시!!!
+            return "redirect:/adminAdd/siteInfo";
         } else {
             return "redirect:/login";
         }

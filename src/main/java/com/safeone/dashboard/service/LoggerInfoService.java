@@ -103,7 +103,23 @@ public class LoggerInfoService implements JqGridService<LoggerInfoDto> {
                 String newId = generationKeyOn.get("newId").asText();
                 String newIdNo = newId.replaceAll("^[A-Za-z]", "");
 
-                String prefix = "GNSS".equals(typeValue) ? "GNS" : "LOG";
+//                String prefix = "GNSS".equals(typeValue) ? "GNS" : "LOG";
+
+                String prefix;
+                String logrFlag;
+
+                if ("GNSS".equals(typeValue)) {
+                    prefix = "GNS";
+                    logrFlag = "G";
+                } else if ("RAIN".equals(typeValue)) {
+                    prefix = "LOG";
+                    logrFlag = "R";
+                } else {
+                    prefix = "LOG";
+                    logrFlag = "L";
+                }
+
+
                 logr_nm_type = district.get(0).get("dist_abbr") + prefix + newIdNo;
 
                 loggerInfo.put("logr_no", newId);
@@ -118,6 +134,7 @@ public class LoggerInfoService implements JqGridService<LoggerInfoDto> {
                 loggerInfo.put("logr_svr_port", formatter.formatCellValue(row.getCell(7)));  // 숫자 셀
                 loggerInfo.put("logr_maker", formatter.formatCellValue(row.getCell(8)));
                 loggerInfo.put("model_nm", formatter.formatCellValue(row.getCell(9)));
+                loggerInfo.put("logr_flag", logrFlag);
 
 //                System.out.println("loggerInfo: " + loggerInfo);
                  mapper.insertLoggerInfo(loggerInfo);
