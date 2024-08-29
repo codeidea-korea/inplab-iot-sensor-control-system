@@ -39,7 +39,8 @@
 				<div class="contents-re">
 					<h3 class="txt">센서 목록</h3>
 					<div class="contents-in">
-						<jsp:include page="common/include_jqgrid.jsp" flush="true"></jsp:include>
+<%--						<jsp:include page="common/include_jqgrid.jsp" flush="true"></jsp:include>--%>
+						<jsp:include page="common/include_jqgrid_old.jsp" flush="true"></jsp:include>
 					</div>
 				</div>
 			</div>

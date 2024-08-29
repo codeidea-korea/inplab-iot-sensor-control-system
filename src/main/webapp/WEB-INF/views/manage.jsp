@@ -80,7 +80,8 @@
 						</div>
 						<!-- 센서 정보 변경/관리 기준값 변경/채널 정보 변경 -->
 						<div class="contents-in" style="min-height: calc(94% - 4.6rem)"><!--  sensor_modify"> -->
-							<jsp:include page="common/include_jqgrid.jsp" flush="true"></jsp:include>
+<%--							<jsp:include page="common/include_jqgrid.jsp" flush="true"></jsp:include>--%>
+							<jsp:include page="common/include_jqgrid_old.jsp" flush="true"></jsp:include>
 						</div>
 					</div>
 				</div>

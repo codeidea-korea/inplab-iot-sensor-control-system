@@ -292,7 +292,7 @@
         </h2>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">센서 관리</h3>
+                <h3 class="txt">센서-로거인덱스</h3>
                 <div class="btn-group">
                     <input class="search_input" type="text" id="search" name="search"
                            placeholder="현장명 / 센서타입명 / 로거명"/>

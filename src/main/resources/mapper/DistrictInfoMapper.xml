@@ -226,6 +226,7 @@
     <update id="updateDistrictInfo" parameterType="java.util.Map">
         update tb_district_info set
             district_nm = #{district_nm}
+            , mod_dt = now()
         <if test="dist_addr != null">
             , dist_addr = #{dist_addr}
         </if>

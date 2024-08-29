@@ -98,7 +98,7 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
                 logrIdxMap.put("sens_disp_yn", formatter.formatCellValue(row.getCell(8)));
                 logrIdxMap.put("inst_ymd", formatter.formatCellValue(row.getCell(9)));
 
-                System.out.println("logrIdxMap: " + logrIdxMap);
+//                System.out.println("logrIdxMap: " + logrIdxMap);
                 // mapper.insertLogrIdxMap(logrIdxMap);
                 successCount++;  // 성공 카운트 증가
             }

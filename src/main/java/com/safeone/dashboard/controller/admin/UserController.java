@@ -34,26 +34,26 @@ public class UserController extends JqGridAbstract<UserDto> {
         super(UserDto.class);
     }
     
-	@Override
-	public Map<String, FieldDetails> getColumnDataJson() {
-		Map<String, FieldDetails> result = super.getColumnDataJson();
-		((FieldDetails)result.get("grade")).type = this.getCommonCodeListStr("사용자구분");
-		
-		return result;
-	}
-	
-	private String getCommonCodeListStr(String cat){
-		String result = ":";
-		Map<String,Object> pm = new HashMap<String,Object>();
-		pm.put("category", cat);
-		
-		List<Map> rList = commonCodeService.getCommonCodeList(pm);
-		for(Map m : rList) {
-			result += ";"+String.valueOf(m.get("code"))+":"+String.valueOf(m.get("name"));
-		}
-		
-		return result;
-	}
+//	@Override
+//	public Map<String, FieldDetails> getColumnDataJson() {
+//		Map<String, FieldDetails> result = super.getColumnDataJson();
+//		((FieldDetails)result.get("grade")).type = this.getCommonCodeListStr("사용자구분");
+//
+//		return result;
+//	}
+//
+//	private String getCommonCodeListStr(String cat){
+//		String result = ":";
+//		Map<String,Object> pm = new HashMap<String,Object>();
+//		pm.put("category", cat);
+//
+//		List<Map> rList = commonCodeService.getCommonCodeList(pm);
+//		for(Map m : rList) {
+//			result += ";"+String.valueOf(m.get("code"))+":"+String.valueOf(m.get("name"));
+//		}
+//
+//		return result;
+//	}
 
     @Override
     protected List getList(Map param) {

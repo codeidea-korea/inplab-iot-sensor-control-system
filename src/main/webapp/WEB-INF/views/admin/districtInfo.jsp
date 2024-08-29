@@ -131,7 +131,7 @@
                     alert('삭제할 현장이 선택되지 않았습니다.');
                     return;
                 }
-
+                confirm('삭제하시겠습니까?', function() {
                     $.get('/adminAdd/districtInfo/del', {district_no: districtNo}, function(res) {
                         if (res === 1) {  // 성공 시
                             alert('삭제되었습니다.');
@@ -143,13 +143,16 @@
                             alert('삭제 실패: ' + res);
                         }
                     });
+                });
+
             });
 
             // 등록
             $('.insertBtn').on('click', function () {
 
                 $('.deleteBtn').hide();
-                $("#form_sub_title").html('등록');
+                $("#form_sub_title").html('신규 등록');
+                $('input[type="submit"]').val('저장');
 
                 initForm();
 
@@ -200,7 +203,8 @@
             // 수정 팝업
             $('.modifyBtn').on('click', function () {
 
-                $("#form_sub_title").html('수정');
+                $("#form_sub_title").html('상세정보');
+                $('input[type="submit"]').val('수정');
 
                 initForm();
 
@@ -464,7 +468,7 @@
         </h2>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">현장 관리</h3>
+                <h3 class="txt">현장 정보 관리</h3>
                 <div class="btn-group">
                     <input type="text" class="search_input"  id="search" name="search" placeholder="현장명/주소/시공사/계측사"/>
                     <a class="searchBtn">검색</a>
@@ -488,7 +492,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">현장 관리 <span id="form_sub_title">등록/수정</span></div>
+        <div class="layer-base-title">현장 정보 <span id="form_sub_title">등록/수정</span></div>
         <div class="layer-base-conts">
             <%--            <div class="table-container" style="display: flex; justify-content: space-between; gap:10px;>--%>
             <div class="table-container" style="display: flex; justify-content: space-between; gap:10px;">
@@ -684,8 +688,8 @@
             </div>
 
             <div class="btn-btm">
-                <input type="submit" blue value="저장"/>
                 <button type="button" class="deleteBtn" style="display:none;">삭제</button>
+                <input type="submit" blue value="저장"/>
                 <button type="button" data-fancybox-close>취소</button>
             </div>
         </div>

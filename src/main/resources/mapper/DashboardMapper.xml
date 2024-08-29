@@ -370,7 +370,7 @@
         FROM (
              SELECT
                  A.manager_name
-                  , (select "name" from tb_common_code where category = '유지보수종류' and code = A.type::int  ) AS type_name
+                  , (select "name" from tb_common_code_old where category = '유지보수종류' and code = A.type::int  ) AS type_name
                   , asset.name as asset_name
                   , asset.zone_id
                   , A.reg_date
@@ -383,4 +383,5 @@
         </if>
         order by MG.reg_date desc
     </select>
+
 </mapper>

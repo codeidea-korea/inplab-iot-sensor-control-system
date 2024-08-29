@@ -79,6 +79,7 @@
                         </div>
                         <div class="contents-in">
 <%--                            <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>--%>
+                            <jsp:include page="../common/include_jqgrid_old.jsp" flush="true"></jsp:include>
                         </div>
                     </div>
                 </div>

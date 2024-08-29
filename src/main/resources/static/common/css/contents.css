@@ -734,7 +734,7 @@ select:-ms-expand{display:none;}
 
 .layer-base .bul-sensor>li[blue]{color: #2e5fc3;}
 
-.layer-base .btn-btm{width:100%; margin-top:2rem; display: flex; justify-content: flex-end;}
+.layer-base .btn-btm{width:100%; margin-top:2rem; display: flex; justify-content: space-evenly;}
 .layer-base .btn-btm>*{width:7.4rem; height:2.8rem; margin-left:0.6rem; background-color: #6975ac; font-size:1.4rem; line-height:1; color: #fff; text-align: center; display: flex; align-items: center; justify-content: center; border-radius:99px; cursor: pointer;}
 .layer-base .btn-btm>*[blue]{background-color: #2e5fc3;}
 .layer-base .btn-btm>*[red]{background-color: #b43232;}
