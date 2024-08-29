@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.SensorAddMapper">
+	<select id="getSensorListTotalCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		/* SensorAddMapper.getSensorListTotalCnt */
+		SELECT
+			COUNT(1)
+		FROM tb_sensor_info A
+		<include refid="getSensorList-where"/>
+	</select>
+
+	<resultMap id="getSensorListMap" type="java.util.HashMap">
+		<result property="sens_no" column="sens_no"/>
+		<result property="logr_no" column="logr_no"/>
+		<result property="senstype_no" column="senstype_no"/>
+		<result property="inst_ymd" column="inst_ymd"/>
+		<result property="sect_no" column="sect_no"/>
+		<result property="multi_sens_yn" column="multi_sens_yn"/>
+		<result property="disp_prior_yn" column="disp_prior_yn"/>
+		<result property="multi_senstype_no" column="multi_senstype_no"/>
+		<result property="multi_sens_no" column="multi_sens_no"/>
+		<result property="nonrecv_limit_min" column="nonrecv_limit_min"/>
+		<result property="alarm_use_yn" column="alarm_use_yn"/>
+		<result property="sms_snd_yn" column="sms_snd_yn"/>
+		<result property="sens_disp_yn" column="sens_disp_yn"/>
+		<result property="maint_sts_cd" column="maint_sts_cd"/>
+		<result property="sens_lon" column="sens_lon"/>
+		<result property="sens_lat" column="sens_lat"/>
+		<result property="sens_maker" column="sens_maker"/>
+		<result property="model_nm" column="model_nm"/>
+		<result property="reg_dt" column="reg_dt"/>
+		<result property="mod_dt" column="mod_dt"/>
+		<collection property="logr_idx_map" column="{sens_no = sens_no}" javaType="java.util.ArrayList" ofType="java.util.HashMap" select="getLogrIdxMapList"/>
+		<collection property="measure_details" column="{sens_no = sens_no, limit = send_limit , offset = send_offset}" javaType="java.util.ArrayList" ofType="java.util.HashMap" select="getMeasureDetailsList"/>
+	</resultMap>
+	<select id="getSensorList" parameterType="java.util.HashMap" resultMap="getSensorListMap">
+		/* SensorAddMapper.getSensorList */
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY A.sens_nm IS NULL ASC) AS row_num
+			,A.sens_no
+			,A.logr_no
+			,A.senstype_no
+			,B.sens_tp_nm
+			,A.sens_nm
+			,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
+			,A.sect_no
+			,A.multi_sens_yn
+			,A.disp_prior_yn
+			,A.multi_senstype_no
+			,A.multi_sens_no
+			,A.nonrecv_limit_min
+			,A.alarm_use_yn
+			,A.sms_snd_yn
+			,A.sens_disp_yn
+			,A.maint_sts_cd
+		    ,C.code_nm AS maint_sts_nm
+			,A.sens_lon
+			,A.sens_lat
+			,A.sens_maker
+			,A.model_nm
+			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
+			,1 AS send_limit
+			,0 AS send_offset
+		FROM tb_sensor_info A
+		<include refid="getSensorList-where"/>
+		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+			LIMIT ${limit} OFFSET ${offset}
+		</if>
+	</select>
+
+	<sql id="getSensorList-where">
+		/* getSensorList-where */
+		LEFT OUTER JOIN tb_sensor_type B ON A.senstype_no = B.senstype_no
+		LEFT OUTER JOIN (select * from tb_common_code where code_grp_id = 'MTN000') C on A.maint_sts_cd = C.code_id
+		WHERE 1=1
+	</sql>
+
+	<select id="getLogrIdxMapList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* SensorAddMapper.getLogrIdxMapList */
+		SELECT
+			A.mapping_no
+			,A.sens_no
+			,A.sens_chnl_id
+			,A.logr_no
+			,A.logr_idx_no
+			,A.sens_chnl_nm
+			,A.logr_chnl_seq
+			,A.sect_no
+			,A.district_no
+		    ,B.district_nm
+			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
+		FROM tb_logr_idx_map A
+		LEFT OUTER JOIN tb_district_info B ON A.district_no = B.district_no
+		WHERE 1=1
+		AND A.sens_no = #{sens_no}
+	</select>
+
+	<select id="getMeasureDetailsListTotalCnt" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		/* SensorAddMapper.getMeasureDetailsListTotalCnt */
+		SELECT
+			COUNT(1)
+		FROM tb_measure_details A
+		<include refid="getMeasureDetailsList-where"/>
+	</select>
+
+	<select id="getMeasureDetailsList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* SensorAddMapper.getMeasureDetailsList */
+		SELECT
+			ROW_NUMBER() OVER (ORDER BY A.reg_dt IS NULL DESC) AS row_num
+			,A.mgnt_no
+			,A.sens_no
+			,A.sens_chnl_id
+			,TO_CHAR(A.meas_dt, 'YYYY-MM-DD HH24:MI:SS') AS meas_dt
+			,A.raw_data
+			,A.formul_data
+			,A.net_err_yn
+			,A.net_err_cnt
+			,A.alarm_lvl_cd
+			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+		FROM tb_measure_details A
+		<include refid="getMeasureDetailsList-where"/>
+		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+			LIMIT ${limit} OFFSET ${offset}
+		</if>
+	</select>
+
+	<sql id="getMeasureDetailsList-where">
+		/* getMeasureDetailsList-where */
+		WHERE 1=1
+		AND A.sens_no = #{sens_no}
+	</sql>
+</mapper>

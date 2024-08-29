@@ -8,7 +8,7 @@ const addCheckboxToGrid = () => {
         });
     }
 };
-
+/*
 const onSelectRow = (rowId) => {
     // 모든 체크박스를 먼저 해제합니다.
     $('input[type="checkbox"]').prop('checked', false);
@@ -17,7 +17,7 @@ const onSelectRow = (rowId) => {
     let $checkbox = $('#' + rowId).find('input[type="checkbox"]').first();
     $checkbox.prop('checked', true);
 };
-
+*/
 const gridComplete = () => {
     // 헤더에 체크박스 추가
     const $grid = $("#jqGrid");
@@ -45,11 +45,11 @@ const actFormattedData = (data, key) => {
     }));
 };
 
-const setJqGridTable = (data, column, gridComplete, onSelectRow, key) => {
+const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gridId, limit, offset, getFunction, groupHeader) => {
 
     const formattedData = actFormattedData(data, key);
 
-    $("#jqGrid").jqGrid({
+    $(`#${gridId}`).jqGrid({
         datatype: "local",
         data: formattedData,
         height: $('.contents-in').height() - 50,
@@ -64,19 +64,19 @@ const setJqGridTable = (data, column, gridComplete, onSelectRow, key) => {
         onSelectRow: onSelectRow,
     });
 
-    $('#jqGrid').closest(".ui-jqgrid-bdiv").on("scroll", function() {
+    $(`#${gridId}`).closest(".ui-jqgrid-bdiv").on("scroll", function() {
         const $grid = $(this);
         // 스크롤이 맨 아래에 도달했는지 확인
         if ($grid.scrollTop() + $grid.innerHeight() >= $grid[0].scrollHeight) {
             // 스크롤을 빠르게 이동시 랜더링 꼬임 이슈로 setTimeout 사용
             setTimeout(() => {
                 offset += limit;
-                getCctv({limit : limit, offset : offset}).then((res) => {
+                getFunction({limit : limit, offset : offset}).then((res) => {
                     console.log('res > ', res);
                     if (res.rows.length === 0) {
                         offset -= limit;
                     }
-                    $("#jqGrid").jqGrid('addRowData', 'cctv_no', res.rows);
+                    $(`#${gridId}`).jqGrid('addRowData', key, res.rows);
                     //addCheckboxToGrid();
                 }).catch((fail) => {
                     console.log('setJqGridTable fail > ', fail);
@@ -85,17 +85,25 @@ const setJqGridTable = (data, column, gridComplete, onSelectRow, key) => {
         }
     });
 
-    $('#jqGrid').on('click', 'input[type="checkbox"]', function() {
+    $(`#${gridId}`).on('click', 'input[type="checkbox"]', function() {
         const $this = $(this);
         if (!$this.prop('checked')) {
             $this.prop('checked', false);
-            $("#jqGrid").jqGrid('resetSelection');
+            $(`#${gridId}`).jqGrid('resetSelection');
         } else {
-            $('#jqGrid input[type="checkbox"]').prop('checked', false);
+            $(`#${gridId}`+' input[type="checkbox"]').prop('checked', false);
             $this.prop('checked', true);
-            $("#jqGrid").jqGrid('setSelection', $(this).val(), true);
+            $(`#${gridId}`).jqGrid('setSelection', $(this).val(), true);
         }
     });
+
+    // 멀티 헤더 설정
+    if (Array.isArray(groupHeader)) {
+        $(`#${gridId}`).jqGrid('setGroupHeaders', {
+            useColSpanStyle: true, // 이 옵션을 true로 설정해야 그룹 컬럼을 제대로 사용할 수 있음
+            groupHeaders: groupHeader
+        });
+    }
 };
 
 const alert2 = (msg, callbackYes) => {
@@ -236,6 +244,15 @@ const getMaintCompInfo = (obj) => {
             alert2('유지보수 업체 정보를 가져오는데 실패했습니다.', function() {});
         });
     });
+};
+
+const isFunctionEmpty = (func) => {
+    if (typeof func !== 'function') {
+        throw new Error('The provided argument is not a function');
+    }
+
+    const funcStr = func.toString().replace(/\s+/g, ''); // 모든 공백 제거
+    return funcStr === 'function(){}' || funcStr === '(){}' || funcStr === 'functionempty(){}';
 };
 
 $(window).on('resize', function() {

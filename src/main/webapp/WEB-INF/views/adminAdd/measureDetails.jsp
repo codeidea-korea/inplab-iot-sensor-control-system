@@ -28,36 +28,73 @@
 		.contents-re {
 			width: 100%; /* 각 내용물이 부모 요소 내에서 전체 너비를 차지하도록 */
 		}
+
+		.ui-jqgrid-htable th.group-header {
+			background-color: #2b2a6d;  /* 원하는 배경색 */
+			color: white;  /* 글자색 */
+			font-weight: bold;  /* 글자 굵기 */
+		}
 	</style>
 
 	<script type="text/javascript" src="/admin_add.js"></script>
 	<script>
-		const limit = 25;
-		let offset = 0;
+		const limit_1 = 25;
+		let offset_1 = 0;
+		const limit_2 = 25;
+		let offset_2 = 0;
 
 		const checkboxFormatter = (cellValue, options, rowObject) => {
 			return '<input type="checkbox" class="row-checkbox" value="'+rowObject.dispbd_no+'">';
 		};
 
-		const column = [
-			{name: 'checkbox', index: 'checkbox', width: 35, align: 'center', sortable: false, hidden: false, formatter: checkboxFormatter},
-			{name : 'dispbd_no', index : 'dispbd_no', width: 100, align : 'center', hidden:false},
-			{name : 'dispbd_nm', index : 'dispbd_nm', align : 'center', hidden:false},
+		const dateFormatter = (cellValue, options, rowObject) => {
+			return cellValue === undefined ? '' : '<span style="white-space: normal">'+cellValue+'</span>';
+		};
+
+		const column_1 = [
 			{name : 'district_nm', index : 'district_nm', align : 'center', hidden:false},
-			{name : 'dispbd_ip', index : 'dispbd_ip', align : 'center', hidden:false},
-			{name : 'dispbd_port', index : 'dispbd_port', align : 'center', hidden:false},
-			{name : 'dispbd_conn_id', index : 'dispbd_conn_id', align : 'center', hidden:false},
-			{name : 'maint_sts_nm', index : 'maint_sts_nm', align : 'center', hidden:false},
-			{name : 'inst_ymd', index : 'inst_ymd', width: 120, align : 'center', hidden:false},
+			{name : 'sens_tp_nm', index : 'sens_tp_nm', align : 'center', hidden:false},
+			{name : 'sens_nm', index : 'sens_nm', align : 'center', hidden:false},
+			{name : 'meas_dt', index : 'meas_dt', align : 'center', width: 200, hidden:false, formatter: dateFormatter},
+			{name : 'sect_no', index : 'sect_no', align : 'center', width: 80, hidden:false},
+			{name : 'maint_sts_nm', index : 'maint_sts_nm', width: 120, align : 'center', hidden:false},
 		];
 
-		const header = ['','전광판 ID','전광판명','현장명','장비 IP','장비 Port','접속 ID','설치 상태','설치 일자'];
+		const header_1 = ['현장명','센서타입','센서명','최종계측일시','단면','센서상태'];
 
-		const getDisplayBoard = (obj) => {
+		const column_2 = [
+			{name : 'checkbox', index: 'checkbox', width: 35, align: 'center', sortable: false, hidden: false, formatter: checkboxFormatter},
+			{name : 'meas_dt', index : 'meas_dt', width: 100, align : 'center', hidden:false},
+			{name : 'ttm-02-x', index : 'ttm-02-x', align : 'center', hidden:true},
+			{name : 'raw_data_x', index : 'raw_data_x', align : 'center', hidden:false},
+			{name : 'formul_data_x', index : 'formul_data_x', align : 'center', hidden:false},
+			{name : 'ttm-02-y', index : 'ttm-02-y', align : 'center', hidden:true},
+			{name : 'raw_data_y', index : 'raw_data_y', align : 'center', hidden:false},
+			{name : 'formul_data_y', index : 'formul_data_y', align : 'center', hidden:false},
+		];
+
+		const header_2 = ['', '계측일시', 'TTM-02-X', 'Raw Data', '보정(Deg)', 'TTM-02-Y', 'Raw Data', '보정(Deg)'];
+
+		const header_2_group = [
+			{ startColumnName: 'raw_data_x', numberOfColumns: 2, titleText: 'TTM-02-X', className: 'group-header'},
+			{ startColumnName: 'raw_data_y', numberOfColumns: 2, titleText: 'TTM-02-Y', className: 'group-header'}
+		];
+
+		const onSelectRow = (rowid, status, e) => {
+			const sens_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+			offset_2 = 0;
+			getMeasureDetails({sens_no : sens_no, limit : limit_2, offset : offset_2}).then((res) => {
+				setJqGridTable(res.rows, column_2, header_2, function () {}, function () {}, 'mgnt_no', 'jqGrid-2', limit_2, offset_2, getMeasureDetails, header_2_group);
+			}).catch((fail) => {
+				console.log('setJqGridTable fail > ', fail);
+			});
+		};
+
+		const getMeasureDetails = (obj) => {
 			return new Promise((resolve, reject) => {
 				$.ajax({
 					type: 'GET',
-					url: `/adminAdd/displayBoard/displayBoard`,
+					url: `/adminAdd/sensor/measureDetails`,
 					dataType: 'json',
 					contentType: 'application/json; charset=utf-8',
 					async: true,
@@ -67,168 +104,36 @@
 				}).fail(function(fail) {
 					reject(fail);
 					console.log('getDisplayBoard fail > ', fail);
-					alert2('전광판 정보를 가져오는데 실패했습니다.', function() {});
+					alert2('계측 상세 정보를 가져오는데 실패했습니다.', function() {});
 				});
 			});
 		};
 
-		const insDisplayBoard = (array) => {
+		const getSensor = (obj) => {
 			return new Promise((resolve, reject) => {
 				$.ajax({
-					type: 'POST',
-					url: `/adminAdd/displayBoard/displayBoard`,
+					type: 'GET',
+					url: `/adminAdd/sensor/sensor`,
 					dataType: 'json',
 					contentType: 'application/json; charset=utf-8',
 					async: true,
-					data: JSON.stringify(array)
+					data: obj
 				}).done(function(res) {
-					resolve(res);
-				}).fail(function(fail) {
-					reject(fail);
-					console.log('insDisplayBoard fail > ', fail);
-					alert2('전광판 등록하는데 실패했습니다.', function() {});
-				});
-			});
-		};
-
-		const udtDisplayBoard = (array) => {
-			return new Promise((resolve, reject) => {
-				$.ajax({
-					type: 'PUT',
-					url: `/adminAdd/displayBoard/displayBoard`,
-					dataType: 'json',
-					contentType: 'application/json; charset=utf-8',
-					async: true,
-					data: JSON.stringify(array)
-				}).done(function(res) {
-					resolve(res);
-				}).fail(function(fail) {
-					reject(fail);
-					console.log('udtDisplayBoard fail > ', fail);
-					alert2('전광판 수정하는데 실패했습니다.', function() {});
-				});
-			});
-		};
-
-		const actionDelDisplayBoard = (dispbd_no) => {
-			udtDisplayBoard([{dispbd_no: dispbd_no, del_yn: 'Y'}]).then((res) => {
-				if (res.count?.pass > 0) {
-					alert2(res?.pass_list[0]?.message, function() {});
-					return;
-				}
-				if (res.count?.del === 0) {
-					alert2('전광판 정보가 삭제되지 않았습니다.', function() {});
-					return;
-				}
-				alert2('전광판 정보가 삭제되었습니다.', function () {
-					popFancyClose('#lay-form-write08');
-					const search_text = $('input[name=search_text]').val();
-					offset = 0;
-					getDisplayBoard({search_text: search_text, limit: limit, offset: offset}).then((res) => {
-						const formattedData = actFormattedData(res.rows, 'dispbd_no');
-						$("#jqGrid").jqGrid('clearGridData');
-						$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
-					}).catch((fail) => {
-						console.log('setJqGridTable fail > ', fail);
+					res.rows.forEach((item) => {
+						item?.logr_idx_map.forEach((logr) => {
+							item.district_nm = logr.district_nm;
+						});
+						item?.measure_details.forEach((meas) => {
+							item.meas_dt = meas.meas_dt;
+						});
 					});
+					resolve(res);
+				}).fail(function(fail) {
+					reject(fail);
+					console.log('getDisplayBoard fail > ', fail);
+					alert2('센서 정보를 가져오는데 실패했습니다.', function() {});
 				});
-			}).catch((fail) => {
-				console.log('delBroadcast fail > ', fail);
-				alert2('전광판 정보 삭제에 실패했습니다.', function() {});
 			});
-		};
-
-		const initForm = () => {
-			$('#lay-form-write08').find('input').not('#ins_displayBoard, #udt_displayBoard, #del_displayBoard').val('');
-			$('#lay-form-write08').find('select').prop('selectedIndex', 0);
-		};
-
-		const validCheck = () => {
-			let result = false;
-			const dispbd_no = $('input[name=dispbd_no]').val();
-			const dispbd_nm = $('input[name=dispbd_nm]').val();
-			const district_no = $('select[name=district_no]').val();
-			const dispbd_ip = $('input[name=dispbd_ip]').val();
-			const dispbd_port = $('input[name=dispbd_port]').val();
-			const dispbd_conn_id = $('input[name=dispbd_conn_id]').val();
-			const dispbd_conn_pwd = $('input[name=dispbd_conn_pwd]').val();
-			const inst_ymd = $('input[name=inst_ymd]').val().replaceAll('-', '');
-			const maint_sts_cd = $('select[name=maint_sts_cd]').val();
-			const dispbd_lat = $('input[name=dispbd_lat]').val();
-			const dispbd_lon = $('input[name=dispbd_lon]').val();
-			const model_nm = $('input[name=model_nm]').val();
-			const dispbd_maker = $('input[name=dispbd_maker]').val();
-
-			const obj = {
-				dispbd_no : dispbd_no,
-				dispbd_nm : dispbd_nm,
-				district_no : district_no,
-				dispbd_ip : dispbd_ip,
-				dispbd_port : dispbd_port,
-				dispbd_conn_id : dispbd_conn_id,
-				dispbd_conn_pwd : dispbd_conn_pwd,
-				inst_ymd : inst_ymd,
-				maint_sts_cd : maint_sts_cd,
-				dispbd_lat : dispbd_lat,
-				dispbd_lon : dispbd_lon,
-				model_nm : model_nm,
-				dispbd_maker : dispbd_maker,
-			};
-
-			if (dispbd_nm === '' || dispbd_nm === undefined) {
-				$('input[name=dispbd_nm]').focus();
-				result = true;
-			} else if (district_no === '' || district_no === undefined) {
-				$('select[name=district_no]').focus();
-				result = true;
-			} else if (dispbd_conn_id === '' || dispbd_conn_id === undefined) {
-				$('input[name=dispbd_conn_id]').focus();
-				result = true;
-			} else if (dispbd_conn_pwd === '' || dispbd_conn_pwd === undefined) {
-				$('input[name=dispbd_conn_pwd]').focus();
-				result = true;
-			} else if (dispbd_ip === '' || dispbd_ip === undefined) {
-				$('input[name=dispbd_ip]').focus();
-				result = true;
-			} else if (isNaN(dispbd_port)) {
-				alert2('접속Port는 숫자만 입력해주세요.', function() {
-					$('input[name=dispbd_port]').focus();
-				});
-				result = true;
-			} else if (inst_ymd === '' || inst_ymd === undefined) {
-				$('input[name=inst_ymd]').focus();
-				result = true;
-			} else if (maint_sts_cd === '' || maint_sts_cd === undefined) {
-				$('select[name=maint_sts_cd]').focus();
-				result = true;
-			} else if (isNaN(dispbd_lat)) {
-				alert2('위도는 숫자만 입력해주세요.', function () {
-					$('input[name=dispbd_lat]').focus();
-				});
-				result = true;
-			} else if (isNaN(dispbd_lon)) {
-				alert2('경도는 숫자만 입력해주세요.', function () {
-					$('input[name=dispbd_lon]').focus();
-				});
-				result = true;
-			}
-			return {isValid : result, obj : obj};
-		};
-
-		const setDisplayBoard = (data) => {
-			$('input[name=dispbd_no]').val(data.dispbd_no);
-			$('input[name=dispbd_nm]').val(data.dispbd_nm);
-			$('select[name=district_no]').val(data.district_no);
-			$('input[name=dispbd_ip]').val(data.dispbd_ip);
-			$('input[name=dispbd_port]').val(data.dispbd_port);
-			$('input[name=dispbd_conn_id]').val(data.dispbd_conn_id);
-			$('input[name=dispbd_conn_pwd]').val(data.dispbd_conn_pwd);
-			$('input[name=inst_ymd]').val(data.inst_ymd);
-			$('select[name=maint_sts_cd]').val(data.maint_sts_cd);
-			$('input[name=dispbd_lat]').val(data.dispbd_lat);
-			$('input[name=dispbd_lon]').val(data.dispbd_lon);
-			$('input[name=model_nm]').val(data.model_nm);
-			$('input[name=dispbd_maker]').val(data.dispbd_maker);
 		};
 
 		$(function () {
@@ -245,7 +150,7 @@
 				console.log('setJqGridTable fail > ', fail);
 			});*/
 
-			setTimeout(function() {
+			/*setTimeout(function() {
 				// iframe 생성 및 추가
 				const iframe = document.createElement('iframe');
 				iframe.style.display = 'none';
@@ -259,7 +164,14 @@
 
 				// 기본 alert 호출
 				iframeWindow.alert('준비중입니다.');
-			}, 1000);
+			}, 1000);*/
+
+			getSensor({limit : limit_1, offset : offset_1}).then((res) => {
+				console.log('res > ', res);
+				setJqGridTable(res.rows, column_1, header_1, function () {}, onSelectRow, 'sens_no', 'jqGrid', limit_1, offset_1, getSensor);
+			}).catch((fail) => {
+				console.log('setJqGridTable fail > ', fail);
+			});
 
 			$('.searchtBtn').on('click', function() {
 				const search_text = $('input[name=search_text]').val();
@@ -459,7 +371,7 @@
 				<div class="contents-re">
 					<h3 class="txt">센서 계측 현황</h3>
 					<div class="contents-in">
-						<table id="jqGrid-1"></table>
+						<table id="jqGrid"></table>
 						<%--<jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>--%>
 					</div>
 				</div>
