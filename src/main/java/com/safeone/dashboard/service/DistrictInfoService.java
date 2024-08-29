@@ -25,6 +25,13 @@ public class DistrictInfoService implements JqGridService<DistrictInfoDto> {
         return mapper.selectDistrictInfoListTotal(param);
     }
 
+    public int getDistrictInfoAbbrChk(Map param) {
+        return mapper.selectDistrictInfoAbbrChk(param);
+    }
+	public int getDistrictInfoNmChk(Map param) {
+        return mapper.selectDistrictInfoNmChk(param);
+    }
+
 	@Override
 	public boolean create(Map param) {
 		return mapper.insertDistrictInfo(param) > 0;

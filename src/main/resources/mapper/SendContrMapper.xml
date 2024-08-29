@@ -6,7 +6,7 @@
         select send_contr_id,
                send_group_id,
                dp_effect,
-               (select name from tb_common_code where code = a.dp_effect::numeric and category='표시효과') as dp_effect_name,
+               (select name from tb_common_code_old where code = a.dp_effect::numeric and category='표시효과') as dp_effect_name,
                dp_time,
                url_path,
                filename,

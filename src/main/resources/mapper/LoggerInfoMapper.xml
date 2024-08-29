@@ -40,6 +40,33 @@
                 <when test="'logr_nm' == sidx and sidx != ''">
                     MG.logr_nm ${sord}
                 </when>
+                <when test="'district_nm' == sidx and sidx != ''">
+                    MG.district_nm ${sord}
+                </when>
+                <when test="'inst_ymd' == sidx and sidx != ''">
+                    MG.inst_ymd ${sord}
+                </when>
+                <when test="'logr_MAC' == sidx and sidx != ''">
+                    MG.logr_MAC ${sord}
+                </when>
+                <when test="'logr_ip' == sidx and sidx != ''">
+                    MG.logr_ip ${sord}
+                </when>
+                <when test="'logr_port' == sidx and sidx != ''">
+                    MG.logr_port ${sord}
+                </when>
+                <when test="'logr_svr_ip' == sidx and sidx != ''">
+                    MG.logr_svr_ip ${sord}
+                </when>
+                <when test="'logr_svr_port' == sidx and sidx != ''">
+                    MG.logr_svr_port ${sord}
+                </when>
+                <when test="'model_nm' == sidx and sidx != ''">
+                    MG.model_nm ${sord}
+                </when>
+                <when test="'logr_maker' == sidx and sidx != ''">
+                    MG.logr_maker ${sord}
+                </when>
                 <when test="'mod_dt' == sidx and sidx != ''">
                     MG.mod_dt ${sord}
                 </when>
@@ -66,7 +93,7 @@
             , A.maint_sts_cd
             , A.logr_lon
             , A.logr_lat
-            , A.inst_ymd
+            , COALESCE(to_char(to_date(NULLIF(A.inst_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS inst_ymd
             , A.logr_maker
             , A.model_nm
             , A.logr_flag
@@ -96,7 +123,7 @@
         , A.maint_sts_cd
         , A.logr_lon
         , A.logr_lat
-        , A.inst_ymd
+        , COALESCE(to_char(to_date(NULLIF(A.inst_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS inst_ymd
         , A.logr_maker
         , A.model_nm
         , A.logr_flag
@@ -139,7 +166,7 @@
             <if test="maint_sts_cd != null">#{maint_sts_cd},</if>
             <if test="logr_lon != null">#{logr_lon}::double precision,</if>
             <if test="logr_lat != null">#{logr_lat}::double precision,</if>
-            <if test="inst_ymd != null">#{inst_ymd},</if>
+            <if test="inst_ymd != null">COALESCE(TO_CHAR(TO_DATE(NULLIF(#{inst_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), ''),</if>
             <if test="logr_maker != null">#{logr_maker},</if>
             <if test="model_nm != null">#{model_nm},</if>
             <if test="logr_flag != null">#{logr_flag},</if>
@@ -182,7 +209,7 @@
             , logr_lat = #{logr_lat}::double precision
         </if>
         <if test="inst_ymd != null">
-            , inst_ymd = #{inst_ymd}
+            , inst_ymd = COALESCE(TO_CHAR(TO_DATE(NULLIF(#{inst_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), '')
         </if>
         <if test="logr_maker != null">
             , logr_maker = #{logr_maker}

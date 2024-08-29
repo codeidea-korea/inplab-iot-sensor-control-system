@@ -113,6 +113,7 @@
                     alert('삭제할 센서가 선택되지 않았습니다.');
                     return;
                 }
+                confirm('삭제하시겠습니까?', function() {
                     $.get('/adminAdd/sensorInfo/del', {sens_no: sensNo}, function(res) {
                         if (res === 1) {  // 성공 시
                             alert('삭제되었습니다.');
@@ -124,12 +125,14 @@
                             alert('삭제 실패: ' + res);
                         }
                     });
+                });
             });
 
 
             $('.insertBtn').on('click', function () {
                 $('.deleteBtn').hide();
-                $("#form_sub_title").html('등록');
+                $("#form_sub_title").html('신규 등록');
+                $('input[type="submit"]').val('저장');
 
                 setSerialize('#lay-form-write', _popupClearData);
 
@@ -198,8 +201,8 @@
             // 수정 팝업
             $('.modifyBtn').on('click', function () {
 
-                $("#form_sub_title").html('수정');
-
+                $("#form_sub_title").html('상세정보');
+                $('input[type="submit"]').val('수정');
                 var targetArr = getSelectedCheckData();
 
                 if (targetArr.length > 1) {
@@ -286,6 +289,7 @@
             } else {
                 alert("No file selected.");
             }
+            reloadJqGrid();
         }
 
     </script>
@@ -389,7 +393,7 @@
                     <tr>
                         <th class="required_th">단면번호</th>
                         <td colspan="3">
-                            <input type="text" name="sect_no"/>
+                            <input type="text" name="sect_no" class="required"/>
                         </td>
                     </tr>
 
@@ -473,8 +477,8 @@
                 </table>
             </div>
             <div class="btn-btm">
-                <input type="submit" blue value="저장"/>
                 <button type="button" class="deleteBtn" style="display:none;">삭제</button>
+                <input type="submit" blue value="저장"/>
                 <button type="button" data-fancybox-close>취소</button>
             </div>
         </div>

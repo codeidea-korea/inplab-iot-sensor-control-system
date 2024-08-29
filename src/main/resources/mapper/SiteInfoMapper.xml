@@ -106,6 +106,7 @@
     <update id="updateSiteInfo" parameterType="java.util.Map">
         update tb_site_info set
             site_nm = #{site_nm}
+            , mod_dt = now()
         <if test="site_zip != null">
             , site_zip = #{site_zip}
         </if>

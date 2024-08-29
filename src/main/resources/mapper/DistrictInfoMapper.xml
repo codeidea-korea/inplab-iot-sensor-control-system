@@ -63,6 +63,9 @@
 				<when test="'district_nm' == sidx and sidx != ''">
                     MG.district_nm ${sord}
                 </when>
+                <when test="'district_no' == sidx and sidx != ''">
+                    MG.district_no ${sord}
+                </when>
 				<when test="'site_no' == sidx and sidx != ''">
                     MG.site_no ${sord}
                 </when>
@@ -75,17 +78,17 @@
 				<when test="'dist_road_addr' == sidx and sidx != ''">
                     MG.dist_road_addr ${sord}
                 </when>
-				<when test="'dist_type_cd' == sidx and sidx != ''">
+				<when test="'dist_type_cd_nm' == sidx and sidx != ''">
                     MG.dist_type_cd ${sord}
                 </when>
 				<when test="'dist_abbr' == sidx and sidx != ''">
                     MG.dist_abbr ${sord}
                 </when>
-                <when test="'inst_comp_id1' == sidx and sidx != ''">
-                    MG.inst_comp_id1 ${sord}
+                <when test="'inst_comp_id1_nm' == sidx and sidx != ''">
+                    MG.inst_comp_id1_nm ${sord}
                 </when>
-                <when test="'meas_comp_id1' == sidx and sidx != ''">
-                    MG.dist_lmeas_comp_id1at ${sord}
+                <when test="'meas_comp_id1_nm' == sidx and sidx != ''">
+                    MG.meas_comp_id1_nm ${sord}
                 </when>
                 <when test="'inst_comp_id2' == sidx and sidx != ''">
                     MG.inst_comp_id2 ${sord}
@@ -129,8 +132,8 @@
 				 , z.meas_comp_id1
 				 , z.inst_comp_id2
 				 , z.meas_comp_id2
-				 , z.meas_str_ymd
-				 , z.meas_end_ymd
+                 , COALESCE(to_char(to_date(NULLIF(z.meas_str_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_str_ymd
+                 , COALESCE(to_char(to_date(NULLIF(z.meas_end_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_end_ymd
 				 , z.dist_offi_nm
                 , fn_common(z.dist_type_cd ,'현장구분') as dist_type_cd_nm
                 , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.inst_comp_id1) as inst_comp_id1_nm
@@ -143,6 +146,22 @@
 <!--        <if test="page != null and page > 0">-->
 <!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
 <!--        </if>-->
+    </select>
+
+    <select id="selectDistrictInfoAbbrChk" parameterType="java.util.Map" resultType="int">
+        SELECT
+            count(1)
+        FROM
+            tb_district_info
+        where dist_abbr = #{dist_abbr}
+    </select>
+
+    <select id="selectDistrictInfoNmChk" parameterType="java.util.Map" resultType="int">
+        SELECT
+            count(1)
+        FROM
+            tb_district_info
+        where district_nm = #{district_nm}
     </select>
 
     <select id="selectDistrictInfoListTotal" parameterType="java.util.Map" resultType="int">
@@ -165,8 +184,8 @@
                 , z.meas_comp_id1
                 , z.inst_comp_id2
                 , z.meas_comp_id2
-                , z.meas_str_ymd
-                , z.meas_end_ymd
+                , COALESCE(to_char(to_date(NULLIF(z.meas_str_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_str_ymd
+                , COALESCE(to_char(to_date(NULLIF(z.meas_end_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_end_ymd
                 , z.dist_offi_nm
                 , fn_common(z.dist_type_cd ,'현장구분') as dist_type_cd_nm
                 , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.inst_comp_id1) as inst_comp_id1_nm
@@ -217,8 +236,8 @@
 				 , #{meas_comp_id1}
 				 , #{inst_comp_id2}
 				 , #{meas_comp_id2}
-				 , #{meas_str_ymd}
-				 , #{meas_end_ymd}
+                 , COALESCE(TO_CHAR(TO_DATE(NULLIF(#{meas_str_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), '')
+                 , COALESCE(TO_CHAR(TO_DATE(NULLIF(#{meas_end_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), '')
 				 , #{dist_offi_nm}
             )
     </insert>
@@ -226,6 +245,7 @@
     <update id="updateDistrictInfo" parameterType="java.util.Map">
         update tb_district_info set
             district_nm = #{district_nm}
+            , mod_dt = now()
         <if test="dist_addr != null">
             , dist_addr = #{dist_addr}
         </if>
@@ -269,10 +289,10 @@
             , meas_comp_id2 = #{meas_comp_id2}
         </if>
         <if test="meas_str_ymd != null">
-            , meas_str_ymd = #{meas_str_ymd}
+            , meas_str_ymd = , to_char(to_date(#{meas_str_ymd}, 'YYYY-MM-DD'), 'YYYYMMDD')
         </if>
         <if test="meas_end_ymd != null">
-            , meas_end_ymd = #{meas_end_ymd}
+            , meas_end_ymd = , to_char(to_date(#{meas_end_ymd}, 'YYYY-MM-DD'), 'YYYYMMDD')
         </if>
         <if test="dist_offi_nm != null">
             , dist_offi_nm = #{dist_offi_nm}

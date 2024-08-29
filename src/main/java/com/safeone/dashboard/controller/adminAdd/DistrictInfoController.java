@@ -61,13 +61,71 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
         return districtInfoService.delete(param); // 1: 성공, 0: 실패 (삭제할 항목이 없거나 삭제 실패)
     }
 
+//    @ResponseBody
+//    @PostMapping("/add")
+//    public synchronized boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param,
+//                          @RequestParam("dist_pic") MultipartFile file1,
+//                          @RequestParam("dist_view_pic") MultipartFile file2) {
+//
+//        try {
+//
+//            int Chk = districtInfoService.getDistrictInfoAbbrChk(param.get("dist_addr").toString());
+//
+//            if(Chk != 0){
+//                return false;
+//            }
+//
+//            if (!file1.isEmpty()) {
+//                byte[] fileBytes1 = file1.getBytes();
+//                param.put("dist_pic", fileBytes1);
+//            }
+//
+//            if (!file2.isEmpty()) {
+//                byte[] fileBytes2 = file2.getBytes();
+//                param.put("dist_view_pic", fileBytes2);
+//            }
+//
+//            //district_no 생성
+//            Map<String, Object> newMap = new HashMap<>();
+//            newMap.put("table_nm", "tb_district_info");
+//            newMap.put("column_nm", "district_no");
+//            ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
+//            param.put("district_no", generationKeyOn.get("newId").asText());
+//
+//            // 서비스 호출하여 데이터베이스에 데이터 저장
+//            return districtInfoService.create(param);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false; // 오류 발생 시 false 반환
+//        }
+//
+//    }
+
     @ResponseBody
     @PostMapping("/add")
-    public synchronized boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param,
-                          @RequestParam("dist_pic") MultipartFile file1,
-                          @RequestParam("dist_view_pic") MultipartFile file2) {
+    public synchronized Map<String, Object> insert(HttpServletRequest request, @RequestParam Map<String, Object> param,
+                                                   @RequestParam("dist_pic") MultipartFile file1,
+                                                   @RequestParam("dist_view_pic") MultipartFile file2) {
 
+        Map<String, Object> response = new HashMap<>();
         try {
+
+            int chkNm = districtInfoService.getDistrictInfoNmChk(param);
+
+            if(chkNm != 0) {
+                response.put("success", false);
+                response.put("message", "현장명이 존재합니다.");
+                return response;
+            }
+
+            int chkAbbr = districtInfoService.getDistrictInfoAbbrChk(param);
+
+            if(chkAbbr != 0) {
+                response.put("success", false);
+                response.put("message", "약어가 존재합니다.");
+                return response;
+            }
+
             if (!file1.isEmpty()) {
                 byte[] fileBytes1 = file1.getBytes();
                 param.put("dist_pic", fileBytes1);
@@ -78,7 +136,7 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
                 param.put("dist_view_pic", fileBytes2);
             }
 
-            //district_no 생성
+            // district_no 생성
             Map<String, Object> newMap = new HashMap<>();
             newMap.put("table_nm", "tb_district_info");
             newMap.put("column_nm", "district_no");
@@ -86,13 +144,20 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
             param.put("district_no", generationKeyOn.get("newId").asText());
 
             // 서비스 호출하여 데이터베이스에 데이터 저장
-            return districtInfoService.create(param);
+            boolean createResult = districtInfoService.create(param);
+
+            response.put("success", createResult);
+            response.put("message", createResult ? "저장되었습니다." : "저장에 실패했습니다.");
+            return response;
+
         } catch (Exception e) {
             e.printStackTrace();
-            return false; // 오류 발생 시 false 반환
+            response.put("success", false);
+            response.put("message", "오류가 발생했습니다.");
+            return response;
         }
-
     }
+
 
     @ResponseBody
     @PostMapping("/mod")

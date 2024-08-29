@@ -40,10 +40,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
 
         var $grid = $(".jqGrid");
 
-        $grid.on('jqGridInitGrid', function() {
-            $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
-        });
-
         $.each(_columns, function () {
             _names.push(this.columnName);
             _labels.push(this.title);
@@ -403,7 +399,7 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
         $.jgrid.defaults.width = $grid.parent().width();
 
         $(window).trigger('beforeLoadGrid', columnData);
-        // console.log(columnData.model)
+
         var jqGridOption = Object.assign({}, {
             url: '${path}/list',
             mtype: "GET",
@@ -423,9 +419,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                     }
                 }
             },
-            // sortable: true,
-            autowidth: true,
-            shrinkToFit: true,
             beforeRequest: function (e) {
                 var params = Object.assign($(".jqGrid").jqGrid('getGridParam', 'postData'), $('.ui-search-input input').filter(function () {
                     return !!this.value;
@@ -435,62 +428,21 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                     postData: Object.assign(params, window.gridParam)
                 });
             },
-            // loadComplete: function (rowId) { // console.log(rowId);
-            //     var rowData = jQuery(this).getRowData(rowId);
-            //     $(window).trigger('loadComplete', rowData);
-
-            loadComplete: function (response) {
-
-                var rows = response.rows.map(function (row) {
-                    Object.keys(row).forEach(function(key) {
-                        if (row[key] === null) {
-                            row[key] = '';  // null 값을 빈 문자열로 변환
-                        }
-                    });
-
-                    // site_logo 필드를 img 태그로 변환
-                    if (row.site_logo) {
-                        row.site_logo_src = row.site_logo;
-                        row.site_logo = `<img src="data:image/jpeg;base64, ` + row.site_logo + `" style="width:100px; height:auto;" />`;
-                    } else {
-                        row.site_logo_src = '';
-                        row.site_logo = `<img src="data:image/jpeg;base64, " style="width:100px; height:auto;" />`;
-                    }
-
-                    if (row.dist_pic) {
-                        row.dist_pic_src = row.dist_pic;
-                    } else {
-                        row.dist_pic_src = '';
-                    }
-
-                    if (row.dist_view_pic) {
-                        row.dist_view_pic_src = row.dist_view_pic;
-                    } else {
-                        row.dist_view_pic_src = '';
-                    }
-
-                    return row;
-                });
-
-                // 가공된 데이터를 jqGrid에 반영
-                this.addJSONData(rows);
-
-                // 다른 이벤트 트리거
-                $(window).trigger('loadComplete', rows);
-
+            loadComplete: function (rowId) { // console.log(rowId);
+                var rowData = jQuery(this).getRowData(rowId);
+                $(window).trigger('loadComplete', rowData);
                 $('.jqGrid').on('reloadGrid', function (e) { // console.log(e);
                 });
 
                 $('.ui-jqgrid .ui-search-table input').attr('autocomplete', 'new-password');
                 window.jqgridModify = false;
 
-                // initPage($(".jqGrid"), $(".paginate"), true, "TOT", pageCount);
-                $grid.closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
+                initPage($(".jqGrid"), $(".paginate"), true, "TOT", pageCount);
             },
             gridComplete: function() {
                 $(window).trigger('gridComplete');
 
-                // console.log('gridComplete');
+                console.log('gridComplete');
 
                 // if (window.jqgridOption.columnAutoWidth) {
                 //     $grid.closest('.ui-jqgrid').css('width', '100%');
@@ -500,7 +452,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                 if (window.jqgridOption.columnAutoWidth) {
                     $(window).trigger('resize');
                 }
-                enableColumnReordering();
             },
             ondblClickRow: function (rowId) { // 더블클릭시 색상해제
                 $('.ui-jqgrid-btable tr').removeClass('custom_selected');
@@ -544,76 +495,14 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                 var rowData = {rowId, ...jQuery(this).getRowData(rowId)} ;
                 $(window).trigger('onSelectRow', rowData);
             },
-            // sortable: true,
             loadonce: false,
             viewrecords: true,
             emptyrecords: '조회된 데이터가 없습니다',
-            // height: 'auto',
-            height: $(".contents-in").height() - 35,
-            // scroll: true, // 스크롤 사용
-            rowNum: -1,
-            // rowNum: _rowList[0],
-            // rowList: _rowList,
+            height: 'auto',
+            rowNum: _rowList[0],
+            rowList: _rowList,
             // pager: ".jqGridPager",
-            autowidth: true,
-            shrinkToFit: true
         }, window.jqgridOption);
-
-        function enableColumnReordering() {
-
-            $(".ui-jqgrid-labels").sortable({
-                items: ".ui-th-column",
-
-                update: function (event, ui) {
-                    var newOrder = $(this).sortable("toArray", { attribute: "id" });
-                    var newColModel = [];
-                    var newRowData = [];
-
-                    // 새로운 컬럼 순서에 맞게 colModel과 rowData를 재구성합니다.
-                    newOrder.forEach(function (colId) {
-                        var colName = colId.replace("jqgh_", "").replace(/^_/, "");  // "jqgh_" 및 앞의 언더스코어 제거
-                        var col = Object.values(_columns).find(c => c.columnName === colName);
-
-                        if (col) {
-                            newColModel.push({
-                                name: col.columnName,
-                                label: col.title,
-                                width: col.width,
-                                hidden: col.type === "hidden"
-                            });
-                        } else {
-                            // 기본 컬럼 처리 (예: cb, rn 등)
-                            newColModel.push({
-                                name: colName,
-                                label: colName.toUpperCase(),
-                                width: 50,  // 기본 너비
-                                hidden: false  // 기본으로 표시
-                            });
-                            console.warn('Column not found for:', colName);
-                        }
-                    });
-
-                    // 기존 그리드 데이터를 순서에 맞춰 재정렬
-                    $grid.jqGrid('getRowData').forEach(function (row) {
-                        var newRow = {};
-                        newColModel.forEach(function (col) {
-                            newRow[col.name] = row[col.name] || '';
-                        });
-                        newRowData.push(newRow);
-                    });
-
-                    // jqGrid의 설정을 새로운 colModel과 rowData로 업데이트하고 데이터를 다시 로드합니다.
-                    $grid.jqGrid('setGridParam', {
-                        colModel: newColModel,
-                        data: newRowData
-                    }).trigger("reloadGrid");
-                }
-
-
-
-            });
-        }
-
 
         if (flagCellEdit) {
             jqGridOption = Object.assign(jqGridOption, {
@@ -621,7 +510,7 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                 cellsubmit: 'clientArray',
                 cellurl: '${path}/cell',
                 beforeSubmitCell: function (rowid, cellname, value) { // submit 전
-                    // console.log({"id": rowid, "cellName": cellname, "cellValue": value});
+                    console.log({"id": rowid, "cellName": cellname, "cellValue": value});
                     return {"id": rowid, "cellName": cellname, "cellValue": value}
                 },
                 afterSubmitCell: function (res) { // 변경 후
@@ -639,24 +528,8 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
         }
 
         $grid.jqGrid(jqGridOption);
-
-
-
-
-        $(document).on('click', '.searchBtn', function() {
-            var searchValue = $('#search').val();  // 검색어 가져오기
-            $(".jqGrid").jqGrid('setGridParam', {
-                postData: {
-                    searchKeyword: searchValue
-                },
-                page: 1  // 검색 시 첫 페이지로 이동
-            }).trigger('reloadGrid');  // 그리드 새로고침
-        });
-
-
-        if (window.jqgridOption.filterToolbarCheck) {
-            $('.jqGrid').jqGrid('filterToolbar');
-        }
+        // activate the toolbar searching
+        $('.jqGrid').jqGrid('filterToolbar');
 
         $('.ui-search-toolbar input').on('keyup', function (e) {
             if (e.keyCode == 13)
@@ -685,23 +558,15 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
 
         if (window.jqgridOption.columnAutoWidth) {
             $(window).resize(function() {
-                // 그리드의 너비 조정
-                var gridWidth = $(".contents-in").width();
+                console.log('resize');
+                var gridWidth = $(window).width() - 445;  // 그리드 컨테이너 너비
+                // console.log('resize ' + gridWidth);
                 $grid.jqGrid('setGridWidth', gridWidth, true);  // shrinkToFit를 true로 설정하여 조정
-
-                // 그리드의 높이 조정
-                var gridHeight = $(".contents-in").height() - 35;
-                $grid.jqGrid('setGridHeight', gridHeight);  // 그리드 높이를 동적으로 설정
             });
 
             $(window).trigger('resize');
         }
-
-
-
     });
-
-
 
     function downloadExcel(fileName, $grid = $('.jqGrid')) {
         //20231228 urlParameters 추가
@@ -710,7 +575,7 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
 
         var url = "${path}/excel/" + fileName + '?' + urlParameters;
 
-        // console.log(url);
+        console.log(url);
 
         var hiddenIFrameId = 'hiddenDownloader';
         var iframe = document.getElementById(hiddenIFrameId);

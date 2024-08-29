@@ -23,6 +23,8 @@ public interface CommonCodeEditMapper {
 
     List<Map> selectDistrictInfoDistAbbr(Map param);
 
+    String selectSensorInfoNm(Map param);
+
     List<Map> selectMaintcompInfoList(Map param);
 
     List<Map> selectLoggerInfoLogrNo(Map param);

@@ -46,11 +46,23 @@
                 <when test="'senstype_no' == sidx and sidx != ''">
                     MG.senstype_no ${sord}
                 </when>
-                <when test="'site_no' == sidx and sidx != ''">
-                    MG.site_no ${sord}
-                </when>
                 <when test="'sens_tp_nm' == sidx and sidx != ''">
                     MG.sens_tp_nm ${sord}
+                </when>
+                <when test="'sens_abbr' == sidx and sidx != ''">
+                    MG.sens_abbr ${sord}
+                </when>
+                <when test="'basic_formul' == sidx and sidx != ''">
+                    MG.basic_formul ${sord}
+                </when>
+                <when test="'sens_chnl_cnt' == sidx and sidx != ''">
+                    MG.sens_chnl_cnt ${sord}
+                </when>
+                <when test="'logr_idx_str' == sidx and sidx != ''">
+                    MG.logr_idx_str ${sord}
+                </when>
+                <when test="'logr_idx_end' == sidx and sidx != ''">
+                    MG.logr_idx_end ${sord}
                 </when>
                 <when test="'mod_dt' == sidx and sidx != ''">
                     MG.mod_dt ${sord}

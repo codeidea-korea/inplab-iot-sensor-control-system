@@ -67,7 +67,8 @@
     </li>
     <!-- 메뉴 확장 -->
     <li >
-        <button type="button" class="round dashboard" onclick="location.href='/'">
+<%--        <button type="button" class="round dashboard" onclick="location.href='/'">--%>
+        <button type="button" class="round dashboard" onclick="location.href='/dashboard'">
             <dl>
                 <dt data-type="dashboard">
                     <img src="/images/icon_gnb01.png" alt="대시보드">

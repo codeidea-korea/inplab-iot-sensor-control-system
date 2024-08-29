@@ -121,13 +121,14 @@ function validate() {
         }
 
         if (value === '') {
-            var thText = $(this).closest('tr').find('.required_th').text();  // 해당 <th>의 텍스트를 가져옴
+            var thText = $(this).closest('td').prev('th').text();  // 해당 <th>의 텍스트를 가져옴
             alert(thText + "은(는) 필수값입니다.");
             $(this).focus();  // 포커스를 현재 요소에 맞춤
             isValid = false;  // 검증 실패
             return false;  // each 반복문을 종료하고, validate 함수도 종료
         }
     });
+
 
     if (!isValid) {
         return false;  // 검증 실패 시 함수 종료
@@ -201,15 +202,18 @@ function validate() {
     }
 
 
-    // 약어 검증 (3글자 영문자 형식)
     if ($('.abbr').length > 0) {
-        var distAbbrPattern = /^[A-Za-z]{3}$/;
+        // 3글자의 영문자 또는 숫자로만 구성된 문자열을 검사하는 정규 표현식
+        var distAbbrPattern = /^[A-Za-z0-9]{3}$/;
         if (!distAbbrPattern.test($('.abbr').val().trim())) {
-            alert($('.dist_abbr').closest('tr').find('.required_th').text() + "은(는) 정확히 3글자의 영문자 형식이어야 합니다.");
+            var thText = $(this).closest('tr').find('.required_th').text();
+
+            alert(thText + "은(는) 정확히 3글자의 영문자 또는 숫자 형식이어야 합니다.");
             $('.dist_abbr').focus();
             return false;
         }
     }
+
 
 
 

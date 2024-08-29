@@ -123,6 +123,13 @@
 		WHERE district_no = #{district_no}
 	</select>
 
+	<select id="selectSensorInfoNm" parameterType="java.util.Map" resultType="string">
+		SELECT sens_no
+		FROM tb_sensor_info
+		WHERE sens_nm = #{sens_nm}
+		AND logr_no = #{logr_no}
+	</select>
+
 	<select id="selectDistrictInfoNmAbbr" parameterType="string" resultType="java.util.Map">
 		SELECT B.district_no
 			 , B.dist_abbr

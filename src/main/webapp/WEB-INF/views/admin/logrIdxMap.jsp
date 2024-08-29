@@ -264,6 +264,8 @@
             } else {
                 alert("No file selected.");
             }
+
+            reloadJqGrid();
         }
 
     </script>
@@ -292,7 +294,7 @@
         </h2>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">센서 관리</h3>
+                <h3 class="txt">센서-로거인덱스</h3>
                 <div class="btn-group">
                     <input class="search_input" type="text" id="search" name="search"
                            placeholder="현장명 / 센서타입명 / 로거명"/>
@@ -302,10 +304,10 @@
 <%--                    <a class="modifyBtn">수정</a>--%>
 <%--                    <a class="deleteBtn">삭제</a>--%>
 
-<%--                    <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>--%>
-<%--                    <form id="uploadForm" style="display:none;">--%>
-<%--                        <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">--%>
-<%--                    </form>--%>
+                    <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>
+                    <form id="uploadForm" style="display:none;">
+                        <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
+                    </form>
 
 <%--                    <a class="excelBtn">다운로드</a>--%>
                 </div>

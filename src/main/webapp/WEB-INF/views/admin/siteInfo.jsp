@@ -115,8 +115,8 @@
             // 수정 팝업
             $('.modifyBtn').on('click', function () {
 
-                $("#form_sub_title").html('수정');
-
+                $("#form_sub_title").html('상세정보');
+                $('input[type="submit"]').val('수정');
                 initForm();
 
                 var targetArr = getSelectedCheckData();
@@ -176,9 +176,9 @@
                 $('#site_no').html(option);
             });
 
-            $('.excelBtn').on('click', function () {
-                downloadExcel('현장관리');
-            });
+            // $('.excelBtn').on('click', function () {
+            //     downloadExcel('기관관리');
+            // });
         });
 
         function initForm() {
@@ -217,7 +217,7 @@
         </h2>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">현장 관리</h3>
+                <h3 class="txt">기관 정보 관리</h3>
                 <div class="btn-group">
                     <%--                            <a class="insertBtn" style="display:none;">신규 등록</a>--%>
                     <a class="modifyBtn" style="display:none;">상세정보</a>
@@ -239,7 +239,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">현장 <span id="form_sub_title">등록/수정</span></div>
+        <div class="layer-base-title">기관 정보 <span id="form_sub_title">등록/수정</span></div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
@@ -252,12 +252,12 @@
                     <tbody>
                     <tr>
                         <th class="required_th">사이트 ID</th>
-<%--                        <td><input type="text" id="site_no" name="site_no" value="" placeholder="" readonly/></td>--%>
-                        <td>
-                            <select id="site_no" name="site_no" disabled>
-                                <option value="">선택</option>
-                            </select>
-                        </td>
+                        <td><input type="text" id="site_no" name="site_no" value="" placeholder="" readonly/></td>
+<%--                        <td>--%>
+<%--                            <select id="site_no" name="site_no" disabled>--%>
+<%--                                <option value="">선택</option>--%>
+<%--                            </select>--%>
+<%--                        </td>--%>
                     </tr>
                     <tr>
                         <th class="required_th">관리 기관명</th>

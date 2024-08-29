@@ -4,7 +4,7 @@
 <mapper namespace="com.safeone.dashboard.dao.CommonCodeMapper">
     <select id="selectCommonCodeList" parameterType="java.util.Map" resultType="java.util.Map">
 	    SELECT * 
-	    FROM tb_common_code cc 
+	    FROM tb_common_code_old cc
 	    WHERE cc.category = #{category}
 		ORDER BY cc.code
     </select>
