@@ -393,7 +393,7 @@
                     <tr>
                         <th class="required_th">단면번호</th>
                         <td colspan="3">
-                            <input type="text" name="sect_no"/>
+                            <input type="text" name="sect_no" class="required"/>
                         </td>
                     </tr>
 

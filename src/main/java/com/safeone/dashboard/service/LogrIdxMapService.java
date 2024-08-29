@@ -68,38 +68,44 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
             Sheet sheet = workbook.getSheetAt(0);
 
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue;  // 헤더 행 건너뛰기
+                if (row.getRowNum() == 0) continue;
 
-                List<Map> senstypeNo = commonCodeEditService.getNewSensorSeq(Collections.singletonMap("sens_tp_nm", formatter.formatCellValue(row.getCell(0))));
-                List<Map> logrNo = commonCodeEditService.getNewSensorSeq(Collections.singletonMap("logr_nm", formatter.formatCellValue(row.getCell(2))));
-                List<Map> sensAbbr = commonCodeEditService.getSensorAbbr(Collections.singletonMap("senstype_no", senstypeNo));
 
                 Map<String, Object> newMap = new HashMap<>();
-                newMap.put("table_nm", "tb_sensor_info");
-                newMap.put("column_nm", "sens_no");
+                newMap.put("table_nm", "tb_logr_idx_map");
+                newMap.put("column_nm", "mapping_no");
                 ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-
-                Map<String, Object> sens = new HashMap<>();
-                sens.put("sensor_seq",sensAbbr);
-                sens.put("logr_no", logrNo);
-                List<Map> sensNm = commonCodeEditService.getNewSensorSeq(sens);
 
                 Map<String, Object> logrIdxMap = new HashMap<>();
 
-                logrIdxMap.put("sens_no", generationKeyOn.get("newId").asText());
-                logrIdxMap.put("senstype_no", senstypeNo); //센서타입명으로 0번 formatter.formatCellValue(row.getCell(0))
-                logrIdxMap.put("sens_nm", sensNm);
-                logrIdxMap.put("logr_no", logrNo); // 로거명으로 2번 formatter.formatCellValue(row.getCell(2))
-                logrIdxMap.put("sect_no", formatter.formatCellValue(row.getCell(3)));
-                logrIdxMap.put("maint_sts_cd", formatter.formatCellValue(row.getCell(4)));
-                logrIdxMap.put("logrnonrecv_limit_min_lon", formatter.formatCellValue(row.getCell(5)));
-                logrIdxMap.put("alarm_use_yn", formatter.formatCellValue(row.getCell(6)));
-                logrIdxMap.put("sms_snd_yn", formatter.formatCellValue(row.getCell(7)));
-                logrIdxMap.put("sens_disp_yn", formatter.formatCellValue(row.getCell(8)));
-                logrIdxMap.put("inst_ymd", formatter.formatCellValue(row.getCell(9)));
+                logrIdxMap.put("mapping_no", generationKeyOn.get("newId").asText());//관리_no
+
+                List<Map> districtInfoNmAbbr = commonCodeEditService.getDistrictInfoNmAbbr(formatter.formatCellValue(row.getCell(0)));
+                logrIdxMap.put("district_no", districtInfoNmAbbr.get(0).get("district_no").toString());//현장_no
+
+                Map<String, Object> newMap2 = new HashMap<>();
+                newMap2.put("logr_nm", formatter.formatCellValue(row.getCell(3)));
+
+                List<Map> loggerInfoLogrNo = commonCodeEditService.getLoggerInfoLogrNo(newMap2);
+                logrIdxMap.put("logr_no", loggerInfoLogrNo.get(0).get("logr_no").toString());//로거_no
+
+                Map<String, Object> newMap3 = new HashMap<>();
+                newMap3.put("logr_no", loggerInfoLogrNo.get(0).get("logr_no").toString());
+                newMap3.put("sens_nm", formatter.formatCellValue(row.getCell(2)));
+
+                String sensorInfoNm = commonCodeEditService.getSensorInfoNm(newMap3);
+                logrIdxMap.put("sens_no", sensorInfoNm);//센서_no
+
+//                logrIdxMap.put("senstype_nm", formatter.formatCellValue(row.getCell(1)));//현장 TYPE명
+//                logrIdxMap.put("sens_nm", formatter.formatCellValue(row.getCell(2)));//센서 ID
+
+                logrIdxMap.put("sens_chnl_nm", formatter.formatCellValue(row.getCell(4)));//체널명
+                logrIdxMap.put("logr_idx_no", formatter.formatCellValue(row.getCell(5)));//로거_Idx
+                logrIdxMap.put("sect_no", formatter.formatCellValue(row.getCell(6)));//단면번호
+//                logrIdxMap.put("logr_chnl_seq", formatter.formatCellValue(row.getCell(9)));//채널seq
 
 //                System.out.println("logrIdxMap: " + logrIdxMap);
-                // mapper.insertLogrIdxMap(logrIdxMap);
+                 mapper.insertLogrIdxMap(logrIdxMap);
                 successCount++;  // 성공 카운트 증가
             }
         } catch (Exception e) {

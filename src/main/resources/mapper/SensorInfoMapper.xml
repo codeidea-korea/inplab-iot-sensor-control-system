@@ -32,15 +32,38 @@
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
-                <when test="'sens_no' == sidx and sidx != ''">
-                    MG.sens_no ${sord}
+                <when test="'senstype_nm' == sidx and sidx != ''">
+                    MG.senstype_nm ${sord}
                 </when>
-                <when test="'logr_no' == sidx and sidx != ''">
-                    MG.logr_no ${sord}
+                <when test="'logr_nm' == sidx and sidx != ''">
+                    MG.logr_nm ${sord}
                 </when>
-                <when test="'senstype_no' == sidx and sidx != ''">
-                    MG.senstype_no ${sord}
+                <when test="'sens_nm' == sidx and sidx != ''">
+                    MG.sens_nm ${sord}
                 </when>
+
+                <when test="'sect_no' == sidx and sidx != ''">
+                    MG.sect_no ${sord}
+                </when>
+                <when test="'maint_sts_nm' == sidx and sidx != ''">
+                    MG.maint_sts_nm ${sord}
+                </when>
+                <when test="'nonrecv_limit_min' == sidx and sidx != ''">
+                    MG.nonrecv_limit_min ${sord}
+                </when>
+                <when test="'alarm_use_yn' == sidx and sidx != ''">
+                    MG.alarm_use_yn ${sord}
+                </when>
+                <when test="'sms_snd_yn' == sidx and sidx != ''">
+                    MG.sms_snd_yn ${sord}
+                </when>
+                <when test="'sens_disp_yn' == sidx and sidx != ''">
+                    MG.sens_disp_yn ${sord}
+                </when>
+                <when test="'inst_ymd' == sidx and sidx != ''">
+                    MG.inst_ymd ${sord}
+                </when>
+
                 <when test="'mod_dt' == sidx and sidx != ''">
                     MG.mod_dt ${sord}
                 </when>
@@ -62,7 +85,7 @@
             , (SELECT B.code_nm FROM tb_common_code B WHERE B.code_id = A.maint_sts_cd) AS maint_sts_nm
             , A.senstype_no
             , A.sens_nm
-            , A.inst_ymd
+            , COALESCE(to_char(to_date(NULLIF(A.inst_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS inst_ymd
             , A.sect_no
             , A.multi_sens_yn
             , A.disp_prior_yn
@@ -98,7 +121,7 @@
             , (SELECT B.code_nm FROM tb_common_code B WHERE B.code_id = A.maint_sts_cd) AS maint_sts_nm
             , A.senstype_no
             , A.sens_nm
-            , A.inst_ymd
+            , COALESCE(to_char(to_date(NULLIF(A.inst_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS inst_ymd
             , A.sect_no
             , A.multi_sens_yn
             , A.disp_prior_yn
@@ -145,7 +168,7 @@
             <if test="logr_no != null">#{logr_no},</if>
             <if test="senstype_no != null">#{senstype_no},</if>
             <if test="sens_nm != null">#{sens_nm},</if>
-            <if test="inst_ymd != null">#{inst_ymd},</if>
+            <if test="inst_ymd != null">COALESCE(TO_CHAR(TO_DATE(NULLIF(#{inst_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), ''),</if>
             <if test="sect_no != null">#{sect_no}::int,</if>
             <if test="nonrecv_limit_min != null">#{nonrecv_limit_min}::int,</if>
             <if test="alarm_use_yn != null">#{alarm_use_yn},</if>
@@ -174,7 +197,7 @@
             , sens_nm = #{sens_nm}
         </if>
         <if test="inst_ymd != null">
-            , inst_ymd = #{inst_ymd}
+            , inst_ymd = COALESCE(TO_CHAR(TO_DATE(NULLIF(#{inst_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), '')
         </if>
         <if test="sect_no != null">
             , sect_no = #{sect_no}::int

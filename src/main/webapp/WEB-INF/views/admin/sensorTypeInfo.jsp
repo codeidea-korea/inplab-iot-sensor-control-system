@@ -340,11 +340,11 @@
                                 <tr>
                                     <th class="required_th">로거_idx_S</th>
                                     <td>
-                                        <input type="text" name="logr_idx_str"  class="logr_idx"/>
+                                        <input type="text" name="logr_idx_str"  class="logr_idx required"/>
                                     </td>
                                     <th class="required_th">로거_idx_E</th>
                                     <td>
-                                        <input type="text" name="logr_idx_end"  class="logr_idx"/>
+                                        <input type="text" name="logr_idx_end"  class="logr_idx required"/>
                                     </td>
                                 </tr>
 

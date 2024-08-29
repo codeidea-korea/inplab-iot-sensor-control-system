@@ -38,15 +38,38 @@
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
-                <when test="'mapping_no' == sidx and sidx != ''">
-                    MG.mapping_no ${sord}
+                <when test="'district_nm' == sidx and sidx != ''">
+                    MG.district_nm ${sord}
                 </when>
-                <when test="'sens_no' == sidx and sidx != ''">
-                    MG.sens_no ${sord}
+                <when test="'senstype_nm' == sidx and sidx != ''">
+                    MG.senstype_nm ${sord}
                 </when>
-                <when test="'sens_chnl_id' == sidx and sidx != ''">
-                    MG.sens_chnl_id ${sord}
+                <when test="'sens_nm' == sidx and sidx != ''">
+                    MG.sens_nm ${sord}
                 </when>
+
+                <when test="'logr_nm' == sidx and sidx != ''">
+                    MG.logr_nm ${sord}
+                </when>
+                <when test="'logr_no' == sidx and sidx != ''">
+                    MG.logr_no ${sord}
+                </when>
+                <when test="'sens_chnl_nm' == sidx and sidx != ''">
+                    MG.sens_chnl_nm ${sord}
+                </when>
+                <when test="'logr_chnl_seq' == sidx and sidx != ''">
+                    MG.logr_chnl_seq ${sord}
+                </when>
+                <when test="'logr_idx_no' == sidx and sidx != ''">
+                    MG.logr_idx_no ${sord}
+                </when>
+                <when test="'sect_no' == sidx and sidx != ''">
+                    MG.sect_no ${sord}
+                </when>
+                <when test="'reg_dt' == sidx and sidx != ''">
+                    MG.reg_dt ${sord}
+                </when>
+
                 <when test="'mod_dt' == sidx and sidx != ''">
                     MG.mod_dt ${sord}
                 </when>

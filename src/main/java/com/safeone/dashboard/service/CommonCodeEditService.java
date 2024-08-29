@@ -41,6 +41,10 @@ public class CommonCodeEditService {
         return mapper.selectDistrictInfoDistAbbr(param);
     }
 
+    public String getSensorInfoNm(Map param) {
+        return mapper.selectSensorInfoNm(param);
+    }
+
     public List<Map> getDistrictInfoList() {
         return mapper.selectDistrictInfoList();
     }

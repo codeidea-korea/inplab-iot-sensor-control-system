@@ -21,7 +21,8 @@
 <meta name="twitter:image" content="/images/og_images.jpg" />
 <meta name="twitter:description" content="" />
 <title>Golden City - IoT센서관제시스템</title>
-<script type="text/javascript" src="http://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=935413DC-CBE2-382F-B307-933501B0DC45"></script>
+<%--<script type="text/javascript" src="http://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=935413DC-CBE2-382F-B307-933501B0DC45"></script>--%>
+<script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=935413DC-CBE2-382F-B307-933501B0DC45"></script>
 <!-- <script type="text/javascript" src="/Cesium/Cesium.js"></script> -->
 <script type="text/javascript" src="https://cesium.com/downloads/cesiumjs/releases/1.82/Build/Cesium/Cesium.js"></script>
 <link href="https://fonts.cdnfonts.com/css/source-code-pro" rel="stylesheet">

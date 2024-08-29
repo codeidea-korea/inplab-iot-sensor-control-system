@@ -179,6 +179,23 @@
                     const form = $('#lay-form-write')[0]; // 폼 요소 선택
                     const formData = new FormData(form); // FormData 객체 생성
 
+                    // $.ajax({
+                    //     url: '/adminAdd/districtInfo/add',
+                    //     type: 'POST',
+                    //     data: formData,
+                    //     contentType: false, // 서버에 전송되는 데이터의 타입을 기본 설정으로 둠
+                    //     processData: false, // 데이터의 처리 방법 설정 (false로 해야 파일을 처리할 수 있음)
+                    //     success: function (res) {
+                    //         alert('저장되었습니다.', function () {
+                    //             popFancyClose('#lay-form-write');
+                    //         });
+                    //         reloadJqGrid();
+                    //     },
+                    //     error: function (err) {
+                    //         alert('파일 업로드에 실패했습니다.');
+                    //     }
+                    // });
+
                     $.ajax({
                         url: '/adminAdd/districtInfo/add',
                         type: 'POST',
@@ -186,15 +203,23 @@
                         contentType: false, // 서버에 전송되는 데이터의 타입을 기본 설정으로 둠
                         processData: false, // 데이터의 처리 방법 설정 (false로 해야 파일을 처리할 수 있음)
                         success: function (res) {
-                            alert('저장되었습니다.', function () {
-                                popFancyClose('#lay-form-write');
-                            });
-                            reloadJqGrid();
+                            if (res.success) {
+                                alert(res.message, function () {
+                                    popFancyClose('#lay-form-write');
+                                    reloadJqGrid(); // 그리드 리로드
+                                });
+                            } else {
+                                alert(res.message); // 중복된 값이 있거나 오류가 발생한 경우의 메시지
+                                if (res.message === "중복된 값이 존재합니다.") {
+                                    $('.abbr').focus(); // 중복된 값이 있는 필드로 포커스 이동
+                                }
+                            }
                         },
                         error: function (err) {
                             alert('파일 업로드에 실패했습니다.');
                         }
                     });
+
 
 
                 });

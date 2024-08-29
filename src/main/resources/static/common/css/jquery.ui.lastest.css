@@ -945,10 +945,10 @@ body .ui-tooltip {
 .ui-state-default .ui-icon {
 	background-image: url(images/ui-icons_ffffff_256x240.png)/*{iconsDefault}*/;
 }
-.ui-state-hover .ui-icon,
-.ui-state-focus .ui-icon {
-	background-image: url(images/ui-icons_454545_256x240.png)/*{iconsHover}*/;
-}
+/*.ui-state-hover .ui-icon,*/
+/*.ui-state-focus .ui-icon {*/
+/*	background-image: url(images/ui-icons_454545_256x240.png)!*{iconsHover}*!;*/
+/*}*/
 .ui-state-active .ui-icon {
 	background-image: url(images/ui-icons_454545_256x240.png)/*{iconsActive}*/;
 }

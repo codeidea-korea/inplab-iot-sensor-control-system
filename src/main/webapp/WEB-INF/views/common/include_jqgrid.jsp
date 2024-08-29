@@ -40,6 +40,10 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
 
         var $grid = $(".jqGrid");
 
+        $grid.on('jqGridInitGrid', function() {
+            $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
+        });
+
         $.each(_columns, function () {
             _names.push(this.columnName);
             _labels.push(this.title);
@@ -481,6 +485,7 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                 window.jqgridModify = false;
 
                 // initPage($(".jqGrid"), $(".paginate"), true, "TOT", pageCount);
+                $grid.closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
             },
             gridComplete: function() {
                 $(window).trigger('gridComplete');

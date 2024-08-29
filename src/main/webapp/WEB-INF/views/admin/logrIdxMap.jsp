@@ -264,6 +264,8 @@
             } else {
                 alert("No file selected.");
             }
+
+            reloadJqGrid();
         }
 
     </script>
@@ -302,10 +304,10 @@
 <%--                    <a class="modifyBtn">수정</a>--%>
 <%--                    <a class="deleteBtn">삭제</a>--%>
 
-<%--                    <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>--%>
-<%--                    <form id="uploadForm" style="display:none;">--%>
-<%--                        <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">--%>
-<%--                    </form>--%>
+                    <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>
+                    <form id="uploadForm" style="display:none;">
+                        <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
+                    </form>
 
 <%--                    <a class="excelBtn">다운로드</a>--%>
                 </div>

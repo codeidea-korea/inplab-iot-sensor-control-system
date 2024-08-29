@@ -9,6 +9,8 @@ import java.util.Map;
 @Repository
 public interface DistrictInfoMapper {
     int selectDistrictInfoListTotal(Map param);
+    int selectDistrictInfoAbbrChk(Map param);
+    int selectDistrictInfoNmChk(Map param);
     List<DistrictInfoDto> selectDistrictInfoList(Map param);
     String getDistrictInfoIdByEtc1(String name);
     int insertDistrictInfo(Map param);
