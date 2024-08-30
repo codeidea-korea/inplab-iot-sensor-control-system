@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -72,20 +73,8 @@ public class ExcelServiceImpl implements ExcelService {
 
         String fileName = excelDto.getFile_name() + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + ".xlsx";
 
-        // 브라우저별로 파일명을 다르게 인코딩하여 설정
-        String encodedFilename = java.net.URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
-        String userAgent = request.getHeader("User-Agent");
-
-        if (userAgent.contains("MSIE") || userAgent.contains("Trident") || userAgent.contains("Edge")) {
-            // IE 및 Edge 브라우저용
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFilename + "\"");
-        } else if (userAgent.contains("Firefox")) {
-            // Firefox 브라우저용
-            response.setHeader("Content-Disposition", "attachment; filename*=\"UTF-8''" + encodedFilename + "\"");
-        } else {
-            // Chrome, Safari, Opera, 기타 브라우저용
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + java.net.URLDecoder.decode(encodedFilename, "UTF-8") + "\"");
-        }
+        String outputFileName = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + outputFileName + "\"");
         // Content-Type 설정
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
