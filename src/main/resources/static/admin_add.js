@@ -49,7 +49,7 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gr
 
     const formattedData = actFormattedData(data, key);
 
-    $(`#${gridId}`).jqGrid({
+    let settingObj = {
         datatype: "local",
         data: formattedData,
         height: $('.contents-in').height() - 50,
@@ -62,7 +62,14 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gr
         colModel:column,
         gridComplete: gridComplete,
         onSelectRow: onSelectRow,
-    });
+    };
+
+    if (gridId !== 'jqGrid-2') {
+        settingObj.reorderColumns = true;
+        settingObj.sortable = true;
+    }
+
+    $(`#${gridId}`).jqGrid(settingObj);
 
     // 멀티 헤더 설정
     if (Array.isArray(groupHeader)) {
@@ -107,6 +114,18 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gr
             $(`#${gridId}`).jqGrid('setSelection', $(this).val(), true);
         }
     });
+
+    /*$(`#${gridId}`).jqGrid("sortableColumns", true);
+
+    // jQuery UI sortable을 사용하여 헤더 순서 변경 가능하게 설정
+    $(".ui-jqgrid-htable th").sortable({
+        axis: "x", // x축으로만 이동 가능
+        stop: function(event, ui) {
+            const newOrder = $(this).sortable("toArray", { attribute: "id" });
+            console.log("New header order:", newOrder);
+            // 필요시 새로운 순서를 반영하여 데이터 재정렬 로직 추가 가능
+        }
+    });*/
 };
 
 const alert2 = (msg, callbackYes) => {
@@ -256,6 +275,19 @@ const isFunctionEmpty = (func) => {
 
     const funcStr = func.toString().replace(/\s+/g, ''); // 모든 공백 제거
     return funcStr === 'function(){}' || funcStr === '(){}' || funcStr === 'functionempty(){}';
+};
+
+const isValidTimestamp = (timestamp) => {
+    // 정규식으로 'YYYY-MM-DD HH:MM:SS' 형식 검사
+    const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+    // 형식이 맞는지 확인
+    if (!regex.test(timestamp)) {
+        return false;
+    }
+    // 실제 날짜로 변환 가능한지 확인
+    const date = new Date(timestamp.replace(' ', 'T')); // Date 객체로 변환
+    // 유효한 날짜인지 확인
+    return !isNaN(date.getTime());
 };
 
 $(window).on('resize', function() {

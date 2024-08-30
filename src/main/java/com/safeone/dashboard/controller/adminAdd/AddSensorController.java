@@ -30,4 +30,9 @@ public class AddSensorController {
     public ResponseEntity<ObjectNode> getMeasureDetails(GetAdminAddMeasureDetailsDto getAdminAddSensorDto) {
         return ResponseEntity.ok(sensorAddService.getMeasureDetails(getAdminAddSensorDto));
     }
+
+    @RequestMapping(value = "/actUdtIns", produces = MediaType.APPLICATION_JSON_VALUE, method = { RequestMethod.POST })
+    public ResponseEntity<ObjectNode> actUdtIns(@RequestBody InsAdminAddMeasureDetailsDto getAdminAddSensorDto) {
+        return ResponseEntity.ok(sensorAddService.actUdtIns(getAdminAddSensorDto));
+    }
 }

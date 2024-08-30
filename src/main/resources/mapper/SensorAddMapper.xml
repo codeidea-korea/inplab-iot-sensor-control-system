@@ -145,4 +145,30 @@
 		WHERE 1=1
 		AND A.sens_no = #{sens_no}
 	</sql>
+
+	<insert id="insMeasureDetails" parameterType="java.util.HashMap">
+		/* SensorAddMapper.insMeasureDetails */
+		INSERT INTO tb_measure_details (
+			mgnt_no
+			,sens_no
+			,sens_chnl_id
+			,meas_dt
+			,raw_data
+			,formul_data
+		) VALUES (
+			(SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_measure_details)
+			,#{sens_no}
+			,#{sens_chnl_id}
+			,CAST(#{meas_dt} AS TIMESTAMP)
+			,${raw_data}
+ 			,${formul_data}
+		)
+	</insert>
+
+	<delete id="delMeasureDetails" parameterType="java.util.HashMap">
+		/* SensorAddMapper.delMeasureDetails */
+		DELETE FROM tb_measure_details
+		WHERE 1=1
+		AND mgnt_no = ${mgnt_no}
+	</delete>
 </mapper>

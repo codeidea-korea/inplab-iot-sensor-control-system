@@ -34,17 +34,54 @@
 			color: white;  /* 글자색 */
 			font-weight: bold;  /* 글자 굵기 */
 		}
+
+		.btn-group-1 > a {
+			height: 2.8rem;
+			margin-left: 1rem; /* padding:0 2rem; */
+			background-color: #6975ac;
+			font-weight: 500;
+			font-size: 1.4rem;
+			line-height: 1;
+			color: #fff; /* text-align:center; */
+			border-radius: 99px;
+			display: flex;
+			align-items: center;
+			cursor: pointer;
+			width: 56px;
+			justify-content: center;
+			white-space: nowrap;
+		}
+
+		.btn-group-2 > a {
+			height: 2.8rem;
+			margin-left: 1rem;
+			padding:0 1rem;
+			background-color: #237149;
+			font-weight: 500;
+			font-size: 1.4rem;
+			line-height: 1;
+			color: #fff; /* text-align:center; */
+			border-radius: 99px;
+			display: flex;
+			align-items: center;
+			cursor: pointer;
+			justify-content: center;
+			white-space: nowrap;
+		}
 	</style>
 
 	<script type="text/javascript" src="/admin_add.js"></script>
+	<!-- SheetJS (XLSX.js) 라이브러리 추가 -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 	<script>
 		const limit_1 = 25;
 		let offset_1 = 0;
 		const limit_2 = 25;
 		let offset_2 = 0;
+		let delArr = [];
 
 		const checkboxFormatter = (cellValue, options, rowObject) => {
-			return '<input type="checkbox" class="row-checkbox" value="'+rowObject.mapping_no+'">';
+			return '<input type="checkbox" class="row-checkbox" value="'+rowObject.mgnt_no+'">';
 		};
 
 		const dateFormatter = (cellValue, options, rowObject) => {
@@ -68,19 +105,27 @@
 
 		const onSelectRow2 = (rowid, status, e) => {
 			const sens_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+
 			$('#contents-2').html('<table id="jqGrid-2"></table>');
+			$('#district_nm').html($("#jqGrid").jqGrid('getRowData', rowid).district_nm);
+			$('#sens_tp_nm').html($("#jqGrid").jqGrid('getRowData', rowid).sens_tp_nm);
+			$('#sens_nm').html($("#jqGrid").jqGrid('getRowData', rowid).sens_nm);
+
 			column_2 = [
 				{name : 'checkbox', index: 'checkbox', width: 35, align: 'center', sortable: false, hidden: false, formatter: checkboxFormatter},
-				{name : 'meas_dt', index : 'meas_dt', width: 200, align : 'center', hidden:false},
+				{name : 'meas_dt', index : 'meas_dt', width: 230, align : 'center', hidden:false},
 			];
 			header_2 = ['', '계측일시'];
 			header_2_group = [];
+			delArr = [];
 			offset_2 = 0;
+
 			getMeasureDetails({sens_no : sens_no, limit : limit_2, offset : offset_2}).then((res) => {
 				if (res?.rows.length === 0) {
 					column_2 = [];
 					header_2 = [];
 					header_2_group = [];
+					$('#btn-group-1').hide();
 					return;
 				}
 				res?.rows[0]?.logr_idx_map.forEach((logr) => {
@@ -105,6 +150,7 @@
 					}
 				});
 				setJqGridTable(res.rows, column_2, header_2, function () {}, onSelectRow, 'mgnt_no', 'jqGrid-2', limit_2, offset_2, getMeasureDetails, header_2_group);
+				$('#btn-group-1').show();
 			}).catch((fail) => {
 				console.log('setJqGridTable fail > ', fail);
 			});
@@ -156,6 +202,25 @@
 			});
 		};
 
+		const actInsDel = (obj) => {
+			return new Promise((resolve, reject) => {
+				$.ajax({
+					type: 'POST',
+					url: `/adminAdd/sensor/actUdtIns`,
+					dataType: 'json',
+					contentType: 'application/json; charset=utf-8',
+					async: true,
+					data: JSON.stringify(obj)
+				}).done(function(res) {
+					resolve(res);
+				}).fail(function(fail) {
+					reject(fail);
+					console.log('actUdtIns fail > ', fail);
+					alert2('저장에 실패했습니다.', function() {});
+				});
+			});
+		};
+
 		const gridComplete2 = () => {
 			$("#jqGrid").parent().height($("#jqGrid").height()+100);
 		};
@@ -190,6 +255,8 @@
 				iframeWindow.alert('준비중입니다.');
 			}, 1000);*/
 
+			$('#btn-group-1').hide();
+
 			getSensor({limit : limit_1, offset : offset_1}).then((res) => {
 				console.log('res > ', res);
 				setJqGridTable(res.rows, column_1, header_1, gridComplete2, onSelectRow2, 'sens_no', 'jqGrid', limit_1, offset_1, getSensor);
@@ -197,9 +264,11 @@
 				console.log('setJqGridTable fail > ', fail);
 			});
 
-			$("#addRowButton").click(function() {
+			$("#addRow").click(function() {
+				let newRowId = $.jgrid.randId();  // 랜덤 ID 생성
 				let array = [
 					{
+						mgnt_no : newRowId,
 						raw_data_x : '<input type="text" class="raw_data_x"/>',
 						formul_data_x : '<input type="text" class="formul_data_x"/>',
 						raw_data_y : '<input type="text" class="raw_data_y"/>',
@@ -209,180 +278,180 @@
 						meas_dt: '<input type="text" class="meas_dt"/>'
 					}
 				];
-				$("#jqGrid-2").jqGrid('addRowData', 'mgnt_no', array[0], "first");
+				$("#jqGrid-2").jqGrid('addRowData', newRowId, array[0], "first");
 
 				// 새 행을 편집 모드로 전환
-				$("#jqGrid-2").jqGrid('editRow', 'mgnt_no', {
+				$("#jqGrid-2").jqGrid('editRow', newRowId, {
 					keys: true,  // Enter 키로 편집 완료 가능
 					focusField: 1  // 첫 번째 편집 가능한 필드에 포커스
 				});
 			});
 
-			$('.searchtBtn').on('click', function() {
-				const search_text = $('input[name=search_text]').val();
-				offset = 0;
-				getDisplayBoard({search_text : search_text, limit : limit, offset : offset}).then((res) => {
-					const formattedData = actFormattedData(res.rows, 'dispbd_no');
-					$("#jqGrid").jqGrid('clearGridData');
-					$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
-				}).catch((fail) => {
-					console.log('setJqGridTable fail > ', fail);
+			$('#delRow').click(function() {
+				const mgnt_no =  $("#jqGrid-2").jqGrid('getGridParam', 'selrow');
+				if (mgnt_no === '' || mgnt_no === null || mgnt_no === undefined || mgnt_no === 'undefined') {
+					alert2('삭제할 행을 선택해주세요.', function() {});
+					return;
+				}
+				confirm2('선택한 행을 삭제하시겠습니까?', function() {
+					$("#jqGrid-2").jqGrid('delRowData', mgnt_no);
+					if (mgnt_no.indexOf('jqg') === -1) {
+						delArr.push(mgnt_no);
+					}
 				});
 			});
 
-			$('.insertBtn').on('click', function() {
-				initForm();
-				getDistrictInfo().then((res2) => {
-					let district_nm = $('select[name=district_no]');
-					district_nm.empty();
-					district_nm.append('<option value="">선택</option>');
-					$.each(res2.rows, function(index, item) {
-						district_nm.append('<option value="' + item.district_no + '">' + item.district_nm + '</option>');
-					});
-					$("#form_sub_title").html('신규 등록');
-					$('#ins_displayBoard').show();
-					$('#udt_displayBoard').hide();
-					$('#del_displayBoard').hide();
-					$('#tr_dispbd_no').hide();
-					popFancy('#lay-form-write08');
-				}).catch((fail) => {
-					console.log('fail > ', fail);
-				});
-			});
+			$('#insDel').on('click', function() {
+				let insArr = [];
+				let isValid = false;
+				const sens_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
 
-			$('#ins_displayBoard').on('click', function() {
-				let array = [];
-				const {isValid, obj} = validCheck();
+				$("#jqGrid-2").find('tr[id^=jqg]').each(function() {
+					let obj = {};
+					if ($(this).find('.meas_dt').val() !== '' && $(this).find('.meas_dt').val() !== undefined) {
+						obj.sens_no = sens_no;
+						obj.meas_dt = $(this).find('.meas_dt').val();
+					}
+					if ($(this).find('.raw_data_x').val() !== '' && $(this).find('.raw_data_x').val() !== undefined) {
+						obj.raw_data = $(this).find('.raw_data_x').val();
+						obj.sens_chnl_id = 'X';
+					}
+					if ($(this).find('.formul_data_x').val() !== '' && $(this).find('.formul_data_x').val() !== undefined) {
+						obj.formul_data = $(this).find('.formul_data_x').val();
+						obj.sens_chnl_id = 'X';
+					}
+					if ($(this).find('.raw_data_y').val() !== '' && $(this).find('.raw_data_y').val() !== undefined) {
+						obj.raw_data = $(this).find('.raw_data_y').val();
+						obj.sens_chnl_id = 'Y';
+					}
+					if ($(this).find('.formul_data_y').val() !== '' && $(this).find('.formul_data_y').val() !== undefined) {
+						obj.formul_data = $(this).find('.formul_data_y').val();
+						obj.sens_chnl_id = 'Y';
+					}
+					if ($(this).find('.raw_data_z').val() !== '' && $(this).find('.raw_data_z').val() !== undefined) {
+						obj.raw_data = $(this).find('.raw_data_z').val();
+						obj.sens_chnl_id = 'Z';
+					}
+					if ($(this).find('.formul_data_z').val() !== '' && $(this).find('.formul_data_z').val() !== undefined) {
+						obj.formul_data = $(this).find('.formul_data_z').val();
+						obj.sens_chnl_id = 'Z';
+					}
+					if ($(this).find('.raw_data_').val() !== '' && $(this).find('.raw_data_').val() !== undefined) {
+						obj.raw_data = $(this).find('.raw_data_').val();
+						obj.sens_chnl_id = '';
+					}
+					if ($(this).find('.formul_data_').val() !== '' && $(this).find('.formul_data_').val() !== undefined) {
+						obj.formul_data = $(this).find('.formul_data_').val();
+						obj.sens_chnl_id = '';
+					}
+					insArr.push(obj);
+				});
+
+				insArr.some((item) => {
+					if (item.meas_dt === undefined || item.meas_dt === '') {
+						isValid = true;
+						return;
+					}
+					if (isValidTimestamp(item.meas_dt) === false) {
+						isValid = true;
+						return;
+					}
+					if ((item.raw_data === undefined || item.raw_data === '')
+						&& (item.formul_data === undefined || item.formul_data === '')) {
+						isValid = true;
+						return;
+					}
+				});
 
 				if (isValid) {
+					alert2('계측일시와 계측값을 확인해주세요.', function() {});
 					return;
 				}
 
-				array.push(obj);
-
-				insDisplayBoard(array).then((res) => {
-					if (res.count?.pass > 0) {
-						alert2(res?.pass_list[0]?.message, function() {});
-						return;
-					}
-					if (res.count?.ins === 0) {
-						alert2('전광판 정보가 등록되지 않았습니다.', function() {});
-						return;
-					}
-					alert2('전광판 정보가 등록되었습니다.', function () {
-						popFancyClose('#lay-form-write08');
-						const search_text = $('input[name=search_text]').val();
-						offset = 0;
-						getDisplayBoard({search_text : search_text, limit : limit, offset : offset}).then((res) => {
-							const formattedData = actFormattedData(res.rows, 'dispbd_no');
-							$("#jqGrid").jqGrid('clearGridData');
-							$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
-						}).catch((fail) => {
-							console.log('setJqGridTable fail > ', fail);
-						});
+				actInsDel({ins_arr : insArr, del_arr : delArr}).then((res) => {
+					console.log('res > ', res);
+					alert2('저장되었습니다.', function() {
+						$("#" + sens_no).trigger("click");
 					});
 				}).catch((fail) => {
-					console.log('insDisplayBoard fail > ', fail);
-					alert2('전광판 정보 등록에 실패했습니다.', function() {});
+					console.log('actUdtIns fail > ', fail);
+					alert2('저장에 실패했습니다.', function() {});
 				});
 			});
 
-			$('#udt_displayBoard').on('click', function() {
-				let array = [];
-				const {isValid, obj} = validCheck();
+			$("#importExcel").click(function() {
+				$("#fileInput").click();
+			});
 
-				if (isValid) {
-					return;
-				}
+			// 파일 선택 후 엑셀 읽기
+			$("#fileInput").change(function(e) {
+				const file = e.target.files[0];
+				const reader = new FileReader();
 
-				array.push(obj);
+				reader.onload = function(e) {
+					const data = new Uint8Array(e.target.result);
+					const workbook = XLSX.read(data, { type: 'array' });
 
-				udtDisplayBoard(array).then((res) => {
-					if (res.count?.pass > 0) {
-						alert2(res?.pass_list[0]?.message, function() {});
-						return;
-					}
-					if (res.count?.udt === 0) {
-						alert2('전광판 정보가 수정되지 않았습니다.', function() {});
-						return;
-					}
-					alert2('전광판 정보가 수정되었습니다.', function () {
-						popFancyClose('#lay-form-write08');
-						const search_text = $('input[name=search_text]').val();
-						offset = 0;
-						getDisplayBoard({search_text : search_text, limit : limit, offset : offset}).then((res) => {
-							const formattedData = actFormattedData(res.rows, 'dispbd_no');
-							$("#jqGrid").jqGrid('clearGridData');
-							$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
-						}).catch((fail) => {
-							console.log('setJqGridTable fail > ', fail);
-						});
+					// 첫 번째 시트의 데이터를 가져옴
+					const sheetName = workbook.SheetNames[0];
+					const worksheet = workbook.Sheets[sheetName];
+
+					// 엑셀 데이터를 JSON 형태로 변환
+					const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+					// JSON 데이터를 사용하여 jqGrid에 행 추가
+					jsonData.forEach(function(row, index) {
+						if (index === 0) return; // 헤더 행을 건너뜀
+
+						let newRowId = $.jgrid.randId();  // 랜덤 ID 생성
+						let rowData = {
+							mgnt_no: newRowId,
+							meas_dt: '<input type="text" class="meas_dt" value="' + (row[0] || '') + '"/>',
+							raw_data_x: '<input type="text" class="raw_data_x" value="' + (row[1] || '') + '"/>',
+							formul_data_x: '<input type="text" class="formul_data_x" value="' + (row[2] || '') + '"/>',
+							raw_data_y: '<input type="text" class="raw_data_y" value="' + (row[3] || '') + '"/>',
+							formul_data_y: '<input type="text" class="formul_data_y" value="' + (row[4] || '') + '"/>',
+							raw_data_z: '<input type="text" class="raw_data_z" value="' + (row[5] || '') + '"/>',
+							formul_data_z: '<input type="text" class="formul_data_z" value="' + (row[6] || '') + '"/>',
+						};
+						$("#jqGrid-2").jqGrid('addRowData', newRowId, rowData, "first");
 					});
-				}).catch((fail) => {
-					console.log('insDisplayBoard fail > ', fail);
-					alert2('전광판 수정에 실패했습니다.', function() {});
+					$('#fileInput').val('');
+				};
+				reader.readAsArrayBuffer(file);
+			});
+
+			// 엑셀 다운로드 버튼 클릭 시 동작
+			$("#exportExcel").click(function() {
+				// jqGrid 데이터 가져오기
+				const gridData = $("#jqGrid-2").jqGrid('getRowData');
+
+				// 워크시트 데이터 준비
+				const worksheetData = gridData.map(function(row) {
+					return {
+						'계측일시': row.meas_dt === undefined ? $(row.meas_dt).val() : row.meas_dt,
+						'Raw Data X': row.raw_data_x === undefined ? $(row.raw_data_x).val() : row.raw_data_x,
+						'Formul Data X': row.formul_data_x === undefined ? $(row.formul_data_x).val() : row.formul_data_x,
+						'Raw Data Y': row.raw_data_y === undefined ? $(row.raw_data_y).val() : row.raw_data_y,
+						'Formul Data Y': row.formul_data_y === undefined ? $(row.formul_data_y).val() : row.formul_data_y,
+						'Raw Data Z': row.raw_data_z === undefined ? $(row.raw_data_z).val() : row.raw_data_z,
+						'Formul Data Z': row.formul_data_z === undefined ? $(row.formul_data_z).val() : row.formul_data_z,
+					};
 				});
+
+				// 워크시트 생성
+				const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+
+				// 워크북 생성
+				const workbook = XLSX.utils.book_new();
+				XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+				// 엑셀 파일 다운로드
+				XLSX.writeFile(workbook, "measureDetails.xlsx");
 			});
 
-			// 수정 팝업
-			$('.modifyBtn').on('click', function() {
-				const dispbd_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
-
-				if (dispbd_no === null) {
-					alert2('전광판를 선택해주세요.', function() {});
-					return;
-				}
-
-				initForm();
-
-				Promise.all([getDisplayBoard({dispbd_no : dispbd_no}), getDistrictInfo()]).then(([res1, res2]) => {
-					if (res1.rows.length === 0) {
-						alert2('불러온 전광판정보가 없습니다.', function() {});
-						return;
-					} else if (res1.rows.length > 1) {
-						alert2('불러온 전광판정보가 2개 이상입니다.', function() {});
-						return;
-					}
-
-					let district_nm = $('select[name=district_no]');
-					district_nm.empty();
-					district_nm.append('<option value="">선택</option>');
-					$.each(res2.rows, function(index, item) {
-						district_nm.append('<option value="' + item.district_no + '">' + item.district_nm + '</option>');
-					});
-
-					setDisplayBoard(res1.rows[0]);
-					$("#form_sub_title").html('상세 정보');
-					$('#ins_displayBoard').hide();
-					$('#udt_displayBoard').show();
-					$('#del_displayBoard').show();
-					$('#tr_dispbd_no').show();
-					popFancy('#lay-form-write08');
-				}).catch((fail) => {
-					console.log('fail > ', fail);
-				});
-			});
-
-			$('#del_displayBoard').on('click', function() {
-				const dispbd_no = $('input[name=dispbd_no]').val();
-				if (dispbd_no === '') {
-					alert2('전광판를 선택해주세요.', function() {});
-					return;
-				}
-				confirm2('전광판를 정보를 삭제하시겠습니까?', function() {
-					actionDelDisplayBoard(dispbd_no);
-				});
-			});
-
-			$('.excelBtn').on('click', function() {
-				const obj = makeExcelData('전광판 관리');
-				listExcelDown(obj);
-			});
-
-			$('input[name=search_text]').on('keypress', function(e) {
-				if (e.key === 'Enter') {
-					$('.searchtBtn').trigger('click');
-				}
+			$('#viewChart').on('click', function() {
+				alert2('준비중입니다.', function() {});
 			});
 		});
 	</script>
@@ -423,14 +492,24 @@
 			</div>
 			<div id="contents" style="flex: 6">
 				<div class="contents-re">
-					<h3 class="txt">데이터값 수정</h3>
-					<div class="btn-group">
-						<input type="text" name="search_text" placeholder="전광판명 / 현장명 / 설치상태"
-							   style="background-color: white; font-size: medium;"/>
-						<a id="addRowButton">검색</a>
-						<a class="insertBtn">신규등록</a>
-						<a class="modifyBtn">상세정보</a>
-						<a class="excelBtn">다운로드</a>
+					<div style="display: flex; align-items: center; justify-content: space-between">
+						<div style="display: flex; gap: 2px;">
+							<h3 class="txt">데이터값 수정</h3>
+							<div class="btn-group-2" style="display: flex; gap: 2px;">
+								<a id="district_nm">현장명</a>
+								<a id="sens_tp_nm">센서타입</a>
+								<a id="sens_nm">센서명</a>
+							</div>
+						</div>
+						<div class="btn-group-1" style="display: flex; gap: 2px; margin-bottom: 2.2rem;" id="btn-group-1">
+							<a id="addRow">행추가</a>
+							<a id="delRow">행삭제</a>
+							<a id="insDel">저장</a>
+							<a id="importExcel">업로드</a>
+							<a id="exportExcel">다운로드</a>
+							<a id="viewChart">차트조회</a>
+							<input type="file" id="fileInput" style="display:none;" accept=".xls,.xlsx"/>
+						</div>
 					</div>
 					<div class="contents-in" id="contents-2">
 						<table id="jqGrid-2"></table>
@@ -441,104 +520,6 @@
 		</div>
 	</div>
 	<!--[e] 컨텐츠 영역 -->
-
-	<!--[s] 사용자 등록 팝업 -->
-	<div id="lay-form-write08" class="layer-base">
-		<div class="layer-base-btns">
-			<a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
-		</div>
-		<div class="layer-base-title">전광판 <span id="form_sub_title"></span></div>
-		<div class="layer-base-conts">
-			<div class="bTable">
-				<table>
-					<colgroup>
-						<col width="130" />
-						<col width="*" />
-						<col width="130" />
-						<col width="*" />
-					</colgroup>
-					<tbody>
-					<tr id="tr_dispbd_no">
-						<th>전광판 ID <span style="color: red">*</span></th>
-						<td colspan="3">
-							<input type="text" name="dispbd_no" value="" readonly>
-						</td>
-					</tr>
-					<tr>
-						<th>전광판명 <span style="color: red">*</span></th>
-						<td colspan="3">
-							<input type="text" name="dispbd_nm"/>
-						</td>
-					</tr>
-					<tr>
-						<th>현장명 <span style="color: red">*</span></th>
-						<td colspan="3">
-							<select id="district_no" name="district_no">
-								<option value="">선택</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<th>장비 IP <span style="color: red">*</span></th>
-						<td><input type="text" name="dispbd_ip"/></td>
-						<th>접속Port <span style="color: red">*</span></th>
-						<td><input type="text" name="dispbd_port"/></td>
-					</tr>
-					<tr>
-						<th>접속ID <span style="color: red">*</span></th>
-						<td><input type="text" name="dispbd_conn_id"/></td>
-						<th>접속PWD <span style="color: red">*</span></th>
-						<td><input type="text" name="dispbd_conn_pwd"/></td>
-					</tr>
-					<tr>
-						<th>설치일자 <span style="color: red">*</span></th>
-						<td>
-							<input type="text" id="inst_ymd" name="inst_ymd" value="" placeholder="" datepicker="" class="flatpickr-input" readonly="readonly" />
-						</td>
-						<th>설치상태 <span style="color: red">*</span></th>
-						<td>
-							<select name="maint_sts_cd">
-								<option value="">선택</option>
-								<option value="MTN001">정상</option>
-								<option value="MTN002">망실</option>
-								<option value="MTN003">점검</option>
-								<option value="MTN004">망실(철거)</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<th>위도 <span style="color: red">*</span></th>
-						<td>
-							<input type="text" name="dispbd_lat" />
-						</td>
-						<th>경도 <span style="color: red">*</span></th>
-						<td>
-							<input type="text" name="dispbd_lon" />
-						</td>
-					</tr>
-					<tr>
-						<th>모델명</th>
-						<td>
-							<input type="text" name="model_nm" />
-						</td>
-						<th>제조사</th>
-						<td>
-							<input type="text" name="dispbd_maker" />
-						</td>
-					</tr>
-					</tbody>
-				</table>
-
-			</div>
-			<div class="btn-btm">
-				<input type="button" blue value="저장" id="ins_displayBoard"/>
-				<input type="button" blue value="수정" id="udt_displayBoard"/>
-				<input type="button" red value="삭제" id="del_displayBoard"/>
-				<button type="button" data-fancybox-close>닫기</button>
-			</div>
-		</div>
-	</div>
-	<!--[e] 사용자 등록 팝업 -->
 </section>
 </body>
 </html>

@@ -31,4 +31,12 @@ public class SensorAddMapper {
     public int getMeasureDetailsListTotalCnt(Map<String, Object> map) {
         return sqlSession.selectOne("getMeasureDetailsListTotalCnt", map);
     }
+
+    public int insMeasureDetails(Map<String, Object> map) {
+        return sqlSession.insert("insMeasureDetails", map);
+    }
+
+    public int delMeasureDetails(Map<String, Object> map) {
+        return sqlSession.delete("delMeasureDetails", map);
+    }
 }

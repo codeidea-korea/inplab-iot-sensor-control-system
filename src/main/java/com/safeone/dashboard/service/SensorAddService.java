@@ -11,4 +11,6 @@ public interface SensorAddService {
   ObjectNode getSensor(GetAdminAddSensorDto getAdminAddSensorDto);
 
   ObjectNode getMeasureDetails(GetAdminAddMeasureDetailsDto getAdminAddSensorDto);
+
+  ObjectNode actUdtIns(InsAdminAddMeasureDetailsDto getAdminAddSensorDto);
 }

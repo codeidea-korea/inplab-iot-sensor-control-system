@@ -64,4 +64,31 @@ public class SensorAddServiceImpl implements SensorAddService {
 
         return on;
     }
+
+    public ObjectNode actUdtIns(InsAdminAddMeasureDetailsDto getAdminAddSensorDto) {
+        ObjectMapper om = new ObjectMapper();
+        ObjectNode on = om.createObjectNode();
+        ArrayNode an = om.createArrayNode();
+
+        Map<String, Object> map = CommonUtils.dtoToMap(getAdminAddSensorDto);
+        List<HashMap<String, Object>> insArr = getAdminAddSensorDto.getIns_arr();
+        List<String> delArr = getAdminAddSensorDto.getDel_arr();
+
+        int insCount = 0;
+        int delCount = 0;
+
+        for (HashMap<String, Object> insMap : insArr) {
+            insCount += sensorAddMapper.insMeasureDetails(insMap);
+        }
+
+        for (String mgntNo : delArr) {
+            map.put("mgnt_no", mgntNo);
+            delCount += sensorAddMapper.delMeasureDetails(map);
+        }
+
+        CommonUtils.setCountInfo("ins", insCount, on);
+        CommonUtils.setCountInfo("del", delCount, on);
+
+        return on;
+    }
 }
