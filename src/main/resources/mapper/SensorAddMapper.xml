@@ -106,7 +106,20 @@
 		<include refid="getMeasureDetailsList-where"/>
 	</select>
 
-	<select id="getMeasureDetailsList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+	<resultMap id="getMeasureDetailsListMap" type="java.util.HashMap">
+		<result property="mgnt_no" column="mgnt_no"/>
+		<result property="sens_no" column="sens_no"/>
+		<result property="sens_chnl_id" column="sens_chnl_id"/>
+		<result property="meas_dt" column="meas_dt"/>
+		<result property="raw_data" column="raw_data"/>
+		<result property="formul_data" column="formul_data"/>
+		<result property="net_err_yn" column="net_err_yn"/>
+		<result property="net_err_cnt" column="net_err_cnt"/>
+		<result property="alarm_lvl_cd" column="alarm_lvl_cd"/>
+		<result property="reg_dt" column="reg_dt"/>
+		<collection property="logr_idx_map" column="{sens_no = sens_no}" javaType="java.util.ArrayList" ofType="java.util.HashMap" select="getLogrIdxMapList"/>
+	</resultMap>
+	<select id="getMeasureDetailsList" parameterType="java.util.HashMap" resultMap="getMeasureDetailsListMap">
 		/* SensorAddMapper.getMeasureDetailsList */
 		SELECT
 			ROW_NUMBER() OVER (ORDER BY A.reg_dt IS NULL DESC) AS row_num

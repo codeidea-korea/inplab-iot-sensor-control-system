@@ -8,7 +8,7 @@ const addCheckboxToGrid = () => {
         });
     }
 };
-/*
+
 const onSelectRow = (rowId) => {
     // 모든 체크박스를 먼저 해제합니다.
     $('input[type="checkbox"]').prop('checked', false);
@@ -17,7 +17,7 @@ const onSelectRow = (rowId) => {
     let $checkbox = $('#' + rowId).find('input[type="checkbox"]').first();
     $checkbox.prop('checked', true);
 };
-*/
+
 const gridComplete = () => {
     // 헤더에 체크박스 추가
     const $grid = $("#jqGrid");
@@ -64,6 +64,14 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gr
         onSelectRow: onSelectRow,
     });
 
+    // 멀티 헤더 설정
+    if (Array.isArray(groupHeader)) {
+        $(`#${gridId}`).jqGrid('setGroupHeaders', {
+            useColSpanStyle: true, // 이 옵션을 true로 설정해야 그룹 컬럼을 제대로 사용할 수 있음
+            groupHeaders: groupHeader
+        });
+    }
+
     $(`#${gridId}`).closest(".ui-jqgrid-bdiv").on("scroll", function() {
         const $grid = $(this);
         // 스크롤이 맨 아래에 도달했는지 확인
@@ -78,6 +86,9 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gr
                     }
                     $(`#${gridId}`).jqGrid('addRowData', key, res.rows);
                     //addCheckboxToGrid();
+                    if (getFunction.name === 'getSensor') {
+                        $(`#${gridId}`).parent().height($(`#${gridId}`).height()+10)
+                    }
                 }).catch((fail) => {
                     console.log('setJqGridTable fail > ', fail);
                 });
@@ -96,14 +107,6 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gr
             $(`#${gridId}`).jqGrid('setSelection', $(this).val(), true);
         }
     });
-
-    // 멀티 헤더 설정
-    if (Array.isArray(groupHeader)) {
-        $(`#${gridId}`).jqGrid('setGroupHeaders', {
-            useColSpanStyle: true, // 이 옵션을 true로 설정해야 그룹 컬럼을 제대로 사용할 수 있음
-            groupHeaders: groupHeader
-        });
-    }
 };
 
 const alert2 = (msg, callbackYes) => {

@@ -44,7 +44,7 @@
 		let offset_2 = 0;
 
 		const checkboxFormatter = (cellValue, options, rowObject) => {
-			return '<input type="checkbox" class="row-checkbox" value="'+rowObject.dispbd_no+'">';
+			return '<input type="checkbox" class="row-checkbox" value="'+rowObject.mapping_no+'">';
 		};
 
 		const dateFormatter = (cellValue, options, rowObject) => {
@@ -62,29 +62,49 @@
 
 		const header_1 = ['현장명','센서타입','센서명','최종계측일시','단면','센서상태'];
 
-		const column_2 = [
-			{name : 'checkbox', index: 'checkbox', width: 35, align: 'center', sortable: false, hidden: false, formatter: checkboxFormatter},
-			{name : 'meas_dt', index : 'meas_dt', width: 100, align : 'center', hidden:false},
-			{name : 'ttm-02-x', index : 'ttm-02-x', align : 'center', hidden:true},
-			{name : 'raw_data_x', index : 'raw_data_x', align : 'center', hidden:false},
-			{name : 'formul_data_x', index : 'formul_data_x', align : 'center', hidden:false},
-			{name : 'ttm-02-y', index : 'ttm-02-y', align : 'center', hidden:true},
-			{name : 'raw_data_y', index : 'raw_data_y', align : 'center', hidden:false},
-			{name : 'formul_data_y', index : 'formul_data_y', align : 'center', hidden:false},
-		];
+		let column_2 = [];
+		let header_2 = [];
+		let header_2_group = [];
 
-		const header_2 = ['', '계측일시', 'TTM-02-X', 'Raw Data', '보정(Deg)', 'TTM-02-Y', 'Raw Data', '보정(Deg)'];
-
-		const header_2_group = [
-			{ startColumnName: 'raw_data_x', numberOfColumns: 2, titleText: 'TTM-02-X', className: 'group-header'},
-			{ startColumnName: 'raw_data_y', numberOfColumns: 2, titleText: 'TTM-02-Y', className: 'group-header'}
-		];
-
-		const onSelectRow = (rowid, status, e) => {
+		const onSelectRow2 = (rowid, status, e) => {
 			const sens_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+			$('#contents-2').html('<table id="jqGrid-2"></table>');
+			column_2 = [
+				{name : 'checkbox', index: 'checkbox', width: 35, align: 'center', sortable: false, hidden: false, formatter: checkboxFormatter},
+				{name : 'meas_dt', index : 'meas_dt', width: 200, align : 'center', hidden:false},
+			];
+			header_2 = ['', '계측일시'];
+			header_2_group = [];
 			offset_2 = 0;
 			getMeasureDetails({sens_no : sens_no, limit : limit_2, offset : offset_2}).then((res) => {
-				setJqGridTable(res.rows, column_2, header_2, function () {}, function () {}, 'mgnt_no', 'jqGrid-2', limit_2, offset_2, getMeasureDetails, header_2_group);
+				if (res?.rows.length === 0) {
+					column_2 = [];
+					header_2 = [];
+					header_2_group = [];
+					return;
+				}
+				res?.rows[0]?.logr_idx_map.forEach((logr) => {
+					//column_2.push({name : logr?.sens_chnl_nm, index : logr?.sens_chnl_nm, align : 'center', hidden : false});
+					column_2.push({name : 'raw_data_'+logr?.sens_chnl_id?.toLowerCase(), index : 'raw_data_'+logr?.sens_chnl_id?.toLowerCase(), align : 'center', hidden : false});
+					column_2.push({name : 'formul_data_'+logr?.sens_chnl_id?.toLowerCase(), index : 'formul_data_'+logr?.sens_chnl_id?.toLowerCase(), align : 'center', hidden : false});
+					//header_2.push(logr?.sens_chnl_nm);
+					header_2.push('Raw Data');
+					header_2.push('보정(Deg)');
+					header_2_group.push({ startColumnName: 'raw_data_'+logr?.sens_chnl_id?.toLowerCase(), numberOfColumns: 2, titleText: logr?.sens_chnl_nm, className: 'group-header'});
+				});
+				res?.rows?.forEach((item) => {
+					if (item?.sens_chnl_id === 'X') {
+						item.raw_data_x = item.raw_data;
+						item.formul_data_x = item.formul_data;
+					} else if (item?.sens_chnl_id === 'Y') {
+						item.raw_data_y = item.raw_data;
+						item.formul_data_y = item.formul_data;
+					} else if (item?.sens_chnl_id === 'Z') {
+						item.raw_data_z = item.raw_data;
+						item.formul_data_z = item.formul_data;
+					}
+				});
+				setJqGridTable(res.rows, column_2, header_2, function () {}, onSelectRow, 'mgnt_no', 'jqGrid-2', limit_2, offset_2, getMeasureDetails, header_2_group);
 			}).catch((fail) => {
 				console.log('setJqGridTable fail > ', fail);
 			});
@@ -136,6 +156,10 @@
 			});
 		};
 
+		const gridComplete2 = () => {
+			$("#jqGrid").parent().height($("#jqGrid").height()+100);
+		};
+
 		$(function () {
 			$("[datepicker]").flatpickr({
 				locale: "ko",
@@ -168,9 +192,30 @@
 
 			getSensor({limit : limit_1, offset : offset_1}).then((res) => {
 				console.log('res > ', res);
-				setJqGridTable(res.rows, column_1, header_1, function () {}, onSelectRow, 'sens_no', 'jqGrid', limit_1, offset_1, getSensor);
+				setJqGridTable(res.rows, column_1, header_1, gridComplete2, onSelectRow2, 'sens_no', 'jqGrid', limit_1, offset_1, getSensor);
 			}).catch((fail) => {
 				console.log('setJqGridTable fail > ', fail);
+			});
+
+			$("#addRowButton").click(function() {
+				let array = [
+					{
+						raw_data_x : '<input type="text" class="raw_data_x"/>',
+						formul_data_x : '<input type="text" class="formul_data_x"/>',
+						raw_data_y : '<input type="text" class="raw_data_y"/>',
+						formul_data_y : '<input type="text" class="formul_data_y"/>',
+						raw_data_z : '<input type="text" class="raw_data_z"/>',
+						formul_data_z : '<input type="text" class="formul_data_z"/>',
+						meas_dt: '<input type="text" class="meas_dt"/>'
+					}
+				];
+				$("#jqGrid-2").jqGrid('addRowData', 'mgnt_no', array[0], "first");
+
+				// 새 행을 편집 모드로 전환
+				$("#jqGrid-2").jqGrid('editRow', 'mgnt_no', {
+					keys: true,  // Enter 키로 편집 완료 가능
+					focusField: 1  // 첫 번째 편집 가능한 필드에 포커스
+				});
 			});
 
 			$('.searchtBtn').on('click', function() {
@@ -382,12 +427,12 @@
 					<div class="btn-group">
 						<input type="text" name="search_text" placeholder="전광판명 / 현장명 / 설치상태"
 							   style="background-color: white; font-size: medium;"/>
-						<a class="searchtBtn">검색</a>
+						<a id="addRowButton">검색</a>
 						<a class="insertBtn">신규등록</a>
 						<a class="modifyBtn">상세정보</a>
 						<a class="excelBtn">다운로드</a>
 					</div>
-					<div class="contents-in">
+					<div class="contents-in" id="contents-2">
 						<table id="jqGrid-2"></table>
 						<%--<jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>--%>
 					</div>
