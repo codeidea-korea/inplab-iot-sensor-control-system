@@ -464,7 +464,7 @@
 	<!--[s] 컨텐츠 영역 -->
 		<div id="container">
             <div class="search-form search-area searchArea">
-                <h2 class="txt">센서 조회</h2>
+                <h2 class="txt">센서모니터링</h2>
                 <div class="toggleThreshold inputBox" style="margin-right: 20px">
                     <p class="check-box" notxt="" small=""><input type="checkbox" checked="" id="check_tit01_0" name="check_tit01_0" value=""><label for="check_tit01_0"><span class="graphic"></span></label></p>
                     <span class="labelText">임계치 표시</span>

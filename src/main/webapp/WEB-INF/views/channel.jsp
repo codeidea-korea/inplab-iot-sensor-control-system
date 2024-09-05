@@ -53,7 +53,7 @@
 
 			<!--[s] 컨텐츠 영역 -->
 			<div id="container">
-				<h2 class="txt">센서 조회</h2>
+				<h2 class="txt">센서모니터링</h2>
 	
 				<div id="contents">
 					<div class="contents-re">
