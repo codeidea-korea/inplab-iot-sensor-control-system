@@ -61,6 +61,9 @@ public class CommonCodeEditService {
     public List<Map> getSiteInfo() {
         return mapper.selectSiteInfo();
     }
+    public List<Map> selectSiteInfoLogo() {
+        return mapper.selectSiteInfoLogo();
+    }
 
 
     public List<Map> getNewGenerationKey(Map param) {

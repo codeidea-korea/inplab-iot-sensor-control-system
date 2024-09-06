@@ -2,7 +2,9 @@ package com.safeone.dashboard.controller;
 
 import com.safeone.dashboard.config.annotate.NoLoginCheck;
 import com.safeone.dashboard.dto.UserDto;
+import com.safeone.dashboard.service.CommonCodeEditService;
 import com.safeone.dashboard.service.LoginLogService;
+import com.safeone.dashboard.service.SiteInfoService;
 import com.safeone.dashboard.service.UserService;
 import com.safeone.dashboard.util.CommonUtils;
 import com.safeone.dashboard.util.HttpUtils;
@@ -20,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -30,9 +33,16 @@ public class LoginController {
     private UserService userService;
     @Autowired
     private LoginLogService loginLogService;
+
+    @Autowired
+    private CommonCodeEditService commonCodeEditService;
+
     @NoLoginCheck
     @RequestMapping(value = {"", "/"})
     public String main(Model model) {
+        List<Map> maps = commonCodeEditService.selectSiteInfoLogo();
+        model.addAttribute("site_logo", maps.get(0).get("site_logo"));
+        model.addAttribute("site_sys_nm", maps.get(0).get("site_sys_nm"));
         return "login";
     }
 
@@ -59,6 +69,11 @@ public class LoginController {
                     result.setUsr_pwd(null);
                     session.setAttribute("login", result);
                     loginLog.put("status", "Y");
+
+                    // site_logo 및 site_sys_nm 세션에 저장
+                    List<Map> maps = commonCodeEditService.selectSiteInfoLogo();
+                    session.setAttribute("site_logo", maps.get(0).get("site_logo"));
+                    session.setAttribute("site_sys_nm", maps.get(0).get("site_sys_nm"));
 
                     // 수정해야됨 임시!!!
 //                    returnPage = "redirect:/dashboard";

@@ -39,6 +39,8 @@ public interface CommonCodeEditMapper {
 
     List<Map> selectSiteInfo();
 
+    List<Map> selectSiteInfoLogo();
+
     boolean isLoggerNoExists(Map param);
 
     boolean isSensNoExists(Map param);

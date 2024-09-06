@@ -122,8 +122,12 @@
 
 <div id="header">
     <h1>
-        <a href="/"><img src="/images/logo.png" alt="Golden City - IoT센서관제시스템" title="Golden City - IoT센서관제시스템"/>
-            <span class="">IoT센서관제시스템</span>
+        <a href="/">
+<%--            <img src="/images/logo.png" alt="Golden City - IoT센서관제시스템" title="Golden City - IoT센서관제시스템"/>--%>
+            <img src="data:image/jpeg;base64,${sessionScope.site_logo}" alt="${sessionScope.site_sys_nm}" title="${sessionScope.site_sys_nm}" />
+
+        <%--            <span class="">IoT센서관제시스템</span>--%>
+            <span class="">${sessionScope.site_sys_nm}</span>
         </a>
     </h1>
 
