@@ -43,6 +43,7 @@ public class LoginController {
         List<Map> maps = commonCodeEditService.selectSiteInfoLogo();
         model.addAttribute("site_logo", maps.get(0).get("site_logo"));
         model.addAttribute("site_sys_nm", maps.get(0).get("site_sys_nm"));
+        model.addAttribute("site_title_logo", maps.get(0).get("site_title_logo"));
         return "login";
     }
 
@@ -74,6 +75,7 @@ public class LoginController {
                     List<Map> maps = commonCodeEditService.selectSiteInfoLogo();
                     session.setAttribute("site_logo", maps.get(0).get("site_logo"));
                     session.setAttribute("site_sys_nm", maps.get(0).get("site_sys_nm"));
+                    session.setAttribute("site_title_logo", maps.get(0).get("site_title_logo"));
 
                     // 수정해야됨 임시!!!
 //                    returnPage = "redirect:/dashboard";

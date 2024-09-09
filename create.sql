@@ -33,7 +33,9 @@ CREATE TABLE tb_site_info (
                               site_addr VARCHAR DEFAULT '' NOT NULL,
                               site_road_addr VARCHAR DEFAULT '' NOT NULL,
                               site_logo BYTEA DEFAULT E'\\x' NOT NULL,
+                              site_title_logo BYTEA DEFAULT E'\\x' NOT NULL,
                               site_logo_nm VARCHAR DEFAULT '' NOT NULL,
+                              site_title_logo_nm VARCHAR DEFAULT '' NOT NULL,
                               site_sys_nm VARCHAR DEFAULT '' NOT NULL,
                               reg_dt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
                               mod_dt TIMESTAMP,
@@ -48,6 +50,8 @@ COMMENT ON COLUMN tb_site_info.site_addr IS '지번';
 COMMENT ON COLUMN tb_site_info.site_road_addr IS '도로명주소  로그인화면. 메인창';
 COMMENT ON COLUMN tb_site_info.site_logo IS '지자체로고  로그인화면. 메인창';
 COMMENT ON COLUMN tb_site_info.site_logo_nm IS '지자체로고 이름';
+COMMENT ON COLUMN tb_site_info.site_title_logo IS '지자체 타이틀 로고';
+COMMENT ON COLUMN tb_site_info.site_title_logo_nm IS '지자체 타이틀 로고 이름';
 COMMENT ON COLUMN tb_site_info.site_sys_nm IS '시스템명칭';
 COMMENT ON COLUMN tb_site_info.reg_dt IS '등록일시';
 COMMENT ON COLUMN tb_site_info.mod_dt IS '수정일시';

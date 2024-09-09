@@ -161,7 +161,9 @@
 	</select>
 
 	<select id="selectSiteInfoLogo" resultType="java.util.Map">
-		SELECT encode(site_logo, 'base64') AS site_logo
+		SELECT
+			 encode(site_logo, 'base64') AS site_logo
+			 , encode(site_title_logo, 'base64') AS site_title_logo
 			 , site_sys_nm
 		FROM tb_site_info
 		WHERE site_no = 'S01'

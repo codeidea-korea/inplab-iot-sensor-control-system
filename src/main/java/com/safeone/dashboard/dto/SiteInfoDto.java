@@ -28,9 +28,15 @@ public class SiteInfoDto implements Serializable {
 
     @FieldLabel(title="지자체로고", width=180)
     String site_logo;
-
+    
     @FieldLabel(title="지자체로고 명", type="hidden")
-    String site_logo_nm;
+    String site_logo_nm;    
+    
+    @FieldLabel(title="지자체 타이틀 로고 명", type="hidden")
+    String site_title_logo_nm;
+
+    @FieldLabel(title="지자체 타이틀 로고")
+    String site_title_logo;
 
     @FieldLabel(title="지자체로고 src", type="hidden")
     String site_logo_src;

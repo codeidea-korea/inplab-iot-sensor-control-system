@@ -242,7 +242,10 @@
                     </div>
                 </form>
 <%--                <p class="logo-img"><img src="/images/img_login.png" alt=""/></p>--%>
-                <p class="logo-img"><img src="data:image/jpeg;base64,${site_logo}" alt="" /></p>
+<%--                <p class="logo-img"><img src="data:image/jpeg;base64,${site_logo}" alt="" /></p>--%>
+                <p class="logo-img" style="margin-top: 25px">
+                    <img src="data:image/jpeg;base64,${site_title_logo}" alt="" width="460" height="310" />
+                </p>
 
 
                 <p class="login-arr"><img src="/images/icon_login_arr.png" alt=""/></p>
