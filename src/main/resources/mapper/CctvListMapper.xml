@@ -66,124 +66,61 @@
                     MG.real_value ${sord}
                 </when>
                 <otherwise>
-                    MG.asset_id::integer
+                    A.cctv_nm ASC
                 </otherwise>
             </choose>
         </trim>
     </sql>
     
     <select id="selectCctvList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.CctvListDto">
-		SELECT MG.* 
-        FROM (
-			SELECT ass.asset_id 
-				 , ass.asset_kind_id
-				 , ass.asset_kind_id asset_kind_id_hid
-				 , ass.area_id
-				 , ta2.name as area_name
-				 , ass.area_id area_id_hid
-				 , ass.zone_id
-				 , tz.name as zone_name
-				 , ass.zone_id zone_id_hid
-				 , ass.status
-				 , ass.status status_hid
-				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
-				 , ass.name	
-				 , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id ORDER BY ch.seq),',') sensor_id
-				 , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
-				 , MAX(dbc.real_value) real_value 					 
-				 , ass.device_id 		
-				 , ass.description 	 
-				 , ass.etc1
-				 , ass.etc2
-				 , ass.etc3
-				 , ass.x
-				 , ass.y
-				 , ass.z
-			FROM tb_asset ass
-				LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
-					LEFT JOIN (SELECT *
-									FROM tb_dps_basecollection
-									WHERE (sensor_id, zone_id, collect_date)
-									IN ( SELECT sensor_id, zone_id, MAX(collect_date)
-										 FROM tb_dps_basecollection
-										GROUP BY sensor_id, zone_id ) 
-									) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id, tb_zone tz, tb_area ta2
-			WHERE ass.area_id = ta2.area_id
-			  and ass.zone_id = tz.zone_id 	
-			GROUP BY ass.asset_id 
-				 , ass.asset_kind_id
-				 , ass.area_id
-				 , ass.zone_id
-				 , ass.status
-				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD')
-				 , ass.name
-				 , ta2.name
-				 , tz.name
-				 , ass.device_id
-        ) MG
-        WHERE 1=1
-		  and MG.asset_kind_id = '8'
+		SELECT
+			A.cctv_no
+			,A.cctv_nm
+			,A.district_no
+			,B.district_nm
+			,A.maint_sts_cd
+			,C.code_nm AS maint_sts_nm
+			,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
+			,A.model_nm
+			,A.cctv_maker
+			,A.cctv_ip
+			,A.web_port
+			,A.rtsp_port
+			,A.cctv_conn_id
+			,A.cctv_conn_pwd
+			,A.relay_nm
+			,A.relay_ip
+			,A.relay_port
+			,A.cctv_lat
+			,A.cctv_lon
+			,A.admin_center
+			,A.partner_comp_id
+		    ,D.partner_comp_nm
+			,A.partner_comp_user_nm
+			,A.partner_comp_user_phone
+		    ,A.etc1
+		    ,A.etc2
+		    ,A.etc3
+		FROM tb_cctv_info A
+		LEFT OUTER JOIN tb_district_info B ON A.district_no = B.district_no
+		LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') C ON A.maint_sts_cd = C.code_id
+		LEFT OUTER JOIN tb_maintcomp_info D ON A.partner_comp_id = D.partner_comp_id
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
-        <if test="page != null and page > 0">
+        <!--<if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>-->
+        <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+            LIMIT ${limit} OFFSET ${offset}
         </if>
     </select>
 
     <select id="selectCctvListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT count(*)
-        FROM (
-			SELECT ass.asset_id 
-				 , ass.asset_kind_id
-				 , ass.asset_kind_id asset_kind_id_hid
-				 , ass.area_id
-				 , ass.area_id area_id_hid
-				 , ass.zone_id
-				 , ass.zone_id zone_id_hid
-				 , ass.status
-				 , ass.status status_hid
-				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
-				 
-				 -- 센서
-				 , ass.name				-- 센서명
-				 , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id ORDER BY ch.seq),',') sensor_id
-
-				 , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
-				 , MAX(dbc.real_value) real_value 	-- 센서값
-				 
-				-- 센서 외
-				 , ass.device_id 		-- 장비 ID
-			--	 , ass.description 
-			--	 , ass.use_flag				 
-			--	 , ass.etc1
-			--	 , ass.etc2
-			--	 , ass.etc3
-			--	 , ass.mod_date
-			--	 , ass.mod_user
-			--	 , ass.reg_date
-			--	 , ass.x
-			--	 , ass.y
-			--	 , ass.z
-			FROM tb_asset ass
-				LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
-					LEFT JOIN (SELECT *
-									FROM tb_dps_basecollection
-									WHERE (sensor_id, zone_id, collect_date)
-									IN ( SELECT sensor_id, zone_id, MAX(collect_date)
-										 FROM tb_dps_basecollection
-										GROUP BY sensor_id, zone_id ) 
-									) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
-			GROUP BY ass.asset_id 
-				 , ass.asset_kind_id
-				 , ass.area_id
-				 , ass.zone_id
-				 , ass.status
-				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD')
-				 , ass.name
-				 , ass.device_id
-        ) MG
-        WHERE 1=1
-		  and MG.asset_kind_id = '8'
+        SELECT count(1)
+		FROM tb_cctv_info A
+		LEFT OUTER JOIN tb_district_info B ON A.district_no = B.district_no
+		LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') C ON A.maint_sts_cd = C.code_id
+		LEFT OUTER JOIN tb_maintcomp_info D ON A.partner_comp_id = D.partner_comp_id
         <include refid="rowSearch"/>
     </select>
 </mapper>

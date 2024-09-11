@@ -18,6 +18,7 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
     var _search = [];
 
     var _rowList = [15, 30, 60];
+    //var _rowList = [25, 30, 60];
     var jqgridModify;
 
     var pageCount = 5; // 한 페이지에 보여줄 페이지 수 (ex:1 2 3 4 5)
@@ -137,7 +138,9 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
             label: _labels[idx],
             width: _widths[idx],
             title: false,
-            fixed: true
+            fixed: true,
+            align: 'center',
+            sortable: true,
         };
 
         if (_types[idx].indexOf('#') > -1) {
@@ -283,6 +286,7 @@ function jqgridUtil($gridElement, params, columnsJson, visiblePage, callback, ca
         sortIconsBeforeText: true,
         idPrefix: 'g' + $('.ui-jqgrid').length + '_',
         // clearSearch: true,
+        reorderColumns: true,
         formatoptions: {
             keys: true,
             delOptions: {

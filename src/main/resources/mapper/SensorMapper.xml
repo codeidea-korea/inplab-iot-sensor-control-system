@@ -230,7 +230,7 @@
 			,A.sms_snd_yn
 			,A.sens_disp_yn
 			,A.maint_sts_cd
-			,E.code_nm
+			,E.code_nm AS maint_sts_nm
 			,A.sens_lon
 			,A.sens_lat
 			,A.sens_maker
@@ -275,7 +275,7 @@
 		) F ON C.sens_no = F.sens_no AND C.sens_chnl_id = F.sens_chnl_id
 		WHERE 1=1
         <include refid="rowSearch"/>
-        <include refid="rowOrder"/>
+        <!--<include refid="rowOrder"/>-->
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
         </if>

@@ -45,7 +45,7 @@ const actFormattedData = (data, key) => {
     }));
 };
 
-const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gridId, limit, offset, getFunction, groupHeader) => {
+const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gridId, limit, offset, getFunction, groupHeader, loadComplete) => {
 
     const formattedData = actFormattedData(data, key);
 
@@ -62,6 +62,7 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gr
         colModel:column,
         gridComplete: gridComplete,
         onSelectRow: onSelectRow,
+        loadComplete: loadComplete,
     };
 
     if (gridId !== 'jqGrid-2') {
