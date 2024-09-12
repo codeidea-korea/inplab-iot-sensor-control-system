@@ -7,20 +7,20 @@
 <meta name="format-detection" content="telephone=no, address=no, email=no, date=no" />
 <!-- <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" /> -->
 <link rel="canonical" href="http://goldencity.iceserver.co.kr" />
-<meta name="title" content="Golden City - IoT센서관제시스템" />
+<meta name="title" content="${sessionScope.site_sys_nm}" />
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Golden City - IoT센서관제시스템" />
+<meta property="og:title" content="${sessionScope.site_sys_nm}" />
 <meta property="og:url" content="http://goldencity.iceserver.co.kr" />
 <meta property="og:image" content="/images/og_images.jpg" />
 <meta property="og:description" content="" />
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="Golden City - IoT센서관제시스템" />
+<meta name="twitter:title" content="${sessionScope.site_sys_nm}" />
 <meta name="twitter:url" content="http://goldencity.iceserver.co.kr" />
 <meta name="twitter:image" content="/images/og_images.jpg" />
 <meta name="twitter:description" content="" />
-<title>Golden City - IoT센서관제시스템</title>
+<title>${sessionScope.site_sys_nm}</title>
 <%--<script type="text/javascript" src="http://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=935413DC-CBE2-382F-B307-933501B0DC45"></script>--%>
 <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=935413DC-CBE2-382F-B307-933501B0DC45"></script>
 <!-- <script type="text/javascript" src="/Cesium/Cesium.js"></script> -->

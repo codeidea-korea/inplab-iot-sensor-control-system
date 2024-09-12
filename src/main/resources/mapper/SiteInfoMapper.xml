@@ -54,7 +54,9 @@
 				 , a.site_addr
 				 , a.site_road_addr
 				 , a.site_logo_nm
+				 , a.site_title_logo_nm
                  , encode(a.site_logo, 'base64') AS site_logo
+                 , encode(a.site_title_logo, 'base64') AS site_title_logo
 				 , a.site_sys_nm
 			FROM tb_site_info a
 		) MG
@@ -75,7 +77,9 @@
 				 , a.site_addr
 				 , a.site_road_addr
 				 , a.site_logo_nm
+				 , a.site_title_logo_nm
 				 , encode(a.site_logo, 'base64') AS site_logo
+				 , encode(a.site_title_logo, 'base64') AS site_title_logo
 				 , a.site_sys_nm
 			FROM tb_site_info a
 		) MG
@@ -90,16 +94,20 @@
 							  , site_addr
 							  , site_road_addr
 							  , site_logo
+							  , site_title_logo
 							  , site_sys_nm
 							  , site_logo_nm
+							  , site_title_logo_nm
 		) SELECT   #{site_no}
 		         , #{site_nm}
 		         , #{site_zip}
 				 , #{site_addr}
 				 , #{site_road_addr}
 				 , #{site_logo}
+				 , #{site_title_logo}
 				 , #{site_sys_nm}
 				 , #{site_logo_nm}
+				 , #{site_title_logo_nm}
 		    FROM tb_site_info
     </insert>
     
@@ -119,11 +127,17 @@
         <if test="site_logo != null">
             , site_logo = #{site_logo}
         </if>
+        <if test="site_title_logo != null">
+            , site_title_logo = #{site_title_logo}
+        </if>
         <if test="site_sys_nm != null">
             , site_sys_nm = #{site_sys_nm}
         </if>
         <if test="site_logo_nm != null">
             , site_logo_nm = #{site_logo_nm}
+        </if>
+        <if test="site_title_logo_nm != null">
+            , site_title_logo_nm = #{site_title_logo_nm}
         </if>
         where site_no = #{site_no}
     </update>

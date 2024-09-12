@@ -457,6 +457,15 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                         row.site_logo = `<img src="data:image/jpeg;base64, " style="width:100px; height:auto;" />`;
                     }
 
+                    // site_title_logo 필드를 img 태그로 변환
+                    if (row.site_title_logo) {
+                        row.site_title_logo_src = row.site_title_logo;
+                        row.site_title_logo = `<img src="data:image/jpeg;base64, ` + row.site_title_logo + `" style="width:100px; height:auto;" />`;
+                    } else {
+                        row.site_title_logo_src = '';
+                        row.site_title_logo = `<img src="data:image/jpeg;base64, " style="width:100px; height:auto;" />`;
+                    }
+
                     if (row.dist_pic) {
                         row.dist_pic_src = row.dist_pic;
                     } else {

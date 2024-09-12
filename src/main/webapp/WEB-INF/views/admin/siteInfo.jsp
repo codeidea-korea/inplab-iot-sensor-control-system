@@ -74,6 +74,20 @@
                 reader.readAsDataURL(file);
             });
 
+
+            $("#site_title_logo").on("change", function (event) {
+                var file = event.target.files[0];
+                $('#lay-form-write input[name=site_title_logo_nm]').val(file.name);
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#uploadFileImg2').css("cursor", "");
+                    $('#uploadFileImg2').off('click');
+
+                    $("#uploadFileImg2").attr("src", e.target.result);
+                }
+                reader.readAsDataURL(file);
+            });
+
             // 등록
             // $('.insertBtn').on('click', function () {
             //
@@ -130,8 +144,10 @@
                 }
 
                 $("#uploadFileImg").attr("src", "data:image/jpeg;base64," + targetArr[0].site_logo_src);
+                $("#uploadFileImg2").attr("src", "data:image/jpeg;base64," + targetArr[0].site_title_logo_src);
 
                 targetArr[0].site_logo = '';
+                targetArr[0].site_title_logo = '';
 
                 setSerialize('#lay-form-write', targetArr[0]); // 선택값 세팅
 
@@ -190,6 +206,8 @@
 
             $("#site_logo").attr("src", '');
             $('#lay-form-write input[name=site_logo]').val('');
+            $("#site_title_logo").attr("src", '');
+            $('#lay-form-write input[name=site_title_logo]').val('');
         }
 
     </script>
@@ -307,10 +325,29 @@
                         </td>
                     </tr>
 
+                    <tr>
+                        <th class="required_th">지자체 타이틀 로고</th>
+                        <td colspan="2" style="display: flex; align-items: center;">
+                            <input type="file" id="site_title_logo" name="site_title_logo" class="file2" accept="image/*" style="display:none;" />
+                            <input type="text" id="site_title_logo_nm" name="site_title_logo_nm" class="required" readonly style="flex: 1; margin-right: 10px;"/>
+                            <div class="btn-btm" style="width: auto; margin-top: 0px;">
+                                <button type="button" class="btn-search" onclick="$('#site_title_logo').click()">파일 선택</button>
+                            </div>
+                            <div style="margin-left: 10px">권장 사이즈 460 x 310</div>
+                        </td>
+                    </tr>
+
 <%--                    <tr>--%>
 <%--                        <th>지자체로고 사진</th>--%>
 <%--                        <td style="height:250px">--%>
 <%--                            <img id="uploadFileImg" src="" alt="" style="width:300px">--%>
+<%--                        </td>--%>
+<%--                    </tr>--%>
+
+<%--                    <tr>--%>
+<%--                        <th>지자체 타이틀 로고 사진</th>--%>
+<%--                        <td style="height:250px">--%>
+<%--                            <img id="uploadFileImg2" src="" alt="" style="width:300px">--%>
 <%--                        </td>--%>
 <%--                    </tr>--%>
 

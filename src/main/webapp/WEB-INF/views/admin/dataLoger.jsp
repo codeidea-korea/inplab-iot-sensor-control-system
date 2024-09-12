@@ -14,21 +14,21 @@
 
 	<!-- <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" /> -->
 	<link rel="canonical" href="http://goldencity.iceserver.co.kr">
-	<meta name="title" content="Golden City - IoT센서관제시스템">
+	<meta name="title" content="${sessionScope.site_sys_nm}">
 	<meta name="keywords" content="">
 	<meta name="description" content="">
 	<meta property="og:type" content="website">
-	<meta property="og:title" content="Golden City - IoT센서관제시스템">
+	<meta property="og:title" content="${sessionScope.site_sys_nm}">
 	<meta property="og:url" content="http://goldencity.iceserver.co.kr">
 	<meta property="og:image" content="/images/og_images.jpg">
 	<meta property="og:description" content="">
 	<meta name="twitter:card" content="summary">
-	<meta name="twitter:title" content="Golden City - IoT센서관제시스템">
+	<meta name="twitter:title" content="${sessionScope.site_sys_nm}">
 	<meta name="twitter:url" content="http://goldencity.iceserver.co.kr">
 	<meta name="twitter:image" content="/images/og_images.jpg">
 	<meta name="twitter:description" content="">
 
-	<title>Golden City - IoT센서관제시스템</title>
+	<title>${sessionScope.site_sys_nm}</title>
 
 	<link rel="stylesheet" type="text/css" href="/common/font/SUIT-Variable.css" />
 	<link rel="stylesheet" type="text/css" href="/common/css/jquery.ui.lastest.css" />

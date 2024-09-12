@@ -33,7 +33,8 @@
 	<div id="intro-area">
 		<div class="donutty"></div>
 		<dl class="donut-ps">
-			<dt>IoT센서 상시계측 관제시스템</dt>
+<%--			<dt>IoT센서 상시계측 관제시스템</dt>--%>
+			<dt>${sessionScope.site_sys_nm}</dt>
 			<dd>
 				시스템에관한 간략한 설명문구가 들어갑니다.<br />최대 2줄까지 들어갑니다.
 			</dd>

@@ -3,7 +3,8 @@
         <nav class="navbar top navbar-expand-lg" style="margin-bottom: 0;">
             <a class="navbar-brand" href="/"><img src="/img/logo_gyeongju.png" height="35"
                     style="margin: 0 20px 0 10px">
-                <span style="color: #fff; font-weight: 700; font-size: 15px; font-family: 'Nanum Gothic';">IoT센서관제시스템</span>
+<%--                <span style="color: #fff; font-weight: 700; font-size: 15px; font-family: 'Nanum Gothic';">IoT센서관제시스템</span>--%>
+                <span style="color: #fff; font-weight: 700; font-size: 15px; font-family: 'Nanum Gothic';">${sessionScope.site_sys_nm}</span>
             </a>
             <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
         aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">

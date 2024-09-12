@@ -199,7 +199,8 @@
             <div id="intro-area">
                 <div class="donutty"></div>
                 <dl class="donut-ps">
-                    <dt>IoT센서 상시계측 관제시스템</dt>
+<%--                    <dt>IoT센서 상시계측 관제시스템</dt>--%>
+                    <dt>${site_sys_nm}</dt>
                     <dd>
                         로딩중입니다.<br/>잠시만 기다려주세요.
                     </dd>
@@ -207,9 +208,12 @@
             </div>
             <div id="login-area">
                 <h2>
-                    <span data-font="Prompt">Hello,</span><br/><strong>
-                        <span data-font="Prompt">IoT</span>센서 상시계측
-                                                        관제시스템</strong>
+                    <span data-font="Prompt">Hello,</span><br/>
+                    <strong>
+<%--                        <span data-font="Prompt">IoT</span>--%>
+<%--                            센서 상시계측 관제시스템--%>
+                        ${site_sys_nm}
+                        </strong>
                 </h2>
                 <form class="p-t-40" method="post" action="/login/process" onsubmit="return validate_form();">
                     <div class="login_in">
@@ -237,7 +241,13 @@
                                             </div> -->
                     </div>
                 </form>
-                <p class="logo-img"><img src="/images/img_login.png" alt=""/></p>
+<%--                <p class="logo-img"><img src="/images/img_login.png" alt=""/></p>--%>
+<%--                <p class="logo-img"><img src="data:image/jpeg;base64,${site_logo}" alt="" /></p>--%>
+                <p class="logo-img" style="margin-top: 25px">
+                    <img src="data:image/jpeg;base64,${site_title_logo}" alt="" width="460" height="310" />
+                </p>
+
+
                 <p class="login-arr"><img src="/images/icon_login_arr.png" alt=""/></p>
             </div>
 
