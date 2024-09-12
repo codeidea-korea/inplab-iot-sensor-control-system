@@ -99,7 +99,7 @@
         <ul class="menu-sub">
             <li>
                 <a href="/sensorList" class="menu-link">센서현황</a>
-                <a href="/sensorGroup" class="menu-link">센서 그룹 조회</a>
+                <a href="/sensorGroup" class="menu-link">센서모니터링</a>
                 <a href="/calc" class="menu-link">센서 정보 변경</a>
             </li>
         </ul>

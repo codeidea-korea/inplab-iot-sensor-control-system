@@ -38,16 +38,20 @@ const gridComplete = () => {
     });
 };
 
-const actFormattedData = (data, key) => {
-    return data.map(item => ({
-        id: item[key], // cctv_no 값을 id로 설정
-        ...item
-    }));
+const actFormattedData = (data, keyArray) => {
+    return data.map(item => {
+        // keyArray의 각 키를 사용하여 id를 생성
+        const id = keyArray.map(key => item[key]).join('_');
+        return {
+            id: id, // 결합된 키 값을 id로 설정
+            ...item
+        };
+    });
 };
 
-const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gridId, limit, offset, getFunction, groupHeader, loadComplete) => {
+const setJqGridTable = (data, column, header, gridComplete, onSelectRow, keyArray, gridId, limit, offset, getFunction, groupHeader, loadComplete) => {
 
-    const formattedData = actFormattedData(data, key);
+    const formattedData = actFormattedData(data, keyArray);
 
     let settingObj = {
         datatype: "local",
@@ -87,15 +91,33 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, key, gr
             // 스크롤을 빠르게 이동시 랜더링 꼬임 이슈로 setTimeout 사용
             setTimeout(() => {
                 offset += limit;
-                getFunction({limit : limit, offset : offset}).then((res) => {
+                getFunction({ limit: limit, offset: offset }).then((res) => {
                     console.log('res > ', res);
+
                     if (res.rows.length === 0) {
                         offset -= limit;
                     }
-                    $(`#${gridId}`).jqGrid('addRowData', key, res.rows);
-                    //addCheckboxToGrid();
+
+                    // 데이터에 대한 고유 식별자를 생성하기 위한 함수
+                    const addUniqueIdToData = (data) => {
+                        return data.map(item => {
+                            const id = keyArray.map(key => item[key]).join('_');
+                            return {
+                                id: id,
+                                ...item
+                            };
+                        });
+                    };
+
+                    // 고유 식별자가 추가된 데이터를 jqGrid에 추가
+                    const formattedRows = addUniqueIdToData(res.rows);
+                    formattedRows.forEach(row => {
+                        $(`#${gridId}`).jqGrid('addRowData', row.id, row); // id는 keyArray로 생성한 고유한 값
+                    });
+
+                    // 추가적인 동작이 필요한 경우
                     if (getFunction.name === 'getSensor') {
-                        $(`#${gridId}`).parent().height($(`#${gridId}`).height()+10)
+                        $(`#${gridId}`).parent().height($(`#${gridId}`).height() + 10);
                     }
                 }).catch((fail) => {
                     console.log('setJqGridTable fail > ', fail);
@@ -265,6 +287,24 @@ const getMaintCompInfo = (obj) => {
             reject(fail);
             console.log('getMaintCompInfo fail > ', fail);
             alert2('유지보수 업체 정보를 가져오는데 실패했습니다.', function() {});
+        });
+    });
+};
+
+const getDistinct = (obj) => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: 'GET',
+            url: `/modify/sensor/distinct`,
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            async: true,
+            data: obj
+        }).done(function(res) {
+            resolve(res);
+        }).fail(function(fail) {
+            reject(fail);
+            console.log('getDistinct fail > ', fail);
         });
     });
 };

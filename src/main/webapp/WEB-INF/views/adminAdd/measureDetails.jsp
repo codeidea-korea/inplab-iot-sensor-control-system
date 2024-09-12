@@ -149,7 +149,7 @@
 						item.formul_data_z = item.formul_data;
 					}
 				});
-				setJqGridTable(res.rows, column_2, header_2, function () {}, onSelectRow, 'mgnt_no', 'jqGrid-2', limit_2, offset_2, getMeasureDetails, header_2_group);
+				setJqGridTable(res.rows, column_2, header_2, function () {}, onSelectRow, ['mgnt_no'], 'jqGrid-2', limit_2, offset_2, getMeasureDetails, header_2_group);
 				$('#btn-group-1').show();
 			}).catch((fail) => {
 				console.log('setJqGridTable fail > ', fail);
@@ -259,7 +259,7 @@
 
 			getSensor({limit : limit_1, offset : offset_1}).then((res) => {
 				console.log('res > ', res);
-				setJqGridTable(res.rows, column_1, header_1, gridComplete2, onSelectRow2, 'sens_no', 'jqGrid', limit_1, offset_1, getSensor);
+				setJqGridTable(res.rows, column_1, header_1, gridComplete2, onSelectRow2, ['sens_no'], 'jqGrid', limit_1, offset_1, getSensor);
 			}).catch((fail) => {
 				console.log('setJqGridTable fail > ', fail);
 			});

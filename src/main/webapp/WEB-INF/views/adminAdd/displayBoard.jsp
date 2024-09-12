@@ -218,7 +218,7 @@
 
 			getDisplayBoard({limit : limit, offset : offset}).then((res) => {
 				console.log('res > ', res);
-				setJqGridTable(res.rows, column, header, function () {}, onSelectRow, 'dispbd_no', 'jqGrid', limit, offset, getDisplayBoard);
+				setJqGridTable(res.rows, column, header, function () {}, onSelectRow, ['dispbd_no'], 'jqGrid', limit, offset, getDisplayBoard);
 			}).catch((fail) => {
 				console.log('setJqGridTable fail > ', fail);
 			});

@@ -496,7 +496,7 @@
 
 			<div id="contents">
 				<div class="contents-re on" style="flex: 5">
-					<h3 class="txt">센서 그룹 조회</h3>
+					<h3 class="txt">센서 그룹핑 분석</h3>
 					<div class="contents-in">
                         <div class="bTable">
                             <table class="grid"></table>

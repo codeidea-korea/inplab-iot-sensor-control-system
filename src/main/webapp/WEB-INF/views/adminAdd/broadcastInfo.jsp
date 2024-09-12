@@ -224,7 +224,7 @@
 
 				getBroadcast({limit : limit, offset : offset}).then((res) => {
 					console.log('res > ', res);
-					setJqGridTable(res.rows, column, header, function () {}, onSelectRow, 'brdcast_no', 'jqGrid', limit, offset, getBroadcast);
+					setJqGridTable(res.rows, column, header, function () {}, onSelectRow, ['brdcast_no'], 'jqGrid', limit, offset, getBroadcast);
 				}).catch((fail) => {
 					console.log('setJqGridTable fail > ', fail);
 				});

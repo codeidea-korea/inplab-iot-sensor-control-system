@@ -475,7 +475,7 @@
 
                 getCctv({limit : limit, offset : offset}).then((res) => {
                     console.log('res > ', res);
-                    setJqGridTable(res.rows, column, header, gridComplete2, onSelectRow2, 'cctv_no', 'jqGrid', limit, offset, getCctv, null, loadComplete2);
+                    setJqGridTable(res.rows, column, header, gridComplete2, onSelectRow2, ['cctv_no'], 'jqGrid', limit, offset, getCctv, null, loadComplete2);
                 }).catch((fail) => {
                     console.log('setJqGridTable fail > ', fail);
                 });

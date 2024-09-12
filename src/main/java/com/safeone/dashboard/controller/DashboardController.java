@@ -142,7 +142,7 @@ public class DashboardController {
     }
 
     /**
-     * 센서 그룹 조회 - 캔들차트
+     * 센서모니터링 - 캔들차트
      * min : 간격(분)
      * asset_id : 자산id
      * start_date : 시작일자 (일시 가능)
@@ -159,7 +159,7 @@ public class DashboardController {
     }
 
     /**
-     * 센서 그룹 조회 - 라인차트
+     * 센서모니터링 - 라인차트
      * @param param
      * @return
      */
