@@ -292,6 +292,8 @@
                 if ($("#jqGrid").closest(".ui-jqgrid-view").find(".ui-search-toolbar").length === 0) {
                     let $thead = $("#jqGrid").closest(".ui-jqgrid-view").find(".ui-jqgrid-htable thead");
                     let $searchRow = $('<tr class="ui-search-toolbar"></tr>');
+                    let distinctDistrict = [];
+                    let distinctSensType = [];
 
                     // 현재 필터링 조건을 저장할 객체
                     let filters = {
@@ -299,45 +301,22 @@
                         rules: []
                     };
 
-                    $("#jqGrid").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
-                        let $cell = $('<th></th>');
+                    getDistinct().then((res) => {
+                        distinctDistrict = res.district;
+                        distinctSensType = res.sensor_type;
 
-                        // hidden:true인 컬럼은 검색 행에서 제외
-                        if (!col.hidden && index > 0) {
-                            let $input = $('<input type="text" style="width: 98%; box-sizing: border-box;" />');
-                            $input.on("input", function () {
-                                const colName = $("#jqGrid").jqGrid("getGridParam", "colModel")[index].name;
-                                const searchValue = $(this).val();
-
-                                // 기존 필터에서 해당 열의 조건을 제거
-                                filters.rules = filters.rules.filter(rule => rule.field !== colName);
-
-                                // 새로운 필터 조건 추가
-                                if (searchValue) {
-                                    filters.rules.push({
-                                        field: colName,
-                                        op: "cn", // cn = contains (포함 여부)
-                                        data: searchValue
-                                    });
-                                }
-
-                                // 필터링 적용
-                                $("#jqGrid").jqGrid("setGridParam", {
-                                    postData: {
-                                        filters: JSON.stringify(filters)
-                                    },
-                                    search: true,
-                                    page: 1
-                                }).trigger("reloadGrid");
-                            });
-                            $cell.append($input);
-                        }
-                        $searchRow.append($cell);
+                        $("#jqGrid").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
+                            let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "jqGrid");
+                            $searchRow.append($cell);
+                        });
+                        $thead.append($searchRow);
+                    }).catch((fail) => {
+                        console.log('getDistinct fail > ', fail);
                     });
-                    $thead.append($searchRow);
                 }
-
-                $('#jqGrid_checkbox').html('<input type="checkbox" id="check-all">');
+                if ($('#check-all').length === 0) {
+                    $('#jqGrid_checkbox div').prepend('<input type="checkbox" id="check-all">');
+                }
 
                 // 헤더 체크박스 선택 시, 전체 행의 클릭 이벤트 트리거
                 $('#check-all').on('click', function() {

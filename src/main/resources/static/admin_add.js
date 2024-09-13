@@ -49,6 +49,133 @@ const actFormattedData = (data, keyArray) => {
     });
 };
 
+const setFilterControls = (col, index, distinctDistrict, distinctSensType, filters, gridId) => {
+    let $cell = $('<th></th>');
+
+    if (!col.hidden && index > 0) {
+        if (col.name === "district_nm") {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            distinctDistrict.forEach(function (item) {
+                $select.append('<option value="' + item.district_nm + '">' + item.district_nm + '</option>');
+            });
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "eq",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($select);
+        } else if (col.name === "sens_tp_nm") {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            distinctSensType.forEach(function (item) {
+                $select.append('<option value="' + item.sens_tp_nm + '">' + item.sens_tp_nm + '</option>');
+            });
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "eq",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($select);
+        } else if (col.name === "inst_ymd" || col.name === "meas_dt") {
+            $(`#${gridId}`).jqGrid('setColProp', col.name, {
+                sorttype: "date",
+                formatoptions: { srcformat: "Y-m-d", newformat: "Y-m-d" }
+            });
+
+            let $input = $('<input type="text" style="width: 98%; box-sizing: border-box;" />');
+            $input.daterangepicker({
+                ranges: {
+                    '금일': [moment(), moment()],
+                    '지난 1주': [moment().subtract(6, 'days'), moment()],
+                    '지난 1개월': [moment().subtract(29, 'days'), moment()],
+                    '지난 3개월': [moment().subtract(3, 'month'), moment()],
+                    '지난 6개월': [moment().subtract(6, 'month'), moment()],
+                    '1년': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
+                },
+                locale: {
+                    format: 'YYYY-MM-DD',
+                    separator: ' ~ ',
+                    applyLabel: '적용',
+                    cancelLabel: '취소',
+                    fromLabel: 'From',
+                    toLabel: 'To',
+                    customRangeLabel: '사용자 정의',
+                    daysOfWeek: ['일', '월', '화', '수', '목', '금', '토'],
+                    monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
+                },
+                alwaysShowCalendars: true,
+                autoUpdateInput: false,
+                opens: 'right'
+            }, function (start, end, label) {
+                $input.val(start.format('YYYY-MM-DD') + ' ~ ' + end.format('YYYY-MM-DD'));
+
+                filters.rules = filters.rules.filter(rule => rule.field !== col.name);
+                filters.rules.push({
+                    field: col.name,
+                    op: "ge",
+                    data: start.format('YYYY-MM-DD')
+                });
+                filters.rules.push({
+                    field: col.name,
+                    op: "le",
+                    data: end.format('YYYY-MM-DD')
+                });
+
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($input);
+        } else {
+            let $input = $('<input type="text" style="width: 98%; box-sizing: border-box;" />');
+            $input.on("input", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "cn",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($input);
+        }
+    }
+    return $cell;
+};
+
 const setJqGridTable = (data, column, header, gridComplete, onSelectRow, keyArray, gridId, limit, offset, getFunction, groupHeader, loadComplete) => {
 
     const formattedData = actFormattedData(data, keyArray);
@@ -56,7 +183,7 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, keyArra
     let settingObj = {
         datatype: "local",
         data: formattedData,
-        height: $('.contents-in').height() - 50,
+        height: $('.contents-in').height() - 65,
         width: '100%',
         autowidth: true,
         shrinkToFit: true,
@@ -67,6 +194,7 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, keyArra
         gridComplete: gridComplete,
         onSelectRow: onSelectRow,
         loadComplete: loadComplete,
+        rows: 10000,
     };
 
     if (gridId !== 'jqGrid-2') {
@@ -84,45 +212,92 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, keyArra
         });
     }
 
-    $(`#${gridId}`).closest(".ui-jqgrid-bdiv").on("scroll", function() {
+    let lastScrollTop = 0; // 마지막 스크롤 위치 저장
+    let isFetching = false; // 데이터 요청 중인지 여부를 확인
+    let wheelCount = 0;
+    let wheelResetTimer = null;  // 휠 이벤트 리셋 타이머
+    const $gridWrapper = $(`#${gridId}`).closest(".ui-jqgrid-bdiv");
+
+    $gridWrapper.on("scroll", function() {
         const $grid = $(this);
+        const currentScrollTop = $grid.scrollTop();
+        const maxScrollTop = $grid[0].scrollHeight - $grid.innerHeight();
+
         // 스크롤이 맨 아래에 도달했는지 확인
-        if ($grid.scrollTop() + $grid.innerHeight() >= $grid[0].scrollHeight) {
-            // 스크롤을 빠르게 이동시 랜더링 꼬임 이슈로 setTimeout 사용
-            setTimeout(() => {
-                offset += limit;
-                getFunction({ limit: limit, offset: offset }).then((res) => {
-                    console.log('res > ', res);
+        if (currentScrollTop >= maxScrollTop) {
+            lastScrollTop = currentScrollTop;
+        }
+    });
 
-                    if (res.rows.length === 0) {
-                        offset -= limit;
-                    }
+    $gridWrapper.on("wheel", function(event) {
+        const $grid = $(this);
+        const currentScrollTop = $grid.scrollTop();
+        const maxScrollTop = $grid[0].scrollHeight - $grid.innerHeight();
 
-                    // 데이터에 대한 고유 식별자를 생성하기 위한 함수
-                    const addUniqueIdToData = (data) => {
-                        return data.map(item => {
-                            const id = keyArray.map(key => item[key]).join('_');
-                            return {
-                                id: id,
-                                ...item
-                            };
+        // 스크롤이 맨 아래에 도달했고, 휠을 아래로 돌렸을 때만 실행
+        if (currentScrollTop >= maxScrollTop && event.originalEvent.deltaY > 0) {
+            // 이벤트 버블링 및 기본 동작 차단
+            event.preventDefault();
+            event.stopPropagation();
+
+            // 휠 이벤트 카운트 증가
+            wheelCount++;
+
+            // 연속 휠 카운트를 일정 시간 후 리셋하기 위한 타이머 설정
+            if (wheelResetTimer) {
+                clearTimeout(wheelResetTimer);
+            }
+
+            wheelResetTimer = setTimeout(() => {
+                wheelCount = 0;  // 일정 시간 후 휠 카운트 리셋
+            }, 300);  // 300ms 이내에 3번 이상 발생해야 동작
+
+            // 휠 카운트가 3번 이상일 때만 동작
+            if (wheelCount >= 3) {
+                wheelCount = 0;  // 카운트를 초기화
+
+                if (!isFetching) {  // 이미 데이터를 가져오는 중이면 실행하지 않음
+                    isFetching = true;
+
+                    offset += limit;
+                    getFunction({ limit: limit, offset: offset }).then((res) => {
+                        console.log('res > ', res);
+
+                        if (res.rows.length === 0) {
+                            offset -= limit;
+                        }
+
+                        // 고유 식별자가 추가된 데이터를 jqGrid에 추가
+                        const addFormattedData = actFormattedData(res.rows, keyArray);
+                        addFormattedData.forEach(row => {
+                            $(`#${gridId}`).jqGrid('addRowData', row.id, row); // id는 keyArray로 생성한 고유한 값
                         });
-                    };
 
-                    // 고유 식별자가 추가된 데이터를 jqGrid에 추가
-                    const formattedRows = addUniqueIdToData(res.rows);
-                    formattedRows.forEach(row => {
-                        $(`#${gridId}`).jqGrid('addRowData', row.id, row); // id는 keyArray로 생성한 고유한 값
+                        // 필터가 적용되어 있으면 필터 재적용
+                        const currentFilters = $(`#${gridId}`).jqGrid('getGridParam', 'postData').filters;
+                        if (currentFilters !== undefined && JSON.parse(currentFilters).rules.length > 0) {
+                            $(`#${gridId}`).jqGrid("setGridParam", {
+                                search: true,
+                                postData: {
+                                    filters: currentFilters
+                                },
+                                page: 1
+                            }).trigger("reloadGrid");
+                        }
+
+                        // 추가적인 동작이 필요한 경우
+                        if (getFunction.name === 'getSensor') {
+                            $(`#${gridId}`).parent().height($(`#${gridId}`).height() + 10);
+                        }
+
+                        isFetching = false;  // 데이터 로드 완료 시 플래그 해제
+                    }).catch((fail) => {
+                        console.log('setJqGridTable fail > ', fail);
+                        isFetching = false;  // 실패 시에도 플래그 해제
                     });
-
-                    // 추가적인 동작이 필요한 경우
-                    if (getFunction.name === 'getSensor') {
-                        $(`#${gridId}`).parent().height($(`#${gridId}`).height() + 10);
-                    }
-                }).catch((fail) => {
-                    console.log('setJqGridTable fail > ', fail);
-                });
-            }, 500);
+                }
+            }
+            isFetching = false;  // 데이터 로드 완료 시 플래그 해제
         }
     });
 

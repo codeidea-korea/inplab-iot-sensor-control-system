@@ -95,146 +95,18 @@
 						rules: []
 					};
 
-					getDistinct()
-							.then((res) => {
-								distinctDistrict = res.district;
-								distinctSensType = res.sensor_type;
+					getDistinct().then((res) => {
+						distinctDistrict = res.district;
+						distinctSensType = res.sensor_type;
 
-								$("#jqGrid").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
-									let $cell = $('<th></th>');
-
-									if (!col.hidden && index > 0) {
-										if (col.name === "district_nm") {
-											let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
-											distinctDistrict.forEach(function (item) {
-												$select.append('<option value="' + item.district_nm + '">' + item.district_nm + '</option>');
-											});
-											$select.on("change", function () {
-												const colName = $("#jqGrid").jqGrid("getGridParam", "colModel")[index].name;
-												const searchValue = $(this).val();
-												filters.rules = filters.rules.filter(rule => rule.field !== colName);
-												if (searchValue) {
-													filters.rules.push({
-														field: colName,
-														op: "eq",
-														data: searchValue
-													});
-												}
-												$("#jqGrid").jqGrid("setGridParam", {
-													postData: { filters: JSON.stringify(filters) },
-													search: true,
-													page: 1
-												}).trigger("reloadGrid");
-											});
-											$cell.append($select);
-										} else if (col.name === "sens_tp_nm") {
-											let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
-											distinctSensType.forEach(function (item) {
-												$select.append('<option value="' + item.sens_tp_nm + '">' + item.sens_tp_nm + '</option>');
-											});
-											$select.on("change", function () {
-												const colName = $("#jqGrid").jqGrid("getGridParam", "colModel")[index].name;
-												const searchValue = $(this).val();
-												filters.rules = filters.rules.filter(rule => rule.field !== colName);
-												if (searchValue) {
-													filters.rules.push({
-														field: colName,
-														op: "eq",
-														data: searchValue
-													});
-												}
-												$("#jqGrid").jqGrid("setGridParam", {
-													postData: { filters: JSON.stringify(filters) },
-													search: true,
-													page: 1
-												}).trigger("reloadGrid");
-											});
-											$cell.append($select);
-										} else if (col.name === "inst_ymd" || col.name === "meas_dt") {
-											// 날짜 컬럼에 대해 sorttype을 date로 지정하고, 포맷 설정
-											$("#jqGrid").jqGrid('setColProp', col.name, {
-												sorttype: "date",
-												formatoptions: { srcformat: "Y-m-d", newformat: "Y-m-d" }
-											});
-
-											// From-To 형태의 날짜 선택 달력 적용
-											let $input = $('<input type="text" style="width: 98%; box-sizing: border-box;" />');
-											$input.daterangepicker({
-												ranges: {
-													'금일': [moment(), moment()],
-													'지난 1주': [moment().subtract(6, 'days'), moment()],
-													'지난 1개월': [moment().subtract(29, 'days'), moment()],
-													'지난 3개월': [moment().subtract(3, 'month'), moment()],
-													'지난 6개월': [moment().subtract(6, 'month'), moment()],
-													'1년': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
-												},
-												locale: {
-													format: 'YYYY-MM-DD',
-													separator: ' ~ ',
-													applyLabel: '적용',
-													cancelLabel: '취소',
-													fromLabel: 'From',
-													toLabel: 'To',
-													customRangeLabel: '사용자 정의',
-													daysOfWeek: ['일', '월', '화', '수', '목', '금', '토'],
-													monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월']
-												},
-												alwaysShowCalendars: true,
-												autoUpdateInput: false,
-												opens: 'right'
-											}, function (start, end, label) {
-												$input.val(start.format('YYYY-MM-DD') + ' ~ ' + end.format('YYYY-MM-DD'));
-
-												// 필터 조건 추가
-												filters.rules = filters.rules.filter(rule => rule.field !== col.name);
-												filters.rules.push({
-													field: col.name,
-													op: "ge",  // between (날짜 범위)
-													data: start.format('YYYY-MM-DD')
-												});
-												filters.rules.push({
-													field: col.name,
-													op: "le",  // between (날짜 범위)
-													data: end.format('YYYY-MM-DD')
-												});
-
-												// 필터링 적용
-												$("#jqGrid").jqGrid("setGridParam", {
-													postData: { filters: JSON.stringify(filters) },
-													search: true,
-													page: 1
-												}).trigger("reloadGrid");
-											});
-											$cell.append($input);
-										} else {
-											let $input = $('<input type="text" style="width: 98%; box-sizing: border-box;" />');
-											$input.on("input", function () {
-												const colName = $("#jqGrid").jqGrid("getGridParam", "colModel")[index].name;
-												const searchValue = $(this).val();
-												filters.rules = filters.rules.filter(rule => rule.field !== colName);
-												if (searchValue) {
-													filters.rules.push({
-														field: colName,
-														op: "cn",  // contains (포함 여부)
-														data: searchValue
-													});
-												}
-												$("#jqGrid").jqGrid("setGridParam", {
-													postData: { filters: JSON.stringify(filters) },
-													search: true,
-													page: 1
-												}).trigger("reloadGrid");
-											});
-											$cell.append($input);
-										}
-									}
-									$searchRow.append($cell);
-								});
-								$thead.append($searchRow);
-							})
-							.catch((fail) => {
-								console.log('getDistinct fail > ', fail);
-							});
+						$("#jqGrid").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
+							let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "jqGrid");
+							$searchRow.append($cell);
+						});
+						$thead.append($searchRow);
+					}).catch((fail) => {
+						console.log('getDistinct fail > ', fail);
+					});
 				}
 			};
 
@@ -273,7 +145,7 @@
 					}).fail(function(fail) {
 						reject(fail);
 						console.log('getSensor fail > ', fail);
-						alert2('CCTV 정보를 가져오는데 실패했습니다.', function() {});
+						alert2('센서 정보를 가져오는데 실패했습니다.', function() {});
 					});
 				});
 			};

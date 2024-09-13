@@ -4,9 +4,9 @@
 <html lang="ko">
     <head>
 	    <jsp:include page="common/include_head.jsp" flush="true"></jsp:include>
-	
+
 	    <style>
-            .bTable {
+            /*.bTable {
                 overflow: auto;
             }
             #contents .contents-in {
@@ -15,435 +15,171 @@
 
             .ui-jqgrid .ui-jqgrid-bdiv {
                 overflow: visible;
-            }
+            }*/
         </style>
 
-	
+
+        <script type="text/javascript" src="/admin_add.js"></script>
         <script>
             window.jqgridOption = {
                 multiselect: true,
                 multiboxonly: false,
-                rowNum: 0
             }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
 
-            let chart, $grid;
-            let today = formatDateToString(new Date());
-            let interval = 'minute';
+            let $grid;
+            const limit = 25;
+            let offset = 0;
+            let selectArrary = [];
 
-            window.jqgridFlag = false;
+            const checkboxFormatter = (cellValue, options, rowObject) => {
+                return '<input type="checkbox" class="row-checkbox" value="'+rowObject.id+'">';
+            };
+
+            const netErrorYnFormatter = (cellValue, options, rowObject) => {
+                if (cellValue === 'Y') {
+                    return '<span style="color: red;">오류</span>';
+                } else {
+                    return '<span style="color: green;">수신</span>';
+                }
+            };
+
+            const column = [
+                {name: 'checkbox', index: 'checkbox', width: 35, align: 'center', sortable: false, hidden: false, formatter: checkboxFormatter},
+                //{ name: 'cb', index: 'cb', width: 50, sortable: false, formatter: 'checkbox', formatoptions: { disabled: false }, align: 'center', title: false },
+                {name : 'sens_tp_nm', index : 'sens_tp_nm', width: 100, align : 'center', hidden:false},
+                {name : 'sens_nm', index : 'sens_nm', width: 100, align : 'center', hidden:false},
+                {name : 'meas_dt', index : 'meas_dt', width: 130, align : 'center', hidden:false},
+                {name : 'net_err_yn', index : 'net_err_yn', width: 70, align : 'center', hidden:false, formatter: netErrorYnFormatter},
+
+                {name : 'district_nm', index : 'district_nm', align : 'center', hidden:true},
+                {name : 'senstype_no', index : 'senstype_no', align : 'center', hidden:true},
+                {name : 'sens_no', index : 'sens_no', align : 'center', hidden:true},
+                {name : 'sens_chnl_nm', index : 'sens_chnl_nm', align : 'center', hidden:true},
+                {name : 'sect_no', index : 'sect_no', align : 'center', hidden:true},
+                {name : 'inst_ymd', index : 'inst_ymd', align : 'center', hidden:true},
+                {name : 'logr_nm', index : 'logr_nm', align : 'center', hidden:true},
+                {name : 'logr_no', index : 'logr_no', align : 'center', hidden:true},
+                {name : 'maint_sts_nm', index : 'maint_sts_nm', align : 'center', hidden:true},
+                {name : 'multi_sens_yn', index : 'multi_sens_yn', align : 'center', hidden:true},
+                {name : 'disp_prior_yn', index : 'disp_prior_yn', align : 'center', hidden:true},
+                {name : 'multi_senstype_no', index : 'multi_senstype_no', align : 'center', hidden:true},
+                {name : 'multi_sens_no', index : 'multi_sens_no', align : 'center', hidden:true},
+                {name : 'nonrecv_limit_min', index : 'nonrecv_limit_min', align : 'center', hidden:true},
+                {name : 'alarm_use_yn', index : 'alarm_use_yn', align : 'center', hidden:true},
+                {name : 'sms_snd_yn', index : 'sms_snd_yn', align : 'center', hidden:true},
+                {name : 'sens_disp_yn', index : 'sens_disp_yn', align : 'center', hidden:true},
+                {name : 'maint_sts_cd', index : 'maint_sts_cd', align : 'center', hidden:true},
+                {name : 'sens_lon', index : 'sens_lon', align : 'center', hidden:true},
+                {name : 'sens_lat', index : 'sens_lat', align : 'center', hidden:true},
+                {name : 'sens_maker', index : 'sens_maker', align : 'center', hidden:true},
+                {name : 'model_nm', index : 'model_nm', align : 'center', hidden:true},
+                {name : 'logger_maint_sts_cd', index : 'logger_maint_sts_cd', align : 'center', hidden:true},
+                {name : 'formul_data', index : 'formul_data', align : 'center', hidden:true},
+                {name : 'reg_dt', index : 'reg_dt', align : 'center', hidden:true},
+                {name : 'mod_dt', index : 'mod_dt', align : 'center', hidden:true},
+            ];
+
+            const header = [
+                '','센서타입명','센서명','최종계측일시','통신상태',
+                '','','','','','','','','','',
+                '','','','','','','','','','',
+                '','','','','',''
+            ];
+
+            const gridComplete2 = () => {
+                // 검색 행 추가
+                if ($("#jqGrid").closest(".ui-jqgrid-view").find(".ui-search-toolbar").length === 0) {
+                    let $thead = $("#jqGrid").closest(".ui-jqgrid-view").find(".ui-jqgrid-htable thead");
+                    let $searchRow = $('<tr class="ui-search-toolbar"></tr>');
+                    let distinctDistrict = [];
+                    let distinctSensType = [];
+
+                    // 현재 필터링 조건을 저장할 객체
+                    let filters = {
+                        groupOp: "AND",
+                        rules: []
+                    };
+
+                    getDistinct().then((res) => {
+                        distinctDistrict = res.district;
+                        distinctSensType = res.sensor_type;
+
+                        $("#jqGrid").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
+                            let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "jqGrid");
+                            $searchRow.append($cell);
+                        });
+                        $thead.append($searchRow);
+                    }).catch((fail) => {
+                        console.log('getDistinct fail > ', fail);
+                    });
+                }
+            };
+
+            const onSelectRow2 = (rowId, status, e) => {
+                const data = $("#jqGrid").jqGrid('getRowData', rowId);
+                let isExist = false;
+
+                selectArrary.some(select => select.sens_no+'_'+select.sens_chnl_nm === rowId) ? isExist = true : isExist = false;
+                selectArrary = selectArrary.filter((select) => select.sens_no+'_'+select.sens_chnl_nm !== data.sens_no+'_'+data.sens_chnl_nm);
+
+                if (isExist) {
+                    $('tr[id='+rowId+'] input[type=checkbox]').prop("checked", false);
+                } else {
+                    selectArrary.push(data);
+                    $('tr[id='+rowId+'] input[type=checkbox]').prop("checked", true);
+                }
+            };
+
+            const loadComplete2 = () => {
+                selectArrary.map((select) => {
+                    $('tr[id='+select.sens_no+'_'+select.sens_chnl_nm+'] input[type=checkbox]').prop("checked", true);
+                });
+            };
+
+            const getSensor = (obj) => {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        type: 'GET',
+                        url: `/modify/sensor/sensor`,
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        async: true,
+                        data: obj
+                    }).done(function(res) {
+                        resolve(res);
+                    }).fail(function(fail) {
+                        reject(fail);
+                        console.log('getSensor fail > ', fail);
+                        alert2('센서 정보를 가져오는데 실패했습니다.', function() {});
+                    });
+                });
+            };
 
             $(function() {
 
-                $.get('/sensorGroup/columns', function (res) {
-                    // console.log(res);
-                    res.zone_name.width = 90;
-                    $grid = jqgridUtil($('table.grid'), {
-                        listPathUrl: "/sensorGroup"
-                    }, res, false);
-
-                    $('.ui-th-div input.cbox').hide();
+                getSensor({limit : limit, offset : offset}).then((res) => {
+                    console.log('res > ', res);
+                    setJqGridTable(res.rows, column, header, gridComplete2, onSelectRow2, ['sens_no','sens_chnl_nm'], 'jqGrid', limit, offset, getSensor, null, loadComplete2);
+                }).catch((fail) => {
+                    console.log('setJqGridTable fail > ', fail);
                 });
 
-                // $('.search-form.search-area input.searchDate').flatpickr({
-                //     locale: "ko",
-                //     mode: "range",
-                //     enableTime: true,
-                //     plugins : [new confirmDatePlugin({
-                //         confirmIcon: "<i class='fa fa-check'></i>", // your icon's html, if you wish to override
-                //         confirmText: "",
-                //         showAlways: false
-                //     })],
-                //     dateFormat: "Y-m-d H:i",                    
-                //     onClose: function (selectedDates, dateStr, instance) {
-                //         $(instance._input).attr('start_date', formatDateToString(selectedDates[0]));
-                //         $(instance._input).attr('end_date', formatDateToString(selectedDates[1]));
-                //     }
-                // });
-                
-                $('.search-form.search-area input.searchDate').daterangepicker({
-                    // "timePicker": true,
-                    // "timePicker24Hour": true,
-                    ranges: {
-                        '금일': [moment(), moment()],
-                        '지난 1주': [moment().subtract(6, 'days'), moment()],
-                        '지난 1개월': [moment().subtract(29, 'days'), moment()],
-                        // '지난 3개월': [moment().subtract(3, 'month'), moment()],
-                        '지난 6개월': [moment().subtract(6, 'month'), moment()],
-                        '1년': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
-                    },
-                    locale: { 
-                        format: 'YYYY-MM-DD',
-                        "separator": " ~ ",
-                        cancelLabel: '취소', 
-                        applyLabel: '적용',
-                        "customRangeLabel": "사용자 정의",
-                        "fromLabel": "From",
-                        "toLabel": "To",
-                        "daysOfWeek": [
-                            "일",
-                            "월",
-                            "화",
-                            "수",
-                            "목",
-                            "금",
-                            "토"
-                        ],
-                        "monthNames": [
-                            "1월",
-                            "2월",
-                            "3월",
-                            "4월",
-                            "5월",
-                            "6월",
-                            "7월",
-                            "8월",
-                            "9월",
-                            "10월",
-                            "11월",
-                            "12월"
-                        ],
-                    },
-                    "alwaysShowCalendars": true,
-                    opens: 'right',
-                    autoUpdateInput: false
-                }, function(start, end, label) {
-                    $('.search-form.search-area input.searchDate').val(start.format('YYYY-MM-DD') + ' ~ ' + end.format('YYYY-MM-DD'));
-                    $('.search-form.search-area input.searchDate').attr('start_date', start.format('YYYY-MM-DD'));
-                    $('.search-form.search-area input.searchDate').attr('end_date', end.format('YYYY-MM-DD'));
-                });
+                // row 의 체크박스를 해제하기 위해 클릭했을때 onselectrow 이 반응하지 않기에 추가된 이벤트
+                $(document).on('change', '#jqGrid input[type=checkbox]', function(e) {
+                    e.stopImmediatePropagation(); // 현재 이벤트가 다른 이벤트 핸들러로 전파되는 것을 방지
+                    const isChecked = $(this).is(':checked');
+                    const rowId = $(this).closest('tr').attr('id');
 
-                // setRangePicker($('.search-form.search-area input.searchDate'));
+                    // row클릭시 selectArray 에 등록되고 동작해야한다
+                    loadComplete2();
 
-                $('.searchGroup .selectBtn').on('click', function() {
-                    if(!$('.ui-common-table .cbox').is(":checked")){
-                        alert("센서를 선택해주세요.");
-                        return false;
-                    }
-
-                    let $target = $('.contents-re .tab-three a.active');
-
-                    if($target.data("kind") === "candle"){
-                        drawChartCandle();
-                    }else if($target.data("kind") === "line") {
-                        drawChartLine();
+                    if (!isChecked) {
+                        onSelectRow2(rowId, isChecked, e);
                     }
                 });
-
-                $('.searchGroup .excelBtn').on('click', function() {
-                    if(window.jqgridFlag){
-                        excelDownload('/sensorGroup/excel/센서그룹조회', lastParam);
-                    }else{
-                        alert("데이터가 없습니다.");
-                        $('.chart').empty();
-                    }
-                });
-
-                // 크게 보기(최대화)
-                $('.chartGroup').on('click', function() {
-                    if ($('#contents .contents-re:eq(0)').hasClass('on')) {
-                        $('#contents .contents-re:eq(0)').removeClass('on');
-                        $('#contents .contents-re:eq(0)').hide();
-                    } else {
-                        $('#contents .contents-re:eq(1) .chart').hide();
-                        $('#contents .contents-re:eq(0)').show();
-                        $('#contents .contents-re:eq(1) .chart').highcharts().chartWidth = $('#contents .contents-re:eq(1) .chart').parent().width()
-                        $('#contents .contents-re:eq(1) .chart').highcharts().reflow();
-                        $('#contents .contents-re:eq(1) .chart').highcharts().redraw();
-                        $('#contents .contents-re:eq(1) .chart').show();
-                        $('#contents .contents-re:eq(0)').addClass('on');
-                    }                    
-                });
-
-                $('.contents-re .tab-three a').on('click', function (e) {
-                    if($(this).hasClass("active")){
-                        return false;
-                    }
-
-                    if(!$('.ui-common-table .cbox').is(":checked")){
-                        alert("센서를 선택해주세요.");
-                        return false;
-                    }
-
-                    $('.contents-re .tab-three a').removeClass("active");
-                    $(this).addClass("active");
-
-                    $('.searchGroup .selectBtn').trigger('click');
-
-                });
-
-                // $('.searchArea .selectDate').on('change', function() {
-                //     var days = $(this).val();
-                //     var pastDate = getPastDate(days);
-
-                //     setSearchDate(pastDate, today);
-                // });
-
-                setSearchDate(getPastDate($('.searchArea .selectDate option:selected').val()), today);
-
-                $('.chartGroup').hide();
             });
-
-            function setSearchDate(start, end) {
-                $('.search-form.search-area input.searchDate').attr('start_date', start);
-                $('.search-form.search-area input.searchDate').attr('end_date', end);
-                $('.search-form.search-area input.searchDate').val(start + ' ~ ' + end);
-            }
-
-            function clearChart() {
-                chart.destroy();
-                $('.chartGroup').hide();
-            }
-
-            let lastParam = null;
-
-            function drawChartLine() {
-                let sdate = $('.search-form.search-area input.searchDate').attr('start_date');            // 2023-11-01
-                let edate = $('.search-form.search-area input.searchDate').attr('end_date');
-
-                let valueType = $('.valueType input[type=radio]:checked').val();
-                let threshold = $('.toggleThreshold input[type=checkbox]').is(':checked');
-
-                let diffDay = countDaysBetweenDates(sdate, edate);
-                let xformat = '{value:%Y-%m-%d %H:%M}';
-                let min = 1;
-                let asset_ids = [];
-
-
-                if (valueType == 'raw') {
-                    threshold = false;
-                }
-
-                if (diffDay >= 89) {
-                    min = 60 * 24 * 7;          // 4시간별
-                    xformat = '{value:%y-%m-%d %H}';
-                    interval = '4hour';
-                } else if (diffDay >= 29) {
-                    min = 60 * 24;              // 시간별
-                    xformat = '{value:%y-%m-%d %H}';
-                    interval = 'hour';
-                } else if (diffDay >= 6) {      // 5분
-                    min = 60;
-                    xformat = '{value:%Y-%m-%d %H:%M}';
-                    interval = '5min';
-                } else {       // 1분
-                    min = 1;
-                    interval = 'minute';
-                }
-
-                $.each(getSelectedCheckData($grid), function() {
-                    asset_ids.push(this.asset_id);
-                });
-
-                lastParam = {
-                    asset_ids : JSON.stringify(asset_ids),
-                    min : min,
-                    valueType: $('.valueType input[type=radio]:checked').val(),
-                    start_date : sdate,
-                    end_date : edate,
-                    itv : interval
-                };
-
-                // console.log(lastParam);
-
-                if (typeof chart != 'undefined') {
-                    chart.showLoading('데이터 로딩 중 입니다...');
-                }
-                $.get('/getSensorChartRealData', lastParam, function(res) {
-                    if (res == null || res.length == 0) {
-                        alert('데이터가 없습니다.');
-                        return;
-                    }
-
-                    let guideLine = [];                                             // 루프를 돌리면서 자산 종류별로 가이드 라인 array 를 만들어서 plotLine 데이터를 생성
-
-                    if(threshold) {
-                        if(!!res && res.length > 0){
-                            const obj = res.find(d => d.real_value == d.tar_value); // type 이 달라서 ==
-
-                            if(!obj)
-                                return;
-
-                            guideLine.push(getPlotLine('#FF0000', obj.max4, obj.asset_kind_name + ' 4차 (' + obj.max4 + ')'));
-                            guideLine.push(getPlotLine('#FF9600', obj.max3, obj.asset_kind_name + ' 3차 (' + obj.max3 + ')'));
-                            guideLine.push(getPlotLine('#FFD200', obj.max2, obj.asset_kind_name + ' 2차 (' + obj.max2 + ')'));
-                            guideLine.push(getPlotLine('#90DA00', obj.max1, obj.asset_kind_name + ' 1차 (' + obj.max1 + ')'));
-                            guideLine.push(getPlotLine('#FF0000', obj.min4, obj.asset_kind_name + ' 4차 (' + obj.min4 + ')'));
-                            guideLine.push(getPlotLine('#FF9600', obj.min3, obj.asset_kind_name + ' 3차 (' + obj.min3 + ')'));
-                            guideLine.push(getPlotLine('#FFD200', obj.min2, obj.asset_kind_name + ' 2차 (' + obj.min2 + ')'));
-                            guideLine.push(getPlotLine('#90DA00', obj.min1, obj.asset_kind_name + ' 1차 (' + obj.min1 + ')'));
-                        }
-                    }
-
-                    console.log(guideLine);
-
-                    const data = res.reduce((acc, item) => {
-                        let key = item.channel_name;
-                        if (!acc[key]) {
-                            acc[key] = [];
-                        }
-                        acc[key].push([item.time_slot, item.real_value]);
-                        return acc;
-                    }, {});
-
-                    let seriesData = Object.keys(data).map(name => {
-                        return {
-                            name,
-                            data: data[name],
-                            showInLegend: false
-                        }
-                    });
-
-                    try {
-                        chart = drawLineChart($('.chart'), seriesData, guideLine, xformat);
-                        chart.hideLoading();
-                        $('.chartGroup').show();
-                        window.jqgridFlag = true;
-                    } catch(e) {
-                    }
-                });
-            }
-
-            function drawChartCandle() {
-                let sdate = $('.search-form.search-area input.searchDate').attr('start_date');            // 2023-11-01
-                let edate = $('.search-form.search-area input.searchDate').attr('end_date');
-
-                let diffDay = countDaysBetweenDates(sdate, edate);
-                let xformat = '{value:%Y-%m-%d %H:%M}';
-                
-                let valueType = $('.valueType input[type=radio]:checked').val();
-                let threshold = $('.toggleThreshold input[type=checkbox]').is(':checked');
-
-                let min = 1;
-
-                if (valueType == 'raw') {
-                    threshold = false;
-                }
-
-                console.log(diffDay);
-
-                // tick 간격 정의 
-                if (diffDay >= 89) {
-                    min = 60 * 24 * 7;          // 4시간별
-                    xformat = '{value:%y-%m-%d %H}';
-                    interval = '4hour';                    
-                } else if (diffDay >= 29) {
-                    min = 60 * 24;              // 시간별
-                    xformat = '{value:%y-%m-%d %H}';
-                    interval = 'hour';
-                } else if (diffDay >= 6) {      // 5분
-                    min = 60;
-                    xformat = '{value:%Y-%m-%d %H:%M}';
-                    interval = '5min';
-                } else {       // 1분 
-                    min = 1;
-                    interval = 'minute';
-                }
-
-                let asset_ids = [];
-                $.each(getSelectedCheckData($grid), function() {
-                    asset_ids.push(this.asset_id);
-                });
-
-                lastParam = {
-                    asset_ids : JSON.stringify(asset_ids), 
-                    min : min,
-                    valueType: $('.valueType input[type=radio]:checked').val(),
-                    start_date : sdate,
-                    end_date : edate,
-                    itv : interval
-                };
-
-                console.log(lastParam);
-
-                if (typeof chart != 'undefined') {
-                    chart.showLoading('데이터 로딩 중 입니다...');
-                }
-
-                $.get('/getSensorChartData', lastParam, function(res) {
-                    if (res == null || res.length == 0) {
-                        alert('데이터가 없습니다.');
-                        $('.chart').empty();
-                        window.jqgridFlag = false;
-                        return;
-                    }
-
-                    let guideLine = [];                                             // 루프를 돌리면서 자산 종류별로 가이드 라인 array 를 만들어서 plotLine 데이터를 생성                
-                    let lastKind = '';
-                    let viewChart = true;
-
-                    if(threshold) {
-                        $.each(res, function() {
-                            const data = this;
-                            if (data.asset_kind_id != lastKind) {
-                                if (lastKind === '') {
-                                    lastKind = data.asset_kind_id;
-                                } else {
-                                    alert('캔들차트는 동일한 센서종류에서 조회가 가능합니다. 동일한 센서종류를 선택하세요.');
-                                    viewChart = false;
-                                    $(".tab-three > a:eq(0)").trigger("click");
-                                    return false;
-                                }
-                            }
-                        });
-
-                        if(!!res && res.length > 0){
-                            const obj = res.find(d => d.max_value == d.tar_value);
-
-                            if(!obj)
-                                return;
-
-                            guideLine.push(getPlotLine('#FF0000', obj.max4, obj.asset_kind_name + ' 4차 (' + obj.max4 + ')'));
-                            guideLine.push(getPlotLine('#FF9600', obj.max3, obj.asset_kind_name + ' 3차 (' + obj.max3 + ')'));
-                            guideLine.push(getPlotLine('#FFD200', obj.max2, obj.asset_kind_name + ' 2차 (' + obj.max2 + ')'));
-                            guideLine.push(getPlotLine('#90DA00', obj.max1, obj.asset_kind_name + ' 1차 (' + obj.max1 + ')'));
-                            guideLine.push(getPlotLine('#FF0000', obj.min4, obj.asset_kind_name + ' 4차 (' + obj.min4 + ')'));
-                            guideLine.push(getPlotLine('#FF9600', obj.min3, obj.asset_kind_name + ' 3차 (' + obj.min3 + ')'));
-                            guideLine.push(getPlotLine('#FFD200', obj.min2, obj.asset_kind_name + ' 2차 (' + obj.min2 + ')'));
-                            guideLine.push(getPlotLine('#90DA00', obj.min1, obj.asset_kind_name + ' 1차 (' + obj.min1 + ')'));
-                        }
-                    }
-
-                    const data = res.reduce((acc, item) => {
-                        let key = item.channel_name;
-                        if (!acc[key]) {
-                            acc[key] = [];
-                        }
-                        acc[key].push([item.time_slot, item.start_value, item.max_value, item.min_value, item.end_value]);
-                        return acc;
-                    }, {});
-
-                    let seriesData = Object.keys(data).map(name => {
-                        return {
-                            name,
-                            data: data[name],
-                            type: 'candlestick',
-                            tooltip: {
-                                xDateFormat: '%Y-%m-%d %H:%M:%S'
-                            },
-                            color: 'blue', // 내리는 경우의 색상
-                            lineColor: 'blue', // 내리는 경우의 선 색상
-                            upColor: 'red', // 오르는 경우의 색상
-                            upLineColor: 'red', // 오르는 경우의 선 색상
-                        }
-                    });
-
-                    try {
-                        chart = drawCandleChart($('.chart'), seriesData, guideLine, xformat);
-                        chart.hideLoading();
-                        if (!viewChart) {
-                            $('.chart').empty();
-                            $('.chartGroup').hide();
-                            window.jqgridFlag = false;
-                        } else {
-                            $('.chartGroup').show();
-                            window.jqgridFlag = true;
-                        }
-                    } catch(e) {
-                    }
-                });
-            }
         </script>
-	
+
 	</head>
 
 <body data-pgcode="0000">
@@ -465,12 +201,12 @@
 		<div id="container">
             <div class="search-form search-area searchArea">
                 <h2 class="txt">센서모니터링</h2>
-                <div class="toggleThreshold inputBox" style="margin-right: 20px">
+                <%--<div class="toggleThreshold inputBox" style="margin-right: 20px">
                     <p class="check-box" notxt="" small=""><input type="checkbox" checked="" id="check_tit01_0" name="check_tit01_0" value=""><label for="check_tit01_0"><span class="graphic"></span></label></p>
                     <span class="labelText">임계치 표시</span>
-                </div>
+                </div>--%>
 
-                <div class="valueType inputBox" style="margin-right: 20px">
+                <%--<div class="valueType inputBox" style="margin-right: 20px">
                     <p class="check-box">
                         <input type="radio" id="check01" name="valueType" value="calc" checked/>
                         <label for="check01"><span class="graphic"></span>계산값</label>
@@ -479,27 +215,36 @@
                         <input type="radio" id="check02" name="valueType" value="raw"/>
                         <label for="check02"><span class="graphic"></span>Raw Value</label>
                     </p>
-                </div>
+                </div>--%>
 
                 <!-- <select name="selectDate" class="selectDate" tabindex="0">
                     <option value="7">주</option>
                     <option value="30">월</option>
                     <option value="365">년</option>
                 </select> -->
-                <input type="text" class="searchDate" name="searchDate" value="" readonly="readonly" start_date="" end_date="" tabindex="0">
+                <%--<input type="text" class="searchDate" name="searchDate" value="" readonly="readonly" start_date="" end_date="" tabindex="0">
 
                 <div class="searchGroup">
                     <a class="selectBtn">조회</a>
                     <a class="excelBtn">다운로드</a>
-                </div>
+                </div>--%>
             </div>
 
 			<div id="contents">
-				<div class="contents-re on" style="flex: 5">
-					<h3 class="txt">센서 그룹핑 분석</h3>
+				<div class="contents-re on" style="flex: 4">
+                    <div style="display:flex;align-items: center;margin-bottom:10px">
+                        <h3 class="txt" style="margin-bottom:0">센서 그룹핑 분석</h3>
+                        <div style="display:flex;position: unset;align-items: center;" class="search-top">
+                            <div style="color: #ffffff76;font-size: 1.5rem;display: flex;align-items: center;padding: 1rem;">현장명</div>
+                            <select style="background: transparent url(/images/bg_select_arr_m.png) no-repeat 90% center / 1.3rem;">
+                                <option>이월지구</option>
+                                <option>이월지구</option>
+                            </select>
+                        </div>
+                    </div>
 					<div class="contents-in">
                         <div class="bTable">
-                            <table class="grid"></table>
+                            <table id="jqGrid"></table>
                         </div>
 					</div>
 				</div>

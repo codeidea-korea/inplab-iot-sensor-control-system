@@ -99,12 +99,13 @@
         <ul class="menu-sub">
             <li>
                 <a href="/sensorList" class="menu-link">센서현황</a>
-                <a href="/sensorGroup" class="menu-link">센서모니터링</a>
+                <a href="/sensorGroup" class="menu-link">센서그룹핑 조회</a>
+                <a href="/alarmList" class="menu-link">알람 이력 조회</a>
                 <a href="/calc" class="menu-link">센서 정보 변경</a>
             </li>
         </ul>
     </li>
-    <li>
+    <%--<li>
         <button type="button" class="round">
             <dl>
                 <dt data-type="alarm">
@@ -115,10 +116,10 @@
         <ul class="menu-sub">
             <li>
                 <a href="/alarmList" class="menu-link">알람 이력 조회</a>
-                <%--               <a href="javascript:void(0);" class="menu-link">알람 Report</a>--%>
+                &lt;%&ndash;               <a href="javascript:void(0);" class="menu-link">알람 Report</a>&ndash;%&gt;
             </li>
         </ul>
-    </li>
+    </li>--%>
     <li>
         <button type="button" class="round">
             <dl>
