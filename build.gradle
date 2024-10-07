@@ -93,6 +93,8 @@ dependencies {
 	implementation group: 'org.bytedeco', name: 'ffmpeg', version: '6.0-1.5.9', classifier: 'windows-x86'
 	implementation group: 'org.bytedeco', name: 'ffmpeg', version: '6.0-1.5.9', classifier: 'linux-x86'
 	implementation group: 'org.bytedeco', name: 'ffmpeg', version: '6.0-1.5.9', classifier: 'linux-x86_64'
+	implementation group: 'org.bytedeco', name: 'ffmpeg', version: '6.0-1.5.9', classifier: 'macosx-x86_64'
+	implementation group: 'org.bytedeco', name: 'ffmpeg', version: '6.0-1.5.9', classifier: 'macosx-arm64'
 	// implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.9'
 
 	 // GSon
