@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 
 
 @Configuration
-@MapperScan(value = "com.safeone.dashboard.dao", sqlSessionFactoryRef = "sqlSessionFactory")
+@MapperScan(value = "com.safeone.dashboard.dao.**", sqlSessionFactoryRef = "sqlSessionFactory")
 public class DatabaseConfig {
     private final static String ALIAS = "safeone";
 
@@ -80,7 +80,7 @@ public class DatabaseConfig {
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(dataSource);
         //패키지 기본경로
-        sqlSessionFactoryBean.setMapperLocations(applicationContext.getResources("classpath:mapper/*.xml"));
+        sqlSessionFactoryBean.setMapperLocations(applicationContext.getResources("classpath:mapper/**/*.xml"));
         SqlSessionFactory factory = sqlSessionFactoryBean.getObject();
         factory.getConfiguration().setMapUnderscoreToCamelCase(false);          // DTO CamelCasing 사용여부
         return factory;

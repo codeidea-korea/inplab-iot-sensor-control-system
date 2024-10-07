@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.maintenance.MaintenanceDetailsMapper">
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'maint_accpt_ymd' == sidx and sidx != ''">
+                    tmd.maint_accpt_ymd ${sord}
+                </when>
+                <when test="'maint_str_ymd' == sidx and sidx != ''">
+                    tmd.maint_str_ymd ${sord}
+                </when>
+                <when test="'maint_end_ymd' == sidx and sidx != ''">
+                    tmd.maint_end_ymd ${sord}
+                </when>
+                <when test="'district_nm' == sidx and sidx != ''">
+                    tmd.district_no ${sord}
+                </when>
+                <when test="'sens_nm' == sidx and sidx != ''">
+                    tmd.sens_no ${sord}
+                </when>
+                <when test="'code_nm' == sidx and sidx != ''">
+                    tmd.maint_rslt_cd ${sord}
+                </when>
+                <when test="'maint_dtls' == sidx and sidx != ''">
+                    tmd.maint_dtls ${sord}
+                </when>
+                <when test="'maint_comp_nm' == sidx and sidx != ''">
+                    tmd.maint_comp_nm ${sord}
+                </when>
+                <when test="'maint_chgr_nm' == sidx and sidx != ''">
+                    tmd.maint_chgr_nm ${sord}
+                </when>
+                <when test="'maint_chgr_ph' == sidx and sidx != ''">
+                    tmd.maint_chgr_ph ${sord}
+                </when>
+                <when test="'reg_dt' == sidx and sidx != ''">
+                    tmd.reg_dt ${sord}
+                </when>
+                <otherwise>
+                    tmd.reg_dt desc
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectMaintenanceDetailsList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.maintenance.MaintenanceDetailsDto">
+        SELECT tmd.mgnt_no
+        , TO_CHAR(tmd.maint_accpt_ymd::timestamp, 'YYYY-MM-DD') AS maint_accpt_ymd
+        , TO_CHAR(tmd.maint_str_ymd::timestamp, 'YYYY-MM-DD') AS maint_str_ymd
+        , TO_CHAR(tmd.maint_end_ymd::timestamp, 'YYYY-MM-DD') AS maint_end_ymd
+        , tmd.district_no
+        , tdi.district_nm
+        , tmd.sens_no
+        , tsi.sens_nm
+        , tmd.maint_rslt_cd
+        , tcc.code_nm
+        , tmd.maint_dtls
+        , tmd.maint_comp_nm
+        , tmd.maint_chgr_nm
+        , tmd.maint_chgr_ph
+        , tmd.maint_pic_path
+        , tmd.reg_dt
+        , tmd.mod_dt
+        FROM tb_maint_details tmd
+        LEFT OUTER JOIN tb_district_info tdi ON tmd.district_no = tdi.district_no
+        LEFT OUTER JOIN tb_sensor_info tsi ON tmd.sens_no = tsi.sens_no
+        LEFT OUTER JOIN tb_common_code tcc ON tmd.maint_rslt_cd = tcc.code_id
+        WHERE 1=1
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectMaintenanceDetailsListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(tmd.mgnt_no)
+        FROM tb_maint_details tmd
+                 LEFT OUTER JOIN tb_district_info tdi ON tmd.district_no = tdi.district_no
+                 LEFT OUTER JOIN tb_sensor_info tsi ON tmd.sens_no = tsi.sens_no
+                 LEFT OUTER JOIN tb_common_code tcc ON tmd.maint_rslt_cd = tcc.code_id
+        WHERE 1 = 1
+    </select>
+
+    <insert id="insertMaintenance" parameterType="java.util.Map">
+        INSERT INTO tb_maintenance ( maintenance_id
+                                   , manager_name
+                                   , manager_tel
+                                   , description
+                                   , reg_date
+                                   , mt_date
+                                   , asset_id
+                                   , area_id
+                                   , type
+                                   , file1)
+        SELECT COALESCE(max(maintenance_id::integer), 0) + 1 as maintenance_id
+             , #{manager_name}
+             , #{manager_tel}
+             , #{description}
+             , now()
+             , #{mt_date}::timestamp
+									          , #{asset_id_hid}
+             , (select area_id from tb_zone where zone_id = #{zone_id_hid})
+             , #{type_hid}
+             , #{file1}
+        FROM tb_maintenance
+    </insert>
+
+    <update id="updateMaintenance" parameterType="java.util.Map">
+        update tb_maintenance set
+        reg_date = now()
+        <if test="manager_name != null">
+            , manager_name = #{manager_name}
+        </if>
+        <if test="manager_tel != null">
+            , manager_tel = #{manager_tel}
+        </if>
+        <if test="description != null">
+            , description = #{description}
+        </if>
+        <if test="mt_date != null">
+            , mt_date = #{mt_date}::timestamp
+        </if>
+        <if test="asset_id_hid != null and asset_id_hid != ''">
+            , asset_id = #{asset_id_hid}
+        </if>
+        <if test="zone_id_hid != null and zone_id_hid != ''">
+            , area_id = (select area_id from tb_zone where zone_id = #{zone_id_hid})
+        </if>
+        <if test="type_hid != null and type_hid != ''">
+            , type = #{type_hid}
+        </if>
+        <if test="file1 != null">
+            , file1 = #{file1}
+        </if>
+        where maintenance_id = #{maintenance_id}
+    </update>
+
+    <delete id="deleteMaintenance" parameterType="java.util.Map">
+        DELETE
+        FROM tb_maintenance
+        WHERE maintenance_id = #{maintenance_id}
+    </delete>
+</mapper>

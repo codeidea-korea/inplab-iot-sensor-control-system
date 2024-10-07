@@ -557,12 +557,12 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
             loadonce: false,
             viewrecords: true,
             emptyrecords: '조회된 데이터가 없습니다',
-            // height: 'auto',
-            height: $(".contents-in").height() - 35,
+            height: 'auto',
+            // height: $(".contents-in").height() - 35,
             // scroll: true, // 스크롤 사용
-            rowNum: -1,
-            // rowNum: _rowList[0],
-            // rowList: _rowList,
+            // rowNum: -1,
+            rowNum: _rowList[0],
+            rowList: _rowList,
             // pager: ".jqGridPager",
             autowidth: true,
             shrinkToFit: true

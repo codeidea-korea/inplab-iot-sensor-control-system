@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-    
-<mapper namespace="com.safeone.dashboard.dao.MaintenanceMapper">
+
+<mapper namespace="com.safeone.dashboard.dao.maintenance.MaintenanceManageMapper">
     <sql id="rowSearch">
         <if test="reg_day_start != null and reg_day_start != '' and reg_day_end != null and reg_day_end != ''">
             and MG.reg_day between concat(#{reg_day_start},' 00:00:00') and concat(#{reg_day_end},' 23:59:59')
@@ -19,7 +19,8 @@
             and MG.type = #{type}
         </if>
         <if test="mt_date_start != null and mt_date_start != '' and mt_date_end != null and mt_date_end != ''">
-            and MG.mt_date::timestamp between concat(#{mt_date_start},' 00:00:00')::timestamp and concat(#{mt_date_end},' 23:59:59')::timestamp
+            and MG.mt_date::timestamp between concat(#{mt_date_start},' 00:00:00')::timestamp and
+            concat(#{mt_date_end},' 23:59:59')::timestamp
         </if>
         <if test="manager_name != null and manager_name != ''">
             and MG.manager_name ilike '%' || #{manager_name} || '%'
@@ -69,27 +70,28 @@
         </trim>
     </sql>
 
-    <select id="selectMaintenanceList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.MaintenanceDto">
+    <select id="selectMaintenanceList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.maintenance.MaintenanceManageDto">
         SELECT MG.*
         FROM (
-            SELECT A.maintenance_id
-		            , A.manager_name
-		            , A.manager_tel
-		            , A.description
-		            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
-		            , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
-		            , A.reg_date
-		            , asset.zone_id
-		            , asset.zone_id zone_id_hid
-                    , TO_CHAR(A.mt_date, 'YYYY-MM-DD') AS mt_date
-		            , A.asset_id
-		            , A.asset_id asset_id_hid
-		            , A.area_id
-		            , A.type
-		            , A.type type_hid
-		            , A.file1
-            FROM tb_maintenance A
-            	JOIN tb_asset asset ON A.asset_id = asset.asset_id
+        SELECT A.maintenance_id
+        , A.manager_name
+        , A.manager_tel
+        , A.description
+        , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
+        , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
+        , A.reg_date
+        , asset.zone_id
+        , asset.zone_id zone_id_hid
+        , TO_CHAR(A.mt_date, 'YYYY-MM-DD') AS mt_date
+        , A.asset_id
+        , A.asset_id asset_id_hid
+        , A.area_id
+        , A.type
+        , A.type type_hid
+        , A.file1
+        FROM tb_maintenance A
+        JOIN tb_asset asset ON A.asset_id = asset.asset_id
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
@@ -102,24 +104,24 @@
     <select id="selectMaintenanceListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(*)
         FROM (
-            SELECT A.maintenance_id
-		            , A.manager_name
-		            , A.manager_tel
-		            , A.description
-		            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
-		            , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
-		            , A.reg_date
-		            , asset.zone_id
-		            , asset.zone_id zone_id_hid
-                    , TO_CHAR(A.mt_date, 'YYYY-MM-DD') AS mt_date
-		            , A.asset_id
-		            , A.asset_id asset_id_hid
-		            , A.area_id
-		            , A.type
-		            , A.type type_hid
-		            , A.file1
-            FROM tb_maintenance A
-            	JOIN tb_asset asset ON A.asset_id = asset.asset_id
+        SELECT A.maintenance_id
+        , A.manager_name
+        , A.manager_tel
+        , A.description
+        , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
+        , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
+        , A.reg_date
+        , asset.zone_id
+        , asset.zone_id zone_id_hid
+        , TO_CHAR(A.mt_date, 'YYYY-MM-DD') AS mt_date
+        , A.asset_id
+        , A.asset_id asset_id_hid
+        , A.area_id
+        , A.type
+        , A.type type_hid
+        , A.file1
+        FROM tb_maintenance A
+        JOIN tb_asset asset ON A.asset_id = asset.asset_id
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
@@ -127,31 +129,31 @@
 
     <insert id="insertMaintenance" parameterType="java.util.Map">
         INSERT INTO tb_maintenance ( maintenance_id
-							          , manager_name
-							          , manager_tel
-							          , description
-							          , reg_date
-							          , mt_date
-							          , asset_id
-							          , area_id
-							          , type
-							          , file1
-							        ) SELECT COALESCE(max(maintenance_id::integer),0)+1 as maintenance_id
-									          , #{manager_name}
-									          , #{manager_tel}
-									          , #{description}
-									          , now()
-									          , #{mt_date}::timestamp
+                                   , manager_name
+                                   , manager_tel
+                                   , description
+                                   , reg_date
+                                   , mt_date
+                                   , asset_id
+                                   , area_id
+                                   , type
+                                   , file1)
+        SELECT COALESCE(max(maintenance_id::integer), 0) + 1 as maintenance_id
+             , #{manager_name}
+             , #{manager_tel}
+             , #{description}
+             , now()
+             , #{mt_date}::timestamp
 									          , #{asset_id_hid}
-									          , (select area_id from tb_zone where zone_id = #{zone_id_hid})
-									          , #{type_hid}
-									          , #{file1}
-							        	FROM tb_maintenance
+             , (select area_id from tb_zone where zone_id = #{zone_id_hid})
+             , #{type_hid}
+             , #{file1}
+        FROM tb_maintenance
     </insert>
 
     <update id="updateMaintenance" parameterType="java.util.Map">
         update tb_maintenance set
-            reg_date = now()
+        reg_date = now()
         <if test="manager_name != null">
             , manager_name = #{manager_name}
         </if>
@@ -180,7 +182,8 @@
     </update>
 
     <delete id="deleteMaintenance" parameterType="java.util.Map">
-        DELETE FROM tb_maintenance
-         WHERE maintenance_id = #{maintenance_id}
+        DELETE
+        FROM tb_maintenance
+        WHERE maintenance_id = #{maintenance_id}
     </delete>
 </mapper>

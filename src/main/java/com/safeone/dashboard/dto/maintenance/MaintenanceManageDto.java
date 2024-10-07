@@ -1,4 +1,4 @@
-package com.safeone.dashboard.dto;
+package com.safeone.dashboard.dto.maintenance;
 
 import java.io.Serializable;
 
@@ -7,7 +7,7 @@ import com.safeone.dashboard.config.annotate.FieldLabel;
 import lombok.Data;
 
 @Data
-public class MaintenanceDto implements Serializable {
+public class MaintenanceManageDto implements Serializable {
     @FieldLabel(title="유지보수 ID", type="hidden")
     String maintenance_id;
 

@@ -1,16 +1,16 @@
-package com.safeone.dashboard.dao;
+package com.safeone.dashboard.dao.maintenance;
 
 import org.springframework.stereotype.Repository;
 
-import com.safeone.dashboard.dto.MaintenanceDto;
+import com.safeone.dashboard.dto.maintenance.MaintenanceManageDto;
 
 import java.util.List;
 import java.util.Map;
 
 @Repository
-public interface MaintenanceMapper {
+public interface MaintenanceManageMapper {
     int selectMaintenanceListTotal(Map param);
-    List<MaintenanceDto> selectMaintenanceList(Map param);
+    List<MaintenanceManageDto> selectMaintenanceList(Map param);
     int insertMaintenance(Map param);
     int updateMaintenance(Map param);
     int deleteMaintenance(Map param);

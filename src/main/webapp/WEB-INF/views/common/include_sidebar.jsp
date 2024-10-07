@@ -1,6 +1,6 @@
 <%@ page import="com.safeone.dashboard.dto.UserDto" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
     UserDto loginUser = (UserDto) session.getAttribute("login");
 %>
@@ -141,8 +141,8 @@
         </button>
         <ul class="menu-sub">
             <li>
-                <a href="/abc" class="menu-link">(신규)유지보수이력</a>
-                <a href="/maintenance" class="menu-link">유지보수업체관리</a>
+                <a href="/maintenance/details" class="menu-link">(신규)유지보수이력</a>
+                <a href="/maintenance/manage" class="menu-link">유지보수업체관리</a>
             </li>
         </ul>
     </li>

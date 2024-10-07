@@ -23,7 +23,7 @@ import com.safeone.dashboard.service.AssetListService;
 import com.safeone.dashboard.service.CommonCodeService;
 import com.safeone.dashboard.service.DashboardService;
 import com.safeone.dashboard.service.EmergencyCallService;
-import com.safeone.dashboard.service.MaintenanceService;
+import com.safeone.dashboard.service.maintenance.MaintenanceManageService;
 import com.safeone.dashboard.service.ZoneService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,8 +37,6 @@ public class DashboardController {
     private AlarmListService alarmService;
     @Autowired
     private AssetListService assetService;
-    @Autowired
-    private MaintenanceService maintenanceService;
     @Autowired
     private EmergencyCallService emergencyCallService;
     @Autowired
