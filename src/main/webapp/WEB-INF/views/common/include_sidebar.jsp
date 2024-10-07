@@ -2,14 +2,13 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
-    UserDto loginUser = (UserDto)session.getAttribute("login");
+    UserDto loginUser = (UserDto) session.getAttribute("login");
 %>
 <script>
     $(function () {
         var currentURI = '<%=request.getServletPath()%>';
         let grade = '<%=loginUser.getUsr_flag()%>';
         if (grade !== '0') {
-            // $("ul#gnb-menu li:last-child").hide();
             document.querySelectorAll('.admin-menu').forEach(menu => {
                 menu.style.display = 'none';
             });
@@ -35,15 +34,9 @@
             }
         });
 
-        // $('#gnb-menu li').on('mouseleave', function () {
-        //     if ($(this).find('ul.menu-sub').length > 0) {
-        //         $(this).removeClass('active');
-        //     }
-        // });
+        const currentUrl = window.location.href;
 
-        var currentUrl = window.location.href;
-
-        $.each($('ul#gnb-menu li a'), function() {
+        $.each($('ul#gnb-menu li a'), function () {
             if (currentUrl.indexOf($(this).attr('href')) > -1) {
                 $(this).addClass('active');
                 $(this).closest('li').addClass('active');
@@ -65,9 +58,7 @@
             <p class="txt bul">Menu</p>
         </button>
     </li>
-    <!-- 메뉴 확장 -->
-    <li >
-<%--        <button type="button" class="round dashboard" onclick="location.href='/'">--%>
+    <li>
         <button type="button" class="round dashboard" onclick="location.href='/dashboard'">
             <dl>
                 <dt data-type="dashboard">
@@ -100,62 +91,77 @@
             <li>
                 <a href="/sensorList" class="menu-link">센서현황</a>
                 <a href="/sensorGroup" class="menu-link">센서그룹핑 조회</a>
-                <a href="/alarmList" class="menu-link">알람 이력 조회</a>
-                <a href="/calc" class="menu-link">센서 정보 변경</a>
+                <a href="/alarmList" class="menu-link">알람이력조회</a>
+                <a href="/calc" class="menu-link">경보기준관리</a>
+                <a href="/aaa" class="menu-link">(신규)센서초기치설정</a>
             </li>
         </ul>
     </li>
-    <%--<li>
+    <li>
         <button type="button" class="round">
             <dl>
-                <dt data-type="alarm">
-                    <img src="/images/icon_gnb04.png" alt="알람조회"></dt>
-                <dd class="bul">알람조회</dd>
+                <dt data-type="warning">
+                    <img src="/images/icon_gnb05.png" alt="전광판 연계"></dt>
+                <dd class="bul">(신규)전광판 연계</dd>
             </dl>
         </button>
         <ul class="menu-sub">
             <li>
-                <a href="/alarmList" class="menu-link">알람 이력 조회</a>
-                &lt;%&ndash;               <a href="javascript:void(0);" class="menu-link">알람 Report</a>&ndash;%&gt;
+                <a href="/abc" class="menu-link">(신규)전광판이미지관리</a>
+                <a href="/abc" class="menu-link">(신규)전광판 전송관리</a>
             </li>
         </ul>
-    </li>--%>
+    </li>
+    <li>
+        <button type="button" class="round">
+            <dl>
+                <dt data-type="warning">
+                    <img src="/images/icon_gnb05.png" alt="방송시스템 연계"></dt>
+                <dd><a href="/aaa" class="menu-link">(신규)방송시스템 연계</a></dd>
+            </dl>
+        </button>
+    </li>
     <li>
         <button type="button" class="round">
             <dl>
                 <dt data-type="warning">
                     <img src="/images/icon_gnb05.png" alt="경보대상관리"></dt>
-                <dd><a href="/smsAlarm" class="menu-link">경보대상관리</a></dd>
+                <dd><a href="/smsAlarm" class="menu-link">(기존)경보대상관리</a></dd>
             </dl>
         </button>
     </li>
-    <%--    <li>--%>
-    <%--	    <button type="button" class="round">--%>
-    <%--	    <dl>--%>
-    <%--	        <dt data-type="disaster">--%>
-    <%--	            <img src="/images/icon_gnb06.png" alt="재난전파조회"></dt>--%>
-    <%--	            <dd class="bul">재난전파조회</dd>--%>
-    <%--	        </dl>--%>
-    <%--	    </button>--%>
-
-    <%--        <ul class="menu-sub">--%>
-    <%--            <li>--%>
-    <%--                <a href="disaster_broadcast_list.html" class="menu-link">재난방송 시스템 이력</a>--%>
-    <%--                <a href="disaster_message_list.html" class="menu-link">재난문자 전광판 이력</a>--%>
-    <%--            </li>--%>
-    <%--        </ul>--%>
-    <%--    </li>--%>
     <li>
         <button type="button" class="round">
             <dl>
                 <dt data-type="maintenance">
                     <img src="/images/icon_gnb07.png" alt="유지보수관리">
                 </dt>
-                <dd>
-                    <a href="/maintenance" class="menu-link">유지보수관리</a>
-                </dd>
+                <dd class="bul">(신규)유지보수관리</dd>
             </dl>
         </button>
+        <ul class="menu-sub">
+            <li>
+                <a href="/abc" class="menu-link">(신규)유지보수이력</a>
+                <a href="/maintenance" class="menu-link">유지보수업체관리</a>
+            </li>
+        </ul>
+    </li>
+    <li>
+        <button type="button" class="round">
+            <dl>
+                <dt data-type="maintenance">
+                    <img src="/images/icon_gnb07.png" alt="운영환경설정">
+                </dt>
+                <dd class="bul">(신규)운영환경설정</dd>
+            </dl>
+        </button>
+        <ul class="menu-sub">
+            <li>
+                <a href="/abc" class="menu-link">(신규)사용자관리</a>
+                <a href="/abc" class="menu-link">(신규)비상연락망관리</a>
+                <a href="/abc" class="menu-link">(신규)SMS 경보대상 관리</a>
+            </li>
+        </ul>
     </li>
     <li class="admin-menu">
         <button type="button" class="round">
@@ -189,7 +195,6 @@
                 <dl>
                     <dt>데이터관리</dt>
                     <dd>
-                        <%--	                    <a href="/admin/dataLoger" class="menu-link">Loger 관리</a>--%>
                         <a href="/admin/dataMeasure" class="menu-link">계측기 데이터 관리</a>
                     </dd>
                 </dl>
@@ -219,8 +224,6 @@
             </li>
         </ul>
     </li>
-
-
     <li class="admin-menu">
         <button type="button" class="round">
             <dl>
@@ -271,6 +274,4 @@
             </li>
         </ul>
     </li>
-
-
 </ul>
