@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.maintenance.MaintenanceCompanyManagementMapper">
+    <sql id="rowSearch">
+        <if test="partner_comp_id != null and partner_comp_id != ''">
+            and tmi.partner_comp_id ilike '%' || #{partner_comp_id} || '%'
+        </if>
+        <if test="partner_comp_nm != null and partner_comp_nm != ''">
+            and tmi.partner_comp_nm ilike '%' || #{partner_comp_nm} || '%'
+        </if>
+        <if test="partner_type_flag != null and partner_type_flag != ''">
+            and tmi.partner_type_flag ilike '%' || #{partner_type_flag} || '%'
+        </if>
+        <if test="partner_comp_addr != null and partner_comp_addr != ''">
+            and tmi.partner_comp_addr ilike '%' || #{partner_comp_addr} || '%'
+        </if>
+        <if test="comp_biz_no != null and comp_biz_no != ''">
+            and tmi.comp_biz_no ilike '%' || #{comp_biz_no} || '%'
+        </if>
+        <if test="maint_rep_nm != null and maint_rep_nm != ''">
+            and tmi.maint_rep_nm ilike '%' || #{maint_rep_nm} || '%'
+        </if>
+        <if test="maint_rep_ph != null and maint_rep_ph != ''">
+            and tmi.maint_rep_ph ilike '%' || #{maint_rep_ph} || '%'
+        </if>
+        <if test="reg_dt_start != null and reg_dt_start != '' and reg_dt_end != null and reg_dt_end != ''">
+            and tmi.reg_dt::timestamp between concat(#{reg_dt_start},' 00:00:00')::timestamp and concat(#{reg_dt_end},'
+            23:59:59')::timestamp
+        </if>
+        <if test="mod_dt_start != null and mod_dt_start != '' and mod_dt_end != null and mod_dt_end != ''">
+            and tmi.mod_dt::timestamp between concat(#{mod_dt_start},' 00:00:00')::timestamp and concat(#{mod_dt_end},'
+            23:59:59')::timestamp
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'partner_comp_id' == sidx and sidx != ''">
+                    tmi.partner_comp_id ${sord}
+                </when>
+                <when test="'partner_comp_nm' == sidx and sidx != ''">
+                    tmi.partner_comp_nm ${sord}
+                </when>
+                <when test="'partner_type_flag' == sidx and sidx != ''">
+                    tmi.partner_type_flag ${sord}
+                </when>
+                <when test="'partner_comp_addr' == sidx and sidx != ''">
+                    tmi.partner_comp_addr ${sord}
+                </when>
+                <when test="'comp_biz_no' == sidx and sidx != ''">
+                    tmi.comp_biz_no ${sord}
+                </when>
+                <when test="'maint_rep_nm' == sidx and sidx != ''">
+                    tmi.maint_rep_nm ${sord}
+                </when>
+                <when test="'maint_rep_ph' == sidx and sidx != ''">
+                    tmi.maint_rep_ph ${sord}
+                </when>
+                <when test="'reg_dt' == sidx and sidx != ''">
+                    tmi.reg_dt ${sord}
+                </when>
+                <when test="'mod_dt' == sidx and sidx != ''">
+                    tmi.mod_dt ${sord}
+                </when>
+                <otherwise>
+                    tmi.reg_dt desc
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectMaintenanceCompanyManagementList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.maintenance.MaintenanceCompanyManagementDto">
+        SELECT tmi.partner_comp_id
+        , tmi.partner_comp_nm
+        , tmi.partner_type_flag
+        , tmi.partner_comp_addr
+        , tmi.comp_biz_no
+        , tmi.maint_rep_nm
+        , tmi.maint_rep_ph
+        , tmi.reg_dt
+        , tmi.mod_dt
+        FROM tb_maintcomp_info tmi
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectMaintenanceCompanyManagementListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(tmi.partner_comp_id)
+        FROM tb_maintcomp_info tmi
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertMaintenanceCompanyManagement" parameterType="java.util.Map">
+        INSERT INTO tb_maintenance ( maintenance_id
+                                   , manager_name
+                                   , manager_tel
+                                   , description
+                                   , reg_date
+                                   , mt_date
+                                   , asset_id
+                                   , area_id
+                                   , type
+                                   , file1)
+        SELECT COALESCE(max(maintenance_id::integer), 0) + 1 as maintenance_id
+             , #{manager_name}
+             , #{manager_tel}
+             , #{description}
+             , now()
+             , #{mt_date}::timestamp
+									          , #{asset_id_hid}
+             , (select area_id from tb_zone where zone_id = #{zone_id_hid})
+             , #{type_hid}
+             , #{file1}
+        FROM tb_maintenance
+    </insert>
+
+    <update id="updateMaintenanceCompanyManagement" parameterType="java.util.Map">
+        update tb_maintenance set
+        reg_date = now()
+        <if test="manager_name != null">
+            , manager_name = #{manager_name}
+        </if>
+        <if test="manager_tel != null">
+            , manager_tel = #{manager_tel}
+        </if>
+        <if test="description != null">
+            , description = #{description}
+        </if>
+        <if test="mt_date != null">
+            , mt_date = #{mt_date}::timestamp
+        </if>
+        <if test="asset_id_hid != null and asset_id_hid != ''">
+            , asset_id = #{asset_id_hid}
+        </if>
+        <if test="zone_id_hid != null and zone_id_hid != ''">
+            , area_id = (select area_id from tb_zone where zone_id = #{zone_id_hid})
+        </if>
+        <if test="type_hid != null and type_hid != ''">
+            , type = #{type_hid}
+        </if>
+        <if test="file1 != null">
+            , file1 = #{file1}
+        </if>
+        where maintenance_id = #{maintenance_id}
+    </update>
+
+    <delete id="deleteMaintenanceCompanyManagement" parameterType="java.util.Map">
+        DELETE
+        FROM tb_maintenance
+        WHERE maintenance_id = #{maintenance_id}
+    </delete>
+</mapper>
