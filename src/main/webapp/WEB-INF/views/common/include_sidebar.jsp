@@ -93,7 +93,7 @@
                 <a href="/sensorGroup" class="menu-link">센서그룹핑 조회</a>
                 <a href="/alarmList" class="menu-link">알람이력조회</a>
                 <a href="/calc" class="menu-link">경보기준관리</a>
-                <a href="/aaa" class="menu-link">(신규)센서초기치설정</a>
+                <a href="/aaa" class="menu-link">(작업중)센서초기치설정</a>
             </li>
         </ul>
     </li>
@@ -102,13 +102,13 @@
             <dl>
                 <dt data-type="warning">
                     <img src="/images/icon_gnb05.png" alt="전광판 연계"></dt>
-                <dd class="bul">(신규)전광판 연계</dd>
+                <dd class="bul">(작업중)전광판 연계</dd>
             </dl>
         </button>
         <ul class="menu-sub">
             <li>
-                <a href="/abc" class="menu-link">(신규)전광판이미지관리</a>
-                <a href="/abc" class="menu-link">(신규)전광판 전송관리</a>
+                <a href="/abc" class="menu-link">(작업중)전광판이미지관리</a>
+                <a href="/abc" class="menu-link">(작업중)전광판 전송관리</a>
             </li>
         </ul>
     </li>
@@ -117,7 +117,7 @@
             <dl>
                 <dt data-type="warning">
                     <img src="/images/icon_gnb05.png" alt="방송시스템 연계"></dt>
-                <dd><a href="/aaa" class="menu-link">(신규)방송시스템 연계</a></dd>
+                <dd><a href="/aaa" class="menu-link">(작업중)방송시스템 연계</a></dd>
             </dl>
         </button>
     </li>
@@ -136,12 +136,12 @@
                 <dt data-type="maintenance">
                     <img src="/images/icon_gnb07.png" alt="유지보수관리">
                 </dt>
-                <dd class="bul">(신규)유지보수관리</dd>
+                <dd class="bul">(작업중)유지보수관리</dd>
             </dl>
         </button>
         <ul class="menu-sub">
             <li>
-                <a href="/maintenance/details" class="menu-link">(신규)유지보수이력</a>
+                <a href="/maintenance/details" class="menu-link">(작업중)유지보수이력</a>
                 <a href="/maintenance/manage" class="menu-link">유지보수업체관리</a>
             </li>
         </ul>
@@ -152,14 +152,14 @@
                 <dt data-type="maintenance">
                     <img src="/images/icon_gnb07.png" alt="운영환경설정">
                 </dt>
-                <dd class="bul">(신규)운영환경설정</dd>
+                <dd class="bul">(작업중)운영환경설정</dd>
             </dl>
         </button>
         <ul class="menu-sub">
             <li>
-                <a href="/abc" class="menu-link">(신규)사용자관리</a>
-                <a href="/abc" class="menu-link">(신규)비상연락망관리</a>
-                <a href="/abc" class="menu-link">(신규)SMS 경보대상 관리</a>
+                <a href="/abc" class="menu-link">(작업중)사용자관리</a>
+                <a href="/abc" class="menu-link">(작업중)비상연락망관리</a>
+                <a href="/abc" class="menu-link">(작업중)SMS 경보대상 관리</a>
             </li>
         </ul>
     </li>
