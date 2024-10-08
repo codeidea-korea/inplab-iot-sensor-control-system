@@ -9,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -26,9 +25,7 @@ public class MainController {
     public String main(Model model, HttpServletRequest request) {
         HttpSession session = request.getSession();
         if (session.getAttribute("login") != null) {
-//            return "redirect:/dashboard";
-            // 수정해야됨 임시!!!
-            return "redirect:/adminAdd/siteInfo";
+            return "redirect:/dashboard";
         } else {
             return "redirect:/login";
         }

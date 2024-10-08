@@ -4,7 +4,6 @@ import com.safeone.dashboard.config.annotate.NoLoginCheck;
 import com.safeone.dashboard.dto.UserDto;
 import com.safeone.dashboard.service.CommonCodeEditService;
 import com.safeone.dashboard.service.LoginLogService;
-import com.safeone.dashboard.service.SiteInfoService;
 import com.safeone.dashboard.service.UserService;
 import com.safeone.dashboard.util.CommonUtils;
 import com.safeone.dashboard.util.HttpUtils;
@@ -79,7 +78,7 @@ public class LoginController {
 
                     // 수정해야됨 임시!!!
 //                    returnPage = "redirect:/dashboard";
-                    returnPage = "redirect:/adminAdd/siteInfo";
+                    returnPage = "redirect:/dashboard";
 
 //                    Map user = (Map) session.getAttribute("login");
 //                    if(user.get("user_lv").equals("3"))
