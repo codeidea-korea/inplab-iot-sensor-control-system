@@ -27,12 +27,63 @@ public class MaintenanceDetailsController extends JqGridAbstract<MaintenanceDeta
 
     @Override
     protected List<MaintenanceDetailsDto> getList(Map param) {
+        setParam(param);
         return maintenanceDetailsService.getList(param);
     }
 
     @Override
     protected int getTotalRows(Map param) {
+        setParam(param);
         return maintenanceDetailsService.getTotalCount(param);
+    }
+
+    private void setParam(Map param) {
+        if (param.containsKey("maint_accpt_ymd")) {
+            String[] dates = ((String) param.get("maint_accpt_ymd")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("maint_accpt_ymd_start", dates[0].replace("-", ""));
+                param.put("maint_accpt_ymd_end", dates[1].replace("-", ""));
+            } else {
+                dates[0] = dates[0].replace(" ", "");
+                param.put("maint_accpt_ymd_start", dates[0]);
+                param.put("maint_accpt_ymd_end", dates[0]);
+            }
+        }
+
+        if (param.containsKey("maint_str_ymd")) {
+            String[] dates = ((String) param.get("maint_str_ymd")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("maint_str_ymd_start", dates[0].replace("-", ""));
+                param.put("maint_str_ymd_end", dates[1].replace("-", ""));
+            } else {
+                dates[0] = dates[0].replace(" ", "");
+                param.put("maint_str_ymd_start", dates[0]);
+                param.put("maint_str_ymd_end", dates[0]);
+            }
+        }
+
+        if (param.containsKey("maint_end_ymd")) {
+            String[] dates = ((String) param.get("maint_end_ymd")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("maint_end_ymd_start", dates[0].replace("-", ""));
+                param.put("maint_end_ymd_end", dates[1].replace("-", ""));
+            } else {
+                dates[0] = dates[0].replace(" ", "");
+                param.put("maint_end_ymd_start", dates[0]);
+                param.put("maint_end_ymd_end", dates[0]);
+            }
+        }
+
+        if (param.containsKey("reg_dt")) {
+            String[] dates = ((String) param.get("reg_dt")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("reg_dt_start", dates[0]);
+                param.put("reg_dt_end", dates[1]);
+            } else {
+                param.put("reg_dt_start", dates[0]);
+                param.put("reg_dt_end", dates[0]);
+            }
+        }
     }
 
     @Override

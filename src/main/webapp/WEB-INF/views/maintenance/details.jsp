@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
     <style>
         input[type=date], input[type=number] {
             text-align: left !important;
@@ -83,9 +84,9 @@
             margin-left: 1rem;
         }
     </style>
-    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
     <script>
         window.jqgridOption = {
+            columnAutoWidth: true,
             multiselect: true,
             multiboxonly: false
         };
@@ -169,7 +170,7 @@
                     <a class="excelBtn">다운로드</a>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>
+                    <jsp:include page="../common/include_jqgrid_old.jsp" flush="true"></jsp:include>
                 </div>
             </div>
         </div>

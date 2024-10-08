@@ -2,6 +2,43 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.safeone.dashboard.dao.maintenance.MaintenanceDetailsMapper">
+    <sql id="rowSearch">
+        <if test="maint_accpt_ymd_start != null and maint_accpt_ymd_start != '' and maint_accpt_ymd_end != null and maint_accpt_ymd_end != ''">
+            and tmd.maint_accpt_ymd between #{maint_accpt_ymd_start} and #{maint_accpt_ymd_end}
+        </if>
+        <if test="maint_str_ymd_start != null and maint_str_ymd_start != '' and maint_str_ymd_end != null and maint_str_ymd_end != ''">
+            and tmd.maint_str_ymd between #{maint_str_ymd_start} and #{maint_str_ymd_end}
+        </if>
+        <if test="maint_end_ymd_start != null and maint_end_ymd_start != '' and maint_end_ymd_end != null and maint_end_ymd_end != ''">
+            and tmd.maint_end_ymd between #{maint_end_ymd_start} and #{maint_end_ymd_end}
+        </if>
+        <if test="district_nm != null and district_nm != ''">
+            and tdi.district_nm ilike '%' || #{district_nm} || '%'
+        </if>
+        <if test="sens_nm != null and sens_nm != ''">
+            and tsi.sens_nm ilike '%' || #{sens_nm} || '%'
+        </if>
+        <if test="code_nm != null and code_nm != ''">
+            and tcc.code_nm ilike '%' || #{code_nm} || '%'
+        </if>
+        <if test="maint_dtls != null and maint_dtls != ''">
+            and tmd.maint_dtls ilike '%' || #{maint_dtls} || '%'
+        </if>
+        <if test="maint_comp_nm != null and maint_comp_nm != ''">
+            and tmd.maint_comp_nm ilike '%' || #{maint_comp_nm} || '%'
+        </if>
+        <if test="maint_chgr_nm != null and maint_chgr_nm != ''">
+            and tmd.maint_chgr_nm ilike '%' || #{maint_chgr_nm} || '%'
+        </if>
+        <if test="maint_chgr_ph != null and maint_chgr_ph != ''">
+            and tmd.maint_chgr_ph ilike '%' || #{maint_chgr_ph} || '%'
+        </if>
+        <if test="reg_dt_start != null and reg_dt_start != '' and reg_dt_end != null and reg_dt_end != ''">
+            and tmd.reg_dt::timestamp between concat(#{reg_dt_start},' 00:00:00')::timestamp and
+            concat(#{reg_dt_end},' 23:59:59')::timestamp
+        </if>
+    </sql>
+
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
@@ -69,6 +106,7 @@
         LEFT OUTER JOIN tb_sensor_info tsi ON tmd.sens_no = tsi.sens_no
         LEFT OUTER JOIN tb_common_code tcc ON tmd.maint_rslt_cd = tcc.code_id
         WHERE 1=1
+        <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
@@ -78,10 +116,11 @@
     <select id="selectMaintenanceDetailsListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(tmd.mgnt_no)
         FROM tb_maint_details tmd
-                 LEFT OUTER JOIN tb_district_info tdi ON tmd.district_no = tdi.district_no
-                 LEFT OUTER JOIN tb_sensor_info tsi ON tmd.sens_no = tsi.sens_no
-                 LEFT OUTER JOIN tb_common_code tcc ON tmd.maint_rslt_cd = tcc.code_id
+        LEFT OUTER JOIN tb_district_info tdi ON tmd.district_no = tdi.district_no
+        LEFT OUTER JOIN tb_sensor_info tsi ON tmd.sens_no = tsi.sens_no
+        LEFT OUTER JOIN tb_common_code tcc ON tmd.maint_rslt_cd = tcc.code_id
         WHERE 1 = 1
+        <include refid="rowSearch"/>
     </select>
 
     <insert id="insertMaintenance" parameterType="java.util.Map">
