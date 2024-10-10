@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.safeone.dashboard.dto.SendContrDto;
 import com.safeone.dashboard.service.CommonCodeService;
 import com.safeone.dashboard.service.SendContrService;
-import com.safeone.dashboard.service.SendGroupService;
+import com.safeone.dashboard.service.displayconnection.DisplayImgManagementService;
 import com.safeone.dashboard.util.ExcelUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class SendContrController {
 
 
 	@Autowired
-	private SendGroupService sendGroupService;
+	private DisplayImgManagementService sendGroupService;
 
 	@Autowired
 	private CommonCodeService commonCodeService;

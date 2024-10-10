@@ -1,4 +1,4 @@
-package com.safeone.dashboard.dto;
+package com.safeone.dashboard.dto.displayconnection;
 
 import com.safeone.dashboard.config.annotate.FieldLabel;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 @Data
-public class SendGroupDto implements Serializable {
+public class DisplayImgManagementDto implements Serializable {
 	
 	@FieldLabel(title="전송그룹 ID", type="hidden")
     String send_group_id;

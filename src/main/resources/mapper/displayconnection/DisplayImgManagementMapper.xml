@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
     
-<mapper namespace="com.safeone.dashboard.dao.SendGroupMapper">
+<mapper namespace="com.safeone.dashboard.dao.displayconnection.DisplayImgManagementMapper">
     <sql id="rowSearch">
         <if test="send_group_id != null and send_group_id != ''">
             and MG.send_group_id = #{send_group_id}
@@ -39,7 +39,7 @@
         </trim>
     </sql>
     
-    <select id="selectSendGroupList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.SendGroupDto">
+    <select id="selectDisplayImgManagementList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.displayconnection.DisplayImgManagementDto">
         SELECT MG.*
         FROM (
             SELECT send_group_id
@@ -56,7 +56,7 @@
         </if>
     </select>
 
-    <select id="selectSendGroupListTotal" parameterType="java.util.Map" resultType="int">
+    <select id="selectDisplayImgManagementListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(*)
         FROM (
 			SELECT send_group_id
@@ -69,7 +69,7 @@
         <include refid="rowSearch"/>
     </select>
 
-    <update id="updateSendGroup" parameterType="java.util.Map">
+    <update id="updateDisplayImgManagement" parameterType="java.util.Map">
         update tb_send_group
         <set>
             <if test="send_group_name != null">
@@ -85,7 +85,7 @@
         where send_group_id = #{send_group_id}
     </update>
 
-    <insert id="insertSendGroup" parameterType="java.util.Map">
+    <insert id="insertDisplayImgManagement" parameterType="java.util.Map">
         insert into tb_send_group (send_group_id, send_group_name, description, use_yn)
         SELECT COALESCE(max(send_group_id::integer),0)+1 as tb_send_group
              , #{send_group_name}
@@ -94,7 +94,7 @@
         FROM tb_send_group
     </insert>
 
-    <delete id="deleteSendGroup" parameterType="java.util.Map">
+    <delete id="deleteDisplayImgManagement" parameterType="java.util.Map">
         DELETE FROM tb_send_group
         WHERE send_group_id = #{send_group_id}
     </delete>

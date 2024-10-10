@@ -1,41 +1,29 @@
-package com.safeone.dashboard.controller;
+package com.safeone.dashboard.controller.displayconnection;
 
-import com.google.gson.Gson;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
-import com.safeone.dashboard.dto.SendGroupDto;
-import com.safeone.dashboard.dto.SensorGroupDto;
-import com.safeone.dashboard.dto.UserDto;
-import com.safeone.dashboard.service.CommonCodeService;
-import com.safeone.dashboard.service.DashboardService;
-import com.safeone.dashboard.service.SendGroupService;
-import com.safeone.dashboard.service.SensorGroupService;
-import com.safeone.dashboard.util.ExcelUtil;
-import com.safeone.dashboard.util.ExcelUtil.FieldDetails;
-import lombok.RequiredArgsConstructor;
+import com.safeone.dashboard.dto.displayconnection.DisplayImgManagementDto;
+import com.safeone.dashboard.service.displayconnection.DisplayImgManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/admin/sendGroup")
-public class SendGroupController extends JqGridAbstract<SendGroupDto> {
+@RequestMapping("/display-connection/display-img-management")
+public class DisplayImgManagementController extends JqGridAbstract<DisplayImgManagementDto> {
 
 	@Autowired
-	private SendGroupService service;
+	private DisplayImgManagementService service;
 
-	protected SendGroupController() {
-		super(SendGroupDto.class);
+	protected DisplayImgManagementController() {
+		super(DisplayImgManagementDto.class);
 	}
 
 	@Override
-	protected List<SendGroupDto> getList(Map param) {
+	protected List<DisplayImgManagementDto> getList(Map param) {
 		return service.getList(param);
 	}
 
@@ -46,7 +34,7 @@ public class SendGroupController extends JqGridAbstract<SendGroupDto> {
 
 	@Override
 	protected String setViewPage() {
-		return "admin/sendGroup";
+		return "display-connection/display-img-management";
 	}
 
 	@ResponseBody
