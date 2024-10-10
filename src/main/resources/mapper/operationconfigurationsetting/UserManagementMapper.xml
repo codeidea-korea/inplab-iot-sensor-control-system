@@ -85,11 +85,8 @@
     </select>
 
     <select id="selectUserManagementListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT count(tmd.mgnt_no)
-        FROM tb_maint_details tmd
-        LEFT OUTER JOIN tb_district_info tdi ON tmd.district_no = tdi.district_no
-        LEFT OUTER JOIN tb_sensor_info tsi ON tmd.sens_no = tsi.sens_no
-        LEFT OUTER JOIN tb_common_code tcc ON tmd.maint_rslt_cd = tcc.code_id
+        SELECT count(tui.usr_id)
+        FROM tb_user_info tui
         WHERE 1 = 1
         <include refid="rowSearch"/>
     </select>

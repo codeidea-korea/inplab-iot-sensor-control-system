@@ -1,10 +1,8 @@
 package com.safeone.dashboard.controller.operationconfigurationsetting;
 
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
-import com.safeone.dashboard.dto.maintenance.MaintenanceDetailsDto;
-import com.safeone.dashboard.dto.operationconfigurationsetting.UserManagementDto;
-import com.safeone.dashboard.service.maintenance.MaintenanceDetailsService;
-import com.safeone.dashboard.service.operationconfigurationsetting.UserManagementService;
+import com.safeone.dashboard.dto.operationconfigurationsetting.EmergencyContactDto;
+import com.safeone.dashboard.service.operationconfigurationsetting.EmergencyContactService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,25 +16,25 @@ import java.util.Map;
 
 
 @Controller
-@RequestMapping("/operation-configuration-setting/user-management")
-public class UserManagementController extends JqGridAbstract<UserManagementDto> {
+@RequestMapping("/operation-configuration-setting/emergency-contact")
+public class EmergencyContactController extends JqGridAbstract<EmergencyContactDto> {
     @Autowired
-    private UserManagementService userManagementService;
+    private EmergencyContactService emergencyContactService;
 
-    protected UserManagementController() {
-        super(UserManagementDto.class);
+    protected EmergencyContactController() {
+        super(EmergencyContactDto.class);
     }
 
     @Override
-    protected List<UserManagementDto> getList(Map param) {
+    protected List<EmergencyContactDto> getList(Map param) {
         setParam(param);
-        return userManagementService.getList(param);
+        return emergencyContactService.getList(param);
     }
 
     @Override
     protected int getTotalRows(Map param) {
         setParam(param);
-        return userManagementService.getTotalCount(param);
+        return emergencyContactService.getTotalCount(param);
     }
 
     private void setParam(Map param) {
@@ -44,13 +42,13 @@ public class UserManagementController extends JqGridAbstract<UserManagementDto> 
 
     @Override
     protected String setViewPage() {
-        return "operation-configuration-setting/user-management";
+        return "operation-configuration-setting/emergency-contact";
     }
 
     @ResponseBody
     @GetMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        return userManagementService.delete(param);
+        return emergencyContactService.delete(param);
     }
 
     @ResponseBody
@@ -58,7 +56,7 @@ public class UserManagementController extends JqGridAbstract<UserManagementDto> 
     public boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         param.put("file1", (String) param.get("serverFileName"));
 
-        return userManagementService.create(param);
+        return emergencyContactService.create(param);
     }
 
     @ResponseBody
@@ -66,7 +64,7 @@ public class UserManagementController extends JqGridAbstract<UserManagementDto> 
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         param.put("file1", (String) param.get("serverFileName"));
 
-        return userManagementService.update(param);
+        return emergencyContactService.update(param);
     }
 
 }
