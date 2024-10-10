@@ -2,7 +2,9 @@ package com.safeone.dashboard.controller.operationconfigurationsetting;
 
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.maintenance.MaintenanceDetailsDto;
+import com.safeone.dashboard.dto.operationconfigurationsetting.UserManagementDto;
 import com.safeone.dashboard.service.maintenance.MaintenanceDetailsService;
+import com.safeone.dashboard.service.operationconfigurationsetting.UserManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,24 +19,24 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/operation-configuration-setting/user-management")
-public class UserManagementController extends JqGridAbstract<MaintenanceDetailsDto> {
+public class UserManagementController extends JqGridAbstract<UserManagementDto> {
     @Autowired
-    private MaintenanceDetailsService maintenanceDetailsService;
+    private UserManagementService userManagementService;
 
     protected UserManagementController() {
-        super(MaintenanceDetailsDto.class);
+        super(UserManagementDto.class);
     }
 
     @Override
-    protected List<MaintenanceDetailsDto> getList(Map param) {
+    protected List<UserManagementDto> getList(Map param) {
         setParam(param);
-        return maintenanceDetailsService.getList(param);
+        return userManagementService.getList(param);
     }
 
     @Override
     protected int getTotalRows(Map param) {
         setParam(param);
-        return maintenanceDetailsService.getTotalCount(param);
+        return userManagementService.getTotalCount(param);
     }
 
     private void setParam(Map param) {
@@ -94,7 +96,7 @@ public class UserManagementController extends JqGridAbstract<MaintenanceDetailsD
     @ResponseBody
     @GetMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        return maintenanceDetailsService.delete(param);
+        return userManagementService.delete(param);
     }
 
     @ResponseBody
@@ -102,7 +104,7 @@ public class UserManagementController extends JqGridAbstract<MaintenanceDetailsD
     public boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         param.put("file1", (String) param.get("serverFileName"));
 
-        return maintenanceDetailsService.create(param);
+        return userManagementService.create(param);
     }
 
     @ResponseBody
@@ -110,7 +112,7 @@ public class UserManagementController extends JqGridAbstract<MaintenanceDetailsD
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         param.put("file1", (String) param.get("serverFileName"));
 
-        return maintenanceDetailsService.update(param);
+        return userManagementService.update(param);
     }
 
 }

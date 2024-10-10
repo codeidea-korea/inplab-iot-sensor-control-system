@@ -165,6 +165,8 @@
             <div class="contents-re">
                 <h3 class="txt">사용자 관리</h3>
                 <div class="btn-group">
+                    <input type="text" class="search_input"  id="search" name="search" placeholder="검색"/>
+                    <a class="searchBtn">검색</a>
                     <a class="insertBtn">신규등록</a>
                     <a class="modifyBtn">상세정보</a>
                     <a class="excelBtn">다운로드</a>

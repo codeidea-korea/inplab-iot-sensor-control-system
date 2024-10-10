@@ -127,13 +127,13 @@
                 <dt data-type="maintenance">
                     <img src="/images/icon_gnb07.png" alt="유지보수관리">
                 </dt>
-                <dd class="bul">(작업중)유지보수관리</dd>
+                <dd class="bul">(조회완료)유지보수관리</dd>
             </dl>
         </button>
         <ul class="menu-sub">
             <li>
-                <a href="/maintenance/details" class="menu-link">(작업중)유지보수이력</a>
-                <a href="/maintenance/company-management" class="menu-link">(작업중)유지보수업체관리</a>
+                <a href="/maintenance/details" class="menu-link">(조회완료)유지보수이력</a>
+                <a href="/maintenance/company-management" class="menu-link">(조회완료)유지보수업체관리</a>
             </li>
         </ul>
     </li>
@@ -148,7 +148,7 @@
         </button>
         <ul class="menu-sub">
             <li>
-                <a href="/operation-configuration-setting/user-management" class="menu-link">(작업중)사용자관리</a>
+                <a href="/operation-configuration-setting/user-management" class="menu-link">(조회완료)사용자관리</a>
                 <a href="/abc" class="menu-link">(작업중)비상연락망관리</a>
                 <a href="/abc" class="menu-link">(작업중)SMS 경보대상 관리</a>
             </li>
