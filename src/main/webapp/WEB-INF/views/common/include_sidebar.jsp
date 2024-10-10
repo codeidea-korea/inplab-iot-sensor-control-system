@@ -150,7 +150,7 @@
             <li>
                 <a href="/operation-configuration-setting/user-management" class="menu-link">(조회완료)사용자관리</a>
                 <a href="/operation-configuration-setting/emergency-contact" class="menu-link">(조회완료)비상연락망관리</a>
-                <a href="/abc" class="menu-link">(작업중)SMS 경보대상 관리</a>
+                <a href="/operation-configuration-setting/sms-management" class="menu-link">(조회완료)SMS 경보대상 관리</a>
             </li>
         </ul>
     </li>
