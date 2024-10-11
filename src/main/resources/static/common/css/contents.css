@@ -344,14 +344,7 @@ h3.txt .btn.blue {
     top: 3.7rem;
 }
 
-.btn-group2 {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-bottom: 5px;
-}
-
-.btn-group, .btn-group2 > a {
+.btn-group > a {
     height: 2.8rem;
     margin-left: 1rem;
     padding: 0 2rem;

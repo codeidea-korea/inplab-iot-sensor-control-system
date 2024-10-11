@@ -111,6 +111,29 @@
         .myColorPicker-preview {
             border: 1px solid #555;
         }
+
+        .btn-group2 {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 5px;
+        }
+
+        .btn-group2 > a {
+            height: 2.8rem;
+            margin-left: 1rem;
+            padding: 0 2rem;
+            background-color: #6975ac;
+            font-weight: 500;
+            font-size: 1.4rem;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
     </style>
 
     <script>

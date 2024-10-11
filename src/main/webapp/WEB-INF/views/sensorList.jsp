@@ -205,7 +205,7 @@
 					<h3 class="txt">센서현황<div class="visionBtn" id="view-chart">차트조회</div></h3>
 					<div class="contents-in">
 <%--						<jsp:include page="common/include_jqgrid.jsp" flush="true"></jsp:include>--%>
-						<%--<jsp:include page="common/include_jqgrid_old.jsp" flush="true"></jsp:include>--%>
+						<%--<jsp:include page="common/broadcast-text-grid.jsp" flush="true"></jsp:include>--%>
 						<table id="jqGrid"></table>
 					</div>
 				</div>

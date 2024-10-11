@@ -117,7 +117,7 @@
             <dl>
                 <dt data-type="warning">
                     <img src="/images/icon_gnb05.png" alt="방송시스템 연계"></dt>
-                <dd><a href="/aaa" class="menu-link">(작업중)방송시스템 연계</a></dd>
+                <dd><a href="/broadcast-system-connection" class="menu-link">(작업중)방송시스템 연계</a></dd>
             </dl>
         </button>
     </li>

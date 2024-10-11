@@ -1,39 +1,23 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-<!--
-page include 형태 jqgrid_util.js 필요
--->
+
 <table class="jqGrid"></table>
 <div class="gridSpacer"></div>
 <div class="paginate"></div>
-<!--
-window 그리드 발생 이벤트
 
-beforeLoadGrid  : 그리드 화면 출력 이전 발생 이벤트
-loadComplete    : 그리드 데이터 로딩완료 후
-gridDblClick    : 그리드의 row 더블클릭시
-afterEditCell   : 셀의 수정이 발생하면
-afterSaveCell   : 셀의 수정이 완료되면
-onSelectRow     : row 단위로 사용자가 셀렉트 하는 경우 발생
-afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
--->
 <c:set var="path" value="${requestScope['javax.servlet.forward.servlet_path']}"/>
 
 <script>
     var _columns = ${columns};
 
     $(function() {
-        var _labels = [];
-        var _names = [];
+        const _labels = [];
+        const _names = [];
         var _widths = [];
         var _types = [];
         var _rowList = [15, 30, 60];
-
-        var customPageInfo = "";        // 페이지 정보를 나타낼 것인지 / boolean / 생략시 false
-        var customPageInfoType = "";    // 페이지 정보의 종류
-        var pageCount = 5;             // 한 페이지에 보여줄 페이지 수 (ex:1 2 3 4 5)
-
+        var pageCount = 5;
         var columnData = {
             model: []
         };
@@ -53,7 +37,7 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
         };
 
         function numFormat(cellvalue, options, rowObject) {
-            if (typeof cellvalue == 'undefined')
+            if (typeof cellvalue === 'undefined')
                 return '0';
 
             cellvalue = String(cellvalue);
@@ -77,60 +61,7 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
             return cellvalue.toLocaleString("ko-KR");
         }
 
-        // 그리드에 존재하는 select 형태 컬럼을 멀티 필터로 교체한다
-        // 백앤드단도 like 가 아닌 in 검색형태로 쿼리 수정 필요
-        // 콘트롤러에서는 escape 처리를 해결해야함 StringEscapeUtils.unescapeHtml
-        function selectToMultiFilter(columnName) {
-            var $target;
-            if (typeof columnName == 'undefined') {
-                $target = $('.ui-search-input select');
-            } else {
-                $target = $('.ui-search-input select[name=' + columnName + ']');
-            }
-
-            $.each($target, function () {
-                $(this).hide();
-                $(this).closest('td').append('<input type="text" role="textbox" searchopermenu="true" id="' + $(this).attr('id') + '" clearsearch="true" class="ui-widget-content ui-corner-all multi-select" readonly><input type="hidden" name="arr_' + $(this).attr('name') + '"/>'); // input으로 모양을 변경한후
-
-                var selectorBox = '<div class="ui-multi-filter" style="width:' + $(this).closest('td').width() + 'px"><ul>';
-                $.each($(this).find('option'), function () {
-                    selectorBox += '<li><span>' + $(this).html() + '</span><input type="checkbox" value="' + $(this).val() + '" class="chkbox-value"/></li>';
-                });
-                selectorBox += '</ul></div>';
-                $(this).closest('td').append(selectorBox); // 체크박스 모양을 미리 넣어두고
-                var $filter = $(this).closest('td').find('.ui-multi-filter');
-                $filter.hide();
-
-                $(this).closest('td').on('hover', function () {
-                    if ($filter.css('display') == 'none') {
-                        $filter.show();
-                    } else {
-                        $filter.hide();
-
-                        if (window.jqgridModify)
-                            reloadJqGrid();
-                    }
-                });
-
-                // 체크박스 클릭시 value
-                $(this).closest('td').find('.ui-multi-filter input.chkbox-value').on('click', function () {
-                    var selectValue = '';
-                    var selectName = '';
-                    window.jqgridModify = true;
-                    $.each($(this).closest('.ui-multi-filter').find('input.chkbox-value'), function () {
-                        if ($(this).is(':checked')) {
-                            selectValue += ",'" + $(this).val() + "'";
-                            selectName += ',' + $(this).closest('li').find('span').html();
-                        }
-                    });
-                    $(this).closest('td').find('input.multi-select').val(selectName.substring(1));
-                    $(this).closest('td').find('input[type=hidden]').val(selectValue.substring(1));
-                });
-                $(this).remove();
-            });
-        }
-
-        var flagCellEdit = false;
+        let flagCellEdit = false;
         if (typeof window.jqgridOption == 'undefined') {
             window.jqgridOption = {};
         } else {
@@ -204,22 +135,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                 };
                 column.searchoptions = {
                     dataInit: function (element) {
-                        // $(element).dateRangePicker({format: 'YYYY/M/D', autoClose: true, getValue: function () { // console.log($(this).val());
-                        //     }});
-
-                        // $(element).on('datepicker-change', function () {
-                        //     reloadJqGrid();
-                        // });
-
-                        // $(element).flatpickr({
-                        //     "locale": "ko",
-                        //     mode: "range",
-                        //     dateFormat: "Y-m-d",
-                        //     onClose: function(selectedDates, dateStr, instance){
-                        //         reloadJqGrid();
-                        //     }
-                        // });
-
                         setRangePicker($(element), function() {
                             reloadJqGrid($grid);
                         });
@@ -236,30 +151,11 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                 };
                 column.searchoptions = {
                     dataInit: function (element) {
-                        // $(element).dateRangePicker({format: 'YYYY/M/D', autoClose: true, getValue: function () { // console.log($(this).val());
-                        //     }});
-
-                        // $(element).on('datepicker-change', function () {
-                        //     reloadJqGrid();
-                        // });
-
-                        // $(element).flatpickr({
-                        //     "locale": "ko",
-                        //     mode: "range",
-                        //     dateFormat: "Y-m-d",
-                        //     onClose: function(selectedDates, dateStr, instance){
-                        //         reloadJqGrid();
-                        //     }
-                        // });
-
                         $(element).daterangepicker({
-                            // "timePicker": true,
-                            // "timePicker24Hour": true,
                             ranges: {
                                 '금일': [moment(), moment()],
                                 '지난 1주': [moment().subtract(6, 'days'), moment()],
                                 '지난 1개월': [moment().subtract(29, 'days'), moment()],
-                                // '지난 3개월': [moment().subtract(3, 'month'), moment()],
                                 '지난 6개월': [moment().subtract(6, 'month'), moment()],
                                 '1년': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
                             },
@@ -312,28 +208,14 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
             }
 
             if (_types[idx].indexOf('date') > -1) {
-                // 달력
-                // console.log('달력');
                 column.sorttype = 'date';
                 column.formatter = 'date';
-                // column.srcformat = 'Y-m-d';
-                // column.newformat = 'n/j/Y';
-                // column.newformat = 'Y/m/d';
                 column.formatoptions = {
                     srcformat: 'Y-m-d',
                     newformat: 'Y/m/d'
                 };
                 column.searchoptions = {
                     dataInit: function (element) {
-                        // $(element).datepicker({
-                        //     autoclose: true,
-                        //     format: 'YYYY/M/D',
-                        //     orientation: 'auto',
-                        //     onSelect: function (dt) {
-                        //         reloadJqGrid();
-                        //     }
-                        // });
-
                         $(element).flatpickr({
                             "locale": "ko",
                             dateFormat: "Y-m-d",
@@ -355,37 +237,7 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
             if (_types[idx].indexOf('timestamp') > -1) {
                 column.sorttype = 'date';
                 column.formatter = timestampFormat;
-                // column.formatoptions =  {srcformat: 'u/1000', newformat:'Y-m-d h:i:s'}
-                // column.formatoptions =  {srcformat: 'u', newformat:'Y/m/d H:i:s'}
             }
-
-            // if (_types[idx].indexOf('autocomplete') > -1) { // 자동완성인 경우 url에 autocomplete가 포함
-            //     column.searchoptions = {
-            //         // dataInit is the client-side event that fires upon initializing the toolbar search field for a column
-            //         // use it to place a third party control to customize the toolbar
-            //         dataInit: function (element) {
-            //             $(element).attr("autocomplete", "off").typeahead({
-            //                 appendTo: "body",
-            //                 source: function (query, process) {
-            //                     return $.get(_types[idx] + "/" + _names[idx], {
-            //                         term: query
-            //                     }, function (result) {
-            //                         return process(result.data);
-            //                     });
-
-            //                     /*function (query, proxy) {
-            //                     $.ajax({
-            //                         url: _types[idx] + "/" + _names[idx],
-            //                         dataType: "application/json",
-            //                         data: {term: query},
-            //                         success: proxy
-            //                     });*/
-            //                 }
-            //             });
-            //         },
-            //         sopt: ['eq', 'cn']
-            //     }
-            // }
             if (_types[idx].indexOf('hidden') > -1 || _types[idx].indexOf('password') > -1) { // if (_types[idx].indexOf('hidden') > -1) {
                 column.hidden = true;
             }
@@ -441,14 +293,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
             },
             gridComplete: function() {
                 $(window).trigger('gridComplete');
-
-                console.log('gridComplete');
-
-                // if (window.jqgridOption.columnAutoWidth) {
-                //     $grid.closest('.ui-jqgrid').css('width', '100%');
-                // }
-                // $.jgrid.defaults.width = $grid.parent().width();
-
                 if (window.jqgridOption.columnAutoWidth) {
                     $(window).trigger('resize');
                 }
@@ -458,7 +302,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
 
                 var rowData = jQuery(this).getRowData(rowId);
                 $(window).trigger('gridDblClick', rowData);
-                // console.log('dbclick::');
             },
             afterEditCell: function (rowid, cellname, value, iRow, iCol) {
                 var retVal = Object.assign($(".jqGrid").jqGrid('getRowData', rowid), {
@@ -501,7 +344,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
             height: 'auto',
             rowNum: _rowList[0],
             rowList: _rowList,
-            // pager: ".jqGridPager",
         }, window.jqgridOption);
 
         if (flagCellEdit) {
@@ -516,11 +358,11 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                 afterSubmitCell: function (res) { // 변경 후
                     var aResult = $.parseJSON(res.responseText);
                     var userMsg = "";
-                    if ((aResult.msg == "success")) {
+                    if ((aResult.msg === "success")) {
                         userMsg = "데이터가 변경되었습니다.";
                     }
                     return [
-                        (aResult.msg == "success") ? true : false,
+                        (aResult.msg === "success"),
                         userMsg
                     ];
                 }
@@ -528,7 +370,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
         }
 
         $grid.jqGrid(jqGridOption);
-        // activate the toolbar searching
         $('.jqGrid').jqGrid('filterToolbar');
 
         $('.ui-search-toolbar input').on('keyup', function (e) {
@@ -559,9 +400,8 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
         if (window.jqgridOption.columnAutoWidth) {
             $(window).resize(function() {
                 console.log('resize');
-                var gridWidth = $(window).width() - 445;  // 그리드 컨테이너 너비
-                // console.log('resize ' + gridWidth);
-                $grid.jqGrid('setGridWidth', gridWidth, true);  // shrinkToFit를 true로 설정하여 조정
+                var gridWidth = $(window).width() - 445;
+                $grid.jqGrid('setGridWidth', gridWidth, true);
             });
 
             $(window).trigger('resize');
@@ -569,14 +409,10 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
     });
 
     function downloadExcel(fileName, $grid = $('.jqGrid')) {
-        //20231228 urlParameters 추가
         const gridData = $grid.getGridParam('postData');
         const urlParameters = Object.entries(gridData).map(e => e.join('=')).join('&');
 
         var url = "${path}/excel/" + fileName + '?' + urlParameters;
-
-        console.log(url);
-
         var hiddenIFrameId = 'hiddenDownloader';
         var iframe = document.getElementById(hiddenIFrameId);
         if (iframe === null) {
