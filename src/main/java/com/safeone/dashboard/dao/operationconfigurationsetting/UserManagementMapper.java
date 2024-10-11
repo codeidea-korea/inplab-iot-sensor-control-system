@@ -17,5 +17,7 @@ public interface UserManagementMapper {
     int updateUserManagement(Map param);
 
     int deleteUserManagement(Map param);
+
+    int selectByUserId(Map param);
 }
     

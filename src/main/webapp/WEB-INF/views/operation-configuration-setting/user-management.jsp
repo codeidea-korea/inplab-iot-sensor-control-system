@@ -4,86 +4,6 @@
 <html lang="ko">
 <head>
     <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
-    <style>
-        input[type=date], input[type=number] {
-            text-align: left !important;
-        }
-
-        textarea {
-            text-align: left !important;
-        }
-
-        .layer-base-conts {
-            display: flex;
-            gap: 3rem;
-        }
-
-        .layer-base .layer-base-conts {
-            padding: 3rem;
-        }
-
-        .photo_area {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            width: 100%;
-            height: auto !important;
-            gap: 1.5rem;
-        }
-
-        .photo_area div {
-            width: 100%;
-            background-color: rgb(238, 238, 238);
-            vertical-align: center;
-            padding: 6rem 0;
-            font-size: 1.5rem;
-            color: #47474c;
-            text-align: center;
-        }
-
-        .bTable {
-            overflow: visible;
-        }
-
-        .bTable span {
-            display: inline-block;
-            color: #47474c;
-            font-size: 1.5rem;
-            width: 7.2rem;
-        }
-
-        .left_contents {
-            width: 50%;
-            height: 50rem;
-        }
-
-        .right_contents {
-            width: 50%;
-            height: 50rem;
-        }
-
-        .tableLine {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .table2Column {
-            display: flex;
-        }
-
-        .table2Column > .tableLine {
-            width: 50%;
-        }
-
-        .table2Column > .tableLine:first-child {
-            margin-right: 1rem;
-        }
-
-        .table2Column > .tableLine:last-child span {
-            margin-left: 1rem;
-        }
-    </style>
     <script>
         window.jqgridOption = {
             columnAutoWidth: true,
@@ -91,65 +11,198 @@
             multiboxonly: false
         };
         $(function () {
-            $('.insertBtn').on('click', function () {
-                $("#form_sub_title").html('등록');
-
-                initForm();
-
-                $('#uploadFileImg').css("cursor", "");
-                $('#uploadFileImg').off('click');
+            $('.insertBtn').on('click', () => {
+                resetForm();
+                initInsertForm();
+                popFancy('#lay-form-write');
 
                 $("[datepicker]").flatpickr({
-                    locale: "ko",
-                    dateFormat: "Y-m-d",
-                    onClose: function (selectedDates, dateStr, instance) {
-                    },
+                    onReady: function (selectedDates, dateStr, instance) {
+                        $('#lay-form-write .flatpickr-input').val(
+                            instance.formatDate(new Date(), 'Y-m-d')
+                        )
+                    }
                 });
+            });
 
-                popFancy('#lay-maintenance-history');
+            function initInsertForm() {
+                $("#form_sub_title").html('신규 등록');
+                $("#deleteBtn").hide()
+                $("#form-update-btn").hide();
+                $("#usr_id").attr('readonly', false);
+                $("#usr_nm").attr('readonly', false);
+            }
 
-                $('#lay-form-write input[type=submit]').off().on('click', function () {
-                    if (!validate()) return;
+            $('.modifyBtn').on('click', () => {
+                const targetArr = getSelectedCheckData();
+                if (targetArr.length > 1) {
+                    alert('수정할 데이터를 1건만 선택해주세요.');
+                    return;
+                } else if (targetArr.length === 0) {
+                    alert('수정할 데이터를 선택해주세요.');
+                    return;
+                }
+                resetForm();
+                initModifyForm(targetArr[0]);
+                popFancy('#lay-form-write');
+            });
 
-                    if ($("#uploadFile")[0].files[0] != undefined) {
-                        var call_url = "/common/file/upload"
-                        var serverFileName = genServerFileName() + getExtName($("#uploadFile")[0].files[0].name);
-                        $("#serverFileName").val(serverFileName);//for db insert
+            function initModifyForm(data) {
+                $("#form_sub_title").html('상세 정보');
 
-                        var form = new FormData();
-                        form.append("uploadFile", $("#uploadFile")[0].files[0]);
-                        form.append("serverFileName", serverFileName);
+                $("#usr_id").attr('readonly', true);
+                $("#usr_nm").attr('readonly', true);
+                $("#deleteBtn").show();
+                $("#form-submit-btn").hide();
+                $("#form-update-btn").show();
 
-                        fileUpload(call_url, form);
+                $("#usr_id").val(data.usr_id);
+                $("#usr_nm").val(data.usr_nm);
+                $("#usr_ph").val(data.usr_ph);
+                $("#e_mail").val(data.e_mail);
+                $("#usr_org").val(data.usr_org);
+                $("#usr_flag").val(data.usr_flag === '운영 관리자' ? 1 : 0);
+                $("[datepicker]").flatpickr({
+                    onReady: function (selectedDates, dateStr, instance) {
+                        $('#lay-form-write .flatpickr-input').val(
+                            instance.formatDate(new Date(data.usr_exp_ymd), 'Y-m-d')
+                        )
+                    }
+                });
+            }
+
+            function resetForm() {
+                $('#usr_id').val('');
+                $('#usr_pwd').val('');
+                $('#usr_pwd_confm').val('');
+                $('#usr_nm').val('');
+                $('#usr_ph').val('');
+                $('#e_mail').val('');
+                $('#usr_flag').val('');
+            }
+
+            $("#form-submit-btn").on('click', () => {
+                if (validated(true) === false) {
+                    return;
+                }
+                $.ajax({
+                    url: '/operation-configuration-setting/user-management/add',
+                    type: 'POST',
+                    data: {
+                        usr_id: $('#usr_id').val(),
+                        usr_pwd: $('#usr_pwd').val(),
+                        usr_nm: $('#usr_nm').val(),
+                        usr_ph: $('#usr_ph').val(),
+                        e_mail: $('#e_mail').val(),
+                        usr_org: $('#usr_org').val(),
+                        usr_flag: $('#usr_flag').val(),
+                        usr_exp_ymd: $('#usr_exp_ymd').val()
+                    },
+                    success: function (_res) {
+                        popFancyClose('#lay-form-write');
+                        reloadJqGrid();
+                    },
+                    error: function (err) {
+                        if (err?.responseJSON?.message === "이미 등록된 사용자 ID 입니다.") {
+                            alert('이미 등록된 사용자 ID 입니다.');
+                        }
+                    }
+                });
+            });
+
+            $("#form-update-btn").on('click', () => {
+                if (validated(false) === false) {
+                    return;
+                }
+                $.ajax({
+                    url: '/operation-configuration-setting/user-management/mod',
+                    type: 'POST',
+                    data: {
+                        usr_id: $('#usr_id').val(),
+                        usr_pwd: $('#usr_pwd').val(),
+                        usr_nm: $('#usr_nm').val(),
+                        usr_ph: $('#usr_ph').val(),
+                        e_mail: $('#e_mail').val(),
+                        usr_org: $('#usr_org').val(),
+                        usr_flag: $('#usr_flag').val(),
+                        usr_exp_ymd: $('#usr_exp_ymd').val()
+                    },
+                    success: function (_res) {
+                        popFancyClose('#lay-form-write');
+                        reloadJqGrid();
+                    },
+                    error: function (_err) {
+                        alert('수정에 실패했습니다. 다시 시도해 주세요.');
+                    }
+                });
+            });
+
+            function validated(insert) {
+                if ($('#usr_id').val().length < 8) {
+                    alert('사용자ID는 최소 8자 이상 입력해 주세요.');
+                    return false;
+                }
+
+                if (insert) {
+                    if (/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]+$/.test($('#usr_pwd').val()) === false) {
+                        alert('비밀번호는 영문자, 숫자, 특수문자 최소 1자 이상 입력해 주세요.');
+                        return false;
                     }
 
-                    $.get('/maintenance/add', getSerialize('#lay-form-write'), function (res) { // todo : true가 아닌 경우 실패된것을 알릴것인지?
-                        alert('저장되었습니다.', function () {
-                            popFancyClose('#lay-form-write');
-                        });
-                        reloadJqGrid();
-                    });
+                    if ($('#usr_pwd').val() !== $('#usr_pwd_confm').val()) {
+                        alert('비밀번호가 일치하지 않습니다.');
+                        return false;
+                    }
+                } else {
+                    if ($('#usr_pwd').val() || $('#usr_pwd_confm').val()) {
+                        if (/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]+$/.test($('#usr_pwd').val()) === false) {
+                            alert('비밀번호는 영문자, 숫자, 특수문자 최소 1자 이상 입력해 주세요.');
+                            return false;
+                        }
 
-                });
+                        if ($('#usr_pwd').val() !== $('#usr_pwd_confm').val()) {
+                            alert('비밀번호가 일치하지 않습니다.');
+                            return false;
+                        }
+                    }
+                }
+
+                if ($('#usr_nm').val().length > 10) {
+                    alert('사용자명은 10자 이하로 입력해 주세요.');
+                    return false;
+                }
+
+                if ($('#usr_flag').val() === '') {
+                    alert('사용자 권한을 선택해 주세요.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            $('.excelBtn').on('click', () => {
+                downloadExcel('users');
             });
 
-            $('.excelBtn').on('click', function () {
-                downloadExcel('유지보수');
+            $('#deleteBtn').on('click', () => {
+                confirm('삭제하시겠습니까?',() => {
+                    $.ajax({
+                        url: '/operation-configuration-setting/user-management/del',
+                        type: 'POST',
+                        data: {
+                            usr_id: $('#usr_id').val(),
+                        },
+                        success: function (_res) {
+                            popFancyClose('#lay-form-write');
+                            reloadJqGrid();
+                        },
+                        error: function (_err) {
+                            alert('삭제에 실패했습니다. 다시 시도해 주세요.');
+                        }
+                    });
+                })
             });
         });
-
-        function initForm() {
-            $('#lay-form-write select[name=zone_id_hid]').val('');
-            $('#lay-form-write select[name=type_hid]').val('');
-            $('#lay-form-write input[name=mt_date]').val('');
-            $('#lay-form-write select[name=asset_id_hid]').val('');
-            $('#lay-form-write input[name=manager_name]').val('');
-            $('#lay-form-write input[name=manager_tel]').val('');
-            $("#description").val('');
-            $('#lay-form-write input[name=uploadFile]').val('');
-            $("#uploadFileImg").attr("src", '');
-        }
-
     </script>
 </head>
 
@@ -165,108 +218,108 @@
             <div class="contents-re">
                 <h3 class="txt">사용자 관리</h3>
                 <div class="btn-group">
-                    <input type="text" class="search_input"  id="search" name="search" placeholder="검색"/>
+                    <input type="text" class="search_input" id="search" name="search" placeholder="이름/소속기관/권한/휴대폰번호2"/>
                     <a class="searchBtn">검색</a>
                     <a class="insertBtn">신규등록</a>
                     <a class="modifyBtn">상세정보</a>
                     <a class="excelBtn">다운로드</a>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>
+                    <jsp:include page="./user-management-grid.jsp" flush="true"></jsp:include>
                 </div>
             </div>
         </div>
     </div>
-
-    <div id="lay-maintenance-history" class="layer-base">
+    <div id="lay-form-write" class="layer-base">
         <div class="layer-base-btns">
-            <a href="javascript:void(0);"><img src="./images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
+            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">유지보수 이력 등록</div>
+        <div class="layer-base-title">사용자 <span id="form_sub_title">등록/수정</span></div>
         <div class="layer-base-conts">
-            <div class="left_contents">
-                <div class="bTable">
-                    <div class="tableLine">
-                        <span>현장명</span>
-                        <select name="any">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>센서타입</span>
-                        <select name="any">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>센서ID</span>
-                        <select name="any">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>접수일</span>
-                        <input type="date" name="" value="" placeholder=""/>
-                    </div>
-                    <div class="table2Column">
-                        <div class="tableLine">
-                            <span>작업시작일</span>
-                            <input type="date" name="" value="" placeholder=""/>
-                        </div>
-                        <div class="tableLine">
-                            <span>작업종료일</span>
-                            <input type="date" name="" value="" placeholder=""/>
-                        </div>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업내역</span>
-                        <td><textarea name=""></textarea></td>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업업체</span>
-                        <select name="">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="table2Column">
-                        <div class="tableLine">
-                            <span>작업담당자</span>
-                            <select name="">
-                                <option value="">선택</option>
+            <div class="bTable">
+                <table>
+                    <colgroup>
+                        <col width="130"/>
+                        <col width="*"/>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th class="required_th">사용자ID</th>
+                        <td><input type="text" id="usr_id" placeholder="Ex) 최소 8자 이상" class="required"/></td>
+                    </tr>
+                    <tr>
+                        <th class="required_th">비밀번호</th>
+                        <td><input type="password" id="usr_pwd" placeholder="Ex) 영문자, 숫자, 특수문자 최소 1Char"
+                                   class="required"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="required_th">비밀번호 확인</th>
+                        <td><input type="password" id="usr_pwd_confm" placeholder="Ex) 영문자, 숫자, 특수문자 최소 1Char"
+                                   class="required"/></td>
+                    </tr>
+                    <tr>
+                        <th class="required_th">사용자명</th>
+                        <td><input type="text" id="usr_nm" placeholder="Ex) 10자 입력 제한" class="required"/></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <table style="margin-top: 20px;">
+                    <colgroup>
+                        <col width="130"/>
+                        <col width="*"/>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th>휴대폰</th>
+                        <td><input type="text" id="usr_ph" placeholder="Ex) 010-1234-5678"/></td>
+                    </tr>
+                    <tr>
+                        <th>E-Mail</th>
+                        <td><input type="text" id="e_mail" placeholder="Ex) abc@nate.com"/></td>
+                    </tr>
+                    <tr>
+                        <th>소속 기관</th>
+                        <td><input type="text" id="usr_org" placeholder="Ex) 인플랩 A팀"/></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table style="margin-top: 20px;">
+                    <colgroup>
+                        <col width="130"/>
+                        <col width="*"/>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th class="required_th">사용자 권한</th>
+                        <td>
+                            <select id="usr_flag" name="grade_hid" class="required">
+                                <option value="">Ex) 운영 관리자 / 시스템 관리자</option>
+                                <%-- 0: 관리자, 1: 운영자 --%>
+                                <option value="1">운영 관리자</option>
+                                <option value="0">시스템 관리자</option>
                             </select>
-                        </div>
-                        <div class="tableLine">
-                            <span>연락처</span>
-                            <input type="number" name="" value="" placeholder=""/>
-                        </div>
-                    </div>
-                </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>사용 만료일</th>
+                        <td><input type="text" id="usr_exp_ymd" value="" placeholder="" datepicker=""
+                                   readonly="readonly"/></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="right_contents">
-                <div class="bTable">
-                    <div class="tableLine">
-                        <span>작업결과</span>
-                        <select name="">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업사진</span>
-                        <div class="photo_area">
-                            <div>사진1</div>
-                            <div>사진2</div>
-                            <div>사진3</div>
-                            <div>사진4</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="btn-btm">
+                <input type="button" id="form-submit-btn" blue value="저장"/>
+                <input type="button" id="form-update-btn" blue value="수정"/>
+                <button type="button" id="deleteBtn">삭제</button>
+                <button type="button" data-fancybox-close>닫기</button>
             </div>
-        </div>
-        <div class="btn-btm">
-            <input type="submit" blue value="저장"/>
-            <button type="button" data-fancybox-close>취소</button>
         </div>
     </div>
+    <!--[e] 사용자 등록 팝업 -->
+
     </div>
 </section>
 </body>

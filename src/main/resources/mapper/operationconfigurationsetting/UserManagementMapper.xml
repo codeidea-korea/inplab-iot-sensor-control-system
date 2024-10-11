@@ -3,40 +3,11 @@
 
 <mapper namespace="com.safeone.dashboard.dao.operationconfigurationsetting.UserManagementMapper">
     <sql id="rowSearch">
-<!--        <if test="maint_accpt_ymd_start != null and maint_accpt_ymd_start != '' and maint_accpt_ymd_end != null and maint_accpt_ymd_end != ''">-->
-<!--            and tmd.maint_accpt_ymd between #{maint_accpt_ymd_start} and #{maint_accpt_ymd_end}-->
-<!--        </if>-->
-<!--        <if test="maint_str_ymd_start != null and maint_str_ymd_start != '' and maint_str_ymd_end != null and maint_str_ymd_end != ''">-->
-<!--            and tmd.maint_str_ymd between #{maint_str_ymd_start} and #{maint_str_ymd_end}-->
-<!--        </if>-->
-<!--        <if test="maint_end_ymd_start != null and maint_end_ymd_start != '' and maint_end_ymd_end != null and maint_end_ymd_end != ''">-->
-<!--            and tmd.maint_end_ymd between #{maint_end_ymd_start} and #{maint_end_ymd_end}-->
-<!--        </if>-->
-<!--        <if test="district_nm != null and district_nm != ''">-->
-<!--            and tdi.district_nm ilike '%' || #{district_nm} || '%'-->
-<!--        </if>-->
-<!--        <if test="sens_nm != null and sens_nm != ''">-->
-<!--            and tsi.sens_nm ilike '%' || #{sens_nm} || '%'-->
-<!--        </if>-->
-<!--        <if test="code_nm != null and code_nm != ''">-->
-<!--            and tcc.code_nm ilike '%' || #{code_nm} || '%'-->
-<!--        </if>-->
-<!--        <if test="maint_dtls != null and maint_dtls != ''">-->
-<!--            and tmd.maint_dtls ilike '%' || #{maint_dtls} || '%'-->
-<!--        </if>-->
-<!--        <if test="maint_comp_nm != null and maint_comp_nm != ''">-->
-<!--            and tmd.maint_comp_nm ilike '%' || #{maint_comp_nm} || '%'-->
-<!--        </if>-->
-<!--        <if test="maint_chgr_nm != null and maint_chgr_nm != ''">-->
-<!--            and tmd.maint_chgr_nm ilike '%' || #{maint_chgr_nm} || '%'-->
-<!--        </if>-->
-<!--        <if test="maint_chgr_ph != null and maint_chgr_ph != ''">-->
-<!--            and tmd.maint_chgr_ph ilike '%' || #{maint_chgr_ph} || '%'-->
-<!--        </if>-->
-<!--        <if test="reg_dt_start != null and reg_dt_start != '' and reg_dt_end != null and reg_dt_end != ''">-->
-<!--            and tmd.reg_dt::timestamp between concat(#{reg_dt_start},' 00:00:00')::timestamp and-->
-<!--            concat(#{reg_dt_end},' 23:59:59')::timestamp-->
-<!--        </if>-->
+        <if test="searchKeyword != null and searchKeyword != ''">
+            and (tui.usr_nm ilike '%' || #{searchKeyword} || '%' or tui.usr_flag ilike '%' || #{searchKeyword} || '%' or
+            tui.usr_ph ilike
+            '%' || #{searchKeyword} || '%' or tui.usr_org ilike '%' || #{searchKeyword} || '%')
+        </if>
     </sql>
 
     <sql id="rowOrder">
@@ -57,6 +28,12 @@
                 <when test="'e_mail' == sidx and sidx != ''">
                     tui.e_mail ${sord}
                 </when>
+                <when test="'usr_org' == sidx and sidx != ''">
+                    tui.usr_org ${sord}
+                </when>
+                <when test="'usr_flag' == sidx and sidx != ''">
+                    tui.usr_flag ${sord}
+                </when>
                 <otherwise>
                     tui.reg_dt desc
                 </otherwise>
@@ -67,11 +44,13 @@
     <select id="selectUserManagementList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.operationconfigurationsetting.UserManagementDto">
         SELECT tui.usr_id
+        ,tui.usr_pwd
         , tui.usr_nm
         , tui.use_yn
         , tui.usr_ph
         , tui.e_mail
         , tui.usr_flag
+        , tui.usr_org
         , tui.usr_exp_ymd
         , tui.reg_dt
         , tui.mod_dt
@@ -91,63 +70,41 @@
         <include refid="rowSearch"/>
     </select>
 
+    <select id="selectByUserId" parameterType="java.util.Map" resultType="int">
+        SELECT count(tui.usr_id)
+        FROM tb_user_info tui
+        WHERE tui.usr_id = #{usr_id}
+    </select>
+
     <insert id="insertUserManagement" parameterType="java.util.Map">
-        INSERT INTO tb_maintenance ( maintenance_id
-                                   , manager_name
-                                   , manager_tel
-                                   , description
-                                   , reg_date
-                                   , mt_date
-                                   , asset_id
-                                   , area_id
-                                   , type
-                                   , file1)
-        SELECT COALESCE(max(maintenance_id::integer), 0) + 1 as maintenance_id
-             , #{manager_name}
-             , #{manager_tel}
-             , #{description}
-             , now()
-             , #{mt_date}::timestamp
-									          , #{asset_id_hid}
-             , (select area_id from tb_zone where zone_id = #{zone_id_hid})
-             , #{type_hid}
-             , #{file1}
-        FROM tb_maintenance
+        INSERT INTO tb_user_info (usr_id, usr_pwd, usr_pwd_confm, usr_nm, usr_ph, e_mail, usr_org, usr_flag,
+                                  usr_exp_ymd,
+                                  reg_dt,
+                                  mod_dt)
+        VALUES (#{usr_id}, #{usr_pwd}, #{usr_pwd}, #{usr_nm}, #{usr_ph}, #{e_mail}, #{usr_org}, #{usr_flag},
+                #{usr_exp_ymd}, now(),
+                now())
     </insert>
 
     <update id="updateUserManagement" parameterType="java.util.Map">
-        update tb_maintenance set
-        reg_date = now()
-        <if test="manager_name != null">
-            , manager_name = #{manager_name}
+        UPDATE tb_user_info SET
+        <if test="usr_pwd != null and usr_pwd != ''">
+            usr_pwd = #{usr_pwd},
+            usr_pwd_confm = #{usr_pwd},
         </if>
-        <if test="manager_tel != null">
-            , manager_tel = #{manager_tel}
-        </if>
-        <if test="description != null">
-            , description = #{description}
-        </if>
-        <if test="mt_date != null">
-            , mt_date = #{mt_date}::timestamp
-        </if>
-        <if test="asset_id_hid != null and asset_id_hid != ''">
-            , asset_id = #{asset_id_hid}
-        </if>
-        <if test="zone_id_hid != null and zone_id_hid != ''">
-            , area_id = (select area_id from tb_zone where zone_id = #{zone_id_hid})
-        </if>
-        <if test="type_hid != null and type_hid != ''">
-            , type = #{type_hid}
-        </if>
-        <if test="file1 != null">
-            , file1 = #{file1}
-        </if>
-        where maintenance_id = #{maintenance_id}
+        usr_nm = #{usr_nm},
+        usr_ph = #{usr_ph},
+        e_mail = #{e_mail},
+        usr_org = #{usr_org},
+        usr_flag = #{usr_flag},
+        usr_exp_ymd = #{usr_exp_ymd},
+        mod_dt = now()
+        WHERE usr_id = #{usr_id}
     </update>
 
     <delete id="deleteUserManagement" parameterType="java.util.Map">
         DELETE
-        FROM tb_maintenance
-        WHERE maintenance_id = #{maintenance_id}
+        FROM tb_user_info
+        WHERE usr_id = #{usr_id}
     </delete>
 </mapper>

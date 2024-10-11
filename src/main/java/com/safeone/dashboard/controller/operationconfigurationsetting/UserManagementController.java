@@ -1,16 +1,12 @@
 package com.safeone.dashboard.controller.operationconfigurationsetting;
 
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
-import com.safeone.dashboard.dto.maintenance.MaintenanceDetailsDto;
 import com.safeone.dashboard.dto.operationconfigurationsetting.UserManagementDto;
-import com.safeone.dashboard.service.maintenance.MaintenanceDetailsService;
 import com.safeone.dashboard.service.operationconfigurationsetting.UserManagementService;
+import com.safeone.dashboard.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -48,25 +44,25 @@ public class UserManagementController extends JqGridAbstract<UserManagementDto> 
     }
 
     @ResponseBody
-    @GetMapping("/del")
+    @PostMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         return userManagementService.delete(param);
     }
 
     @ResponseBody
-    @GetMapping("/add")
+    @PostMapping("/add")
     public boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        param.put("file1", (String) param.get("serverFileName"));
-
+        param.put("usr_pwd", CommonUtils.encrypt(param.get("usr_pwd").toString()));
+        param.put("usr_pwd_confm", CommonUtils.encrypt(param.get("usr_pwd").toString()));
         return userManagementService.create(param);
     }
 
     @ResponseBody
-    @GetMapping("/mod")
+    @PostMapping("/mod")
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        param.put("file1", (String) param.get("serverFileName"));
-
+        if (param.get("usr_pwd") != null && !param.get("usr_pwd").toString().isEmpty()) {
+            param.put("usr_pwd", CommonUtils.encrypt(param.get("usr_pwd").toString()));
+        }
         return userManagementService.update(param);
     }
-
 }

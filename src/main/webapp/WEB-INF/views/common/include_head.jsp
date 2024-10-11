@@ -112,6 +112,11 @@
         opacity: var(--fancybox-opacity, 1);
         will-change: opacity
     }
+
+    .required_th::after {
+        content: " *";
+        color: red;
+    }
 </style>
 <script>
     google.charts.load('current', {'packages': ['corechart']});

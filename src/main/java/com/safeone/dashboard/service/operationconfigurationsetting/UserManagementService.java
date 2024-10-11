@@ -29,6 +29,9 @@ public class UserManagementService implements JqGridService<UserManagementDto> {
 
     @Override
     public boolean create(Map param) {
+        if (mapper.selectByUserId(param) > 0) {
+            throw new IllegalArgumentException("이미 등록된 사용자 ID 입니다.");
+        }
         return mapper.insertUserManagement(param) > 0;
     }
 

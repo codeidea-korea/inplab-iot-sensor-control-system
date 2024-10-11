@@ -1,23 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-<!--
-page include 형태 jqgrid_util.js 필요
--->
+
 <table class="jqGrid"></table>
 <div class="gridSpacer"></div>
 <div class="paginate"></div>
-<!--
-window 그리드 발생 이벤트
-
-beforeLoadGrid  : 그리드 화면 출력 이전 발생 이벤트
-loadComplete    : 그리드 데이터 로딩완료 후
-gridDblClick    : 그리드의 row 더블클릭시
-afterEditCell   : 셀의 수정이 발생하면
-afterSaveCell   : 셀의 수정이 완료되면
-onSelectRow     : row 단위로 사용자가 셀렉트 하는 경우 발생
-afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
--->
 <c:set var="path" value="${requestScope['javax.servlet.forward.servlet_path']}"/>
 
 <script>
@@ -29,10 +16,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
         var _widths = [];
         var _types = [];
         var _rowList = [15, 30, 60];
-
-        var customPageInfo = "";        // 페이지 정보를 나타낼 것인지 / boolean / 생략시 false
-        var customPageInfoType = "";    // 페이지 정보의 종류
-        var pageCount = 5;             // 한 페이지에 보여줄 페이지 수 (ex:1 2 3 4 5)
 
         var columnData = {
             model: []
@@ -79,59 +62,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
 
             cellvalue = new Date(cellvalue);
             return cellvalue.toLocaleString("ko-KR");
-        }
-
-        // 그리드에 존재하는 select 형태 컬럼을 멀티 필터로 교체한다
-        // 백앤드단도 like 가 아닌 in 검색형태로 쿼리 수정 필요
-        // 콘트롤러에서는 escape 처리를 해결해야함 StringEscapeUtils.unescapeHtml
-        function selectToMultiFilter(columnName) {
-            var $target;
-            if (typeof columnName == 'undefined') {
-                $target = $('.ui-search-input select');
-            } else {
-                $target = $('.ui-search-input select[name=' + columnName + ']');
-            }
-
-            $.each($target, function () {
-                $(this).hide();
-                $(this).closest('td').append('<input type="text" role="textbox" searchopermenu="true" id="' + $(this).attr('id') + '" clearsearch="true" class="ui-widget-content ui-corner-all multi-select" readonly><input type="hidden" name="arr_' + $(this).attr('name') + '"/>'); // input으로 모양을 변경한후
-
-                var selectorBox = '<div class="ui-multi-filter" style="width:' + $(this).closest('td').width() + 'px"><ul>';
-                $.each($(this).find('option'), function () {
-                    selectorBox += '<li><span>' + $(this).html() + '</span><input type="checkbox" value="' + $(this).val() + '" class="chkbox-value"/></li>';
-                });
-                selectorBox += '</ul></div>';
-                $(this).closest('td').append(selectorBox); // 체크박스 모양을 미리 넣어두고
-                var $filter = $(this).closest('td').find('.ui-multi-filter');
-                $filter.hide();
-
-                $(this).closest('td').on('hover', function () {
-                    if ($filter.css('display') == 'none') {
-                        $filter.show();
-                    } else {
-                        $filter.hide();
-
-                        if (window.jqgridModify)
-                            reloadJqGrid();
-                    }
-                });
-
-                // 체크박스 클릭시 value
-                $(this).closest('td').find('.ui-multi-filter input.chkbox-value').on('click', function () {
-                    var selectValue = '';
-                    var selectName = '';
-                    window.jqgridModify = true;
-                    $.each($(this).closest('.ui-multi-filter').find('input.chkbox-value'), function () {
-                        if ($(this).is(':checked')) {
-                            selectValue += ",'" + $(this).val() + "'";
-                            selectName += ',' + $(this).closest('li').find('span').html();
-                        }
-                    });
-                    $(this).closest('td').find('input.multi-select').val(selectName.substring(1));
-                    $(this).closest('td').find('input[type=hidden]').val(selectValue.substring(1));
-                });
-                $(this).remove();
-            });
         }
 
         var flagCellEdit = false;
@@ -435,16 +365,16 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                     postData: Object.assign(params, window.gridParam)
                 });
             },
-            // loadComplete: function (rowId) { // console.log(rowId);
-            //     var rowData = jQuery(this).getRowData(rowId);
-            //     $(window).trigger('loadComplete', rowData);
-
             loadComplete: function (response) {
 
                 var rows = response.rows.map(function (row) {
                     Object.keys(row).forEach(function(key) {
                         if (row[key] === null) {
-                            row[key] = '';  // null 값을 빈 문자열로 변환
+                            row[key] = '';
+                        }
+
+                        if (key === 'usr_flag') {
+                            row[key] = row[key] === '0' ? '운영 관리자' : '시스템 관리자';
                         }
                     });
 

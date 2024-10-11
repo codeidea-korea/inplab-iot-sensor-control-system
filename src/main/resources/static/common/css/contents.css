@@ -592,6 +592,7 @@ h3.txt .btn.blue {
 .bTable input[type="text"],
 .bTable input[type="number"],
 .bTable input[type="date"],
+.bTable input[type="password"],
 .bTable select,
 .bTable textarea {
     width: 100%;
@@ -3595,6 +3596,13 @@ select:-ms-expand {
     border-radius: 0;
 }
 
+.search_input {
+    height: 28px;
+    background: white;
+    padding: 0 8px;
+    border-radius: 4px;
+    font-size: 1.3rem;
+}
 
 .search_box {
     display: flex;
