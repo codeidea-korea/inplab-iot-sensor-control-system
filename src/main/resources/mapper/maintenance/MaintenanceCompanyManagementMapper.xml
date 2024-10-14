@@ -99,62 +99,41 @@
     </select>
 
     <insert id="insertMaintenanceCompanyManagement" parameterType="java.util.Map">
-        INSERT INTO tb_maintenance ( maintenance_id
-                                   , manager_name
-                                   , manager_tel
-                                   , description
-                                   , reg_date
-                                   , mt_date
-                                   , asset_id
-                                   , area_id
-                                   , type
-                                   , file1)
-        SELECT COALESCE(max(maintenance_id::integer), 0) + 1 as maintenance_id
-             , #{manager_name}
-             , #{manager_tel}
-             , #{description}
-             , now()
-             , #{mt_date}::timestamp
-									          , #{asset_id_hid}
-             , (select area_id from tb_zone where zone_id = #{zone_id_hid})
-             , #{type_hid}
-             , #{file1}
-        FROM tb_maintenance
+        INSERT INTO tb_maintcomp_info ( partner_comp_id
+                                      , partner_comp_nm
+                                      , partner_type_flag
+                                      , partner_comp_addr
+                                      , comp_biz_no
+                                      , maint_rep_nm
+                                      , maint_rep_ph
+                                      , reg_dt
+                                      , mod_dt)
+        VALUES ( #{partner_comp_id}
+               , #{partner_comp_nm}
+               , #{partner_type_flag}
+               , #{partner_comp_addr}
+               , #{comp_biz_no}
+               , #{maint_rep_nm}
+               , #{maint_rep_ph}
+               , #{reg_dt}::timestamp
+               , #{mod_dt}::timestamp)
     </insert>
 
     <update id="updateMaintenanceCompanyManagement" parameterType="java.util.Map">
-        update tb_maintenance set
-        reg_date = now()
-        <if test="manager_name != null">
-            , manager_name = #{manager_name}
-        </if>
-        <if test="manager_tel != null">
-            , manager_tel = #{manager_tel}
-        </if>
-        <if test="description != null">
-            , description = #{description}
-        </if>
-        <if test="mt_date != null">
-            , mt_date = #{mt_date}::timestamp
-        </if>
-        <if test="asset_id_hid != null and asset_id_hid != ''">
-            , asset_id = #{asset_id_hid}
-        </if>
-        <if test="zone_id_hid != null and zone_id_hid != ''">
-            , area_id = (select area_id from tb_zone where zone_id = #{zone_id_hid})
-        </if>
-        <if test="type_hid != null and type_hid != ''">
-            , type = #{type_hid}
-        </if>
-        <if test="file1 != null">
-            , file1 = #{file1}
-        </if>
-        where maintenance_id = #{maintenance_id}
+        UPDATE tb_maintcomp_info
+        SET partner_comp_nm   = #{partner_comp_nm}
+          , partner_type_flag = #{partner_type_flag}
+          , partner_comp_addr = #{partner_comp_addr}
+          , comp_biz_no       = #{comp_biz_no}
+          , maint_rep_nm      = #{maint_rep_nm}
+          , maint_rep_ph      = #{maint_rep_ph}
+          , mod_dt            = #{mod_dt}::timestamp
+        WHERE partner_comp_id = #{partner_comp_id}
     </update>
 
     <delete id="deleteMaintenanceCompanyManagement" parameterType="java.util.Map">
         DELETE
-        FROM tb_maintenance
-        WHERE maintenance_id = #{maintenance_id}
+        FROM tb_maintcomp_info
+        WHERE partner_comp_id = #{partner_comp_id}
     </delete>
 </mapper>

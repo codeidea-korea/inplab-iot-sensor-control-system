@@ -4,86 +4,6 @@
 <html lang="ko">
 <head>
     <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
-    <style>
-        input[type=date], input[type=number] {
-            text-align: left !important;
-        }
-
-        textarea {
-            text-align: left !important;
-        }
-
-        .layer-base-conts {
-            display: flex;
-            gap: 3rem;
-        }
-
-        .layer-base .layer-base-conts {
-            padding: 3rem;
-        }
-
-        .photo_area {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            width: 100%;
-            height: auto !important;
-            gap: 1.5rem;
-        }
-
-        .photo_area div {
-            width: 100%;
-            background-color: rgb(238, 238, 238);
-            vertical-align: center;
-            padding: 6rem 0;
-            font-size: 1.5rem;
-            color: #47474c;
-            text-align: center;
-        }
-
-        .bTable {
-            overflow: visible;
-        }
-
-        .bTable span {
-            display: inline-block;
-            color: #47474c;
-            font-size: 1.5rem;
-            width: 7.2rem;
-        }
-
-        .left_contents {
-            width: 50%;
-            height: 50rem;
-        }
-
-        .right_contents {
-            width: 50%;
-            height: 50rem;
-        }
-
-        .tableLine {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .table2Column {
-            display: flex;
-        }
-
-        .table2Column > .tableLine {
-            width: 50%;
-        }
-
-        .table2Column > .tableLine:first-child {
-            margin-right: 1rem;
-        }
-
-        .table2Column > .tableLine:last-child span {
-            margin-left: 1rem;
-        }
-    </style>
     <script>
         window.jqgridOption = {
             columnAutoWidth: true,
@@ -91,65 +11,211 @@
             multiboxonly: false
         };
         $(function () {
-            $('.insertBtn').on('click', function () {
-                $("#form_sub_title").html('등록');
-
-                initForm();
-
-                $('#uploadFileImg').css("cursor", "");
-                $('#uploadFileImg').off('click');
+            $('.insertBtn').on('click', () => {
+                resetForm();
+                initInsertForm();
+                popFancy('#lay-form-write');
 
                 $("[datepicker]").flatpickr({
-                    locale: "ko",
-                    dateFormat: "Y-m-d",
-                    onClose: function (selectedDates, dateStr, instance) {
-                    },
-                });
-
-                popFancy('#lay-maintenance-history');
-
-                $('#lay-form-write input[type=submit]').off().on('click', function () {
-                    if (!validate()) return;
-
-                    if ($("#uploadFile")[0].files[0] != undefined) {
-                        var call_url = "/common/file/upload"
-                        var serverFileName = genServerFileName() + getExtName($("#uploadFile")[0].files[0].name);
-                        $("#serverFileName").val(serverFileName);//for db insert
-
-                        var form = new FormData();
-                        form.append("uploadFile", $("#uploadFile")[0].files[0]);
-                        form.append("serverFileName", serverFileName);
-
-                        fileUpload(call_url, form);
+                    onReady: function (selectedDates, dateStr, instance) {
+                        $('#lay-form-write .flatpickr-input').val(
+                            instance.formatDate(new Date(), 'Y-m-d')
+                        )
                     }
-
-                    $.get('/maintenance/add', getSerialize('#lay-form-write'), function (res) { // todo : true가 아닌 경우 실패된것을 알릴것인지?
-                        alert('저장되었습니다.', function () {
-                            popFancyClose('#lay-form-write');
-                        });
-                        reloadJqGrid();
-                    });
-
                 });
             });
+
+            $('.modifyBtn').on('click', () => {
+                const targetArr = getSelectedCheckData();
+                if (targetArr.length > 1) {
+                    alert('수정할 데이터를 1건만 선택해주세요.');
+                    return;
+                } else if (targetArr.length === 0) {
+                    alert('수정할 데이터를 선택해주세요.');
+                    return;
+                }
+                resetForm();
+                initModifyForm(targetArr[0]);
+                popFancy('#lay-form-write');
+            });
+
+            function initModifyForm(data) {
+                $("#form_sub_title").html('상세 정보');
+
+                $("#partner_comp_id").attr('readonly', true);
+                $("#deleteBtn").show();
+                $("#form-submit-btn").hide();
+                $("#form-update-btn").show();
+
+                $('#partner_comp_id').val(data.partner_comp_id);
+                $('#partner_comp_nm').val(data.partner_comp_nm);
+                $('#partner_type_flag').val(data.partner_type_flag);
+                $('#partner_comp_addr').val(data.partner_comp_addr);
+                $('#comp_biz_no').val(data.comp_biz_no);
+                $('#maint_rep_nm').val(data.maint_rep_nm);
+                $('#maint_rep_ph').val(data.maint_rep_ph);
+                $("[datepicker]").flatpickr({
+                    onReady: function (selectedDates, dateStr, instance) {
+                        $('#lay-form-write #reg_dt').val(
+                            instance.formatDate(new Date(data.reg_dt), 'Y-m-d')
+                        )
+                    }
+                });
+                $("[datepicker]").flatpickr({
+                    onReady: function (selectedDates, dateStr, instance) {
+                        $('#lay-form-write #mod_dt').val(
+                            instance.formatDate(new Date(data.mod_dt), 'Y-m-d')
+                        )
+                    }
+                });
+            }
+
+            function initInsertForm() {
+                $("#form_sub_title").html('등록');
+                $("#deleteBtn").hide()
+                $("#form-update-btn").hide();
+                $("#partner_comp_id").attr('readonly', false);
+            }
+
+            function resetForm() {
+                $('#partner_comp_id').val('');
+                $('#partner_comp_nm').val('');
+                $('#partner_type_flag').val('');
+                $('#partner_comp_addr').val('');
+                $('#comp_biz_no').val('');
+                $('#maint_rep_nm').val('');
+                $('#maint_rep_ph').val('');
+                $('#reg_dt').val('');
+                $('#mod_dt').val('');
+            }
+
+            $("#form-submit-btn").on('click', () => {
+                if (validated() === false) {
+                    return;
+                }
+                $.ajax({
+                    url: '/maintenance/company-management/add',
+                    type: 'POST',
+                    data: {
+                        partner_comp_id: $('#partner_comp_id').val(),
+                        partner_comp_nm: $('#partner_comp_nm').val(),
+                        partner_type_flag: $('#partner_type_flag').val(),
+                        partner_comp_addr: $('#partner_comp_addr').val(),
+                        comp_biz_no: $('#comp_biz_no').val(),
+                        maint_rep_nm: $('#maint_rep_nm').val(),
+                        maint_rep_ph: $('#maint_rep_ph').val(),
+                        reg_dt: $('#reg_dt').val(),
+                        mod_dt: $('#mod_dt').val()
+                    },
+                    success: function (_res) {
+                        popFancyClose('#lay-form-write');
+                        reloadJqGrid();
+                    },
+                    error: function (_err) {
+                        alert('등록에 실패했습니다. 다시 시도해 주세요.');
+                    }
+                });
+            });
+
+            $("#form-update-btn").on('click', () => {
+                if (validated() === false) {
+                    return;
+                }
+                $.ajax({
+                    url: '/maintenance/company-management/mod',
+                    type: 'POST',
+                    data: {
+                        partner_comp_id: $('#partner_comp_id').val(),
+                        partner_comp_nm: $('#partner_comp_nm').val(),
+                        partner_type_flag: $('#partner_type_flag').val(),
+                        partner_comp_addr: $('#partner_comp_addr').val(),
+                        comp_biz_no: $('#comp_biz_no').val(),
+                        maint_rep_nm: $('#maint_rep_nm').val(),
+                        maint_rep_ph: $('#maint_rep_ph').val(),
+                        reg_dt: $('#reg_dt').val(),
+                        mod_dt: $('#mod_dt').val()
+                    },
+                    success: function (_res) {
+                        popFancyClose('#lay-form-write');
+                        reloadJqGrid();
+                    },
+                    error: function (_err) {
+                        alert('수정에 실패했습니다. 다시 시도해 주세요.');
+                    }
+                });
+            });
+
+            function validated() {
+                if ($('#partner_comp_id').val() === '') {
+                    alert('협력사 ID를 입력해주세요.');
+                    return false;
+                }
+
+                if ($('#partner_comp_nm').val() === '') {
+                    alert('협력사명을 입력해주세요.');
+                    return false;
+                }
+
+                if ($('#partner_type_flag').val() === '') {
+                    alert('협력사구분을 입력해주세요.');
+                    return false;
+                }
+
+                if ($('#partner_comp_addr').val() === '') {
+                    alert('주소를 입력해주세요.');
+                    return false;
+                }
+
+                if ($('#comp_biz_no').val() === '') {
+                    alert('사업자번호를 입력해주세요.');
+                    return false;
+                }
+
+                if ($('#maint_rep_nm').val() === '') {
+                    alert('대표명을 입력해주세요.');
+                    return false;
+                }
+
+                if ($('#maint_rep_ph').val() === '') {
+                    alert('대표연락처를 입력해주세요.');
+                    return false;
+                }
+
+                if ($('#reg_dt').val() === '') {
+                    alert('등록일시를 입력해주세요.');
+                    return false;
+                }
+
+                if ($('#mod_dt').val() === '') {
+                    alert('수정일시를 입력해주세요.');
+                    return false;
+                }
+                return true;
+            }
 
             $('.excelBtn').on('click', function () {
-                downloadExcel('유지보수');
+                downloadExcel('company management');
+            });
+
+            $('#deleteBtn').on('click', () => {
+                confirm('삭제하시겠습니까?',() => {
+                    $.ajax({
+                        url: '/maintenance/company-management/del',
+                        type: 'POST',
+                        data: {
+                            partner_comp_id: $('#partner_comp_id').val()
+                        },
+                        success: function (_res) {
+                            popFancyClose('#lay-form-write');
+                            reloadJqGrid();
+                        },
+                        error: function (_err) {
+                            alert('삭제에 실패했습니다. 다시 시도해 주세요.');
+                        }
+                    });
+                })
             });
         });
-
-        function initForm() {
-            $('#lay-form-write select[name=zone_id_hid]').val('');
-            $('#lay-form-write select[name=type_hid]').val('');
-            $('#lay-form-write input[name=mt_date]').val('');
-            $('#lay-form-write select[name=asset_id_hid]').val('');
-            $('#lay-form-write input[name=manager_name]').val('');
-            $('#lay-form-write input[name=manager_tel]').val('');
-            $("#description").val('');
-            $('#lay-form-write input[name=uploadFile]').val('');
-            $("#uploadFileImg").attr("src", '');
-        }
-
     </script>
 </head>
 
@@ -163,7 +229,7 @@
         <h2 class="txt">유지보수관리</h2>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">유지보수이력</h3>
+                <h3 class="txt">유지보수업체관리</h3>
                 <div class="btn-group">
                     <a class="insertBtn">신규등록</a>
                     <a class="modifyBtn">상세정보</a>
@@ -176,95 +242,98 @@
         </div>
     </div>
 
-    <div id="lay-maintenance-history" class="layer-base">
+    <!-- 팝업 -->
+    <div id="lay-form-write" class="layer-base">
         <div class="layer-base-btns">
-            <a href="javascript:void(0);"><img src="./images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
+            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">유지보수 이력 등록</div>
+        <div class="layer-base-title">유지보수업체 <span id="form_sub_title"></span></div>
         <div class="layer-base-conts">
-            <div class="left_contents">
-                <div class="bTable">
-                    <div class="tableLine">
-                        <span>현장명</span>
-                        <select name="any">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>센서타입</span>
-                        <select name="any">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>센서ID</span>
-                        <select name="any">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>접수일</span>
-                        <input type="date" name="" value="" placeholder=""/>
-                    </div>
-                    <div class="table2Column">
-                        <div class="tableLine">
-                            <span>작업시작일</span>
-                            <input type="date" name="" value="" placeholder=""/>
-                        </div>
-                        <div class="tableLine">
-                            <span>작업종료일</span>
-                            <input type="date" name="" value="" placeholder=""/>
-                        </div>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업내역</span>
-                        <td><textarea name=""></textarea></td>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업업체</span>
-                        <select name="">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="table2Column">
-                        <div class="tableLine">
-                            <span>작업담당자</span>
-                            <select name="">
-                                <option value="">선택</option>
-                            </select>
-                        </div>
-                        <div class="tableLine">
-                            <span>연락처</span>
-                            <input type="number" name="" value="" placeholder=""/>
-                        </div>
-                    </div>
-                </div>
+            <div class="bTable">
+                <table>
+                    <input type="hidden" id="mgnt_no"/>
+                    <colgroup>
+                        <col width="130"/>
+                        <col width="*"/>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th>협력사 ID</th>
+                        <td><input type="text" id="partner_comp_id" placeholder="Ex) H-1"/></td>
+                    </tr>
+                    <tr>
+                        <th>협력사명</th>
+                        <td><input type="text" id="partner_comp_nm" placeholder="Ex) 협력사"/></td>
+                    </tr>
+                    <tr>
+                        <th>협력사구분</th>
+                        <td><input type="text" id="partner_type_flag" placeholder="Ex) 0.시공사/1.계측사"/></td>
+                    </tr>
+                    <tr>
+                        <th style="vertical-align: middle;">주소</th>
+                        <td colspan="2" style="display: flex; align-items: center;">
+                            <input type="text" id="partner_comp_addr" name="site_addr" readonly
+                                   style="flex: 1; margin-right: 10px;"/>
+                            <div class="btn-btm" style="width: auto; margin-top: 0px;">
+                                <button type="button" id="addrSearchBtn" style="margin-left: 10px; padding: 5px 10px;"
+                                        onclick="openDaumPostcode('', '', 'site_addr')">주소 검색
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table style="margin-top: 20px;">
+                    <colgroup>
+                        <col width="130"/>
+                        <col width="*"/>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th>사업자번호</th>
+                        <td><input type="text" id="comp_biz_no" placeholder="Ex) 123123123-123123123"/></td>
+                    </tr>
+                    <tr>
+                        <th>대표명</th>
+                        <td><input type="text" id="maint_rep_nm" placeholder="Ex) 홍길동"/></td>
+                    </tr>
+                    <tr>
+                        <th>대표연락처</th>
+                        <td><input type="text" id="maint_rep_ph" placeholder="Ex) 123-456-7890"/></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <table style="margin-top: 20px;">
+                    <colgroup>
+                        <col width="130"/>
+                        <col width="*"/>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th>등록일시</th>
+                        <td><input type="text" id="reg_dt" placeholder="Ex) 2024-01-01" datepicker=""
+                                   readonly="readonly"/></td>
+                    </tr>
+                    <tr>
+                        <th>수정일시</th>
+                        <td><input type="text" id="mod_dt" placeholder="Ex) 2024-01-01" datepicker=""
+                                   readonly="readonly"/></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="right_contents">
-                <div class="bTable">
-                    <div class="tableLine">
-                        <span>작업결과</span>
-                        <select name="">
-                            <option value="">선택</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업사진</span>
-                        <div class="photo_area">
-                            <div>사진1</div>
-                            <div>사진2</div>
-                            <div>사진3</div>
-                            <div>사진4</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="btn-btm">
+                <input type="button" id="form-submit-btn" blue value="저장"/>
+                <button type="button" style="margin-right: auto" id="deleteBtn">삭제</button>
+                <input type="button" id="form-update-btn" blue value="수정"/>
+                <button type="button" data-fancybox-close>닫기</button>
             </div>
-        </div>
-        <div class="btn-btm">
-            <input type="submit" blue value="저장"/>
-            <button type="button" data-fancybox-close>취소</button>
         </div>
     </div>
+    <!-- 팝업 -->
+
     </div>
 </section>
 </body>

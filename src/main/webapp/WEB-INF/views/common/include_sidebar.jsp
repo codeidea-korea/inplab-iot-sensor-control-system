@@ -133,7 +133,7 @@
         <ul class="menu-sub">
             <li>
                 <a href="/maintenance/details" class="menu-link">(조회완료)유지보수이력</a>
-                <a href="/maintenance/company-management" class="menu-link">(조회완료)유지보수업체관리</a>
+                <a href="/maintenance/company-management" class="menu-link">유지보수업체관리</a>
             </li>
         </ul>
     </li>
