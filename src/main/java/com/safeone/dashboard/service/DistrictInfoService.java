@@ -20,6 +20,12 @@ public class DistrictInfoService implements JqGridService<DistrictInfoDto> {
         return mapper.selectDistrictInfoList(param);
     }
 
+	public List<DistrictInfoDto> getAll() {
+		return mapper.selectAll();
+	}
+
+
+
     @Override
     public int getTotalCount(Map param) {
         return mapper.selectDistrictInfoListTotal(param);

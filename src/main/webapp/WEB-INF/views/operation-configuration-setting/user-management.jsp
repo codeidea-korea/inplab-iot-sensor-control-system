@@ -230,6 +230,8 @@
             </div>
         </div>
     </div>
+
+    <!-- 팝업 -->
     <div id="lay-form-write" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
@@ -312,13 +314,13 @@
             </div>
             <div class="btn-btm">
                 <input type="button" id="form-submit-btn" blue value="저장"/>
+                <button type="button" style="margin-right: auto" id="deleteBtn">삭제</button>
                 <input type="button" id="form-update-btn" blue value="수정"/>
-                <button type="button" id="deleteBtn">삭제</button>
                 <button type="button" data-fancybox-close>닫기</button>
             </div>
         </div>
     </div>
-    <!--[e] 사용자 등록 팝업 -->
+    <!-- 팝업 -->
 
     </div>
 </section>

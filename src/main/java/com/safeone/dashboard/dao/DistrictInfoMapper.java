@@ -17,5 +17,6 @@ public interface DistrictInfoMapper {
     int updateDistrictInfo(Map param);
     int updateDistrictInfoLocation(Map param);
     int deleteDistrictInfo(Map param);
+    List<DistrictInfoDto> selectAll();
 }
     

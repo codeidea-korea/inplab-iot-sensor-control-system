@@ -43,6 +43,12 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
         return "admin/districtInfo";
     }
 
+    @ResponseBody
+    @GetMapping("/all")
+    public List<DistrictInfoDto> getAll() {
+        return districtInfoService.getAll();
+    }
+
 //    @ResponseBody
 //    @GetMapping("/del")
 //    public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {

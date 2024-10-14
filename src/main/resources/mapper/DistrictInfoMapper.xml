@@ -2,6 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
     
 <mapper namespace="com.safeone.dashboard.dao.DistrictInfoMapper">
+    <select id="selectAll" resultType="com.safeone.dashboard.dto.DistrictInfoDto">
+        SELECT * FROM tb_district_info
+    </select>
+
+
     <sql id="rowSearch">
         <if test="district_no != null and district_no != ''">
             and MG.district_no = #{district_no}

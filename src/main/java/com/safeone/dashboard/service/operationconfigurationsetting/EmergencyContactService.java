@@ -40,11 +40,13 @@ public class EmergencyContactService implements JqGridService<EmergencyContactDt
 
     @Override
     public boolean update(Map param) {
+        param.put("mgnt_no", Integer.parseInt(param.get("mgnt_no").toString()));
         return mapper.updateEmergencyContact(param) > 0;
     }
 
     @Override
     public int delete(Map param) {
+        param.put("mgnt_no", Integer.parseInt(param.get("mgnt_no").toString()));
         return mapper.deleteEmergencyContact(param);
     }
 }
