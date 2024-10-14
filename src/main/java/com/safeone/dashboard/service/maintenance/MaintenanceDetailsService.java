@@ -40,11 +40,13 @@ public class MaintenanceDetailsService implements JqGridService<MaintenanceDetai
 
     @Override
     public boolean update(Map param) {
+        param.put("mgnt_no", Integer.parseInt(param.get("mgnt_no").toString()));
         return mapper.updateMaintenanceDetails(param) > 0;
     }
 
     @Override
     public int delete(Map param) {
+        param.put("mgnt_no", Integer.parseInt(param.get("mgnt_no").toString()));
         return mapper.deleteMaintenanceDetails(param);
     }
 }

@@ -98,6 +98,13 @@
         <include refid="rowSearch"/>
     </select>
 
+    <select id="selectAllMaintenanceCompanyManagementList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.maintenance.MaintenanceCompanyManagementDto">
+        SELECT tmi.partner_comp_id
+             , tmi.partner_comp_nm
+        FROM tb_maintcomp_info tmi
+    </select>
+
     <insert id="insertMaintenanceCompanyManagement" parameterType="java.util.Map">
         INSERT INTO tb_maintcomp_info ( partner_comp_id
                                       , partner_comp_nm

@@ -75,11 +75,11 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
         return "admin/sensorInfo";
     }
 
-//    @ResponseBody
-//    @GetMapping("/del")
-//    public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-//        return sensorInfoService.delete(param);
-//    }
+    @ResponseBody
+    @GetMapping("/all-by-district-no")
+    public List<SensorInfoDto> getAllSensorInfoByDistrictNo(@RequestParam Map<String, Object> param) {
+        return sensorInfoService.getAllSensorInfoByDistrictNo(param);
+    }
 
     @ResponseBody
     @GetMapping("/del")

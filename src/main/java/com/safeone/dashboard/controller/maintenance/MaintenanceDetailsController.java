@@ -5,10 +5,7 @@ import com.safeone.dashboard.dto.maintenance.MaintenanceDetailsDto;
 import com.safeone.dashboard.service.maintenance.MaintenanceDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -92,24 +89,20 @@ public class MaintenanceDetailsController extends JqGridAbstract<MaintenanceDeta
     }
 
     @ResponseBody
-    @GetMapping("/del")
+    @PostMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         return maintenanceDetailsService.delete(param);
     }
 
     @ResponseBody
-    @GetMapping("/add")
+    @PostMapping("/add")
     public boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        param.put("file1", (String) param.get("serverFileName"));
-
         return maintenanceDetailsService.create(param);
     }
 
     @ResponseBody
-    @GetMapping("/mod")
+    @PostMapping("/mod")
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        param.put("file1", (String) param.get("serverFileName"));
-
         return maintenanceDetailsService.update(param);
     }
 

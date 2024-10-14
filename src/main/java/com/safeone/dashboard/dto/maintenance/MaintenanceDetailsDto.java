@@ -47,7 +47,16 @@ public class MaintenanceDetailsDto implements Serializable {
     private String maint_chgr_ph;
 
     @FieldLabel(title = "사진경로", type = "hidden")
-    private String maint_pic_path;
+    private String maint_pic_path1;
+
+    @FieldLabel(title = "사진경로", type = "hidden")
+    private String maint_pic_path2;
+
+    @FieldLabel(title = "사진경로", type = "hidden")
+    private String maint_pic_path3;
+
+    @FieldLabel(title = "사진경로", type = "hidden")
+    private String maint_pic_path4;
 
     @FieldLabel(title = "등록일시", type = "range")
     private String reg_dt;

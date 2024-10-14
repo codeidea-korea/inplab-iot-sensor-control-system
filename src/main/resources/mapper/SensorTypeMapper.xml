@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-    
+
 <mapper namespace="com.safeone.dashboard.dao.SensorTypeMapper">
     <sql id="rowSearch">
         <if test="senstype_no != null and senstype_no != ''">
@@ -74,27 +74,28 @@
         </trim>
     </sql>
 
-    <select id="selectSensorTypeList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.SensorTypeDto">
+    <select id="selectSensorTypeList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.SensorTypeDto">
         SELECT MG.*
         FROM (
-            SELECT
-            A.senstype_no
-            , A.site_no
-            , A.sens_tp_nm
-            , A.sens_abbr
-            , A.basic_formul
-            , A.sens_chnl_cnt
-            , A.logr_idx_str
-            , A.logr_idx_end
-            , A.logr_flag
-            FROM tb_sensor_type A
+        SELECT
+        A.senstype_no
+        , A.site_no
+        , A.sens_tp_nm
+        , A.sens_abbr
+        , A.basic_formul
+        , A.sens_chnl_cnt
+        , A.logr_idx_str
+        , A.logr_idx_end
+        , A.logr_flag
+        FROM tb_sensor_type A
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
-<!--        <if test="page != null and page > 0">-->
-<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
-<!--        </if>-->
+        <!--        <if test="page != null and page > 0">-->
+        <!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+        <!--        </if>-->
     </select>
 
     <select id="selectSensorTypeListTotal" parameterType="java.util.Map" resultType="int">
@@ -114,6 +115,13 @@
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
+    </select>
+
+    <select id="getAllSensorTypesBySensTypeNo" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.SensorTypeDto">
+        select senstype_no, sens_tp_nm, sens_abbr
+        from tb_sensor_type
+        where senstype_no = #{senstype_no}
     </select>
 
     <insert id="insertSensorType" parameterType="java.util.Map">
@@ -148,7 +156,7 @@
 
     <update id="updateSensorType" parameterType="java.util.Map">
         update tb_sensor_type set
-            mod_dt = now()
+        mod_dt = now()
         <if test="site_no != null">
             , site_no = #{site_no}
         </if>
@@ -177,7 +185,8 @@
     </update>
 
     <delete id="deleteSensorType" parameterType="java.util.Map">
-        DELETE FROM tb_sensor_type
-         WHERE senstype_no = #{senstype_no}
+        DELETE
+        FROM tb_sensor_type
+        WHERE senstype_no = #{senstype_no}
     </delete>
 </mapper>

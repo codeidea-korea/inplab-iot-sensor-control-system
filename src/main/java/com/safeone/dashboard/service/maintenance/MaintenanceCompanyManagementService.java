@@ -47,4 +47,8 @@ public class MaintenanceCompanyManagementService implements JqGridService<Mainte
     public int delete(Map param) {
         return mapper.deleteMaintenanceCompanyManagement(param);
     }
+
+    public List<MaintenanceCompanyManagementDto> getAll() {
+        return mapper.selectAllMaintenanceCompanyManagementList();
+    }
 }

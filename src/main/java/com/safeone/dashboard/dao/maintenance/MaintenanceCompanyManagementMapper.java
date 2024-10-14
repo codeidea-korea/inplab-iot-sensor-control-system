@@ -13,5 +13,7 @@ public interface MaintenanceCompanyManagementMapper {
     int insertMaintenanceCompanyManagement(Map param);
     int updateMaintenanceCompanyManagement(Map param);
     int deleteMaintenanceCompanyManagement(Map param);
+
+    List<MaintenanceCompanyManagementDto> selectAllMaintenanceCompanyManagementList();
 }
     

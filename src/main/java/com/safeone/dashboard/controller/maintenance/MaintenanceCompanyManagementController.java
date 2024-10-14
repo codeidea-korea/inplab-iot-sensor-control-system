@@ -58,6 +58,12 @@ public class MaintenanceCompanyManagementController extends JqGridAbstract<Maint
         }
     }
 
+    @ResponseBody
+    @GetMapping("/all")
+    public List<MaintenanceCompanyManagementDto> getAll() {
+        return maintenanceCompanyManagementService.getAll();
+    }
+
     @Override
     protected String setViewPage() {
         return "maintenance/company-management";

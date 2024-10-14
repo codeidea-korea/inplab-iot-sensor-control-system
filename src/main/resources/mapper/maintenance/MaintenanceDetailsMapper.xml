@@ -98,7 +98,10 @@
         , tmd.maint_comp_nm
         , tmd.maint_chgr_nm
         , tmd.maint_chgr_ph
-        , tmd.maint_pic_path
+        , tmd.maint_pic_path1
+        , tmd.maint_pic_path2
+        , tmd.maint_pic_path3
+        , tmd.maint_pic_path4
         , tmd.reg_dt
         , tmd.mod_dt
         FROM tb_maint_details tmd
@@ -123,63 +126,66 @@
         <include refid="rowSearch"/>
     </select>
 
-    <insert id="insertMaintenance" parameterType="java.util.Map">
-        INSERT INTO tb_maintenance ( maintenance_id
-                                   , manager_name
-                                   , manager_tel
-                                   , description
-                                   , reg_date
-                                   , mt_date
-                                   , asset_id
-                                   , area_id
-                                   , type
-                                   , file1)
-        SELECT COALESCE(max(maintenance_id::integer), 0) + 1 as maintenance_id
-             , #{manager_name}
-             , #{manager_tel}
-             , #{description}
-             , now()
-             , #{mt_date}::timestamp
-									          , #{asset_id_hid}
-             , (select area_id from tb_zone where zone_id = #{zone_id_hid})
-             , #{type_hid}
-             , #{file1}
-        FROM tb_maintenance
+    <insert id="insertMaintenanceDetails" parameterType="java.util.Map">
+        INSERT INTO tb_maint_details ( mgnt_no
+                                     , maint_accpt_ymd
+                                     , maint_str_ymd
+                                     , maint_end_ymd
+                                     , district_no
+                                     , sens_no
+                                     , maint_rslt_cd
+                                     , maint_dtls
+                                     , maint_comp_nm
+                                     , maint_chgr_nm
+                                     , maint_chgr_ph
+                                     , maint_pic_path1
+                                     , maint_pic_path2
+                                     , maint_pic_path3
+                                     , maint_pic_path4
+                                     , reg_dt
+                                     , mod_dt)
+        VALUES ( (SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_maint_details)
+               , #{maint_accpt_ymd}
+               , #{maint_str_ymd}
+               , #{maint_end_ymd}
+               , #{district_no}
+               , #{sens_no}
+               , #{maint_rslt_cd}
+               , #{maint_dtls}
+               , #{maint_comp_nm}
+               , #{maint_chgr_nm}
+               , #{maint_chgr_ph}
+               , #{maint_pic_path1}
+               , #{maint_pic_path2}
+               , #{maint_pic_path3}
+               , #{maint_pic_path4}
+               , now()
+               , now())
     </insert>
 
-    <update id="updateMaintenance" parameterType="java.util.Map">
-        update tb_maintenance set
-        reg_date = now()
-        <if test="manager_name != null">
-            , manager_name = #{manager_name}
-        </if>
-        <if test="manager_tel != null">
-            , manager_tel = #{manager_tel}
-        </if>
-        <if test="description != null">
-            , description = #{description}
-        </if>
-        <if test="mt_date != null">
-            , mt_date = #{mt_date}::timestamp
-        </if>
-        <if test="asset_id_hid != null and asset_id_hid != ''">
-            , asset_id = #{asset_id_hid}
-        </if>
-        <if test="zone_id_hid != null and zone_id_hid != ''">
-            , area_id = (select area_id from tb_zone where zone_id = #{zone_id_hid})
-        </if>
-        <if test="type_hid != null and type_hid != ''">
-            , type = #{type_hid}
-        </if>
-        <if test="file1 != null">
-            , file1 = #{file1}
-        </if>
-        where maintenance_id = #{maintenance_id}
+    <update id="updateMaintenanceDetails" parameterType="java.util.Map">
+        UPDATE tb_maint_details
+        SET maint_accpt_ymd = #{maint_accpt_ymd}
+          , maint_str_ymd   = #{maint_str_ymd}
+          , maint_end_ymd   = #{maint_end_ymd}
+          , district_no     = #{district_no}
+          , sens_no         = #{sens_no}
+          , maint_rslt_cd   = #{maint_rslt_cd}
+          , maint_dtls      = #{maint_dtls}
+          , maint_comp_nm   = #{maint_comp_nm}
+          , maint_chgr_nm   = #{maint_chgr_nm}
+          , maint_chgr_ph   = #{maint_chgr_ph}
+          , maint_pic_path1 = #{maint_pic_path1}
+          , maint_pic_path2 = #{maint_pic_path2}
+          , maint_pic_path3 = #{maint_pic_path3}
+          , maint_pic_path4 = #{maint_pic_path4}
+          , mod_dt          = now()
+        WHERE mgnt_no = #{mgnt_no}
     </update>
 
-    <delete id="deleteMaintenance" parameterType="java.util.Map">
+    <delete id="deleteMaintenanceDetails" parameterType="java.util.Map">
         DELETE
-        FROM tb_maintenance
-        WHERE maintenance_id = #{maintenance_id}
+        FROM tb_maint_details
+        WHERE mgnt_no = #{mgnt_no}
     </delete>
 </mapper>

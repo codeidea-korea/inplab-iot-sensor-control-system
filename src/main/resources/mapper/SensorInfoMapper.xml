@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-    
+
 <mapper namespace="com.safeone.dashboard.dao.SensorInfoMapper">
     <sql id="rowSearch">
         <if test="sens_no != null and sens_no != ''">
@@ -21,10 +21,12 @@
         </if>
 
         <if test="searchKeyword  != null and searchKeyword  != ''">
-            and (select B.sens_tp_nm from tb_sensor_type B where B.senstype_no = MG.senstype_no) LIKE '%' || #{searchKeyword} || '%' OR
+            and (select B.sens_tp_nm from tb_sensor_type B where B.senstype_no = MG.senstype_no) LIKE '%' ||
+            #{searchKeyword} || '%' OR
             MG.sens_no LIKE '%' || #{searchKeyword} || '%' OR
             (select B.logr_nm from tb_logger_info B where B.logr_no = MG.logr_no) LIKE '%' || #{searchKeyword} || '%' OR
-            (select B.code_nm from tb_common_code B where B.code_id = MG.maint_sts_cd) LIKE '%' || #{searchKeyword} || '%'
+            (select B.code_nm from tb_common_code B where B.code_id = MG.maint_sts_cd) LIKE '%' || #{searchKeyword} ||
+            '%'
         </if>
 
     </sql>
@@ -74,68 +76,81 @@
         </trim>
     </sql>
 
-    <select id="selectSensorInfoList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.SensorInfoDto">
+    <select id="selectSensorInfoList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.SensorInfoDto">
         SELECT MG.*
         FROM (
-            SELECT
-            A.sens_no
-            , A.logr_no
-            , (SELECT B.sens_tp_nm FROM tb_sensor_type B WHERE B.senstype_no = A.senstype_no) AS senstype_nm
-            , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm
-            , (SELECT B.code_nm FROM tb_common_code B WHERE B.code_id = A.maint_sts_cd) AS maint_sts_nm
-            , A.senstype_no
-            , A.sens_nm
-            , COALESCE(to_char(to_date(NULLIF(A.inst_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS inst_ymd
-            , A.sect_no
-            , A.multi_sens_yn
-            , A.disp_prior_yn
-            , A.multi_senstype_no
-            , A.multi_sens_no
-            , A.nonrecv_limit_min
-            , A.alarm_use_yn
-            , A.sms_snd_yn
-            , A.sens_disp_yn
-            , A.maint_sts_cd
-            , A.sens_lon
-            , A.sens_lat
-            , A.sens_maker
-            , A.model_nm
-            FROM tb_sensor_info A
+        SELECT
+        A.sens_no
+        , A.logr_no
+        , (SELECT B.sens_tp_nm FROM tb_sensor_type B WHERE B.senstype_no = A.senstype_no) AS senstype_nm
+        , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm
+        , (SELECT B.code_nm FROM tb_common_code B WHERE B.code_id = A.maint_sts_cd) AS maint_sts_nm
+        , A.senstype_no
+        , A.sens_nm
+        , COALESCE(to_char(to_date(NULLIF(A.inst_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS inst_ymd
+        , A.sect_no
+        , A.multi_sens_yn
+        , A.disp_prior_yn
+        , A.multi_senstype_no
+        , A.multi_sens_no
+        , A.nonrecv_limit_min
+        , A.alarm_use_yn
+        , A.sms_snd_yn
+        , A.sens_disp_yn
+        , A.maint_sts_cd
+        , A.sens_lon
+        , A.sens_lat
+        , A.sens_maker
+        , A.model_nm
+        FROM tb_sensor_info A
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
-<!--        <if test="page != null and page > 0">-->
-<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
-<!--        </if>-->
+        <!--        <if test="page != null and page > 0">-->
+        <!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+        <!--        </if>-->
+    </select>
+
+    <select id="getAllSensorInfoByDistrictNo" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.SensorInfoDto">
+        select sens_no, senstype_no, sens_nm
+        from tb_sensor_info
+        where tb_sensor_info.sens_no in (select tlim.sens_no
+                                         from tb_logr_idx_map tlim
+                                         where logr_no in (select tli.logr_no
+                                                           from tb_district_info tdi
+                                                                    left outer join tb_logger_info tli on tli.district_no = tdi.district_no
+                                                           where tdi.district_no = #{district_no}))
     </select>
 
     <select id="selectSensorInfoListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(*)
         FROM (
         SELECT
-            A.sens_no
-            , A.logr_no
-            , (SELECT B.sens_tp_nm FROM tb_sensor_type B WHERE B.senstype_no = A.senstype_no) AS senstype_nm
-            , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm
-            , (SELECT B.code_nm FROM tb_common_code B WHERE B.code_id = A.maint_sts_cd) AS maint_sts_nm
-            , A.senstype_no
-            , A.sens_nm
-            , COALESCE(to_char(to_date(NULLIF(A.inst_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS inst_ymd
-            , A.sect_no
-            , A.multi_sens_yn
-            , A.disp_prior_yn
-            , A.multi_senstype_no
-            , A.multi_sens_no
-            , A.nonrecv_limit_min
-            , A.alarm_use_yn
-            , A.sms_snd_yn
-            , A.sens_disp_yn
-            , A.maint_sts_cd
-            , A.sens_lon
-            , A.sens_lat
-            , A.sens_maker
-            , A.model_nm
+        A.sens_no
+        , A.logr_no
+        , (SELECT B.sens_tp_nm FROM tb_sensor_type B WHERE B.senstype_no = A.senstype_no) AS senstype_nm
+        , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm
+        , (SELECT B.code_nm FROM tb_common_code B WHERE B.code_id = A.maint_sts_cd) AS maint_sts_nm
+        , A.senstype_no
+        , A.sens_nm
+        , COALESCE(to_char(to_date(NULLIF(A.inst_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS inst_ymd
+        , A.sect_no
+        , A.multi_sens_yn
+        , A.disp_prior_yn
+        , A.multi_senstype_no
+        , A.multi_sens_no
+        , A.nonrecv_limit_min
+        , A.alarm_use_yn
+        , A.sms_snd_yn
+        , A.sens_disp_yn
+        , A.maint_sts_cd
+        , A.sens_lon
+        , A.sens_lat
+        , A.sens_maker
+        , A.model_nm
         FROM tb_sensor_info A
         ) MG
         WHERE 1=1
@@ -168,7 +183,9 @@
             <if test="logr_no != null">#{logr_no},</if>
             <if test="senstype_no != null">#{senstype_no},</if>
             <if test="sens_nm != null">#{sens_nm},</if>
-            <if test="inst_ymd != null">COALESCE(TO_CHAR(TO_DATE(NULLIF(#{inst_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), ''),</if>
+            <if test="inst_ymd != null">COALESCE(TO_CHAR(TO_DATE(NULLIF(#{inst_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'),
+                ''),
+            </if>
             <if test="sect_no != null">#{sect_no}::int,</if>
             <if test="nonrecv_limit_min != null">#{nonrecv_limit_min}::int,</if>
             <if test="alarm_use_yn != null">#{alarm_use_yn},</if>
@@ -186,7 +203,7 @@
 
     <update id="updateSensorInfo" parameterType="java.util.Map">
         update tb_sensor_info set
-            mod_dt = now()
+        mod_dt = now()
         <if test="logr_no != null">
             , logr_no = #{logr_no}
         </if>
@@ -245,7 +262,8 @@
     </update>
 
     <delete id="deleteSensorInfo" parameterType="java.util.Map">
-        DELETE FROM tb_sensor_info
-         WHERE sens_no = #{sens_no}
+        DELETE
+        FROM tb_sensor_info
+        WHERE sens_no = #{sens_no}
     </delete>
 </mapper>
