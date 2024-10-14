@@ -40,6 +40,7 @@ public class SmsManagementService implements JqGridService<SmsManagementDto> {
 
     @Override
     public boolean update(Map param) {
+        param.put("mgnt_no", Integer.parseInt(param.get("mgnt_no").toString()));
         return mapper.updateSmsManagement(param) > 0;
     }
 

@@ -22,10 +22,11 @@ public class SmsManagementDto implements Serializable {
     @FieldLabel(title = "휴대폰 번호")
     private String sms_recv_ph;
 
-    @FieldLabel(title = "경보단계")
+    @FieldLabel(title = "경보단계", type = "selectable")
     private String alarm_lvl_nm;
 
-//    @FieldLabel(title = "상태")
+    @FieldLabel(title = "상태")
+    private String sms_status;
 
     @FieldLabel(title = "자동 전송 여부")
     private String sms_autosnd_yn;

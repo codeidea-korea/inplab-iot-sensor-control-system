@@ -1,5 +1,9 @@
 package com.safeone.dashboard.controller.operationconfigurationsetting;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.operationconfigurationsetting.SmsManagementDto;
 import com.safeone.dashboard.dto.operationconfigurationsetting.UserManagementDto;
@@ -7,10 +11,7 @@ import com.safeone.dashboard.service.operationconfigurationsetting.SmsManagement
 import com.safeone.dashboard.service.operationconfigurationsetting.UserManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -62,11 +63,14 @@ public class SmsManagementController extends JqGridAbstract<SmsManagementDto> {
     }
 
     @ResponseBody
-    @GetMapping("/mod")
+    @PostMapping("/mod")
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        param.put("file1", (String) param.get("serverFileName"));
-
-        return smsManagementService.update(param);
+        JsonArray jArray = ((new JsonParser()).parse(param.get("jsonData").toString())).getAsJsonArray();
+        for(JsonElement el : jArray) {
+            Map m = (new Gson()).fromJson(el, Map.class);
+            smsManagementService.update(m);
+        }
+        return true;
     }
 
 }
