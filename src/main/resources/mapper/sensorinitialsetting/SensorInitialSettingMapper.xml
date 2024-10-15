@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.sensorinitialsetting.SensorInitialSettingMapper">
+    <sql id="rowSearch">
+        <if test="sens_tp_nm != null and sens_tp_nm != ''">
+            and tst.sens_tp_nm ilike '%' || #{sens_tp_nm} || '%'
+        </if>
+        <if test="sens_nm != null and sens_nm != ''">
+            and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'
+        </if>
+        <if test="sens_chnl_nm != null and sens_chnl_nm != ''">
+            and tai.sens_chnl_nm ilike '%' || #{sens_chnl_nm} || '%'
+        </if>
+        <if test="formul_data != null and formul_data != ''">
+            and tsi.formul_data ilike '%' || #{formul_data} || '%'
+        </if>
+        <if test="init_apply_dt_start != null and init_apply_dt_start != '' and init_apply_dt_end != null and init_apply_dt_end != ''">
+            and tsi.init_apply_dt::timestamp between concat(#{init_apply_dt_start},' 00:00:00')::timestamp and
+            concat(#{init_apply_dt_end},' 23:59:59')::timestamp
+        </if>
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <when test="'sens_tp_nm' == sidx and sidx != ''">
+                    tst.sens_tp_nm ${sord}
+                </when>
+                <when test="'sens_nm' == sidx and sidx != ''">
+                    tsinfo.sens_nm ${sord}
+                </when>
+                <when test="'sens_chnl_nm' == sidx and sidx != ''">
+                    tai.sens_chnl_nm ${sord}
+                </when>
+                <when test="'formul_data' == sidx and sidx != ''">
+                    tsi.formul_data ${sord}
+                </when>
+                <when test="'init_apply_dt' == sidx and sidx != ''">
+                    tsi.init_apply_dt ${sord}
+                </when>
+                <otherwise>
+                    tsi.reg_dt desc
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="selectSensorInitialSettingList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.sensorinitialsetting.SensorInitialSettingDto">
+        select tst.sens_tp_nm
+        , tsinfo.sens_nm
+        , tai.sens_chnl_nm
+        , tsi.formul_data
+        , tsi.init_apply_dt
+        from tb_sensor_info tsinfo
+        left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
+        left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
+        left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
+        WHERE 1=1
+        and
+        tsinfo.sens_no in
+        (select tlim.sens_no
+        from tb_logr_idx_map tlim
+        where logr_no in (select tli.logr_no
+        from tb_district_info tdi
+        left outer join tb_logger_info tli on tli.district_no = tdi.district_no
+        where tdi.district_no = #{district_no}))
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+    <select id="selectSensorInitialSettingListTotal" parameterType="java.util.Map" resultType="int">
+        select count(tsinfo.sens_no)
+        from tb_sensor_info tsinfo
+        left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
+        left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
+        left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
+        WHERE 1=1
+        and
+        tsinfo.sens_no in
+        (select tlim.sens_no
+        from tb_logr_idx_map tlim
+        where logr_no in (select tli.logr_no
+        from tb_district_info tdi
+        left outer join tb_logger_info tli on tli.district_no = tdi.district_no
+        where tdi.district_no = #{district_no}))
+        <include refid="rowSearch"/>
+    </select>
+
+    <update id="updateSensorInitialSetting" parameterType="java.util.Map">
+        UPDATE tb_maint_details
+        SET maint_accpt_ymd = #{maint_accpt_ymd}
+          , maint_str_ymd   = #{maint_str_ymd}
+          , maint_end_ymd   = #{maint_end_ymd}
+          , district_no     = #{district_no}
+          , sens_no         = #{sens_no}
+          , maint_rslt_cd   = #{maint_rslt_cd}
+          , maint_dtls      = #{maint_dtls}
+          , maint_comp_nm   = #{maint_comp_nm}
+          , maint_chgr_nm   = #{maint_chgr_nm}
+          , maint_chgr_ph   = #{maint_chgr_ph}
+          , maint_pic_path1 = #{maint_pic_path1}
+          , maint_pic_path2 = #{maint_pic_path2}
+          , maint_pic_path3 = #{maint_pic_path3}
+          , maint_pic_path4 = #{maint_pic_path4}
+          , mod_dt          = now()
+        WHERE mgnt_no = #{mgnt_no}
+    </update>
+</mapper>
