@@ -7,7 +7,8 @@
             and tbh.mgnt_no::TEXT ilike '%' || #{mgnt_no} || '%'
         </if>
         <if test="send_dt_start != null and send_dt_start != '' and send_dt_end != null and send_dt_end != ''">
-            and tbh.send_dt::timestamp between concat(#{send_dt_start},' 00:00:00')::timestamp and concat(#{send_dt_end},' 23:59:59')::timestamp
+            and tbh.send_dt::timestamp between concat(#{send_dt_start},' 00:00:00')::timestamp and
+            concat(#{send_dt_end},' 23:59:59')::timestamp
         </if>
         <if test="brdcast_msg_dtls != null and brdcast_msg_dtls != ''">
             and tbh.brdcast_msg_dtls ilike '%' || #{brdcast_msg_dtls} || '%'
@@ -78,57 +79,25 @@
     </select>
 
     <insert id="insertBroadcastHistory" parameterType="java.util.Map">
-        INSERT INTO tb_maintenance ( maintenance_id
-                                   , manager_name
-                                   , manager_tel
-                                   , description
-                                   , reg_date
-                                   , mt_date
-                                   , asset_id
-                                   , area_id
-                                   , type
-                                   , file1)
-        SELECT COALESCE(max(maintenance_id::integer), 0) + 1 as maintenance_id
-             , #{manager_name}
-             , #{manager_tel}
-             , #{description}
-             , now()
-             , #{mt_date}::timestamp
-									          , #{asset_id_hid}
-             , (select area_id from tb_zone where zone_id = #{zone_id_hid})
-             , #{type_hid}
-             , #{file1}
-        FROM tb_maintenance
+        INSERT INTO tb_broadcast_history ( mgnt_no
+                                         , send_dt
+                                         , brdcast_msg_dtls
+                                         , brdcast_no
+                                         , send_rslt_yn
+                                         , broadcast_rslt_yn
+                                         , reg_dt
+                                         , mod_dt)
+        VALUES ((SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_broadcast_history),
+                now(),
+                #{brdcast_msg_dtls},
+                #{brdcast_no},
+                'Y',
+                'N',
+                now(),
+                now())
     </insert>
 
     <update id="updateBroadcastHistory" parameterType="java.util.Map">
-        update tb_maintenance set
-        reg_date = now()
-        <if test="manager_name != null">
-            , manager_name = #{manager_name}
-        </if>
-        <if test="manager_tel != null">
-            , manager_tel = #{manager_tel}
-        </if>
-        <if test="description != null">
-            , description = #{description}
-        </if>
-        <if test="mt_date != null">
-            , mt_date = #{mt_date}::timestamp
-        </if>
-        <if test="asset_id_hid != null and asset_id_hid != ''">
-            , asset_id = #{asset_id_hid}
-        </if>
-        <if test="zone_id_hid != null and zone_id_hid != ''">
-            , area_id = (select area_id from tb_zone where zone_id = #{zone_id_hid})
-        </if>
-        <if test="type_hid != null and type_hid != ''">
-            , type = #{type_hid}
-        </if>
-        <if test="file1 != null">
-            , file1 = #{file1}
-        </if>
-        where maintenance_id = #{maintenance_id}
     </update>
 
     <delete id="deleteBroadcastHistory" parameterType="java.util.Map">

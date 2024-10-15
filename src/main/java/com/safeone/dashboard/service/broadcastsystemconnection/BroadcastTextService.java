@@ -42,11 +42,13 @@ public class BroadcastTextService implements JqGridService<BroadcastTextDto> {
 
     @Override
     public boolean update(Map param) {
+        param.put("mgnt_no", Integer.parseInt(param.get("mgnt_no").toString()));
         return mapper.updateBroadcastText(param) > 0;
     }
 
     @Override
     public int delete(Map param) {
+        param.put("mgnt_no", Integer.parseInt(param.get("mgnt_no").toString()));
         return mapper.deleteBroadcastText(param);
     }
 }

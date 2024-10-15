@@ -415,9 +415,6 @@
             }
         });
     })
-    $('.addRow').click(() => {
-        // TODO: add row
-    });
 
 
     function downloadExcel(fileName, grid = $grid) {

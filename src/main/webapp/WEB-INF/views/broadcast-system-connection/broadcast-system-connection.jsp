@@ -30,7 +30,7 @@
                 <h3 class="txt">방송안내 문구 관리</h3>
                 <div class="btn-group">
                     <a class="addRow">행추가</a>
-                    <a class="insertBtn">저장</a>
+                    <a class="saveBtn">저장</a>
                     <a class="deleteBtn">삭제</a>
                     <a class="submitBtn">전송</a>
                 </div>

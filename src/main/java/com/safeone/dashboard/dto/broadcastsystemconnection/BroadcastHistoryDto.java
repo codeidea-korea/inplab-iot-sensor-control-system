@@ -13,7 +13,7 @@ public class BroadcastHistoryDto implements Serializable {
     @FieldLabel(title = "전송일시", type = "range")
     private String send_dt;
 
-    @FieldLabel(title = "안내 문구", width = 300)
+    @FieldLabel(title = "안내 문구", width = 400)
     private String brdcast_msg_dtls;
 
     @FieldLabel(title = "방송장비ID")
