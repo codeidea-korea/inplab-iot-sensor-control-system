@@ -41,7 +41,7 @@
             <div class="contents-re">
                 <h3 class="txt">방송 전송이력 조회</h3>
                 <div class="contents-in auto h200">
-                    <jsp:include page="./broadcast-text-grid.jsp" flush="true"></jsp:include>
+                    <jsp:include page="./broadcast-history-grid.jsp" flush="true"></jsp:include>
                 </div>
             </div>
         </div>

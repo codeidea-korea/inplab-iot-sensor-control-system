@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
-<table id="broadcast-text-grid"></table>
+<table id="broadcast-history-grid"></table>
 <div class="gridSpacer"></div>
 <div class="paginate"></div>
 
@@ -14,8 +14,8 @@
             autowidth: true,
         };
 
-        const gridId = "broadcast-text-grid";
-        const path = "/broadcast-text";
+        const gridId = "broadcast-history-grid";
+        const path = "/broadcast-history";
 
         let _columns = [];
 

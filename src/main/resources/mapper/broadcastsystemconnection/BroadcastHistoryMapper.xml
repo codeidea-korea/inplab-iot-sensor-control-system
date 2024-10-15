@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.safeone.dashboard.dao.broadcastsystemconnection.BroadcastTextMapper">
+<mapper namespace="com.safeone.dashboard.dao.broadcastsystemconnection.BroadcastHistoryMapper">
     <sql id="rowSearch">
         <if test="mgnt_no != null and mgnt_no != ''">
-            and tbd.mgnt_no::TEXT ilike '%' || #{mgnt_no} || '%'
+            and tbh.mgnt_no::TEXT ilike '%' || #{mgnt_no} || '%'
         </if>
-        <if test="brdcast_title != null and brdcast_title != ''">
-            and tbd.brdcast_title ilike '%' || #{brdcast_title} || '%'
+        <if test="send_dt_start != null and send_dt_start != '' and send_dt_end != null and send_dt_end != ''">
+            and tbh.send_dt::timestamp between concat(#{send_dt_start},' 00:00:00')::timestamp and concat(#{send_dt_end},' 23:59:59')::timestamp
         </if>
         <if test="brdcast_msg_dtls != null and brdcast_msg_dtls != ''">
-            and tbd.brdcast_msg_dtls ilike '%' || #{brdcast_msg_dtls} || '%'
+            and tbh.brdcast_msg_dtls ilike '%' || #{brdcast_msg_dtls} || '%'
+        </if>
+        <if test="brdcast_no != null and brdcast_no != ''">
+            and tbh.brdcast_no ilike '%' || #{brdcast_no} || '%'
+        </if>
+        <if test="send_rslt_yn != null and send_rslt_yn != ''">
+            and tbh.send_rslt_yn ilike '%' || #{send_rslt_yn} || '%'
+        </if>
+        <if test="broadcast_rslt_yn != null and broadcast_rslt_yn != ''">
+            and tbh.broadcast_rslt_yn ilike '%' || #{broadcast_rslt_yn} || '%'
         </if>
     </sql>
 
@@ -18,34 +27,41 @@
         <trim prefix="order by">
             <choose>
                 <when test="'mgnt_no' == sidx and sidx != ''">
-                    tbd.mgnt_no ${sord}
+                    tbh.mgnt_no ${sord}
                 </when>
-                <when test="'brdcast_title' == sidx and sidx != ''">
-                    tbd.brdcast_title ${sord}
+                <when test="'send_dt' == sidx and sidx != ''">
+                    tbh.send_dt ${sord}
                 </when>
                 <when test="'brdcast_msg_dtls' == sidx and sidx != ''">
-                    tbd.brdcast_msg_dtls ${sord}
+                    tbh.brdcast_msg_dtls ${sord}
+                </when>
+                <when test="'brdcast_no' == sidx and sidx != ''">
+                    tbh.brdcast_no ${sord}
+                </when>
+                <when test="'send_rslt_yn' == sidx and sidx != ''">
+                    tbh.send_rslt_yn ${sord}
+                </when>
+                <when test="'broadcast_rslt_yn' == sidx and sidx != ''">
+                    tbh.broadcast_rslt_yn ${sord}
                 </when>
                 <otherwise>
-                    tbd.reg_dt desc
+                    tbh.reg_dt desc
                 </otherwise>
             </choose>
         </trim>
     </sql>
 
-    <select id="selectBroadcastTextList" parameterType="java.util.Map"
-            resultType="com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastTextDto">
-        SELECT tbd.mgnt_no
-        , tbd.brdcast_no
-        , tbd.brdcast_dt
-        , tbd.brdcast_msg_dtls
-        , tbd.brdcast_title
-        , tbd.brdcast_rslt_yn
-        , tbd.brdcast_contnts
-        , tbd.district_no
-        , tbd.reg_dt
-        , tbd.mod_dt
-        FROM tb_broadcast_details tbd
+    <select id="selectBroadcastHistoryList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastHistoryDto">
+        SELECT tbh.mgnt_no
+        , tbh.send_dt
+        , tbh.brdcast_msg_dtls
+        , tbh.brdcast_no
+        , tbh.send_rslt_yn
+        , tbh.broadcast_rslt_yn
+        , tbh.reg_dt
+        , tbh.mod_dt
+        FROM tb_broadcast_history tbh
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -54,14 +70,14 @@
         </if>
     </select>
 
-    <select id="selectBroadcastTextListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT count(tbd.mgnt_no)
-        FROM tb_broadcast_details tbd
+    <select id="selectBroadcastHistoryListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(tbh.mgnt_no)
+        FROM tb_broadcast_history tbh
         WHERE 1 = 1
         <include refid="rowSearch"/>
     </select>
 
-    <insert id="insertBroadcastText" parameterType="java.util.Map">
+    <insert id="insertBroadcastHistory" parameterType="java.util.Map">
         INSERT INTO tb_maintenance ( maintenance_id
                                    , manager_name
                                    , manager_tel
@@ -85,7 +101,7 @@
         FROM tb_maintenance
     </insert>
 
-    <update id="updateBroadcastText" parameterType="java.util.Map">
+    <update id="updateBroadcastHistory" parameterType="java.util.Map">
         update tb_maintenance set
         reg_date = now()
         <if test="manager_name != null">
@@ -115,7 +131,7 @@
         where maintenance_id = #{maintenance_id}
     </update>
 
-    <delete id="deleteBroadcastText" parameterType="java.util.Map">
+    <delete id="deleteBroadcastHistory" parameterType="java.util.Map">
         DELETE
         FROM tb_maintenance
         WHERE maintenance_id = #{maintenance_id}
