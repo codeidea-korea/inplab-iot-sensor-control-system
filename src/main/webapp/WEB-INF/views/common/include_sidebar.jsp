@@ -102,13 +102,13 @@
             <dl>
                 <dt data-type="warning">
                     <img src="/images/icon_gnb05.png" alt="전광판 연계"></dt>
-                <dd class="bul">(작업중)전광판 연계</dd>
+                <dd class="bul">전광판 연계</dd>
             </dl>
         </button>
         <ul class="menu-sub">
             <li>
                 <a href="/display-connection/display-img-management" class="menu-link">전광판이미지관리</a>
-                <a href="/abc" class="menu-link">(작업중)전광판 전송관리</a>
+                <a href="/display-connection/display-send-management" class="menu-link">(작업중)전광판 전송관리</a>
             </li>
         </ul>
     </li>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.safeone.dashboard.dao.displayconnection.DisplaySendManagementMapper">
+    <sql id="rowSearch">
+<!--        <if test="send_group_id != null and send_group_id != ''">-->
+<!--            and MG.send_group_id = #{send_group_id}-->
+<!--        </if>-->
+<!--        <if test="send_group_name != null and send_group_name != ''">-->
+<!--            and MG.send_group_name ilike '%' || #{send_group_name} || '%'-->
+<!--        </if>-->
+<!--        <if test="description != null and description != ''">-->
+<!--            and MG.description ilike '%' || #{description} || '%'-->
+<!--        </if>-->
+<!--        <if test="use_yn != null and use_yn != ''">-->
+<!--            and MG.use_yn = #{use_yn}-->
+<!--        </if>-->
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+<!--                <when test="'send_group_id' == sidx and sidx != ''">-->
+<!--                    MG.send_group_id ${sord}-->
+<!--                </when>-->
+<!--                <when test="'send_group_name' == sidx and sidx != ''">-->
+<!--                    MG.send_group_name ${sord}-->
+<!--                </when>-->
+<!--                <when test="'description' == sidx and sidx != ''">-->
+<!--                    MG.description ${sord}-->
+<!--                </when>-->
+<!--                <when test="'use_yn' == sidx and sidx != ''">-->
+<!--                    MG.use_yn ${sord}-->
+<!--                </when>-->
+                <otherwise>
+                    tdi.reg_dt desc
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+<!--    관리_no	mgnt_no	int	PK-->
+<!--    이미지파일명	dispbd_imgfile_nm	varchar	UK1-->
+<!--    전송그룹명	img_grp_nm	varchar	UK1-->
+<!--    이벤트구분	dispbd_evnt_flag	varchar(1)	UK1-->
+<!--    표시효과_cd	img_effect_cd	varchar(6)-->
+<!--    표시시간	img_disp_min	int-->
+<!--    파일경로	img_file_path	varchar-->
+<!--    자동전송여부	dispbd_autosnd_yn	varchar(1)-->
+<!--    사용여부	use_yn	varchar(1)-->
+<!--    등록일시	reg_dt	datetime-->
+<!--    수정일시	mod_dt	datetime-->
+
+    <select id="selectDisplaySendManagementList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.displayconnection.DisplaySendManagementDto">
+        SELECT tdi.mgnt_no
+            , tdi.dispbd_imgfile_nm
+            , tdi.img_grp_nm
+            , tdi.dispbd_evnt_flag
+            , tdi.img_effect_cd
+            , tdi.img_disp_min
+            , tdi.img_file_path
+            , tdi.dispbd_autosnd_yn
+            , tdi.use_yn
+            , tdi.reg_dt
+            , tdi.mod_dt
+            , tdi.mgnt_no as edit
+            , tdi.mgnt_no as del
+        FROM tb_dispbd_image tdi
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="selectDisplaySendManagementListTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(tdi.mgnt_no)
+        FROM tb_dispbd_image tdi
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <update id="updateDisplaySendManagement" parameterType="java.util.Map">
+        update tb_send_group
+        <set>
+            <if test="send_group_name != null">
+                , send_group_name = #{send_group_name}
+            </if>
+            <if test="description != null">
+                , description = #{description}
+            </if>
+            <if test="use_yn != null">
+                , use_yn = #{use_yn}
+            </if>
+        </set>
+        where send_group_id = #{send_group_id}
+    </update>
+
+    <insert id="insertDisplaySendManagement" parameterType="java.util.Map">
+        insert into tb_send_group (send_group_id, send_group_name, description, use_yn)
+        SELECT COALESCE(max(send_group_id::integer),0)+1 as tb_send_group
+             , #{send_group_name}
+             , #{description}
+             , 'Y'
+        FROM tb_send_group
+    </insert>
+
+    <delete id="deleteDisplaySendManagement" parameterType="java.util.Map">
+        DELETE FROM tb_send_group
+        WHERE send_group_id = #{send_group_id}
+    </delete>
+
+</mapper>
