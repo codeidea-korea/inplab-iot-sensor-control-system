@@ -20,17 +20,23 @@ public class SensorInitialSettingDto implements Serializable {
     @FieldLabel(title = "채널명")
     private String sens_chnl_nm;
 
-    @FieldLabel(title = "측정값(보정값)")
+    @FieldLabel(title = "측정값(보정값)", type = "editable")
     private String formul_data;
 
-    @FieldLabel(title = "경보상태")
-    private String d;
+    @FieldLabel(title = "경보상태", type = "editable")
+    private String emer_status;
 
-    @FieldLabel(title = "최종계측일시")
-    private String b;
+    @FieldLabel(title = "최종계측일시", type = "range")
+    private String last_apply_dt;
 
     @FieldLabel(title = "초기치설정일시", type = "range")
     private String init_apply_dt;
+
+    @FieldLabel(title = "센서_no", type = "hidden")
+    private String sens_no;
+
+    @FieldLabel(title = "채널_id", type = "hidden")
+    private String sens_chnl_id;
 
 
 }

@@ -39,6 +39,24 @@
                     }
                 }, true);
             }
+
+            $('.save-btn').on('click', function () {
+                const allRowData = $(".jqGrid").jqGrid("getRowData");
+                $.ajax({
+                    method: 'POST',
+                    url: '/sensor-initial-setting/mod',
+                    traditional: true,
+                    data: { jsonData: JSON.stringify(allRowData) },
+                    dataType: 'json',
+                    success: function (_res) {
+                        alert('저장되었습니다.')
+                        $(".jqGrid").trigger('reloadGrid');
+                    },
+                    error: function () {
+                        alert('입력 값이 올바르지 않습니다.');
+                    }
+                });
+            });
         });
     </script>
 </head>

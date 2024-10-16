@@ -1,5 +1,9 @@
 package com.safeone.dashboard.controller.sensorinitialsetting;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.sensorinitialsetting.SensorInitialSettingDto;
 import com.safeone.dashboard.service.sensorinitialsetting.SensorInitialSettingService;
@@ -49,6 +53,18 @@ public class SensorInitialSettingController extends JqGridAbstract<SensorInitial
                 param.put("init_apply_dt_end", dates[0]);
             }
         }
+
+        if (param.containsKey("last_apply_dt")) {
+            String[] dates = ((String) param.get("last_apply_dt")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("last_apply_dt_start", dates[0].replace("-", ""));
+                param.put("last_apply_dt_end", dates[1].replace("-", ""));
+            } else {
+                dates[0] = dates[0].replace(" ", "");
+                param.put("last_apply_dt_start", dates[0]);
+                param.put("last_apply_dt_end", dates[0]);
+            }
+        }
     }
 
     @Override
@@ -71,7 +87,12 @@ public class SensorInitialSettingController extends JqGridAbstract<SensorInitial
     @ResponseBody
     @PostMapping("/mod")
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        return sensorInitialSettingService.update(param);
+        JsonArray jArray = ((new JsonParser()).parse(param.get("jsonData").toString())).getAsJsonArray();
+        for(JsonElement el : jArray) {
+            Map m = (new Gson()).fromJson(el, Map.class);
+            sensorInitialSettingService.update(m);
+        }
+        return true;
     }
 
 }

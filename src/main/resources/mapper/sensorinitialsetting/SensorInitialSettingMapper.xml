@@ -19,6 +19,13 @@
             and tsi.init_apply_dt::timestamp between concat(#{init_apply_dt_start},' 00:00:00')::timestamp and
             concat(#{init_apply_dt_end},' 23:59:59')::timestamp
         </if>
+        <if test="last_apply_dt_start != null and last_apply_dt_start != '' and last_apply_dt_end != null and last_apply_dt_end != ''">
+            and tsi.last_apply_dt::timestamp between concat(#{last_apply_dt_start},' 00:00:00')::timestamp and
+            concat(#{last_apply_dt_end},' 23:59:59')::timestamp
+        </if>
+        <if test="emer_status != null and emer_status != ''">
+            and tsi.emer_status ilike '%' || #{emer_status} || '%'
+        </if>
     </sql>
 
     <sql id="rowOrder">
@@ -39,6 +46,12 @@
                 <when test="'init_apply_dt' == sidx and sidx != ''">
                     tsi.init_apply_dt ${sord}
                 </when>
+                <when test="'last_apply_dt' == sidx and sidx != ''">
+                    tsi.last_apply_dt ${sord}
+                </when>
+                <when test="'emer_status' == sidx and sidx != ''">
+                    tsi.emer_status ${sord}
+                </when>
                 <otherwise>
                     tsi.reg_dt desc
                 </otherwise>
@@ -53,6 +66,10 @@
         , tai.sens_chnl_nm
         , tsi.formul_data
         , tsi.init_apply_dt
+        , tsi.last_apply_dt
+        , tsi.emer_status
+        , tsi.sens_no
+        , tsi.sens_chnl_id
         from tb_sensor_info tsinfo
         left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
         left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
@@ -91,22 +108,11 @@
     </select>
 
     <update id="updateSensorInitialSetting" parameterType="java.util.Map">
-        UPDATE tb_maint_details
-        SET maint_accpt_ymd = #{maint_accpt_ymd}
-          , maint_str_ymd   = #{maint_str_ymd}
-          , maint_end_ymd   = #{maint_end_ymd}
-          , district_no     = #{district_no}
-          , sens_no         = #{sens_no}
-          , maint_rslt_cd   = #{maint_rslt_cd}
-          , maint_dtls      = #{maint_dtls}
-          , maint_comp_nm   = #{maint_comp_nm}
-          , maint_chgr_nm   = #{maint_chgr_nm}
-          , maint_chgr_ph   = #{maint_chgr_ph}
-          , maint_pic_path1 = #{maint_pic_path1}
-          , maint_pic_path2 = #{maint_pic_path2}
-          , maint_pic_path3 = #{maint_pic_path3}
-          , maint_pic_path4 = #{maint_pic_path4}
-          , mod_dt          = now()
-        WHERE mgnt_no = #{mgnt_no}
+        UPDATE tb_sensor_init
+        SET formul_data = #{formul_data}::float
+          , emer_status = #{emer_status}
+          , mod_dt      = now()
+        WHERE sens_no = #{sens_no}
+          and sens_chnl_id = #{sens_chnl_id}
     </update>
 </mapper>

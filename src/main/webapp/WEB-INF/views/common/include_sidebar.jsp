@@ -93,7 +93,7 @@
                 <a href="/sensorGroup" class="menu-link">센서그룹핑 조회</a>
                 <a href="/alarmList" class="menu-link">알람이력조회</a>
                 <a href="/calc" class="menu-link">경보기준관리</a>
-                <a href="/sensor-initial-setting" class="menu-link">(작업중)센서초기치설정</a>
+                <a href="/sensor-initial-setting" class="menu-link">센서초기치설정</a>
             </li>
         </ul>
     </li>
@@ -154,67 +154,67 @@
             </li>
         </ul>
     </li>
-    <li class="admin-menu">
-        <button type="button" class="round">
-            <dl>
-                <dt data-type="admin">
-                    <img src="/images/icon_gnb08.png" alt="관리자 전용">
-                </dt>
-                <dd class="bul">(기존)관리자 전용</dd>
-            </dl>
-        </button>
-        <ul class="menu-sub">
-            <li>
-                <dl>
-                    <dt>자산관리</dt>
-                    <dd>
-                        <a href="/admin/assetList" class="menu-link">자산 목록</a>
-                        <a href="/admin/assetKind" class="menu-link">자산 종류</a>
-                    </dd>
-                </dl>
-            </li>
-            <li>
-                <dl>
-                    <dt>알람관리</dt>
-                    <dd>
-                        <a href="/admin/alarmSetting" class="menu-link">알람 설정</a>
-                        <a href="/admin/alarmRange" class="menu-link">계측기 알람 범위 설정</a>
-                    </dd>
-                </dl>
-            </li>
-            <li>
-                <dl>
-                    <dt>데이터관리</dt>
-                    <dd>
-                        <a href="/admin/dataMeasure" class="menu-link">계측기 데이터 관리</a>
-                    </dd>
-                </dl>
-            </li>
-            <li>
-                <dl>
-                    <dt>관리자</dt>
-                    <dd>
-                        <a href="/admin/loginLog" class="menu-link">로그인 기록</a>
-                        <a href="/admin/user" class="menu-link">사용자 관리</a>
-                        <a href="/admin/area" class="menu-link">현장 관리</a>
-                        <a href="/admin/zone" class="menu-link">지구 관리</a>
-                        <a href="/admin/device" class="menu-link">로거 관리</a>
-                        <a href="/admin/emergencyCall" class="menu-link">비상연락망 관리</a>
-                    </dd>
-                </dl>
-            </li>
-            <li>
-                <dl>
-                    <dt>전광판관리</dt>
-                    <dd>
-                        <a href="/admin/sendGroup2" class="menu-link">전송이미지 생성</a>
-                        <a href="/admin/sendGroup" class="menu-link">전송그룹 관리</a>
-                        <a href="/admin/sendContr" class="menu-link">전송 제어</a>
-                    </dd>
-                </dl>
-            </li>
-        </ul>
-    </li>
+<%--    <li class="admin-menu">--%>
+<%--        <button type="button" class="round">--%>
+<%--            <dl>--%>
+<%--                <dt data-type="admin">--%>
+<%--                    <img src="/images/icon_gnb08.png" alt="관리자 전용">--%>
+<%--                </dt>--%>
+<%--                <dd class="bul">(기존)관리자 전용</dd>--%>
+<%--            </dl>--%>
+<%--        </button>--%>
+<%--        <ul class="menu-sub">--%>
+<%--            <li>--%>
+<%--                <dl>--%>
+<%--                    <dt>자산관리</dt>--%>
+<%--                    <dd>--%>
+<%--                        <a href="/admin/assetList" class="menu-link">자산 목록</a>--%>
+<%--                        <a href="/admin/assetKind" class="menu-link">자산 종류</a>--%>
+<%--                    </dd>--%>
+<%--                </dl>--%>
+<%--            </li>--%>
+<%--            <li>--%>
+<%--                <dl>--%>
+<%--                    <dt>알람관리</dt>--%>
+<%--                    <dd>--%>
+<%--                        <a href="/admin/alarmSetting" class="menu-link">알람 설정</a>--%>
+<%--                        <a href="/admin/alarmRange" class="menu-link">계측기 알람 범위 설정</a>--%>
+<%--                    </dd>--%>
+<%--                </dl>--%>
+<%--            </li>--%>
+<%--            <li>--%>
+<%--                <dl>--%>
+<%--                    <dt>데이터관리</dt>--%>
+<%--                    <dd>--%>
+<%--                        <a href="/admin/dataMeasure" class="menu-link">계측기 데이터 관리</a>--%>
+<%--                    </dd>--%>
+<%--                </dl>--%>
+<%--            </li>--%>
+<%--            <li>--%>
+<%--                <dl>--%>
+<%--                    <dt>관리자</dt>--%>
+<%--                    <dd>--%>
+<%--                        <a href="/admin/loginLog" class="menu-link">로그인 기록</a>--%>
+<%--                        <a href="/admin/user" class="menu-link">사용자 관리</a>--%>
+<%--                        <a href="/admin/area" class="menu-link">현장 관리</a>--%>
+<%--                        <a href="/admin/zone" class="menu-link">지구 관리</a>--%>
+<%--                        <a href="/admin/device" class="menu-link">로거 관리</a>--%>
+<%--                        <a href="/admin/emergencyCall" class="menu-link">비상연락망 관리</a>--%>
+<%--                    </dd>--%>
+<%--                </dl>--%>
+<%--            </li>--%>
+<%--            <li>--%>
+<%--                <dl>--%>
+<%--                    <dt>전광판관리</dt>--%>
+<%--                    <dd>--%>
+<%--                        <a href="/admin/sendGroup2" class="menu-link">전송이미지 생성</a>--%>
+<%--                        <a href="/admin/sendGroup" class="menu-link">전송그룹 관리</a>--%>
+<%--                        <a href="/admin/sendContr" class="menu-link">전송 제어</a>--%>
+<%--                    </dd>--%>
+<%--                </dl>--%>
+<%--            </li>--%>
+<%--        </ul>--%>
+<%--    </li>--%>
     <li class="admin-menu">
         <button type="button" class="round">
             <dl>
