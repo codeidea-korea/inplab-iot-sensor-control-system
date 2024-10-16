@@ -259,7 +259,7 @@
                 <dl>
                     <dt>데이터관리</dt>
                     <dd>
-                        <a href="/adminAdd/view/measureDetails" class="menu-link">계측기 데이터 관리</a>
+                        <a href="/measure-details" class="menu-link">계측기 데이터 관리</a>
                     </dd>
                 </dl>
             </li>
