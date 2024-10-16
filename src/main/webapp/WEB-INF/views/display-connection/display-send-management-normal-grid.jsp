@@ -2,18 +2,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
-<table class="display-send-management-normal"></table>
+<table id="display-send-management-normal"></table>
 <div class="gridSpacer"></div>
-<div class="paginate"></div>
 
 <script>
-    $(function () {
-        window.jqgridOption = {
-            multiselect: true,
-            multiboxonly: false,
-            columnAutoWidth: true,
-        };
-
+    $(document).ready(function () {
         const gridId = "display-send-management-normal";
         const path = "/display-connection/display-send-management";
 
@@ -22,21 +15,16 @@
         $.get(path + "/columns", function (res) {
             _columns = res;
 
-            var _labels = [];
-            var _names = [];
+            const _labels = [];
+            const _names = [];
             var _widths = [];
             var _types = [];
             var _rowList = [15, 30, 60];
-
+            var pageCount = 5;
             var columnData = {
                 model: []
             };
-
             var $grid = $("#" + gridId);
-
-            $grid.on('jqGridInitGrid', function () {
-                $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
-            });
 
             $.each(_columns, function () {
                 _names.push(this.columnName);
@@ -51,7 +39,7 @@
             };
 
             function numFormat(cellvalue, options, rowObject) {
-                if (typeof cellvalue == 'undefined')
+                if (typeof cellvalue === 'undefined')
                     return '0';
 
                 cellvalue = String(cellvalue);
@@ -59,7 +47,7 @@
             }
 
             function numUnformat(cellvalue, options, rowObject) {
-                if (typeof cellvalue == 'undefined')
+                if (typeof cellvalue === 'undefined')
                     return '0';
 
                 cellvalue = String(cellvalue);
@@ -75,7 +63,7 @@
                 return cellvalue.toLocaleString("ko-KR");
             }
 
-            var flagCellEdit = false;
+            let flagCellEdit = false;
             if (typeof window.jqgridOption == 'undefined') {
                 window.jqgridOption = {};
             } else {
@@ -149,22 +137,6 @@
                     };
                     column.searchoptions = {
                         dataInit: function (element) {
-                            // $(element).dateRangePicker({format: 'YYYY/M/D', autoClose: true, getValue: function () { // console.log($(this).val());
-                            //     }});
-
-                            // $(element).on('datepicker-change', function () {
-                            //     reloadJqGrid();
-                            // });
-
-                            // $(element).flatpickr({
-                            //     "locale": "ko",
-                            //     mode: "range",
-                            //     dateFormat: "Y-m-d",
-                            //     onClose: function(selectedDates, dateStr, instance){
-                            //         reloadJqGrid();
-                            //     }
-                            // });
-
                             setRangePicker($(element), function () {
                                 reloadJqGrid($grid);
                             });
@@ -181,30 +153,11 @@
                     };
                     column.searchoptions = {
                         dataInit: function (element) {
-                            // $(element).dateRangePicker({format: 'YYYY/M/D', autoClose: true, getValue: function () { // console.log($(this).val());
-                            //     }});
-
-                            // $(element).on('datepicker-change', function () {
-                            //     reloadJqGrid();
-                            // });
-
-                            // $(element).flatpickr({
-                            //     "locale": "ko",
-                            //     mode: "range",
-                            //     dateFormat: "Y-m-d",
-                            //     onClose: function(selectedDates, dateStr, instance){
-                            //         reloadJqGrid();
-                            //     }
-                            // });
-
                             $(element).daterangepicker({
-                                // "timePicker": true,
-                                // "timePicker24Hour": true,
                                 ranges: {
                                     '금일': [moment(), moment()],
                                     '지난 1주': [moment().subtract(6, 'days'), moment()],
                                     '지난 1개월': [moment().subtract(29, 'days'), moment()],
-                                    // '지난 3개월': [moment().subtract(3, 'month'), moment()],
                                     '지난 6개월': [moment().subtract(6, 'month'), moment()],
                                     '1년': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
                                 },
@@ -257,28 +210,14 @@
                 }
 
                 if (_types[idx].indexOf('date') > -1) {
-                    // 달력
-                    // console.log('달력');
                     column.sorttype = 'date';
                     column.formatter = 'date';
-                    // column.srcformat = 'Y-m-d';
-                    // column.newformat = 'n/j/Y';
-                    // column.newformat = 'Y/m/d';
                     column.formatoptions = {
                         srcformat: 'Y-m-d',
                         newformat: 'Y/m/d'
                     };
                     column.searchoptions = {
                         dataInit: function (element) {
-                            // $(element).datepicker({
-                            //     autoclose: true,
-                            //     format: 'YYYY/M/D',
-                            //     orientation: 'auto',
-                            //     onSelect: function (dt) {
-                            //         reloadJqGrid();
-                            //     }
-                            // });
-
                             $(element).flatpickr({
                                 "locale": "ko",
                                 dateFormat: "Y-m-d",
@@ -300,10 +239,7 @@
                 if (_types[idx].indexOf('timestamp') > -1) {
                     column.sorttype = 'date';
                     column.formatter = timestampFormat;
-                    // column.formatoptions =  {srcformat: 'u/1000', newformat:'Y-m-d h:i:s'}
-                    // column.formatoptions =  {srcformat: 'u', newformat:'Y/m/d H:i:s'}
                 }
-
                 if (_types[idx].indexOf('hidden') > -1 || _types[idx].indexOf('password') > -1) { // if (_types[idx].indexOf('hidden') > -1) {
                     column.hidden = true;
                 }
@@ -317,12 +253,11 @@
             $.jgrid.defaults.width = $grid.parent().width();
 
             $(window).trigger('beforeLoadGrid', columnData);
-            // console.log(columnData.model)
+
             var jqGridOption = Object.assign({}, {
                 url: path + '/list',
                 mtype: "GET",
                 datatype: "json",
-                // page: 0,
                 colModel: columnData.model,
                 formatter: "actions",
                 sortIconsBeforeText: true,
@@ -337,9 +272,6 @@
                         }
                     }
                 },
-                // sortable: true,
-                autowidth: true,
-                shrinkToFit: true,
                 beforeRequest: function (e) {
                     var params = Object.assign($grid.jqGrid('getGridParam', 'postData'), $('.ui-search-input input').filter(function () {
                         return !!this.value;
@@ -349,88 +281,28 @@
                         postData: Object.assign(params, window.gridParam)
                     });
                 },
-                loadComplete: function (response) {
-
-                    var rows = response.rows.map(function (row) {
-                        Object.keys(row).forEach(function (key) {
-                            if (row[key] === null) {
-                                row[key] = '';
-                            }
-
-                            if (key === 'usr_flag') {
-                                row[key] = row[key] === '0' ? '운영 관리자' : '시스템 관리자';
-                            }
-                        });
-
-                        // site_logo 필드를 img 태그로 변환
-                        if (row.site_logo) {
-                            row.site_logo_src = row.site_logo;
-                            row.site_logo = `<img src="data:image/jpeg;base64, ` + row.site_logo + `" style="width:100px; height:auto;" />`;
-                        } else {
-                            row.site_logo_src = '';
-                            row.site_logo = `<img src="data:image/jpeg;base64, " style="width:100px; height:auto;" />`;
-                        }
-
-                        // site_title_logo 필드를 img 태그로 변환
-                        if (row.site_title_logo) {
-                            row.site_title_logo_src = row.site_title_logo;
-                            row.site_title_logo = `<img src="data:image/jpeg;base64, ` + row.site_title_logo + `" style="width:100px; height:auto;" />`;
-                        } else {
-                            row.site_title_logo_src = '';
-                            row.site_title_logo = `<img src="data:image/jpeg;base64, " style="width:100px; height:auto;" />`;
-                        }
-
-                        if (row.dist_pic) {
-                            row.dist_pic_src = row.dist_pic;
-                        } else {
-                            row.dist_pic_src = '';
-                        }
-
-                        if (row.dist_view_pic) {
-                            row.dist_view_pic_src = row.dist_view_pic;
-                        } else {
-                            row.dist_view_pic_src = '';
-                        }
-
-                        return row;
-                    });
-
-                    // 가공된 데이터를 jqGrid에 반영
-                    this.addJSONData(rows);
-
-                    // 다른 이벤트 트리거
-                    $(window).trigger('loadComplete', rows);
-
+                loadComplete: function (rowId) {
+                    var rowData = jQuery(this).getRowData(rowId);
+                    $(window).trigger('loadComplete', rowData);
                     $grid.on('reloadGrid', function (e) { // console.log(e);
                     });
 
                     $('.ui-jqgrid .ui-search-table input').attr('autocomplete', 'new-password');
                     window.jqgridModify = false;
 
-                    // initPage($grid, $(".paginate"), true, "TOT", pageCount);
-                    $grid.closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
+                    initPage($grid, $(".paginate"), true, "TOT", pageCount);
                 },
                 gridComplete: function () {
                     $(window).trigger('gridComplete');
-
-                    // console.log('gridComplete');
-
-                    // if (window.jqgridOption.columnAutoWidth) {
-                    //     $grid.closest('.ui-jqgrid').css('width', '100%');
-                    // }
-                    // $.jgrid.defaults.width = $grid.parent().width();
-
                     if (window.jqgridOption.columnAutoWidth) {
                         $(window).trigger('resize');
                     }
-                    enableColumnReordering();
                 },
                 ondblClickRow: function (rowId) { // 더블클릭시 색상해제
                     $('.ui-jqgrid-btable tr').removeClass('custom_selected');
 
                     var rowData = jQuery(this).getRowData(rowId);
                     $(window).trigger('gridDblClick', rowData);
-                    // console.log('dbclick::');
                 },
                 afterEditCell: function (rowid, cellname, value, iRow, iCol) {
                     var retVal = Object.assign($grid.jqGrid('getRowData', rowid), {
@@ -467,93 +339,30 @@
                     var rowData = {rowId, ...jQuery(this).getRowData(rowId)};
                     $(window).trigger('onSelectRow', rowData);
                 },
-                // sortable: true,
                 loadonce: false,
                 viewrecords: true,
                 emptyrecords: '조회된 데이터가 없습니다',
                 height: 'auto',
-                // height: $(".contents-in").height() - 35,
-                // scroll: true, // 스크롤 사용
-                // rowNum: -1,
                 rowNum: _rowList[0],
                 rowList: _rowList,
-                // pager: ".jqGridPager",
-                autowidth: true,
-                shrinkToFit: true
             }, window.jqgridOption);
-
-            function enableColumnReordering() {
-
-                $(".ui-jqgrid-labels").sortable({
-                    items: ".ui-th-column",
-
-                    update: function (event, ui) {
-                        var newOrder = $(this).sortable("toArray", {attribute: "id"});
-                        var newColModel = [];
-                        var newRowData = [];
-
-                        // 새로운 컬럼 순서에 맞게 colModel과 rowData를 재구성합니다.
-                        newOrder.forEach(function (colId) {
-                            var colName = colId.replace("jqgh_", "").replace(/^_/, "");  // "jqgh_" 및 앞의 언더스코어 제거
-                            var col = Object.values(_columns).find(c => c.columnName === colName);
-
-                            if (col) {
-                                newColModel.push({
-                                    name: col.columnName,
-                                    label: col.title,
-                                    width: col.width,
-                                    hidden: col.type === "hidden"
-                                });
-                            } else {
-                                // 기본 컬럼 처리 (예: cb, rn 등)
-                                newColModel.push({
-                                    name: colName,
-                                    label: colName.toUpperCase(),
-                                    width: 50,  // 기본 너비
-                                    hidden: false  // 기본으로 표시
-                                });
-                                console.warn('Column not found for:', colName);
-                            }
-                        });
-
-                        // 기존 그리드 데이터를 순서에 맞춰 재정렬
-                        $grid.jqGrid('getRowData').forEach(function (row) {
-                            var newRow = {};
-                            newColModel.forEach(function (col) {
-                                newRow[col.name] = row[col.name] || '';
-                            });
-                            newRowData.push(newRow);
-                        });
-
-                        // jqGrid의 설정을 새로운 colModel과 rowData로 업데이트하고 데이터를 다시 로드합니다.
-                        $grid.jqGrid('setGridParam', {
-                            colModel: newColModel,
-                            data: newRowData
-                        }).trigger("reloadGrid");
-                    }
-
-
-                });
-            }
-
 
             if (flagCellEdit) {
                 jqGridOption = Object.assign(jqGridOption, {
                     cellEdit: true,
                     cellsubmit: 'clientArray',
-                    url: path + '/list',
+                    cellurl: path + '/cell',
                     beforeSubmitCell: function (rowid, cellname, value) { // submit 전
-                        // console.log({"id": rowid, "cellName": cellname, "cellValue": value});
                         return {"id": rowid, "cellName": cellname, "cellValue": value}
                     },
                     afterSubmitCell: function (res) { // 변경 후
                         var aResult = $.parseJSON(res.responseText);
                         var userMsg = "";
-                        if ((aResult.msg == "success")) {
+                        if ((aResult.msg === "success")) {
                             userMsg = "데이터가 변경되었습니다.";
                         }
                         return [
-                            (aResult.msg == "success") ? true : false,
+                            (aResult.msg === "success"),
                             userMsg
                         ];
                     }
@@ -561,37 +370,10 @@
             }
 
             $grid.jqGrid(jqGridOption);
-
-
-            $(document).on('keydown', '#search', function (e) {
-                if (e.keyCode === 13) {  // Enter 키 감지
-                    var searchValue = $('#search').val();  // 검색어 가져오기
-                    $grid.jqGrid('setGridParam', {
-                        postData: {
-                            searchKeyword: searchValue
-                        },
-                        page: 1  // 검색 시 첫 페이지로 이동
-                    }).trigger('reloadGrid');  // 그리드 새로고침
-                }
-            });
-
-            $(document).on('click', '.searchBtn', function () {
-                var searchValue = $('#search').val();  // 검색어 가져오기
-                $grid.jqGrid('setGridParam', {
-                    postData: {
-                        searchKeyword: searchValue
-                    },
-                    page: 1  // 검색 시 첫 페이지로 이동
-                }).trigger('reloadGrid');  // 그리드 새로고침
-            });
-
-
-            if (window.jqgridOption.filterToolbarCheck) {
-                $grid.jqGrid('filterToolbar');
-            }
+            $grid.jqGrid('filterToolbar');
 
             $('.ui-search-toolbar input').on('keyup', function (e) {
-                if (e.keyCode == 13)
+                if (e.keyCode === 13)
                     $(window).trigger('reloadGrid');
             });
 
@@ -602,7 +384,7 @@
             });
 
             $grid.jqGrid('navGrid', ".jqGridPager", {
-                search: false, // show search button on the toolbar
+                search: false,
                 add: false,
                 edit: false,
                 del: false,
@@ -617,19 +399,129 @@
 
             if (window.jqgridOption.columnAutoWidth) {
                 $(window).resize(function () {
-                    // 그리드의 너비 조정
-                    var gridWidth = $(".contents-in").width();
-                    $grid.jqGrid('setGridWidth', gridWidth, true);  // shrinkToFit를 true로 설정하여 조정
-
-                    // 그리드의 높이 조정
-                    var gridHeight = $(".contents-in").height() - 35;
-                    $grid.jqGrid('setGridHeight', gridHeight);  // 그리드 높이를 동적으로 설정
+                    var gridWidth = $(window).width() - 445;
+                    $grid.jqGrid('setGridWidth', gridWidth, true);
                 });
 
                 $(window).trigger('resize');
             }
 
+            // 행추가 버튼 클릭 이벤트
+            $('.addRow').click(() => {
+                addEmptyRow()
+            });
+
+            function addEmptyRow() {
+                const newRowId = "new_row_" + new Date().getTime();
+                const defaultRowData = {mgnt_no: "", brdcast_title: "", brdcast_msg_dtls: ""};
+                $grid.jqGrid('addRowData', newRowId, defaultRowData, "last");
+            }
+
+            // 저장 버튼 클릭 이벤트
+            $('.saveBtn').click(() => {
+                const allRowData = $grid.jqGrid("getRowData");
+                const filteredData = allRowData.filter((item) =>
+                    item.brdcast_msg_dtls && item.brdcast_title
+                );
+                // TODO 수정해야 됨
+                filteredData.map((item) => {
+                    item.brdcast_no = 'B01'
+                    item.brdcast_dt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                    item.brdcast_rslt_yn = 'N';
+                    item.brdcast_contnts = 'test';
+                    item.district_no = 'D01';
+                });
+                $.ajax({
+                    method: 'post',
+                    url: '/broadcast-text/save',
+                    traditional: true,
+                    data: {jsonData: JSON.stringify(filteredData)},
+                    dataType: 'json',
+                    success: function (_res) {
+                        alert('저장되었습니다.')
+                    },
+                    error: function (_err) {
+                        alert('저장에 실패했습니다.')
+                    }
+                });
+            });
+
+            // 삭제 버튼 클릭 이벤트
+            $('.deleteBtn').click(() => {
+                const selectedRowIds = $grid.jqGrid('getGridParam', 'selarrrow');
+                if (selectedRowIds.length === 0) {
+                    alert('삭제할 데이터를 선택해주세요.');
+                    return;
+                } else if (selectedRowIds.length > 1) {
+                    alert('삭제할 데이터를 1건만 선택해주세요.');
+                    return;
+                }
+
+                confirm('삭제하시겠습니까?', () => {
+                    const selectedRowData = selectedRowIds.map((rowId) => $grid.jqGrid('getRowData', rowId));
+                    $.ajax({
+                        url: '/broadcast-text/del',
+                        type: 'POST',
+                        data: {
+                            mgnt_no: selectedRowData[0].mgnt_no
+                        },
+                        success: function (_res) {
+                            $grid.trigger('reloadGrid');
+                        },
+                        error: function (_err) {
+                            alert('삭제에 실패했습니다. 다시 시도해 주세요.');
+                        }
+                    });
+                });
+            });
+
+            // 전송 버튼 클릭 이벤트
+            $('.submitBtn').click(() => {
+                const selectedRowIds = $grid.jqGrid('getGridParam', 'selarrrow');
+                if (selectedRowIds.length === 0) {
+                    alert('전송할 데이터를 선택해주세요.');
+                    return;
+                } else if (selectedRowIds.length > 1) {
+                    alert('전송할 데이터를 1건만 선택해주세요.');
+                    return;
+                }
+
+                confirm('전송하시겠습니까?', () => {
+                    const selectedRowData = selectedRowIds.map((rowId) => $grid.jqGrid('getRowData', rowId));
+                    $.ajax({
+                        url: '/broadcast-history/add',
+                        type: 'POST',
+                        data: {
+                            brdcast_msg_dtls: selectedRowData[0].brdcast_msg_dtls
+                        },
+                        success: function (_res) {
+                            $('#broadcast-history-grid').trigger('reloadGrid');
+                        },
+                        error: function (_err) {
+                            alert('전송에 실패했습니다. 다시 시도해 주세요.');
+                        }
+                    });
+                });
+            });
         });
-    });
+
+    })
+
+
+    function downloadExcel(fileName, grid = $grid) {
+        const gridData = grid.getGridParam('postData');
+        const urlParameters = Object.entries(gridData).map(e => e.join('=')).join('&');
+
+        var url = path + "/excel/" + fileName + '?' + urlParameters;
+        var hiddenIFrameId = 'hiddenDownloader';
+        var iframe = document.getElementById(hiddenIFrameId);
+        if (iframe === null) {
+            iframe = document.createElement('iframe');
+            iframe.id = hiddenIFrameId;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        iframe.src = url;
+    }
 </script>
 

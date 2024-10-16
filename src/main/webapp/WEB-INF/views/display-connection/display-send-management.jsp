@@ -242,10 +242,10 @@
                                 <td>4(Sec)</td>
                                 <td>Y</td>
                                 <td>
-                                    <button><img src="./images/square-pen.svg" alt=""></button>
+<%--                                    <button><img src="../images/square-pen.svg" alt=""></button>--%>
                                 </td>
                                 <td>
-                                    <button><img src="./images/trash-2.svg" alt=""></button>
+<%--                                    <button><img src="./images/trash-2.svg" alt=""></button>--%>
                                 </td>
                             </tr>
                             <tr>
@@ -254,10 +254,10 @@
                                 <td>4(Sec)</td>
                                 <td>Y</td>
                                 <td>
-                                    <button><img src="./images/square-pen.svg" alt=""></button>
+<%--                                    <button><img src="/images/square-pen.svg" alt=""></button>--%>
                                 </td>
                                 <td>
-                                    <button><img src="./images/trash-2.svg" alt=""></button>
+<%--                                    <button><img src="./images/trash-2.svg" alt=""></button>--%>
                                 </td>
                             </tr>
                             </tbody>
@@ -343,10 +343,10 @@
                                 <td>4(Sec)</td>
                                 <td>Y</td>
                                 <td>
-                                    <button><img src="./images/square-pen.svg" alt=""></button>
+<%--                                    <button><img src="./images/square-pen.svg" alt=""></button>--%>
                                 </td>
                                 <td>
-                                    <button><img src="./images/trash-2.svg" alt=""></button>
+<%--                                    <button><img src="./images/trash-2.svg" alt=""></button>--%>
                                 </td>
                             </tr>
                             <tr>
@@ -355,10 +355,10 @@
                                 <td>4(Sec)</td>
                                 <td>Y</td>
                                 <td>
-                                    <button><img src="./images/square-pen.svg" alt=""></button>
+<%--                                    <button><img src="./images/square-pen.svg" alt=""></button>--%>
                                 </td>
                                 <td>
-                                    <button><img src="./images/trash-2.svg" alt=""></button>
+<%--                                    <button><img src="./images/trash-2.svg" alt=""></button>--%>
                                 </td>
                             </tr>
                             </tbody>
