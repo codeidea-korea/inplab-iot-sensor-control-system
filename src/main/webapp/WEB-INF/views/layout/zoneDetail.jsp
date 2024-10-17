@@ -141,13 +141,14 @@ ${zone}
                 <table>
                     <thead>
                     <tr>
-                        <th>알람레벨</th>
-                        <th>현장</th>
-                        <th>센서종류</th>
-                        <th>센서</th>
-                        <th>알람종류</th>
-                        <th>일자</th>
-                        <th>알람발생시간</th>
+                        <th>알람상태</th>
+<%--                        <th>현장</th>--%>
+                        <th>센서타입</th>
+                        <th>센서명(채널명)</th>
+                        <th>계측값</th>
+<%--                        <th>알람종류</th>--%>
+<%--                        <th>일자</th>--%>
+                        <th>발생일시</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -567,6 +568,9 @@ ${zone}
         // 알람 이력
         function loadAlarmHistory() {
             $.get('/alarmList/alarmHistory', param, function (res) {
+
+                console.log('res', res);
+
                 if (typeof res != 'undefined') $('.site-status-details_re .alarm-list tbody').empty();
                 if (res.length > 0) $('.site-status-details_re .alarm-list').css("cursor", "pointer");
                 $.each(res, function (idx) {
@@ -581,12 +585,13 @@ ${zone}
                     } else if (level === '4') {
                         contents += '<td><div class="level" fc_step4=""><strong>심각</strong></div></td>';
                     }
-                    contents += '<td>' + res[idx].area_name + '</td>';
+                    // contents += '<td>' + res[idx].area_name + '</td>';
                     contents += '<td>' + res[idx].asset_kind_name + '</td>';
                     contents += '<td>' + res[idx].asset_name + '</td>';
-                    contents += '<td>' + res[idx].alarm_kind_name + '</td>';
-                    contents += '<td>' + res[idx].reg_day + '</td>';
-                    contents += '<td>' + res[idx].reg_time + '</td>';
+                    contents += '<td>' + '-' + '</td>';
+                    // contents += '<td>' + res[idx].alarm_kind_name + '</td>';
+                    // contents += '<td>' + res[idx].reg_day + '</td>';
+                    contents += '<td>' + res[idx].reg_day + " " + res[idx].reg_time + '</td>';
                     contents += '</tr>';
 
                     $('.site-status-details_re .alarm-list tbody').append(contents);
