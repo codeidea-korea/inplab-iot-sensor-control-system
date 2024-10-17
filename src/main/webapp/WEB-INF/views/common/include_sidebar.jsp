@@ -108,7 +108,7 @@
         <ul class="menu-sub">
             <li>
                 <a href="/display-connection/display-img-management" class="menu-link">전광판이미지관리</a>
-                <a href="/display-connection/display-send-management" class="menu-link">(작업중)전광판 전송관리</a>
+                <a href="/display-connection/display-send-management" class="menu-link">전광판 전송관리</a>
             </li>
         </ul>
     </li>

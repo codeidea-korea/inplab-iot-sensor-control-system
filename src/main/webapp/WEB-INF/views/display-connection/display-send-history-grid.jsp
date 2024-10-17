@@ -2,13 +2,17 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 
-<table id="display-send-management-normal"></table>
+<table id="display-send-history-grid"></table>
 <div class="gridSpacer"></div>
 
 <script>
     $(document).ready(function () {
-        const gridId = "display-send-management-normal";
-        const path = "/display-connection/display-send-management";
+        window.jqgridOption = {
+            columnAutoWidth: true
+        };
+
+        const gridId = "display-send-history-grid";
+        const path = "/display-connection/display-send-history";
 
         let _columns = [];
 
@@ -64,7 +68,7 @@
             }
 
             let flagCellEdit = false;
-            if (typeof window.jqgridOption === 'undefined') {
+            if (typeof window.jqgridOption == 'undefined') {
                 window.jqgridOption = {};
             } else {
                 if (window.jqgridOption.columnAutoWidth) {
@@ -114,6 +118,7 @@
                         var res = '';
                         $.each(data, function () {
                             var cell = this.split(':');
+                            // console.log("cell::{}", cell);
                             if (cell[0] === cellValue)
                                 res = cell[1];
 
@@ -367,7 +372,7 @@
             }
 
             $grid.jqGrid(jqGridOption);
-            // $grid.jqGrid('filterToolbar');
+            $grid.jqGrid('filterToolbar');
 
             $('.ui-search-toolbar input').on('keyup', function (e) {
                 if (e.keyCode === 13)
@@ -396,13 +401,8 @@
 
             if (window.jqgridOption.columnAutoWidth) {
                 $(window).resize(function () {
-                    // 그리드의 너비 조정
-                    var gridWidth = $grid.closest('.contents-in').width();
-                    $grid.jqGrid('setGridWidth', gridWidth, true);  // shrinkToFit를 true로 설정하여 조정
-
-                    // 그리드의 높이 조정
-                    var gridHeight = $grid.closest('.contents-in').height() - 35;
-                    $grid.jqGrid('setGridHeight', gridHeight);  // 그리드 높이를 동적으로 설정
+                    var gridWidth = $(window).width() - 445;
+                    $grid.jqGrid('setGridWidth', gridWidth, true);
                 });
 
                 $(window).trigger('resize');

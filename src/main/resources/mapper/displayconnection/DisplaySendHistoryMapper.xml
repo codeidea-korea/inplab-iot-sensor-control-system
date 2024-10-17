@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.displayconnection.DisplaySendHistoryMapper">
+    <sql id="rowSearch">
+        <!--        <if test="img_grp_nm != null and img_grp_nm != ''">-->
+        <!--            and tdi.img_grp_nm = #{img_grp_nm}-->
+        <!--        </if>-->
+        <!--        <if test="dispbd_evnt_flag != null and dispbd_evnt_flag != ''">-->
+        <!--            and tdi.dispbd_evnt_flag = #{dispbd_evnt_flag}-->
+        <!--        </if>-->
+    </sql>
+
+    <sql id="rowOrder">
+        <trim prefix="order by">
+            <choose>
+                <!--                <when test="'send_group_id' == sidx and sidx != ''">-->
+                <!--                    MG.send_group_id ${sord}-->
+                <!--                </when>-->
+                <!--                <when test="'send_group_name' == sidx and sidx != ''">-->
+                <!--                    MG.send_group_name ${sord}-->
+                <!--                </when>-->
+                <!--                <when test="'description' == sidx and sidx != ''">-->
+                <!--                    MG.description ${sord}-->
+                <!--                </when>-->
+                <!--                <when test="'use_yn' == sidx and sidx != ''">-->
+                <!--                    MG.use_yn ${sord}-->
+                <!--                </when>-->
+                <otherwise>
+                    tdd.reg_dt desc
+                </otherwise>
+            </choose>
+        </trim>
+    </sql>
+
+    <select id="getList" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.displayconnection.DisplaySendHistoryDto">
+        SELECT tdd.mgnt_no
+        , tdd.dispbd_no
+        , tdispi.dispbd_nm
+--         , tdispi.d
+        , tdd.sms_trans_dt
+        , tdd.district_no
+        , tdi.district_nm
+        , tdd.dispbd_evnt_flag
+        , tdd.dispbd_autosnd_yn
+        , tdd.dispbd_rslt_yn
+        , tdd.reg_dt
+        FROM tb_dispbd_details tdd
+        LEFT OUTER JOIN tb_district_info tdi ON tdd.district_no = tdi.district_no
+        LEFT OUTER JOIN tb_dispboard_info tdispi ON tdd.dispbd_no = tdispi.dispbd_no
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="getTotalCount" parameterType="java.util.Map" resultType="int">
+        SELECT count(tdd.mgnt_no)
+        FROM tb_dispbd_details tdd
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+</mapper>

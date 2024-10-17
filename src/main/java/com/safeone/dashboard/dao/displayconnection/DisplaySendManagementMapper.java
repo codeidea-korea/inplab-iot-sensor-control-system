@@ -1,5 +1,6 @@
 package com.safeone.dashboard.dao.displayconnection;
 
+import com.safeone.dashboard.dto.displayconnection.DisplayGroupDto;
 import com.safeone.dashboard.dto.displayconnection.DisplaySendManagementDto;
 import org.springframework.stereotype.Repository;
 
@@ -13,4 +14,6 @@ public interface DisplaySendManagementMapper {
     boolean insertDisplaySendManagement(Map param);
     int updateDisplaySendManagement(Map param);
     int deleteDisplaySendManagement(Map param);
+
+    List<DisplayGroupDto> selectDisplayGroupList(Map<String, Object> param);
 }

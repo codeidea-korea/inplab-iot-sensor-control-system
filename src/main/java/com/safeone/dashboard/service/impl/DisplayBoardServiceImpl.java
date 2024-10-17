@@ -8,6 +8,7 @@ import com.safeone.dashboard.dto.DelAdminAddDisplayBoardDto;
 import com.safeone.dashboard.dto.GetAdminAddDisplayBoardDto;
 import com.safeone.dashboard.dto.InsAdminAddDisplayBoardDto;
 import com.safeone.dashboard.dto.UdtAdminAddDisplayBoardDto;
+import com.safeone.dashboard.dto.displayconnection.DisplayBoardDto;
 import com.safeone.dashboard.service.DisplayBoardService;
 import com.safeone.dashboard.service.CctvService;
 import com.safeone.dashboard.service.DisplayBoardService;
@@ -135,5 +136,20 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
         CommonUtils.setCountInfo("del", count, on);
 
         return on;
+    }
+
+    @Override
+    public List<DisplayBoardDto> all(Map<String, Object> param) {
+        return displayBoardMapper.all(param);
+    }
+
+    @Override
+    public int sendHistory(Map<String, Object> param) {
+        if (param.get("dispbd_evnt_flag").equals("2") || Integer.parseInt(param.get("dispbd_evnt_flag").toString()) == 2) {
+            param.put("dispbd_autosnd_yn", "Y");
+        } else {
+            param.put("dispbd_autosnd_yn", "N");
+        }
+        return displayBoardMapper.sendHistory(param);
     }
 }

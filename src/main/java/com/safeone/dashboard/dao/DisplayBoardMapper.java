@@ -1,5 +1,6 @@
 package com.safeone.dashboard.dao;
 
+import com.safeone.dashboard.dto.displayconnection.DisplayBoardDto;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -36,4 +37,11 @@ public class DisplayBoardMapper {
         return sqlSession.delete("delDisplayBoard", map);
     }
 
+    public List<DisplayBoardDto> all(Map<String, Object> param) {
+        return sqlSession.selectList("all", param);
+    }
+
+    public int sendHistory(Map<String, Object> param) {
+        return sqlSession.insert("sendHistory", param);
+    }
 }

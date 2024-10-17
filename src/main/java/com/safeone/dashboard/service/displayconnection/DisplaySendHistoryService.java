@@ -1,8 +1,9 @@
 package com.safeone.dashboard.service.displayconnection;
 
+import com.safeone.dashboard.dao.displayconnection.DisplaySendHistoryMapper;
 import com.safeone.dashboard.dao.displayconnection.DisplaySendManagementMapper;
 import com.safeone.dashboard.dto.displayconnection.DisplayGroupDto;
-import com.safeone.dashboard.dto.displayconnection.DisplaySendManagementDto;
+import com.safeone.dashboard.dto.displayconnection.DisplaySendHistoryDto;
 import com.safeone.dashboard.service.JqGridService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,41 +13,37 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class DisplaySendManagementService implements JqGridService<DisplaySendManagementDto> {
+public class DisplaySendHistoryService implements JqGridService<DisplaySendHistoryDto> {
 
-    private final DisplaySendManagementMapper mapper;
+    private final DisplaySendHistoryMapper mapper;
 
     @Override
-    public List<DisplaySendManagementDto> getList(Map param) {
-        return mapper.selectDisplaySendManagementList(param);
+    public List<DisplaySendHistoryDto> getList(Map param) {
+        return mapper.getList(param);
     }
 
     @Override
     public int getTotalCount(Map param) {
-        return mapper.selectDisplaySendManagementListTotal(param);
+        return mapper.getTotalCount(param);
     }
 
     @Override
     public boolean create(Map param) {
-        return mapper.insertDisplaySendManagement(param);
+        throw new UnsupportedOperationException("Unimplemented method 'create'");
     }
 
     @Override
-    public DisplaySendManagementDto read(int id) {
+    public DisplaySendHistoryDto read(int id) {
         throw new UnsupportedOperationException("Unimplemented method 'read'");
     }
 
     @Override
     public boolean update(Map param) {
-        return mapper.updateDisplaySendManagement(param) > 0;
+        throw new UnsupportedOperationException("Unimplemented method 'update'");
     }
 
     @Override
     public int delete(Map param) {
-        return mapper.deleteDisplaySendManagement(param);
-    }
-
-    public List<DisplayGroupDto> group(Map<String, Object> param) {
-        return mapper.selectDisplayGroupList(param);
+        throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 }

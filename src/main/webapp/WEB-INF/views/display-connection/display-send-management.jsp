@@ -10,9 +10,13 @@
 </head>
 <style>
     #contents {
+        width: 100%;
         display: grid;
         align-items: stretch;
         grid-template-columns: 1fr 1fr;
+    }
+    .contents-re {
+        width: 100%;
     }
 
     .contents-re:nth-of-type(4) {
@@ -89,6 +93,18 @@
         height: 3.8rem;
     }
 
+    .bTable {
+        width: 100%; /* 부모 컨테이너에 맞춤 */
+        height: 100%; /* 높이도 최대로 확장 */
+        overflow: auto; /* 스크롤 필요 시 표시 */
+        display: grid;
+    }
+
+    .contents-in {
+        width: 100%;
+    }
+
+
     #contents .contents-in {
         position: static;
     }
@@ -129,6 +145,162 @@
         margin-bottom: 1rem;
     }
 </style>
+<script>
+    window.jqgridOption = {
+        columnAutoWidth: true
+    };
+
+    $(document).ready(() => {
+
+        const $normalGrid = $('#display-send-management-normal');
+        const $emerGrid = $('#display-send-management-emer');
+        const $sensorGrid = $('#display-send-management-sensor');
+        const $historyGrid = $("#display-send-history-grid");
+
+        $(window).on("resize", () => {
+            $normalGrid.jqGrid('setGridWidth', $normalGrid.closest('.contents-in').width());
+            $emerGrid.jqGrid('setGridWidth', $emerGrid.closest('.contents-in').width());
+            $sensorGrid.jqGrid('setGridWidth', $sensorGrid.closest('.contents-in').width());
+            $historyGrid.jqGrid('setGridWidth', $historyGrid.closest('.contents-in').width());
+        })
+
+        $.ajax({
+            url: '/adminAdd/districtInfo/all',
+            type: 'GET',
+            success: function (res) {
+                res.forEach((item) => {
+                    $('#district-no').append(
+                        "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
+                    );
+                });
+            },
+            error: function () {
+                alert('알 수 없는 오류가 발생했습니다.');
+            }
+        });
+
+        $.ajax({
+            url: '/display-connection/display-send-management/group',
+            type: 'GET',
+            success: function (res) {
+                res.forEach((item) => {
+                    $('#normal-group, #emer-group, #sensor-group').append(
+                        "<option value='" + item.img_grp_nm + "'>" + item.img_grp_nm + "</option>"
+                    );
+
+                    $('#dispbd_group').append(
+                        "<option value='" + item.img_grp_nm + "'>" + item.img_grp_nm + "</option>"
+                    );
+                });
+            },
+            complete: function (res) {
+                $('#normal-group, #emer-group, #sensor-group').val(res.responseJSON[0].img_grp_nm);
+
+                setTimeout(() => {
+                    setGridData($normalGrid, res.responseJSON[0].img_grp_nm, 0);
+                    setGridData($emerGrid, res.responseJSON[0].img_grp_nm, 1);
+                    setGridData($sensorGrid, res.responseJSON[0].img_grp_nm, 2);
+                    $normalGrid.trigger('reloadGrid');
+                    $emerGrid.trigger('reloadGrid');
+                    $sensorGrid.trigger('reloadGrid');
+                }, 100);
+            },
+            error: function () {
+                alert('알 수 없는 오류가 발생했습니다.');
+            }
+        });
+
+        $("#normal-group").on('change', function () {
+            setGridData($normalGrid, $("#normal-group").val(), 0);
+            $normalGrid.trigger('reloadGrid');
+        });
+
+        $("#emer-group").on('change', function () {
+            setGridData($emerGrid, $("#emer-group").val(), 1);
+            $emerGrid.trigger('reloadGrid');
+        });
+
+        $("#sensor-group").on('change', function () {
+            setGridData($sensorGrid, $("#sensor-group").val(), 2);
+            $sensorGrid.trigger('reloadGrid');
+        });
+
+        $("#district-no").on('change', () => {
+            if ($("#district-no").val() === '') {
+                $('#dispbd_nm').empty()
+                $('#dispbd_nm').append(
+                    "<option value=''>선택</option>"
+                );
+                return;
+            } else {
+                $.ajax({
+                    url: '/adminAdd/displayBoard/all-by-district',
+                    type: 'GET',
+                    data: {
+                        district_no: $("#district-no").val()
+                    },
+                    success: function (res) {
+                        res.forEach((item) => {
+                            $('#dispbd_nm').append(
+                                "<option value='" + item.dispbd_no + "'>" + item.dispbd_nm + "</option>"
+                            );
+                        });
+                    },
+                    error: function () {
+                        alert('알 수 없는 오류가 발생했습니다.');
+                    }
+                });
+            }
+        });
+
+        $("#dispbd-send-btn").click(() => {
+            if ($("#district-no").val() === '') {
+                alert('현장명을 선택해주세요.');
+                return;
+            }
+
+            if ($("#dispbd_nm").val() === '') {
+                alert('전광판을 선택해주세요.');
+                return;
+            }
+
+            if ($("#dispbd_group").val() === '') {
+                alert('전송그룹을 선택해주세요.');
+                return;
+            }
+            $.ajax({
+                url: '/adminAdd/displayBoard/send-history',
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    dispbd_no: $("#dispbd_nm").val(),
+                    district_no: $("#district-no").val(),
+                    dispbd_evnt_flag: $("#event-select").val(),
+                    dispbd_rslt_yn: 'N'
+                }),
+                success: function (_res) {
+                    alert('전송이 완료되었습니다.');
+                    $historyGrid.trigger('reloadGrid');
+                },
+                error: function (_err) {
+                    alert('알 수 없는 오류가 발생했습니다.');
+                }
+            });
+        })
+
+        function setGridData($grid, img_grp_nm, dispbd_evnt_flag) {
+            $grid.setGridParam({
+                postData: {
+                    ...$grid.jqGrid('getGridParam', 'postData'),
+                    img_grp_nm: img_grp_nm,
+                    dispbd_evnt_flag: dispbd_evnt_flag
+                }
+            }, true);
+        }
+    });
+</script>
 
 <body data-pgCode="0000">
 <section id="wrap">
@@ -139,21 +311,21 @@
     <div id="container">
         <h2 class="txt">전광판 연계 > 전광판 전송 관리</h2>
         <div id="contents">
-            <div class="contents-re">
+            <div id="normal-grid-div" class="contents-re">
                 <div class="contents-head">
                     <h3 class="txt">평시 이미지</h3>
                     <div class="search-top">
                         <div class="btn-group">
                             <a href="javascript:void(0);">전송그룹</a>
-                            <a href="javascript:void(0);">전송그룹1</a>
+                            <select id="normal-group" style="margin-left: 10px">
+                                <option value="">선택</option>
+                            </select>
                             <a href="javascript:void(0);">등록</a>
                         </div>
                     </div>
                 </div>
                 <div class="contents-in">
-                    <div class="bTable">
-                        <jsp:include page="./display-send-management-normal-grid.jsp" flush="true"></jsp:include>
-                    </div>
+                    <jsp:include page="./display-send-management-normal-grid.jsp" flush="true"></jsp:include>
                 </div>
             </div>
             <div class="contents-re">
@@ -161,7 +333,7 @@
                     <h3 class="txt">전광판 전송</h3>
                     <div class="search-top">
                         <div class="btn-group">
-                            <a href="javascript:void(0);">전송</a>
+                            <a id="dispbd-send-btn">전송</a>
                         </div>
                     </div>
                 </div>
@@ -176,33 +348,34 @@
                             <tr>
                                 <th>현장명</th>
                                 <td>
-                                    <select name="">
-                                        <option value="">이월지구</option>
+                                    <select id="district-no">
+                                        <option value="">선택</option>
                                     </select>
                                 </td>
                             </tr>
                             <tr>
                                 <th>전광판</th>
                                 <td>
-                                    <select name="">
-                                        <option value="">이월지구시점</option>
+                                    <select id="dispbd_nm">
+                                        <option value="">선택</option>
                                     </select>
                                 </td>
                             </tr>
                             <tr>
                                 <th>전송그룹</th>
                                 <td>
-                                    <select name="">
-                                        <option value="">전송그룹1</option>
+                                    <select id="dispbd_group">
+                                        <option value="">선택</option>
                                     </select>
                                 </td>
                             </tr>
                             <tr>
                                 <th>이벤트 구분</th>
                                 <td>
-                                    <select name="">
-                                        <option value="">평시</option>
-                                        <option value="">긴급</option>
+                                    <select id="event-select">
+                                        <option value="0">평시</option>
+                                        <option value="1">긴급</option>
+                                        <option value="2">센서경보</option>
                                     </select>
                                 </td>
                             </tr>
@@ -217,52 +390,15 @@
                     <div class="search-top">
                         <div class="btn-group">
                             <a href="javascript:void(0);">전송그룹</a>
-                            <a href="javascript:void(0);">전송그룹1</a>
+                            <select id="emer-group" style="margin-left: 10px">
+                                <option value="">선택</option>
+                            </select>
                             <a href="javascript:void(0);">등록</a>
                         </div>
                     </div>
                 </div>
                 <div class="contents-in">
-                    <div class="bTable">
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>이미지</th>
-                                <th>효과</th>
-                                <th>표시시간(Sec)</th>
-                                <th>사용여부</th>
-                                <th>수정</th>
-                                <th>삭제</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>이미지</td>
-                                <td>바로표시</td>
-                                <td>4(Sec)</td>
-                                <td>Y</td>
-                                <td>
-<%--                                    <button><img src="../images/square-pen.svg" alt=""></button>--%>
-                                </td>
-                                <td>
-<%--                                    <button><img src="./images/trash-2.svg" alt=""></button>--%>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>이미지</td>
-                                <td>바로표시</td>
-                                <td>4(Sec)</td>
-                                <td>Y</td>
-                                <td>
-<%--                                    <button><img src="/images/square-pen.svg" alt=""></button>--%>
-                                </td>
-                                <td>
-<%--                                    <button><img src="./images/trash-2.svg" alt=""></button>--%>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <jsp:include page="./display-send-management-emer-grid.jsp" flush="true"></jsp:include>
                 </div>
             </div>
             <div class="contents-re">
@@ -272,44 +408,7 @@
                     </div>
                 </div>
                 <div class="contents-in">
-                    <div class="bTable">
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>전송일시</th>
-                                <th>현장명</th>
-                                <th>전광판 위치</th>
-                                <th>이벤트 구분</th>
-                                <th>전송 그룹</th>
-                                <th>자동전송 여부</th>
-                                <th>전송 결과</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>2024-01-01 14:00:00</td>
-                                <td>이월지구</td>
-                                <td>이월지구시점</td>
-                                <td>평시</td>
-                                <td>전송 그룹1</td>
-                                <td>수동</td>
-                                <td>Y</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>2024-01-01 14:00:00</td>
-                                <td>수점지구</td>
-                                <td>수점지구시점</td>
-                                <td>센서경보</td>
-                                <td>전송 그룹2</td>
-                                <td>자동</td>
-                                <td>Y</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <jsp:include page="./display-send-history-grid.jsp" flush="true"></jsp:include>
                 </div>
             </div>
             <div class="contents-re">
@@ -318,51 +417,16 @@
                     <div class="search-top">
                         <div class="btn-group">
                             <a href="javascript:void(0);">전송그룹</a>
-                            <a href="javascript:void(0);">전송그룹1</a>
+                            <select id="sensor-group" style="margin-left: 10px">
+                                <option value="">선택</option>
+                            </select>
                             <a href="javascript:void(0);">등록</a>
                         </div>
                     </div>
                 </div>
                 <div class="contents-in">
                     <div class="bTable">
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>이미지</th>
-                                <th>효과</th>
-                                <th>표시시간(Sec)</th>
-                                <th>사용여부</th>
-                                <th>수정</th>
-                                <th>삭제</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>이미지</td>
-                                <td>바로표시</td>
-                                <td>4(Sec)</td>
-                                <td>Y</td>
-                                <td>
-<%--                                    <button><img src="./images/square-pen.svg" alt=""></button>--%>
-                                </td>
-                                <td>
-<%--                                    <button><img src="./images/trash-2.svg" alt=""></button>--%>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>이미지</td>
-                                <td>바로표시</td>
-                                <td>4(Sec)</td>
-                                <td>Y</td>
-                                <td>
-<%--                                    <button><img src="./images/square-pen.svg" alt=""></button>--%>
-                                </td>
-                                <td>
-<%--                                    <button><img src="./images/trash-2.svg" alt=""></button>--%>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        <jsp:include page="./display-send-management-sensor-grid.jsp" flush="true"></jsp:include>
                     </div>
                 </div>
             </div>
