@@ -2176,20 +2176,20 @@ select:-ms-expand {
     position: relative;
 }
 
-#site-status .site-zone-list .site-zone-title > strong:before {
-    content: "";
-    width: 0;
-    height: 0;
-    border-top: 0.6rem solid #fff;
-    border-right: 0.4rem solid transparent;
-    border-left: 0.4rem solid transparent;
-    border-bottom: none;
-    display: inline-block;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-}
+/*#site-status .site-zone-list .site-zone-title > strong:before {*/
+/*    content: "";*/
+/*    width: 0;*/
+/*    height: 0;*/
+/*    border-top: 0.6rem solid #fff;*/
+/*    border-right: 0.4rem solid transparent;*/
+/*    border-left: 0.4rem solid transparent;*/
+/*    border-bottom: none;*/
+/*    display: inline-block;*/
+/*    position: absolute;*/
+/*    left: 0;*/
+/*    top: 50%;*/
+/*    transform: translateY(-50%);*/
+/*}*/
 
 #site-status .site-zone-list .site-zone-conts {
     width: 100%;

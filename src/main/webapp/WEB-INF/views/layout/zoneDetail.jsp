@@ -17,7 +17,6 @@ ${zone}
         position: sticky;
         top: 0;
     }
-
 </style>
 <div class="close-btns">
     <img src="/images/btn_lay_close.png" alt="닫기">
