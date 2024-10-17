@@ -90,10 +90,8 @@
                     fixed: true
                 };
 
-                if (window.jqgridOption.columnAutoWidth) {
-                    delete column.width;
-                    delete column.fixed;
-                }
+                delete column.width;
+                delete column.fixed;
 
                 if (_types[idx].indexOf('#') > -1) {
                     _types[idx] = _types[idx].replace(/#/gi, ";");

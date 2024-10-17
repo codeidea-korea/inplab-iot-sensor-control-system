@@ -11,7 +11,8 @@
         <script>
             window.jqgridOption = {
                 multiselect: false,
-                multiboxonly: false
+                multiboxonly: false,
+                columnAutoWidth: true,
             }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
         </script>
     </head>
