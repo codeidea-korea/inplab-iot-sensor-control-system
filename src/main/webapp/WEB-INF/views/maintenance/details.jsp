@@ -40,50 +40,6 @@
             text-align: center;
         }
 
-        .bTable {
-            overflow: visible;
-        }
-
-        .bTable span {
-            display: inline-block;
-            color: #47474c;
-            font-size: 1.5rem;
-            width: 7.2rem;
-        }
-
-        .left_contents {
-            width: 50%;
-            height: 50rem;
-        }
-
-        .right_contents {
-            width: 50%;
-            height: 50rem;
-        }
-
-        .tableLine {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .table2Column {
-            display: flex;
-        }
-
-        .table2Column > .tableLine {
-            width: 50%;
-        }
-
-        .table2Column > .tableLine:first-child {
-            margin-right: 1rem;
-        }
-
-        .table2Column > .tableLine:last-child span {
-            margin-left: 1rem;
-        }
-
         .photo {
             width: 100px;
             height: 100px;
@@ -441,7 +397,7 @@
             });
 
             $('#deleteBtn').on('click', () => {
-                confirm('삭제하시겠습니까?',() => {
+                confirm('삭제하시겠습니까?', () => {
                     $.ajax({
                         url: '/maintenance/details/del',
                         type: 'POST',
@@ -491,107 +447,127 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">유지보수이력 <span id="form_sub_title"></span></div>
+        <div class="layer-base-title">유지보수업체 <span id="form_sub_title"></span></div>
         <div class="layer-base-conts">
-            <div class="left_contents">
-                <div class="bTable">
-                    <input type="hidden" id="mgnt_no">
-                    <div class="tableLine">
-                        <span>현장명</span>
-                        <select id="district_no">
-                            <option value="">Ex) 이월지구</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>센서ID</span>
-                        <select id="sens_nm">
+            <div class="bTable">
+                <table>
+                    <input type="hidden" id="mgnt_no"/>
+                    <tbody>
+                    <tr>
+                        <th>현장명</th>
+                        <td>
+                            <select id="district_no">
+                                <option value="">Ex) 이월지구</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>센서ID</th>
+                        <td><select id="sens_nm">
                             <option value="">Ex) TM-01</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>센서타입</span>
-                        <select id="senstype_no">
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <th>센서타입</th>
+                        <td><select id="senstype_no">
                             <option value="">Ex) TM</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>접수일</span>
-                        <input id="maint_accpt_ymd" type="date" placeholder="Ex) 2024-01-01"/>
-                    </div>
-                    <div class="table2Column">
-                        <div class="tableLine">
-                            <span>작업시작일</span>
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <th>접수일</th>
+                        <td>
+                            <input id="maint_accpt_ymd" type="date" placeholder="Ex) 2024-01-01"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>작업시작일</th>
+                        <td>
                             <input id="maint_str_ymd" type="date" placeholder="Ex) 2024-01-01"/>
-                        </div>
-                        <div class="tableLine">
-                            <span>작업종료일</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>작업종료일</th>
+                        <td>
                             <input id="maint_end_ymd" type="date" placeholder="Ex) 2024-01-01"/>
-                        </div>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업내역</span>
-                        <td><textarea id="maint_dtls" placeholder="Ex) 1. 센서 교체"></textarea></td>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업업체</span>
-                        <select id="maint_comp_nm">
-                            <option value="">Ex) 디피에스 글로벌</option>
-                        </select>
-                    </div>
-                    <div class="table2Column">
-                        <div class="tableLine">
-                            <span>작업담당자</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>작업내역</th>
+                        <td>
+                            <textarea id="maint_dtls" placeholder="Ex) 1. 센서 교체"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>작업업체</th>
+                        <td>
+                            <select id="maint_comp_nm">
+                                <option value="">Ex) 디피에스 글로벌</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>작업담당자</th>
+                        <td>
                             <input id="maint_chgr_nm" type="text" placeholder="Ex) 홍길동"/>
-                        </div>
-                        <div class="tableLine">
-                            <span>연락처</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>연락처</th>
+                        <td>
                             <input id="maint_chgr_ph" type="text" placeholder="Ex) 010-1234-5678"/>
-                        </div>
-                    </div>
-                </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="right_contents">
-                <div class="bTable">
-                    <div class="tableLine">
-                        <span>작업결과</span>
-                        <select id="maint_rslt_cd">
+
+            <div class="bTable" style="margin-top: 0">
+                <table>
+                    <tbody>
+                    <tr>
+                        <th>작업결과</th>
+                        <td><select id="maint_rslt_cd">
                             <option value="">Ex) 정상</option>
                             <option value="MTN001">정상</option>
                             <option value="MTN002">망실</option>
                             <option value="MTN003">점검</option>
                             <option value="MTN004">철거</option>
-                        </select>
-                    </div>
-                    <div class="tableLine">
-                        <span>작업사진</span>
-                        <div class="photo_area">
-                            <div class="photo photo1" data-index="1">
-                                <span>사진1</span>
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <th>작업사진</th>
+                        <td>
+                            <div class="photo_area">
+                                <div class="photo photo1" data-index="1">
+                                    <span>사진1</span>
+                                </div>
+                                <div class="photo photo2" data-index="2">
+                                    <span>사진2</span>
+                                </div>
+                                <div class="photo photo3" data-index="3">
+                                    <span>사진3</span>
+                                </div>
+                                <div class="photo photo4" data-index="4">
+                                    <span>사진4</span>
+                                </div>
                             </div>
-                            <div class="photo photo2" data-index="2">
-                                <span>사진2</span>
-                            </div>
-                            <div class="photo photo3" data-index="3">
-                                <span>사진3</span>
-                            </div>
-                            <div class="photo photo4" data-index="4">
-                                <span>사진4</span>
-                            </div>
-                        </div>
-
-                        <!-- 숨겨진 파일 인풋 -->
+                        </td>
                         <input type="file" id="fileInput" style="display: none;" accept="image/*">
-                    </div>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div class="btn-btm">
+                    <input type="button" id="form-submit-btn" blue value="저장"/>
+                    <button type="button" style="margin-right: auto" id="deleteBtn">삭제</button>
+                    <input type="button" id="form-update-btn" blue value="수정"/>
+                    <button type="button" data-fancybox-close>닫기</button>
                 </div>
             </div>
-        </div>
-        <div class="btn-btm">
-            <button id="form-submit-btn" type="button" blue>저장</button>
-            <button type="button" style="margin-right: auto" id="deleteBtn">삭제</button>
-            <input type="button" id="form-update-btn" blue value="수정"/>
-            <button type="button" data-fancybox-close>취소</button>
+
         </div>
     </div>
+
     </div>
 </section>
 </body>
