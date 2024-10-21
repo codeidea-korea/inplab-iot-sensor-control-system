@@ -26,82 +26,82 @@ public class AlarmListController extends JqGridAbstract<AlarmListDto> {
 
     @Autowired
     private CommonCodeService commonCodeService;
-    
+
     protected AlarmListController() {
         super(AlarmListDto.class);
     }
-    
-	@Override
-	public Map<String, FieldDetails> getColumnDataJson() {
-		String alarmKindListStr = ":";
-		String assetKindListStr = ":";
 
-		List<Map> alarmKindList = commonCodeService.getAlarmKindList();
-		for (Map ak : alarmKindList) {
-			alarmKindListStr += ";" + (String) ak.get("code") + ":" + (String) ak.get("name");
-		}
+    @Override
+    public Map<String, FieldDetails> getColumnDataJson() {
+        String alarmKindListStr = ":";
+        String assetKindListStr = ":";
 
-		List<Map> assetKindList = commonCodeService.getAssetKindBySensorList();
-		for (Map ak : assetKindList) {
-			assetKindListStr += ";" + (String) ak.get("name") + ":" + (String) ak.get("name");
-		}
+        List<Map> alarmKindList = commonCodeService.getAlarmKindList();
+        for (Map ak : alarmKindList) {
+            alarmKindListStr += ";" + ak.get("code") + ":" + ak.get("name");
+        }
 
-		String zoneIdListStr = ":";
-		List<Map> zoneIdList = commonCodeService.getZoneList();
+        List<Map> assetKindList = commonCodeService.getAssetKindBySensorList();
+        for (Map ak : assetKindList) {
+            assetKindListStr += ";" + ak.get("name") + ":" + ak.get("name");
+        }
 
-		for (Map zn : zoneIdList) {
-			zoneIdListStr += ";" + (String) zn.get("code") + ":" + (String) zn.get("name");
-		}
+        String zoneIdListStr = ":";
+        List<Map> zoneIdList = commonCodeService.getZoneList();
 
-		Map<String, FieldDetails> result = super.getColumnDataJson();
-		((FieldDetails) result.get("risk_level")).type = this.getCommonCodeListStr("위험레벨");//risk_level
-		((FieldDetails) result.get("alarm_kind_id")).type = alarmKindListStr;
-		((FieldDetails) result.get("asset_kind_name")).type = assetKindListStr;
-		((FieldDetails) result.get("zone_id")).type = zoneIdListStr;
+        for (Map zn : zoneIdList) {
+            zoneIdListStr += ";" + zn.get("code") + ":" + zn.get("name");
+        }
 
-		return result;
-	}    
-	
-	private String getCommonCodeListStr(String cat){
-		String result = ":";
-		Map<String,Object> pm = new HashMap<String,Object>();
-		pm.put("category", cat);
-		
-		List<Map> rList = commonCodeService.getCommonCodeList(pm);
-		for(Map m : rList) {
-			result += ";"+String.valueOf(m.get("code"))+":"+String.valueOf(m.get("name"));
-		}
-		
-		return result;
-	}
+        Map<String, FieldDetails> result = super.getColumnDataJson();
+        result.get("risk_level").type = this.getCommonCodeListStr("위험레벨");//risk_level
+//        result.get("alarm_kind_id").type = alarmKindListStr;
+//        result.get("asset_kind_name").type = assetKindListStr;
+        result.get("zone_id").type = zoneIdListStr;
+
+        return result;
+    }
+
+    private String getCommonCodeListStr(String cat) {
+        String result = ":";
+        Map<String, Object> pm = new HashMap<String, Object>();
+        pm.put("category", cat);
+
+        List<Map> rList = commonCodeService.getCommonCodeList(pm);
+        for (Map m : rList) {
+            result += ";" + m.get("code") + ":" + m.get("name");
+        }
+
+        return result;
+    }
 
     @Override
     protected List getList(Map param) {
-    	if(param.containsKey("reg_day")) {
-    		String[] dates = ((String)param.get("reg_day")).split(" ~ ");
-    		if(dates.length > 1) {
-    			param.put("reg_date_start", dates[0]);
-    			param.put("reg_date_end", dates[1]);
-    		}else {
-    			param.put("reg_date_start", dates[0]);
-    			param.put("reg_date_end", dates[0]);
-    		}
-    	}
+        if (param.containsKey("reg_day")) {
+            String[] dates = ((String) param.get("reg_day")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("reg_date_start", dates[0]);
+                param.put("reg_date_end", dates[1]);
+            } else {
+                param.put("reg_date_start", dates[0]);
+                param.put("reg_date_end", dates[0]);
+            }
+        }
         return alarmListService.getList(param);
     }
 
     @Override
     protected int getTotalRows(Map param) {
-    	if(param.containsKey("reg_day")) {
-    		String[] dates = ((String)param.get("reg_day")).split(" ~ ");
-    		if(dates.length > 1) {
-    			param.put("reg_date_start", dates[0]);
-    			param.put("reg_date_end", dates[1]);
-    		}else {
-    			param.put("reg_date_start", dates[0]);
-    			param.put("reg_date_end", dates[0]);
-    		}
-    	}
+        if (param.containsKey("reg_day")) {
+            String[] dates = ((String) param.get("reg_day")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("reg_date_start", dates[0]);
+                param.put("reg_date_end", dates[1]);
+            } else {
+                param.put("reg_date_start", dates[0]);
+                param.put("reg_date_end", dates[0]);
+            }
+        }
         return alarmListService.getTotalCount(param);
     }
 
@@ -111,16 +111,16 @@ public class AlarmListController extends JqGridAbstract<AlarmListDto> {
     }
 
 
-	@ResponseBody
-	@GetMapping(value = "/alarmCount", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Object getAlarmCountByStatus(@RequestParam Map<String, Object> param) {
-		return alarmListService.selectAlarmCountByStatus(param);
+    @ResponseBody
+    @GetMapping(value = "/alarmCount", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getAlarmCountByStatus(@RequestParam Map<String, Object> param) {
+        return alarmListService.selectAlarmCountByStatus(param);
 
-	}
-	@ResponseBody
-	@GetMapping(value = "/alarmHistory", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Object getAlarmHistory(@RequestParam Map<String, Object> param) {
-//		return alarmListService.getList(param);
-		return alarmListService.selectAlarmHistory(param);
-	}
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/alarmHistory", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getAlarmHistory(@RequestParam Map<String, Object> param) {
+        return alarmListService.selectAlarmHistory(param);
+    }
 }

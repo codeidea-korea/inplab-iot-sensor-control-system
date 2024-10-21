@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.sensor.AlarmDetailsMapper">
+    <sql id="rowSearch">
+        <!--        <if test="risk_level != null and risk_level != ''">-->
+        <!--            and MG.risk_level = #{risk_level}-->
+        <!--        </if>-->
+        <!--        <if test="area_name != null and area_name != ''">-->
+        <!--            and MG.area_name ilike '%' || #{area_name} || '%'-->
+        <!--        </if>-->
+        <!--        <if test="asset_kind_name != null and asset_kind_name != ''">-->
+        <!--            and MG.asset_kind_name ilike '%' || #{asset_kind_name} || '%'-->
+        <!--        </if>-->
+        <!--        <if test="asset_name != null and asset_name != ''">-->
+        <!--            and MG.asset_name ilike '%' || #{asset_name} || '%'-->
+        <!--        </if>-->
+        <!--        <if test="alarm_kind_id != null and alarm_kind_id != ''">-->
+        <!--            and MG.alarm_kind_id = #{alarm_kind_id}-->
+        <!--        </if>-->
+        <!--        <if test="reg_time != null and reg_time != ''">-->
+        <!--            and MG.reg_time ilike '%' || #{reg_time} || '%'-->
+        <!--        </if>-->
+        <!--        <if test="zone_id != null and zone_id != ''">-->
+        <!--            and MG.zone_id = #{zone_id}-->
+        <!--        </if>-->
+        <!--        <if test="view_flag != null and view_flag != ''">-->
+        <!--            and MG.view_flag = #{view_flag}-->
+        <!--        </if>-->
+        <!--        <if test="reg_date_start != null and reg_date_start != '' and reg_date_end != null and reg_date_end != ''">-->
+        <!--            and MG.reg_date::timestamp between concat(#{reg_date_start},' 00:00:00')::timestamp and concat(#{reg_date_end},' 23:59:59')::timestamp-->
+        <!--        </if>-->
+    </sql>
+
+    <sql id="rowOrder">
+        <!--        <trim prefix="order by">-->
+        <!--            <choose>-->
+        <!--                <when test="'risk_level' == sidx and sidx != ''">-->
+        <!--                    MG.risk_level ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'area_name' == sidx and sidx != ''">-->
+        <!--                    MG.area_name ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'asset_kind_name' == sidx and sidx != ''">-->
+        <!--                    MG.asset_kind_name ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'asset_name' == sidx and sidx != ''">-->
+        <!--                    MG.asset_name ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'alarm_kind_id' == sidx and sidx != ''">-->
+        <!--                    MG.alarm_kind_id ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'reg_day' == sidx and sidx != ''">-->
+        <!--                    MG.reg_day ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'reg_time' == sidx and sidx != ''">-->
+        <!--                    MG.reg_time ${sord}-->
+        <!--                </when>-->
+        <!--                <otherwise>-->
+        <!--                    MG.reg desc-->
+        <!--                </otherwise>-->
+        <!--            </choose>-->
+        <!--        </trim>-->
+    </sql>
+
+    <select id="getList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.sensor.AlarmDetailsDto">
+        SELECT tad.meas_dt
+        , tdi.district_nm
+        , tad.sens_chnl_id
+        , tad.alarm_lvl_cd
+        , tad.formul_data
+        , tsi.maint_sts_cd
+        , tad.net_err_yn
+        , tai."1st_lvl_max" as max1
+        , tai."1st_lvl_min" as min1
+        , tai."2nd_lvl_max" as max2
+        , tai."2nd_lvl_min" as min2
+        , tai."3rd_lvl_max" as max3
+        , tai."3rd_lvl_min" as min3
+        , tai."4th_lvl_max" as max4
+        , tai."4th_lvl_min" as min4
+        FROM tb_alarm_details tad
+        left join tb_district_info tdi on tad.district_no = tdi.district_no
+        left join tb_sensor_info tsi on tad.sens_no = tsi.sens_no
+        left join tb_alarm_info tai on tad.sens_no = tai.sens_no
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="getTotalCount" parameterType="java.util.Map" resultType="int">
+        SELECT count(tad.mgnt_no)
+        FROM tb_alarm_details tad
+        left join tb_district_info tdi on tad.district_no = tdi.district_no
+        left join tb_sensor_info tsi on tad.sens_no = tsi.sens_no
+        left join tb_alarm_info tai on tad.sens_no = tai.sens_no
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertAlarm" parameterType="java.util.Map">
+        INSERT INTO tb_alarm ( alarm_uid
+                             , asset_id
+                             , asset_kind_id
+                             , alarm_kind_id
+                             , reg_date
+                             , description
+                             , risk_level
+                             , alarm_type
+                             , alarm_title
+                             , alarm_desc
+                             , view_flag)
+        SELECT COALESCE(max(alarm_uid::integer), 0) + 1 as alarm_uid
+             , #{asset_id}
+             , #{asset_kind_id}
+             , #{alarm_kind_id}
+             , now()
+             , #{description}
+             , #{risk_level}
+             , #{type}
+             , #{name}
+             , #{description}
+             , 'Y'
+        FROM tb_alarm
+    </insert>
+</mapper>

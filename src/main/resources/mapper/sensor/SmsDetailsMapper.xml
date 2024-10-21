@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.sensor.SmsDetailsMapper">
+    <sql id="rowSearch">
+        <!--        <if test="risk_level != null and risk_level != ''">-->
+        <!--            and MG.risk_level = #{risk_level}-->
+        <!--        </if>-->
+        <!--        <if test="area_name != null and area_name != ''">-->
+        <!--            and MG.area_name ilike '%' || #{area_name} || '%'-->
+        <!--        </if>-->
+        <!--        <if test="asset_kind_name != null and asset_kind_name != ''">-->
+        <!--            and MG.asset_kind_name ilike '%' || #{asset_kind_name} || '%'-->
+        <!--        </if>-->
+        <!--        <if test="asset_name != null and asset_name != ''">-->
+        <!--            and MG.asset_name ilike '%' || #{asset_name} || '%'-->
+        <!--        </if>-->
+        <!--        <if test="alarm_kind_id != null and alarm_kind_id != ''">-->
+        <!--            and MG.alarm_kind_id = #{alarm_kind_id}-->
+        <!--        </if>-->
+        <!--        <if test="reg_time != null and reg_time != ''">-->
+        <!--            and MG.reg_time ilike '%' || #{reg_time} || '%'-->
+        <!--        </if>-->
+        <!--        <if test="zone_id != null and zone_id != ''">-->
+        <!--            and MG.zone_id = #{zone_id}-->
+        <!--        </if>-->
+        <!--        <if test="view_flag != null and view_flag != ''">-->
+        <!--            and MG.view_flag = #{view_flag}-->
+        <!--        </if>-->
+        <!--        <if test="reg_date_start != null and reg_date_start != '' and reg_date_end != null and reg_date_end != ''">-->
+        <!--            and MG.reg_date::timestamp between concat(#{reg_date_start},' 00:00:00')::timestamp and concat(#{reg_date_end},' 23:59:59')::timestamp-->
+        <!--        </if>-->
+    </sql>
+
+    <sql id="rowOrder">
+        <!--        <trim prefix="order by">-->
+        <!--            <choose>-->
+        <!--                <when test="'risk_level' == sidx and sidx != ''">-->
+        <!--                    MG.risk_level ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'area_name' == sidx and sidx != ''">-->
+        <!--                    MG.area_name ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'asset_kind_name' == sidx and sidx != ''">-->
+        <!--                    MG.asset_kind_name ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'asset_name' == sidx and sidx != ''">-->
+        <!--                    MG.asset_name ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'alarm_kind_id' == sidx and sidx != ''">-->
+        <!--                    MG.alarm_kind_id ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'reg_day' == sidx and sidx != ''">-->
+        <!--                    MG.reg_day ${sord}-->
+        <!--                </when>-->
+        <!--                <when test="'reg_time' == sidx and sidx != ''">-->
+        <!--                    MG.reg_time ${sord}-->
+        <!--                </when>-->
+        <!--                <otherwise>-->
+        <!--                    MG.reg desc-->
+        <!--                </otherwise>-->
+        <!--            </choose>-->
+        <!--        </trim>-->
+    </sql>
+
+    <!--    create table tb_sms_details-->
+    <!--    (-->
+    <!--    mgnt_no          integer                      not null-->
+    <!--    primary key,-->
+    <!--    alarm_mgnt_no    integer                      not null,-->
+    <!--    sms_trans_dt     timestamp                    not null,-->
+    <!--    sms_subj         varchar                      not null,-->
+    <!--    sms_recv_ph      varchar                      not null,-->
+    <!--    sms_recv_chgr    varchar                      not null,-->
+    <!--    sms_recv_dept    varchar,-->
+    <!--    sms_msg_dtls     varchar,-->
+    <!--    district_nm      varchar                      not null,-->
+    <!--    dist_biz_office  varchar,-->
+    <!--    dist_addr        varchar,-->
+    <!--    inst_comp_nm     varchar                      not null,-->
+    <!--    inst_comp_chgr   varchar                      not null,-->
+    <!--    inst_comp_ph     varchar                      not null,-->
+    <!--    sms_trns_cnt     integer,-->
+    <!--    alarm_lvl_nm     varchar                      not null,-->
+    <!--    sens_recv_rate   double precision default 100 not null,-->
+    <!--    accum_rain       double precision default 0   not null,-->
+    <!--    send_tp_nm       varchar                      not null,-->
+    <!--    inst_sens_cnt    integer                      not null,-->
+    <!--    alarm_sens_cnt   integer                      not null,-->
+    <!--    nonrecv_sens_cnt varchar                      not null,-->
+    <!--    sens_nm          varchar                      not null,-->
+    <!--    dps_chgr_nm      varchar                      not null,-->
+    <!--    dps_chgr_ph      varchar                      not null,-->
+    <!--    mobil_link_url   varchar,-->
+    <!--    sms_rslt_yn      varchar(1)                   not null,-->
+    <!--    unique (alarm_mgnt_no, sms_trans_dt)-->
+    <!--    );-->
+
+    <!--    comment on table tb_sms_details is 'sms전송이력';-->
+
+    <!--    comment on column tb_sms_details.mgnt_no is '관리_no, seq';-->
+
+    <!--    comment on column tb_sms_details.alarm_mgnt_no is '알람발생no, 알람발생이력T의 관리no';-->
+
+    <!--    comment on column tb_sms_details.sms_trans_dt is 'sms전송일시';-->
+
+    <!--    comment on column tb_sms_details.sms_subj is 'sms제목, 현장 이상경보 문자 메세지타이틀';-->
+
+    <!--    comment on column tb_sms_details.sms_recv_ph is '경보수신_전화번호';-->
+
+    <!--    comment on column tb_sms_details.sms_recv_chgr is '경보수신_담당자';-->
+
+    <!--    comment on column tb_sms_details.sms_recv_dept is '경보수신_부서, 지자체-관리사업소';-->
+
+    <!--    comment on column tb_sms_details.sms_msg_dtls is '전송정보, Iot상시계측 관제시스템 경보문자, sms발송시스템명';-->
+
+    <!--    comment on column tb_sms_details.district_nm is '현장명, 현장정보';-->
+
+    <!--    comment on column tb_sms_details.dist_biz_office is '현장관리사업소';-->
+
+    <!--    comment on column tb_sms_details.dist_addr is '현장주소';-->
+
+    <!--    comment on column tb_sms_details.inst_comp_nm is '시공업체_협력사명, 시공업체정보';-->
+
+    <!--    comment on column tb_sms_details.inst_comp_chgr is '시공업체_담당자명';-->
+
+    <!--    comment on column tb_sms_details.inst_comp_ph is '시공업체_연락처';-->
+
+    <!--    comment on column tb_sms_details.sms_trns_cnt is '회차수, 24시간내 전송된 회차';-->
+
+    <!--    comment on column tb_sms_details.alarm_lvl_nm is '경보요약_관리기준상태, 관심/ 주의/ 경계/ 심각, 경보요약';-->
+
+    <!--    comment on column tb_sms_details.sens_recv_rate is '경보요약_수신율 %';-->
+
+    <!--    comment on column tb_sms_details.accum_rain is '경보요약_누적강수량 mm';-->
+
+    <!--    comment on column tb_sms_details.send_tp_nm is '센서상태_센서종류명, 센서상태 통계';-->
+
+    <!--    comment on column tb_sms_details.inst_sens_cnt is '센서상태_설치수량';-->
+
+    <!--    comment on column tb_sms_details.alarm_sens_cnt is '센서상태_초과수량';-->
+
+    <!--    comment on column tb_sms_details.nonrecv_sens_cnt is '센서상태_미측정';-->
+
+    <!--    comment on column tb_sms_details.sens_nm is '센서명, 이상센서리스트';-->
+
+    <!--    comment on column tb_sms_details.dps_chgr_nm is 'DPS담당자명, 시스템관련문의';-->
+
+    <!--    comment on column tb_sms_details.dps_chgr_ph is 'DPS담당자연락처';-->
+
+    <!--    comment on column tb_sms_details.mobil_link_url is '모바일링크주소, 모바일링크';-->
+
+    <!--    comment on column tb_sms_details.sms_rslt_yn is '전송성공여부, 성공/ 실패(sms시스템 return 결과저장)';-->
+
+    <select id="getList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.sensor.SmsDetailsDto">
+        SELECT tsd.mgnt_no
+        , tsd.sms_trans_dt
+        , tsd.sms_recv_chgr
+        , tsd.sms_recv_ph
+        , tsd.district_nm
+        , tsd.sms_rslt_yn
+        , tsd.sms_msg_dtls
+        FROM tb_sms_details tsd
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
+    </select>
+
+    <select id="getTotalCount" parameterType="java.util.Map" resultType="int">
+        SELECT count(tad.mgnt_no)
+        FROM tb_alarm_details tad
+        left join tb_district_info tdi on tad.district_no = tdi.district_no
+        left join tb_sensor_info tsi on tad.sens_no = tsi.sens_no
+        left join tb_alarm_info tai on tad.sens_no = tai.sens_no
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
+
+    <insert id="insertAlarm" parameterType="java.util.Map">
+        INSERT INTO tb_alarm ( alarm_uid
+                             , asset_id
+                             , asset_kind_id
+                             , alarm_kind_id
+                             , reg_date
+                             , description
+                             , risk_level
+                             , alarm_type
+                             , alarm_title
+                             , alarm_desc
+                             , view_flag)
+        SELECT COALESCE(max(alarm_uid::integer), 0) + 1 as alarm_uid
+             , #{asset_id}
+             , #{asset_kind_id}
+             , #{alarm_kind_id}
+             , now()
+             , #{description}
+             , #{risk_level}
+             , #{type}
+             , #{name}
+             , #{description}
+             , 'Y'
+        FROM tb_alarm
+    </insert>
+</mapper>

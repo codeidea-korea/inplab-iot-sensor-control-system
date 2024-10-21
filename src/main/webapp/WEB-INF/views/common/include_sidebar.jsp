@@ -91,8 +91,8 @@
             <li>
                 <a href="/sensorList" class="menu-link">센서현황</a>
                 <a href="/sensor-grouping" class="menu-link">센서그룹핑 조회</a>
-                <a href="/alarmList" class="menu-link">알람이력조회</a>
-                <a href="/calc" class="menu-link">경보기준관리</a>
+                <a href="/sensor/alarm-details" class="menu-link">알람이력조회</a>
+                <a href="/sensor/alert-standard-management" class="menu-link">경보기준관리</a>
                 <a href="/sensor-initial-setting" class="menu-link">센서초기치설정</a>
             </li>
         </ul>

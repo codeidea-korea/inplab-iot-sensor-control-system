@@ -110,7 +110,7 @@
 		            , A.asset_id
 		            , A.asset_kind_id
 		            , A.alarm_kind_id
-		            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_date
+		            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD HH24:MI:SS') AS reg_date
 		            , A.description
 		            , ak.risk_level
 					, (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) asset_kind_name

@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="common/include_head.jsp" flush="true"></jsp:include>
+    <jsp:include page="../common/include_head.jsp" flush="true" />
     <style>
         .layer-base-conts table td:first-child {
             border-left: 1px solid rgba(0, 0, 0, 0.2);
@@ -34,11 +34,6 @@
             padding: 1rem;
         }
 
-        .layer-base-conts {
-            display: flex;
-            gap: 1rem;
-        }
-
     </style>
     <script>
         // window.jqgridOption = {
@@ -48,14 +43,7 @@
         // };
 
         $(document).ready(function () {
-            const $grid = $(".jqGrid");
-            $grid.jqGrid('setGridParam', {
-                multiselect: true,   // 다중 선택 기능 추가
-                multiboxonly: false,   // 체크박스로만 선택 가능하도록 설정
-                columnAutoWidth: true,
-            }).trigger('reloadGrid'); // 변경 사항 적용을 위해 그리드 리로드
-
-
+            const $grid = $("#alarm-details-grid");
 
             const currentYear = new Date().getFullYear();
             const startDate = currentYear + "-01-01";
@@ -81,7 +69,7 @@
             });
 
             $("#open-modal").click(() => {
-                    var targetArr = getSelectedCheckData();
+                    const targetArr = getSelectedCheckData($grid);
 
                     if (targetArr.length > 1) {
                         alert('데이터를 1건만 선택해주세요.');
@@ -95,14 +83,16 @@
                 }
             );
         });
+
+
     </script>
 </head>
 
 <body data-pgcode="0000">
 <section id="wrap">
-    <jsp:include page="common/include_top.jsp" flush="true"></jsp:include>
+    <jsp:include page="../common/include_top.jsp" flush="true"/>
     <div id="global-menu">
-        <jsp:include page="common/include_sidebar.jsp" flush="true"></jsp:include>
+        <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
     <div id="container">
         <h2 class="txt">센서모니터링</h2>
@@ -117,12 +107,12 @@
             <div class="contents-re">
                 <h3 class="txt">알람이력조회</h3>
                 <div class="contents-in">
-                    <jsp:include page="common/include_jqgrid_old.jsp" flush="true"></jsp:include>
+                    <jsp:include page="./alarm-details-grid.jsp" flush="true" />
                 </div>
             </div>
         </div>
     </div>
-    <jsp:include page="./alarm-list-details.jsp" flush="true"></jsp:include>
+    <jsp:include page="./sms-details.jsp" flush="true" />
 </section>
 </body>
 </html>
