@@ -4,7 +4,7 @@
 
 <table id="sensor-grouping-grid"></table>
 <div class="gridSpacer"></div>
-<%--<div class="paginate"></div>--%>
+<div class="paginate"></div>
 
 <script>
     $(document).ready(function () {
