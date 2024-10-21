@@ -204,6 +204,8 @@
                 data: item.map(i => i.formul_data), // 센서 데이터
                 borderColor: 'hsl(' + (index * 60) + ', 100%, 50%)', // 센서마다 다른 색상
                 fill: false,
+                pointRadius: 0, // 꼭지점 원 크기 제거
+                borderWidth: 0.5, // 선 두께 줄이기
             }));
 
             myChart.data.labels = labels;
