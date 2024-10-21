@@ -11,6 +11,17 @@
 				border: 1px solid #ccc; /* 원하는 border 색상 */
 				padding: 2px;
 			}
+			.ui-search-toolbar th:first-child {
+				border-left: none !important;
+			}
+			.ui-jqgrid tr.ui-search-toolbar th {
+				border: 1px solid #d3d3d3;
+			}
+			.ui-jqgrid .ui-jqgrid-htable {
+				table-layout: fixed;
+				margin: 0;
+				border-collapse: collapse;
+			}
 		</style>
 
 		<script type="text/javascript" src="/admin_add.js"></script>
