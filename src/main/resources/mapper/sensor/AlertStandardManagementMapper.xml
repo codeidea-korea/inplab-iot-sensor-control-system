@@ -3,6 +3,9 @@
 
 <mapper namespace="com.safeone.dashboard.dao.sensor.AlertStandardManagementMapper">
     <sql id="rowSearch">
+        <if test="district_nm != null and district_nm != ''">
+            and tdi.district_nm ilike '%' || #{district_nm} || '%'
+        </if>
         <if test="sens_tp_nm != null and sens_tp_nm != ''">
             and tst.sens_tp_nm ilike '%' || #{sens_tp_nm} || '%'
         </if>
@@ -37,13 +40,17 @@
             AND tai."4th_lvl_max"::TEXT ILIKE '%' || #{max4}::TEXT || '%'
         </if>
         <if test="lvl_apply_dt_start != null and lvl_apply_dt_start != '' and lvl_apply_dt_end != null and lvl_apply_dt_end != ''">
-            and tai.lvl_apply_dt::timestamp between concat(#{lvl_apply_dt_start},' 00:00:00')::timestamp and concat(#{lvl_apply_dt_end},' 23:59:59')::timestamp
+            and tai.lvl_apply_dt::timestamp between concat(#{lvl_apply_dt_start},' 00:00:00')::timestamp and
+            concat(#{lvl_apply_dt_end},' 23:59:59')::timestamp
         </if>
     </sql>
 
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
+                <when test="'district_nm' == sidx and sidx != ''">
+                    tdi.district_nm ${sord}
+                </when>
                 <when test="'sens_tp_nm' == sidx and sidx != ''">
                     tst.sens_tp_nm ${sord}
                 </when>
@@ -102,9 +109,12 @@
         , tai."4th_lvl_min" as min4
         , tai."4th_lvl_max" as max4
         , tai.lvl_apply_dt
+        , tdi.district_nm
         from tb_alarm_info tai
         left join tb_sensor_info tsi on tai.sens_no = tsi.sens_no
         left join tb_sensor_type tst on tsi.senstype_no = tst.senstype_no
+        left join tb_logr_idx_map tlim on tai.sens_no = tlim.sens_no
+        left join tb_district_info tdi on tlim.district_no = tdi.district_no
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -118,6 +128,8 @@
         from tb_alarm_info tai
         left join tb_sensor_info tsi on tai.sens_no = tsi.sens_no
         left join tb_sensor_type tst on tsi.senstype_no = tst.senstype_no
+        left join tb_logr_idx_map tlim on tai.sens_no = tlim.sens_no
+        left join tb_district_info tdi on tlim.district_no = tdi.district_no
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>
