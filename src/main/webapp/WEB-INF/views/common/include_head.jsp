@@ -54,7 +54,10 @@
 <script type="text/javascript" src="/build/morris/raphael-min.js"></script>
 <script type="text/javascript" src="/build/morris/morris.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
 <script src="/Guriddo_jqGrid_JS_5.4.0/plugins/chartjs-plugin-annotation.min.js"></script>
 <!-- highchart -->
 <script src="/Highcharts-11.2.0/highcharts.js"></script>

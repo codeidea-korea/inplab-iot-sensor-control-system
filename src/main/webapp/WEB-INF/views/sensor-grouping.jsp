@@ -175,14 +175,45 @@
 
         const ctx = document.getElementById('myChart').getContext('2d');
         const myChart = new Chart(ctx, {
-            type: 'line', // 차트 종류 (예: 'line', 'bar' 등)
+            type: 'line',
             data: {
                 labels: [], // 초기 레이블
                 datasets: [] // 초기 데이터셋
             },
             options: {
                 responsive: true,
-                // 기타 옵션
+                plugins: {
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy', // x, y축 모두 이동 가능
+                            threshold: 10, // 이동을 시작하는 최소 드래그 거리(px)
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true, // 마우스 휠로 줌 가능
+                            },
+                            pinch: {
+                                enabled: true // 터치로 줌 가능
+                            },
+                            mode: 'xy', // x, y축 모두 줌 가능
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time', // 시간 축 설정
+                        time: {
+                            unit: 'hour' // 단위: 시간
+                        },
+                        adapters: {
+                            date: {} // 어댑터 설정(필요시 사용)
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             }
         });
 
@@ -246,14 +277,10 @@
                     }
                 });
             });
-
             myChart.update(); // 차트 업데이트
         }
-
-
     });
 </script>
-
 
 <body data-pgcode="0000">
 <section id="wrap">
@@ -261,8 +288,6 @@
     <div id="global-menu">
         <jsp:include page="common/include_sidebar.jsp" flush="true"></jsp:include>
     </div>
-
-    <!--[s] 컨텐츠 영역 -->
     <div id="container">
         <h2 class="txt">센서 모니터링</h2>
         <div id="contents">
@@ -282,7 +307,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="contents-re cctv_area">
                 <div class="contents_header">
                     <h3 class="txt">그룹핑 차트</h3>
@@ -296,14 +320,6 @@
                                 <p class="search-top-label">~</p>
                                 <input id="end-date" type="datetime-local"/>
                             </div>
-<%--                            <div class="">--%>
-<%--                                <p class="search-top-label">조회조건</p>--%>
-<%--                                <select name="selectFilter" id="dateSelect">--%>
-<%--                                    <option value="">상세</option>--%>
-<%--                                    <option value="">일별</option>--%>
-<%--                                    <option value="">시간별</option>--%>
-<%--                                </select>--%>
-<%--                            </div>--%>
                             <div class="btn-group">
                                 <a id="graph-search-btn" data-fancybox data-src="">조회</a>
                             </div>
@@ -311,18 +327,14 @@
                     </div>
 
                 </div>
-
                 <div class="contents-in">
                     <div class="graph-area">
                         <canvas id="myChart"></canvas>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-    <!--[e] 컨텐츠 영역 -->
-
 </section>
 </body>
 </html>
