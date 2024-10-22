@@ -313,6 +313,10 @@
                                 threshold: 10, // 이동을 시작하는 최소 드래그 거리(px)
                             },
                             zoom: {
+                                drag: {
+                                    enabled: true,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                                },
                                 wheel: {
                                     enabled: true, // 마우스 휠로 줌 가능
                                 },

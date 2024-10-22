@@ -4,15 +4,10 @@
 
 <table id="measure-details-grid"></table>
 <div class="gridSpacer"></div>
+<div class="paginate"></div>
 
 <script>
     $(document).ready(function () {
-        window.jqgridOption = {
-            multiselect: true,
-            multiboxonly: false,
-            // columnAutoWidth: true,
-        };
-
         const gridId = "measure-details-grid";
         const path = "/measure-details";
 
@@ -349,7 +344,10 @@
                 height: 'auto',
                 rowNum: _rowList[0],
                 rowList: _rowList,
-            }, window.jqgridOption);
+            }, {
+                multiselect: true,
+                multiboxonly: false,
+            });
 
             if (flagCellEdit) {
                 jqGridOption = Object.assign(jqGridOption, {

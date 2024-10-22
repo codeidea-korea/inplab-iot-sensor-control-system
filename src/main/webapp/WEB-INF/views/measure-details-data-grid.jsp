@@ -4,15 +4,10 @@
 
 <table id="measure-details-data-grid"></table>
 <div class="gridSpacer"></div>
+<div class="paginate"></div>
 
 <script>
     $(document).ready(function () {
-        window.jqgridOption = {
-            multiselect: true,
-            multiboxonly: false,
-            // columnAutoWidth: true,
-        };
-
         const gridId = "measure-details-data-grid";
         const path = "/measure-details-data";
 
@@ -88,6 +83,54 @@
                     title: false,
                     fixed: true
                 };
+
+                if (this.toString() === 'raw_data') {
+                    column.formatter = function (cellValue, options, rowObject) {
+                        return rowObject.sens_chnl_id ? '' : cellValue;
+                    };
+                }
+
+                if (this.toString() === 'formul_data') {
+                    column.formatter = function (cellValue, options, rowObject) {
+                        return rowObject.sens_chnl_id ? '' : cellValue;
+                    };
+                }
+
+                if (this.toString() === 'raw_data_x') {
+                    column.formatter = function (cellValue, options, rowObject) {
+                        return rowObject.sens_chnl_id === 'X' ? rowObject.raw_data : "";
+                    };
+                }
+
+                if (this.toString() === 'cor_data_x') {
+                    column.formatter = function (cellValue, options, rowObject) {
+                        return rowObject.sens_chnl_id === 'X' ? rowObject.formul_data : "";
+                    };
+                }
+
+                if (this.toString() === 'raw_data_y') {
+                    column.formatter = function (cellValue, options, rowObject) {
+                        return rowObject.sens_chnl_id === 'Y' ? rowObject.raw_data : "";
+                    };
+                }
+
+                if (this.toString() === 'cor_data_y') {
+                    column.formatter = function (cellValue, options, rowObject) {
+                        return rowObject.sens_chnl_id === 'Y' ? rowObject.formul_data : "";
+                    };
+                }
+
+                if (this.toString() === 'raw_data_z') {
+                    column.formatter = function (cellValue, options, rowObject) {
+                        return rowObject.sens_chnl_id === 'Z' ? rowObject.raw_data : "";
+                    };
+                }
+
+                if (this.toString() === 'cor_data_z') {
+                    column.formatter = function (cellValue, options, rowObject) {
+                        return rowObject.sens_chnl_id === 'Z' ? rowObject.formul_data : "";
+                    };
+                }
 
                 delete column.width;
                 delete column.fixed;

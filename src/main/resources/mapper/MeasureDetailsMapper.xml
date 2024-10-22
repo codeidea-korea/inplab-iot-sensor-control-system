@@ -61,30 +61,30 @@
 
     <select id="selectList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.MeasureDetailsDto">
-        select tst.sens_tp_nm
-        , tsinfo.sens_nm
-        -- , tai.sens_chnl_nm
-        , tsi.formul_data
-        , tsi.init_apply_dt
-        , tsi.last_apply_dt
-        , tsi.emer_status
-        , tsi.sens_no
-        , tsi.sens_chnl_id
-        , tsinfo.sect_no
-        , tsinfo.maint_sts_cd
-        from tb_sensor_info tsinfo
-        left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
-        left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
-        -- left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
-        WHERE 1=1
-        and
-        tsinfo.sens_no in
-        (select tlim.sens_no
-        from tb_logr_idx_map tlim
-        where logr_no in (select tli.logr_no
-        from tb_district_info tdi
-        left outer join tb_logger_info tli on tli.district_no = tdi.district_no
-        where tdi.district_no = #{district_no}))
+        SELECT tsinfo.sens_nm,
+        tsinfo.sect_no,
+        tsinfo.maint_sts_cd,
+        MAX(tst.sens_tp_nm) AS sens_tp_nm,
+        MAX(tsi.formul_data) AS formul_data,
+        MIN(tsi.init_apply_dt) AS init_apply_dt,
+        MAX(tsi.last_apply_dt) AS last_apply_dt,
+        MAX(tsi.emer_status) AS emer_status,
+        tsinfo.sens_no,
+        MAX(tsi.sens_chnl_id) AS sens_chnl_id
+        FROM tb_sensor_info tsinfo
+        LEFT JOIN tb_sensor_init tsi
+        ON tsinfo.sens_no = tsi.sens_no
+        LEFT JOIN tb_sensor_type tst
+        ON tsinfo.senstype_no = tst.senstype_no
+        WHERE 1 = 1
+        and tsinfo.sens_no IN (SELECT tlim.sens_no
+        FROM tb_logr_idx_map tlim
+        WHERE tlim.logr_no IN (SELECT tli.logr_no
+        FROM tb_district_info tdi
+        LEFT JOIN tb_logger_info tli
+        ON tli.district_no = tdi.district_no
+        WHERE tdi.district_no = #{district_no}))
+        GROUP BY tsinfo.sens_nm, tsinfo.sens_no
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
@@ -112,20 +112,21 @@
     </select>
 
     <select id="selectListTotal" parameterType="java.util.Map" resultType="int">
-        select count(tsinfo.sens_no)
-        from tb_sensor_info tsinfo
-        left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
-        left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
-        left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
-        WHERE 1=1
-        and
-        tsinfo.sens_no in
-        (select tlim.sens_no
-        from tb_logr_idx_map tlim
-        where logr_no in (select tli.logr_no
-        from tb_district_info tdi
-        left outer join tb_logger_info tli on tli.district_no = tdi.district_no
-        where tdi.district_no = #{district_no}))
+        select count(c.*) from (select tsinfo.*
+        FROM tb_sensor_info tsinfo
+        LEFT JOIN tb_sensor_init tsi
+        ON tsinfo.sens_no = tsi.sens_no
+        LEFT JOIN tb_sensor_type tst
+        ON tsinfo.senstype_no = tst.senstype_no
+        WHERE 1 = 1
+        and tsinfo.sens_no IN (SELECT tlim.sens_no
+        FROM tb_logr_idx_map tlim
+        WHERE tlim.logr_no IN (SELECT tli.logr_no
+        FROM tb_district_info tdi
+        LEFT JOIN tb_logger_info tli
+        ON tli.district_no = tdi.district_no
+        WHERE tdi.district_no = #{district_no}))
+        GROUP BY tsinfo.sens_nm, tsinfo.sens_no) as c
         <include refid="rowSearch"/>
     </select>
 </mapper>

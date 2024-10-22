@@ -89,7 +89,6 @@
         }
     </style>
 </head>
-
 <script>
     $(function () {
         const currentYear = new Date().getFullYear();
@@ -133,7 +132,7 @@
         }
 
         $("#graph-search-btn").click(() => {
-            const checkedData = getSelectedCheckData($grpGrid);
+            let checkedData = getSelectedCheckData($grpGrid);
             if (checkedData.length === 0) {
                 alert('선택된 데이터가 없습니다.');
                 return;
@@ -141,6 +140,17 @@
                 alert('조회기간을 입력해주세요.');
                 return;
             } else {
+                const case_ = ['', 'X', 'Y', 'Z'];
+
+                checkedData = case_.flatMap((item) => {
+                    return checkedData.map((data) => {
+                        return {
+                            ...data,
+                            sens_chnl_id: item
+                        };
+                    });
+                });
+
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
                 chartDataArray.length = 0; // 배열 초기화
@@ -148,10 +158,11 @@
                     return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
                 });
 
-                // 모든 요청이 완료된 후 차트를 그립니다.
-                Promise.all(requests).then(() => {
-                    updateChart(chartDataArray); // 차트 업데이트 함수 호출
-                }).catch(() => {
+                Promise.all(requests).then((d) => {
+                    updateChart(chartDataArray.filter((item) => item.length > 0));
+                }).catch((e) => {
+                    console
+                        .log('error', e);
                     alert('데이터를 가져오는 중 오류가 발생했습니다.');
                 });
             }
@@ -163,7 +174,12 @@
                     url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
                     type: 'GET',
                     success: function (res) {
-                        chartDataArray.push(res); // 데이터 추가
+                        if (res) {
+                            if (res[0]) {
+                                res[0].sens_chnl_id = sensChnlId // 채널 ID 추가
+                            }
+                            chartDataArray.push(res); // 데이터 추가
+                        }
                         resolve();
                     },
                     error: function () {
@@ -190,6 +206,10 @@
                             threshold: 10, // 이동을 시작하는 최소 드래그 거리(px)
                         },
                         zoom: {
+                            drag: {
+                                enabled: true,
+                                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                            },
                             wheel: {
                                 enabled: true, // 마우스 휠로 줌 가능
                             },
@@ -236,9 +256,8 @@
                     date.getSeconds().toString().padStart(2, '0'); // 초
             }); // 첫 번째 데이터의 시간
 
-
             const datasets = data.map((item, index) => ({
-                label: item[0].sens_nm, // 센서 이름
+                label: item[0].sens_nm + (item[0].sens_chnl_id ? '-' + item[0].sens_chnl_id : ''), // 센서 이름
                 data: item.map(i => i.formul_data), // 센서 데이터
                 borderColor: getRandomHSL(), // 랜덤 색상
                 fill: false,

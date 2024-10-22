@@ -61,30 +61,11 @@
 
     <select id="selectList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.MeasureDetailsDataDto">
-        select tst.sens_tp_nm
-        , tsinfo.sens_nm
-        -- , tai.sens_chnl_nm
-        , tsi.formul_data
-        , tsi.init_apply_dt
-        , tsi.last_apply_dt
-        , tsi.emer_status
-        , tsi.sens_no
-        , tsi.sens_chnl_id
-        , tsinfo.sect_no
-        , tsinfo.maint_sts_cd
-        from tb_sensor_info tsinfo
-        left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
-        left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
-        -- left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
+        SELECT mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data, net_err_yn, net_err_cnt, alarm_lvl_cd,
+        reg_dt
+        FROM tb_measure_details
         WHERE 1=1
-        and
-        tsinfo.sens_no in
-        (select tlim.sens_no
-        from tb_logr_idx_map tlim
-        where logr_no in (select tli.logr_no
-        from tb_district_info tdi
-        left outer join tb_logger_info tli on tli.district_no = tdi.district_no
-        where tdi.district_no = #{district_no}))
+        and sens_no = #{sens_no}
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
@@ -92,40 +73,11 @@
         </if>
     </select>
 
-    <select id="selectSensorChartData" parameterType="java.util.Map"
-            resultType="com.safeone.dashboard.dto.MeasureDetailsDataDto">
-        select tmd.sens_no,
-               tsi.sens_nm,
-               tmd.formul_data,
-               tmd.meas_dt,
-               tai."1st_lvl_max" as lvl_max1,
-               tai."2nd_lvl_max" as lvl_max2,
-               tai."3rd_lvl_max" as lvl_max3,
-               tai."4th_lvl_max" as lvl_max4
-        from tb_measure_details tmd
-                 left join tb_alarm_info tai on tai.sens_no = tmd.sens_no
-                 left join tb_sensor_info tsi on tmd.sens_no = tsi.sens_no
-        where tmd.meas_dt::timestamp between (#{start_date_time}:: timestamp)
-          and (#{end_date_time}:: timestamp)
-          and tmd.sens_no = #{sens_no}
-        order by meas_dt
-    </select>
-
     <select id="selectListTotal" parameterType="java.util.Map" resultType="int">
-        select count(tsinfo.sens_no)
-        from tb_sensor_info tsinfo
-        left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
-        left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
-        left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
+        SELECT count(mgnt_no)
+        FROM tb_measure_details
         WHERE 1=1
-        and
-        tsinfo.sens_no in
-        (select tlim.sens_no
-        from tb_logr_idx_map tlim
-        where logr_no in (select tli.logr_no
-        from tb_district_info tdi
-        left outer join tb_logger_info tli on tli.district_no = tdi.district_no
-        where tdi.district_no = #{district_no}))
+        and sens_no = #{sens_no}
         <include refid="rowSearch"/>
     </select>
 </mapper>

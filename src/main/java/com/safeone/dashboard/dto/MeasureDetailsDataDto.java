@@ -15,7 +15,7 @@ public class MeasureDetailsDataDto implements Serializable {
     private String raw_data;
 
     @FieldLabel(title = "보정(Deg)")
-    private String cor_data;
+    private String formul_data;
 
     @FieldLabel(title = "Raw Data(X)")
     private String raw_data_x;
@@ -35,4 +35,6 @@ public class MeasureDetailsDataDto implements Serializable {
     @FieldLabel(title = "Z 보정(Deg)")
     private String cor_data_z;
 
+    @FieldLabel(title = "sens_chnl_id", type = "hidden")
+    private String sens_chnl_id;
 }
