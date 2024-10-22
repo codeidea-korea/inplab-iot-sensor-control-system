@@ -6,9 +6,6 @@
         display: flex;
         gap: 1rem;
     }
-    /*.flex-item {*/
-    /*    flex: 1 !important;*/
-    /*}*/
 </style>
 
 <div id="lay-sensor-message" class="layer-base">

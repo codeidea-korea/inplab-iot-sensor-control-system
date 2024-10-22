@@ -325,7 +325,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
                 <div class="contents-in">
                     <div class="graph-area">
