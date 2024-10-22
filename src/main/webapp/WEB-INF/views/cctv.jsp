@@ -3,9 +3,7 @@
 <!DOCTYPE html>
 <html lang="ko">
     <head>
-
         <jsp:include page="common/include_head.jsp" flush="true"></jsp:include>
-
         <style>
             .cctv-list li video {
                 width: 315px;
@@ -66,6 +64,18 @@
             .ui-search-toolbar input {
                 border: 1px solid #ccc; /* 원하는 border 색상 */
                 padding: 2px;
+            }
+
+            .ui-search-toolbar th:first-child {
+                border-left: none !important;
+            }
+
+            .ui-jqgrid tr.ui-search-toolbar th {
+                border: 1px solid #d3d3d3;
+            }
+
+            .ui-jqgrid .ui-jqgrid-htable {
+                border-collapse: collapse;
             }
         </style>
 
