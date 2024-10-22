@@ -106,6 +106,7 @@
         where tmd.meas_dt::timestamp between (#{start_date_time}:: timestamp)
           and (#{end_date_time}:: timestamp)
           and tmd.sens_no = #{sens_no}
+          and tmd.sens_chnl_id = #{sens_chnl_id}
         order by meas_dt
     </select>
 

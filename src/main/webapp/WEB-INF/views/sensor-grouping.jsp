@@ -145,7 +145,7 @@
                 const endDateTime = $('#end-date').val();
                 chartDataArray.length = 0; // 배열 초기화
                 const requests = checkedData.map((item) => {
-                    return getChartData(item.sens_no, startDateTime, endDateTime);
+                    return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
                 });
 
                 // 모든 요청이 완료된 후 차트를 그립니다.
@@ -157,10 +157,10 @@
             }
         });
 
-        function getChartData(sens_no, startDateTime, endDateTime) {
+        function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
             return new Promise((resolve, reject) => {
                 $.ajax({
-                    url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime,
+                    url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
                     type: 'GET',
                     success: function (res) {
                         chartDataArray.push(res); // 데이터 추가
@@ -217,6 +217,13 @@
             }
         });
 
+        function getRandomHSL() {
+            const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
+            const saturation = 100; // 채도 고정
+            const lightness = 50; // 밝기 고정
+            return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
+        }
+
         function updateChart(data) {
             // 차트 업데이트 로직
             const labels = data[0].map(item => {
@@ -233,10 +240,10 @@
             const datasets = data.map((item, index) => ({
                 label: item[0].sens_nm, // 센서 이름
                 data: item.map(i => i.formul_data), // 센서 데이터
-                borderColor: 'hsl(' + (index * 60) + ', 100%, 50%)', // 센서마다 다른 색상
+                borderColor: getRandomHSL(), // 랜덤 색상
                 fill: false,
                 pointRadius: 0, // 꼭지점 원 크기 제거
-                borderWidth: 0.5, // 선 두께 줄이기
+                borderWidth: 1, // 선 두께 줄이기
             }));
 
             myChart.data.labels = labels;

@@ -32,7 +32,6 @@ public class SensorGroupingController extends JqGridAbstract<SensorGroupingDto> 
 	@GetMapping("/chart")
 	@ResponseBody
 	public List<SensorChartDto> getChartData(@RequestParam Map<String, Object> param) {
-		System.out.println("param = " + param);
 		return sensorGroupingService.getSensorChartData(param);
 	}
 
