@@ -59,14 +59,84 @@
         <!--        </trim>-->
     </sql>
 
+    <insert id="insert" parameterType="java.util.Map">
+        INSERT INTO tb_measure_details
+        (mgnt_no,
+         sens_no,
+         meas_dt,
+         sens_chnl_id,
+         raw_data,
+         formul_data,
+         reg_dt)
+        VALUES ((SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_measure_details),
+                #{sens_no},
+                #{meas_dt}::timestamp,
+                #{sens_chnl_id},
+                #{raw_data}::double precision,
+                #{formul_data}::double precision,
+                now())
+    </insert>
+
+    <update id="update" parameterType="java.util.Map">
+        UPDATE tb_measure_details
+        SET raw_data = #{raw_data}::double precision,
+            formul_data = #{formul_data}:: double precision
+        WHERE sens_no = #{sens_no}
+          AND meas_dt = #{meas_dt}:: timestamp
+          and sens_chnl_id = #{sens_chnl_id}
+    </update>
+
+    <delete id="delete" parameterType="java.util.Map">
+        DELETE FROM tb_measure_details
+        WHERE sens_no = #{sens_no}
+          AND meas_dt = #{meas_dt}:: timestamp
+          and sens_chnl_id = #{sens_chnl_id}
+    </delete>
+
+    <delete id="deleteRow" parameterType="java.util.Map">
+        DELETE FROM tb_measure_details
+        WHERE sens_no = #{sens_no}
+          AND meas_dt = #{meas_dt}:: timestamp
+    </delete>
+
+    <select id="isAlreadyExists" parameterType="java.util.Map"
+            resultType="com.safeone.dashboard.dto.MeasureDetailsDataDto">
+        SELECT sens_no, meas_dt, sens_chnl_id
+        FROM tb_measure_details
+        WHERE sens_no = #{sens_no}
+          AND meas_dt = #{meas_dt}::timestamp
+          AND sens_chnl_id = #{sens_chnl_id}
+    </select>
+
+    <select id="selectXYZ" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.MeasureDetailsDataDto">
+        select sens_no, meas_dt, raw_data, formul_data
+        from tb_measure_details
+        WHERE sens_no = #{sens_no}
+          AND meas_dt = #{meas_dt}::timestamp
+    </select>
+
     <select id="selectList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.MeasureDetailsDataDto">
-        SELECT mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data, net_err_yn, net_err_cnt, alarm_lvl_cd,
-        reg_dt
-        FROM tb_measure_details
-        WHERE 1=1
+        SELECT
+        sens_no,
+        meas_dt,
+        MAX(CASE WHEN sens_chnl_id = '' THEN raw_data END) AS raw_data,
+        MAX(CASE WHEN sens_chnl_id = 'X' THEN raw_data END) AS raw_data_x,
+        MAX(CASE WHEN sens_chnl_id = 'Y' THEN raw_data END) AS raw_data_y,
+        MAX(CASE WHEN sens_chnl_id = 'Z' THEN raw_data END) AS raw_data_z,
+        MAX(CASE WHEN sens_chnl_id = '' THEN formul_data END) AS formul_data,
+        MAX(CASE WHEN sens_chnl_id = 'X' THEN formul_data END) AS formul_data_x,
+        MAX(CASE WHEN sens_chnl_id = 'Y' THEN formul_data END) AS formul_data_y,
+        MAX(CASE WHEN sens_chnl_id = 'Z' THEN formul_data END) AS formul_data_z,
+        MAX(net_err_cnt) AS total_net_err_cnt,
+        MAX(alarm_lvl_cd) AS alarm_lvl_cd, -- 가장 높은 레벨로 묶음
+        MAX(reg_dt) AS latest_reg_dt
+        FROM
+        tb_measure_details
+        where 1 = 1
         and sens_no = #{sens_no}
         <include refid="rowSearch"/>
+        GROUP BY sens_no, meas_dt
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
@@ -74,10 +144,20 @@
     </select>
 
     <select id="selectListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT count(mgnt_no)
-        FROM tb_measure_details
-        WHERE 1=1
-        and sens_no = #{sens_no}
+        SELECT
+        COUNT(*) AS total_count
+        FROM (
+        SELECT
+        sens_no,
+        meas_dt
+        FROM
+        tb_measure_details
+        WHERE
+        1 = 1
+        AND sens_no = #{sens_no}
         <include refid="rowSearch"/>
+        GROUP BY
+        sens_no, meas_dt
+        ) as total
     </select>
 </mapper>

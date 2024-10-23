@@ -38,6 +38,9 @@
 <script type="text/javascript" src="/common/js/TweenMax.min.js"></script>
 <script type="text/javascript" src="/common/js/jquery.throttledresize.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <link rel="stylesheet" type="text/css" href="/common/css/contents.css" />
 
 <script type="text/javascript" src="/common/js/prefixfree.min.js"></script>

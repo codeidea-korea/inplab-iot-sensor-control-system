@@ -4,7 +4,7 @@
 
 <table id="measure-details-data-grid"></table>
 <div class="gridSpacer"></div>
-<div class="paginate"></div>
+<div class="paginate2"></div>
 
 <script>
     $(document).ready(function () {
@@ -83,54 +83,6 @@
                     title: false,
                     fixed: true
                 };
-
-                if (this.toString() === 'raw_data') {
-                    column.formatter = function (cellValue, options, rowObject) {
-                        return rowObject.sens_chnl_id ? '' : cellValue;
-                    };
-                }
-
-                if (this.toString() === 'formul_data') {
-                    column.formatter = function (cellValue, options, rowObject) {
-                        return rowObject.sens_chnl_id ? '' : cellValue;
-                    };
-                }
-
-                if (this.toString() === 'raw_data_x') {
-                    column.formatter = function (cellValue, options, rowObject) {
-                        return rowObject.sens_chnl_id === 'X' ? rowObject.raw_data : "";
-                    };
-                }
-
-                if (this.toString() === 'cor_data_x') {
-                    column.formatter = function (cellValue, options, rowObject) {
-                        return rowObject.sens_chnl_id === 'X' ? rowObject.formul_data : "";
-                    };
-                }
-
-                if (this.toString() === 'raw_data_y') {
-                    column.formatter = function (cellValue, options, rowObject) {
-                        return rowObject.sens_chnl_id === 'Y' ? rowObject.raw_data : "";
-                    };
-                }
-
-                if (this.toString() === 'cor_data_y') {
-                    column.formatter = function (cellValue, options, rowObject) {
-                        return rowObject.sens_chnl_id === 'Y' ? rowObject.formul_data : "";
-                    };
-                }
-
-                if (this.toString() === 'raw_data_z') {
-                    column.formatter = function (cellValue, options, rowObject) {
-                        return rowObject.sens_chnl_id === 'Z' ? rowObject.raw_data : "";
-                    };
-                }
-
-                if (this.toString() === 'cor_data_z') {
-                    column.formatter = function (cellValue, options, rowObject) {
-                        return rowObject.sens_chnl_id === 'Z' ? rowObject.formul_data : "";
-                    };
-                }
 
                 delete column.width;
                 delete column.fixed;
@@ -336,7 +288,7 @@
                     $('.ui-jqgrid .ui-search-table input').attr('autocomplete', 'new-password');
                     window.jqgridModify = false;
 
-                    initPage($grid, $(".paginate"), true, "TOT", pageCount);
+                    initPage($grid, $(".paginate2"), true, "TOT", pageCount);
                 },
                 gridComplete: function () {
                     $(window).trigger('gridComplete');
@@ -391,7 +343,10 @@
                 height: 'auto',
                 rowNum: _rowList[0],
                 rowList: _rowList,
-            }, window.jqgridOption);
+            }, {
+                multiselect: true,
+                multiboxonly: false,
+            });
 
             if (flagCellEdit) {
                 jqGridOption = Object.assign(jqGridOption, {
@@ -452,122 +407,27 @@
                 $(window).trigger('resize');
             }
 
-            // 행추가 버튼 클릭 이벤트
-            $('.addRow').click(() => {
-                addEmptyRow()
-            });
-
-            function addEmptyRow() {
-                const newRowId = "new_row_" + new Date().getTime();
-                const defaultRowData = {mgnt_no: "", brdcast_title: "", brdcast_msg_dtls: ""};
-                $grid.jqGrid('addRowData', newRowId, defaultRowData, "last");
-            }
-
-            // 저장 버튼 클릭 이벤트
-            $('.saveBtn').click(() => {
-                const allRowData = $grid.jqGrid("getRowData");
-                const filteredData = allRowData.filter((item) =>
-                    item.brdcast_msg_dtls && item.brdcast_title
-                );
-                // TODO 수정해야 됨
-                filteredData.map((item) => {
-                    item.brdcast_no = 'B01'
-                    item.brdcast_dt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                    item.brdcast_rslt_yn = 'N';
-                    item.brdcast_contnts = 'test';
-                    item.district_no = 'D01';
-                });
-                $.ajax({
-                    method: 'post',
-                    url: '/broadcast-text/save',
-                    traditional: true,
-                    data: {jsonData: JSON.stringify(filteredData)},
-                    dataType: 'json',
-                    success: function (_res) {
-                        alert('저장되었습니다.')
-                    },
-                    error: function (_err) {
-                        alert('저장에 실패했습니다.')
-                    }
-                });
-            });
-
-            // 삭제 버튼 클릭 이벤트
-            $('.deleteBtn').click(() => {
-                const selectedRowIds = $grid.jqGrid('getGridParam', 'selarrrow');
-                if (selectedRowIds.length === 0) {
-                    alert('삭제할 데이터를 선택해주세요.');
-                    return;
-                } else if (selectedRowIds.length > 1) {
-                    alert('삭제할 데이터를 1건만 선택해주세요.');
-                    return;
-                }
-
-                confirm('삭제하시겠습니까?', () => {
-                    const selectedRowData = selectedRowIds.map((rowId) => $grid.jqGrid('getRowData', rowId));
-                    $.ajax({
-                        url: '/broadcast-text/del',
-                        type: 'POST',
-                        data: {
-                            mgnt_no: selectedRowData[0].mgnt_no
-                        },
-                        success: function (_res) {
-                            $grid.trigger('reloadGrid');
-                        },
-                        error: function (_err) {
-                            alert('삭제에 실패했습니다. 다시 시도해 주세요.');
-                        }
-                    });
-                });
-            });
-
-            // 전송 버튼 클릭 이벤트
-            $('.submitBtn').click(() => {
-                const selectedRowIds = $grid.jqGrid('getGridParam', 'selarrrow');
-                if (selectedRowIds.length === 0) {
-                    alert('전송할 데이터를 선택해주세요.');
-                    return;
-                } else if (selectedRowIds.length > 1) {
-                    alert('전송할 데이터를 1건만 선택해주세요.');
-                    return;
-                }
-
-                confirm('전송하시겠습니까?', () => {
-                    const selectedRowData = selectedRowIds.map((rowId) => $grid.jqGrid('getRowData', rowId));
-                    $.ajax({
-                        url: '/broadcast-history/add',
-                        type: 'POST',
-                        data: {
-                            brdcast_msg_dtls: selectedRowData[0].brdcast_msg_dtls
-                        },
-                        success: function (_res) {
-                            $('#broadcast-history-grid').trigger('reloadGrid');
-                        },
-                        error: function (_err) {
-                            alert('전송에 실패했습니다. 다시 시도해 주세요.');
-                        }
-                    });
-                });
+            $("#download-excel").click(() => {
+                downloadExcel('measure-details', $grid);
             });
         });
 
-    })
+        function downloadExcel(fileName, grid = $grid) {
+            const gridData = grid.getGridParam('postData');
+            const urlParameters = Object.entries(gridData).map(e => e.join('=')).join('&');
 
-
-    function downloadExcel(fileName, grid = $grid) {
-        const gridData = grid.getGridParam('postData');
-        const urlParameters = Object.entries(gridData).map(e => e.join('=')).join('&');
-
-        var url = path + "/excel/" + fileName + '?' + urlParameters;
-        var hiddenIFrameId = 'hiddenDownloader';
-        var iframe = document.getElementById(hiddenIFrameId);
-        if (iframe === null) {
-            iframe = document.createElement('iframe');
-            iframe.id = hiddenIFrameId;
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
+            var url = path + "/excel/" + fileName + '?' + urlParameters;
+            var hiddenIFrameId = 'hiddenDownloader';
+            var iframe = document.getElementById(hiddenIFrameId);
+            if (iframe === null) {
+                iframe = document.createElement('iframe');
+                iframe.id = hiddenIFrameId;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = url;
         }
-        iframe.src = url;
-    }
+
+    })
 </script>
 

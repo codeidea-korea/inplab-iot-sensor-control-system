@@ -1,10 +1,11 @@
-`<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+`
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="common/include_head.jsp" flush="true"></jsp:include>
+    <jsp:include page="common/include_head.jsp" flush="true"/>
     <style>
         h3.txt {
             margin: 0;
@@ -408,13 +409,165 @@
         }
     });
 </script>
+<script>
+    $(function () {
+        const $detailsGrid = $("#measure-details-grid");
+        const $detailsDateGrid = $("#measure-details-data-grid");
+
+
+        $('#add-row').click(() => {
+            const selectedSensor = getSelectedCheckData($detailsGrid);
+            if (selectedSensor.length === 0) {
+                alert('센서를 선택해주세요.');
+                return;
+            }
+            addEmptyRow(selectedSensor, $detailsDateGrid)
+        });
+
+        function addEmptyRow(sensor, $grid) {
+            const newRowId = "new_row_" + new Date().getTime();
+            const defaultRowData = {sens_no: sensor[0].sens_no, is_new: true};
+            $grid.jqGrid('addRowData', newRowId, defaultRowData, "last");
+        }
+
+        $("#save-button").click(() => {
+            $.ajax({
+                method: 'post',
+                url: '/measure-details-data/save',
+                traditional: true,
+                data: {jsonData: JSON.stringify($detailsDateGrid.jqGrid('getRowData'))},
+                dataType: 'json',
+                success: function (res) {
+                    alert('저장되었습니다.');
+                    $detailsDateGrid.trigger('reloadGrid');
+                },
+                error: function () {
+                    alert('입력값을 확인해 주세요.');
+                }
+            });
+        })
+
+        $("#del-row").click(() => {
+            const selectedRow = getSelectedCheckData($detailsDateGrid);
+            if (selectedRow.length === 0) {
+                alert('삭제할 데이터를 선택해주세요.');
+                return;
+            }
+            $.ajax({
+                method: 'post',
+                url: '/measure-details-data/del',
+                traditional: true,
+                data: {jsonData: JSON.stringify(selectedRow)},
+                dataType: 'json',
+                success: function (res) {
+                    alert('삭제되었습니다.');
+                    $detailsDateGrid.trigger('reloadGrid');
+                },
+                error: function () {
+                    alert('입력값을 확인해 주세요.');
+                }
+            });
+        });
+
+        // 버튼 클릭 시 파일 입력창 열기
+        $('#upload-excel').click(function (e) {
+            const selectedRow = getSelectedCheckData($detailsGrid);
+            if (selectedRow.length === 0) {
+                alert('업로드할 데이터를 선택해주세요.');
+                return;
+            }
+
+            e.preventDefault();  // 링크의 기본 동작 방지
+            $('#excel-file').click();  // 숨겨진 파일 입력 창 열기
+        });
+
+        // 파일이 선택되면 처리
+        $('#excel-file').on('change', function (e) {
+            const file = e.target.files[0];  // 선택한 파일 가져오기
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+
+
+                // 첫 번째 시트의 데이터를 JSON 형태로 변환
+                const sheetName = workbook.SheetNames[0];  // 첫 번째 시트 이름 가져오기
+                const sheet = workbook.Sheets[sheetName];
+                let jsonData = XLSX.utils.sheet_to_json(sheet);
+
+                jsonData.forEach((item) => {
+                    var parts = item['계측일시'].split(" ");
+                    var date = parts[0];
+                    var time = parts[1].replace(/:/g, '-'); // ':'를 '-'로 대체
+
+                    item.meas_dt = date + '-' + time;
+                    item.raw_data = item['Raw Data'];
+                    item.formul_data = item['보정(Deg)'];
+                    item.raw_data_x = item['Raw Data(X)'];
+                    item.formul_data_x = item['X 보정(Deg)'];
+                    item.raw_data_y = item['Raw Data(Y)'];
+                    item.formul_data_y = item['Y 보정(Deg)'];
+                    item.raw_data_z = item['Raw Data(Z)'];
+                    item.formul_data_z = item['Z 보정(Deg)'];
+
+                    // 숫자형 데이터 파싱 (빈 값은 0.0으로 처리)
+                    item.raw_data = parseFloat(item['Raw Data']) || 0.0;
+                    item.formul_data = parseFloat(item['보정(Deg)']) || 0.0;
+                    item.raw_data_x = parseFloat(item['Raw Data(X)']) || 0.0;
+                    item.formul_data_x = parseFloat(item['X 보정(Deg)']) || 0.0;
+                    item.raw_data_y = parseFloat(item['Raw Data(Y)']) || 0.0;
+                    item.formul_data_y = parseFloat(item['Y 보정(Deg)']) || 0.0;
+                    item.raw_data_z = parseFloat(item['Raw Data(Z)']) || 0.0;
+                    item.formul_data_z = parseFloat(item['Z 보정(Deg)']) || 0.0;
+
+
+                    delete item['계측일시'];
+                    delete item['Raw Data'];
+                    delete item['보정(Deg)'];
+                    delete item['Raw Data(X)'];
+                    delete item['X 보정(Deg)'];
+                    delete item['Raw Data(Y)'];
+                    delete item['Y 보정(Deg)'];
+                    delete item['Raw Data(Z)'];
+                    delete item['Z 보정(Deg)'];
+                    delete item['__EMPTY'];
+                    delete item['__EMPTY_1'];
+                    delete item['__EMPTY_2'];
+                });
+
+                const selectedRow = getSelectedCheckData($detailsGrid);
+
+                $.ajax({
+                    method: 'POST',
+                    url: '/measure-details-data/excel',
+                    contentType: 'application/json',  // JSON 형식으로 전송
+                    data: JSON.stringify({jsonData, sensNo: selectedRow[0].sens_no}),  // JSON 데이터 직렬화
+                    dataType: 'json',
+                    success: function (res) {
+                        alert('저장되었습니다.');
+                        $detailsDateGrid.trigger('reloadGrid');
+                    },
+                    error: function () {
+                        alert('입력값을 확인해 주세요.');
+                    }
+                });
+
+
+            };
+
+            reader.readAsArrayBuffer(file);  // 파일 읽기
+        });
+    });
+</script>
 
 
 <body data-pgcode="0000">
 <section id="wrap">
-    <jsp:include page="common/include_top.jsp" flush="true"></jsp:include>
+    <jsp:include page="common/include_top.jsp" flush="true"/>
     <div id="global-menu">
-        <jsp:include page="common/include_sidebar.jsp" flush="true"></jsp:include>
+        <jsp:include page="common/include_sidebar.jsp" flush="true"/>
     </div>
 
     <!--[s] 컨텐츠 영역 -->
@@ -448,12 +601,20 @@
             <div class="contents-re cctv_area">
                 <div class="contents_header">
                     <h3 class="txt">데이터값 수정</h3>
-                    <div class="btn-group-2" style="display: flex; gap: 2px; align-items: start">
+                    <div class="btn-group-2" style="display: flex; gap: 2px; margin-right: auto">
                         <a id="district_nm">현장명</a>
                         <a id="sens_tp_nm">센서타입</a>
                         <a id="sens_nm">센서명</a>
                     </div>
-                    <div class="search-btn-wrapper" style="margin-left: auto">
+                    <div class="search-btn-wrapper" style="display: flex">
+                        <a id="add-row">행추가</a>
+                        <a id="del-row">행삭제</a>
+                        <a id="save-button">저장</a>
+
+<%--                        <a id="upload-excel" href="#">업로드</a>--%>
+<%--                        <input type="file" id="excel-file" style="display: none;" accept=".xlsx, .xls"/>--%>
+
+                        <a id="download-excel">다운로드</a>
                         <a id="view-chart">차트조회</a>
                     </div>
                 </div>
