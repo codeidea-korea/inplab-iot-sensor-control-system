@@ -224,7 +224,10 @@
                     x: {
                         type: 'time', // 시간 축 설정
                         time: {
-                            unit: 'hour' // 단위: 시간
+                            displayFormats: {
+                                minute: 'YYYY-MM-DD HH:mm' // 분 단위까지 표시
+                            },
+                            unit: 'minute', // 단위를 분(minute)으로 설정
                         },
                         adapters: {
                             date: {} // 어댑터 설정(필요시 사용)

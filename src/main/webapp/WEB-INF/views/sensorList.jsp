@@ -61,6 +61,16 @@
             align-items: center;
             padding: 1rem;
         }
+
+        /*#chart-popup {*/
+        /*    position: fixed; !* 화면에 고정 *!*/
+        /*    top: 50%; !* 화면 중앙에 배치 *!*/
+        /*    left: 50%;*/
+        /*    transform: translate(-50%, -50%); !* 정확한 중앙 정렬 *!*/
+        /*    z-index: 1000; !* 다른 요소 위에 배치 *!*/
+        /*    pointer-events: none; !* 클릭 이벤트 비활성화 *!*/
+        /*}*/
+
     </style>
     <script type="text/javascript" src="/admin_add.js"></script>
     <script>
@@ -241,6 +251,22 @@
     </script>
     <script>
         $(document).ready(function () {
+            function popFancy(name) {
+                // 팝업 열기
+                new Fancybox([{src: name, type: "inline"}], Object.assign({
+                    dragToClose: false,  // 드래그로 닫기 비활성화
+                    animated: false,     // 애니메이션 제거 (선택적)
+                    on: {
+                        "*": (event, fancybox, slide) => {
+                        },
+                    },
+                    touch: {
+                        vertical: false, // 세로 드래그 비활성화
+                        momentum: false, // 드래그 후 팝업이 밀리는 현상 방지
+                    }
+                }));
+            }
+
             const currentYear = new Date().getFullYear();
 
             const startDate = new Date(currentYear, 0, 1); // 0은 1월
@@ -331,7 +357,10 @@
                         x: {
                             type: 'time', // 시간 축 설정
                             time: {
-                                unit: 'hour' // 단위: 시간
+                                displayFormats: {
+                                    minute: 'YYYY-MM-DD HH:mm' // 분 단위까지 표시
+                                },
+                                unit: 'minute', // 단위를 분(minute)으로 설정
                             },
                             adapters: {
                                 date: {} // 어댑터 설정(필요시 사용)
