@@ -61,7 +61,7 @@ public class EmergencyCallController extends JqGridAbstract<EmergencyCallDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return userService.getTotalCount(param);
     }
 

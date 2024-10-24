@@ -27,7 +27,7 @@ public class DisplaySendHistoryController extends JqGridAbstract<DisplaySendHist
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return service.getTotalCount(param);
     }
 

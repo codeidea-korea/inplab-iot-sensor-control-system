@@ -54,7 +54,7 @@ public class AlarmRangeController extends JqGridAbstract<AlarmRangeDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return alarmRangeService.getTotalCount(param);
     }
 

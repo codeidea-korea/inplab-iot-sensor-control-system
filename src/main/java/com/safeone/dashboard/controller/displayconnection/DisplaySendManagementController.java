@@ -35,7 +35,7 @@ public class DisplaySendManagementController extends JqGridAbstract<DisplaySendM
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return service.getTotalCount(param);
     }
 

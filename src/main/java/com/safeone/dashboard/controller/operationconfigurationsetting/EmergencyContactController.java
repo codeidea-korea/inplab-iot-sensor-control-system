@@ -29,7 +29,7 @@ public class EmergencyContactController extends JqGridAbstract<EmergencyContactD
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         setParam(param);
         return emergencyContactService.getTotalCount(param);
     }

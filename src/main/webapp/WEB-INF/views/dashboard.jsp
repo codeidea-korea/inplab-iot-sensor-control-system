@@ -759,7 +759,7 @@
     function initZoneSelect() {
         $.get('/getZoneList', {use_flag: 'Y'}, function (res) {
             $('select.selectZone').empty();
-            $('select.selectZone').append('<option value="">지구 선택</option>');
+            $('select.selectZone').append('<option value="">현장 선택</option>');
 
             // 지구 마커 표시
             $.each(res, function () {
@@ -1155,7 +1155,7 @@
             <div class="site-status-list">
                 <div class="status-container">
                     <div class="title">
-                        <span>지구 현황</span>
+                        <span>현장 현황</span>
                     </div>
                     <div class="rain-info" style="display: none">
                         <img src="images/weather/rain_ic.png"/>

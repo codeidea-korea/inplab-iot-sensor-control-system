@@ -72,7 +72,7 @@ public class AlarmSettingController extends JqGridAbstract<AlarmSettingDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return alarmSettingService.getTotalCount(param);
     }
 

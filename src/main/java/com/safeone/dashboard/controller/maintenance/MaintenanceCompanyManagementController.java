@@ -29,7 +29,7 @@ public class MaintenanceCompanyManagementController extends JqGridAbstract<Maint
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         setParam(param);
         return maintenanceCompanyManagementService.getTotalCount(param);
     }

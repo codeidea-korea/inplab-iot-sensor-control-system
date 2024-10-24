@@ -42,7 +42,7 @@ public class LoginLogController extends JqGridAbstract<LoginLogDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         if(param.containsKey("login_date")) {
             String[] dates = ((String)param.get("login_date")).split(" ~ ");
             if(dates.length > 1) {

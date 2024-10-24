@@ -55,7 +55,7 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         if (param.containsKey("mod_dt")) {
             String[] dates = ((String) param.get("mod_dt")).split(" ~ ");
             if (dates.length > 1) {

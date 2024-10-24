@@ -63,7 +63,7 @@ public class ZoneController extends JqGridAbstract<ZoneDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return zoneService.getTotalCount(param);
     }
 

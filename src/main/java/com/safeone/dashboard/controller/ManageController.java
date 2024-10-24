@@ -61,7 +61,7 @@ public class ManageController extends JqGridAbstract<ManageDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return manageService.getTotalCount(param);
     }
 

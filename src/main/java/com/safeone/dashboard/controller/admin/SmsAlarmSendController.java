@@ -41,7 +41,7 @@ public class SmsAlarmSendController extends JqGridAbstract<SmsAlarmListDto> {
 	}
 
 	@Override
-	protected int getTotalRows(Map param) {
+	protected int getTotalCount(Map param) {
 
 		return smsAlarmListService.getTotalCount(param);
 	}

@@ -34,7 +34,7 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return districtInfoService.getTotalCount(param);
     }
 

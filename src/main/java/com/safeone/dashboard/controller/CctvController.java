@@ -31,7 +31,7 @@ public class CctvController extends JqGridAbstract<CctvListDto> {
     }
     
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
         return cctvListService.getTotalCount(param);
     }
 

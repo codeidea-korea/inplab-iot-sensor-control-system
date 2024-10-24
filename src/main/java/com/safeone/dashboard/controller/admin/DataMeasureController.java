@@ -75,7 +75,7 @@ public class DataMeasureController extends JqGridAbstract<DataMeasureDto> {
 	}
 
 	@Override
-	protected int getTotalRows(Map param) {
+	protected int getTotalCount(Map param) {
 		if(param.containsKey("collect_date")) {
 			String[] dates = ((String)param.get("collect_date")).split(" ~ ");
 			if(dates.length > 1) {

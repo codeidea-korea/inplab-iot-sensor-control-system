@@ -44,7 +44,7 @@ public class DeviceController extends JqGridAbstract<DeviceDto> {
     }
 
     @Override
-    protected int getTotalRows(Map param) {
+    protected int getTotalCount(Map param) {
     	if(param.containsKey("mod_date")) {
         	String[] dates = ((String)param.get("mod_date")).split(" ~ ");
         	if(dates.length > 1) {
