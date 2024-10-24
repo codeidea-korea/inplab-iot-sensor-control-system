@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="common/include_head.jsp" flush="true"></jsp:include>
+    <jsp:include page="./common/include_head.jsp" flush="true"></jsp:include>
     <style>
         /* 검색 행의 input 필드에 border 추가 */
         .ui-search-toolbar input {

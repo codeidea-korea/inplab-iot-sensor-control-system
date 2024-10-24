@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
+    <jsp:include page="../common/include_head.jsp" flush="true" />
 
     <style>
         #map {
@@ -82,28 +82,6 @@
                 });
                 $('#senstype_no').html(option);
             });
-
-
-//             // 삭제
-//             $('.deleteBtn').on('click', function () {
-//                 var targetArr = getSelectedCheckData();
-//
-//                 if (targetArr.length > 0) {
-//                     confirm(targetArr.length + '건의 데이터를 삭제하시겠습니까?', function () {
-//                         $.each(targetArr, function (idx) {
-//                             $.get('/adminAdd/sensorInfo/del', this, function (res) { // todo : 1이 아닌 경우 삭제가 실패된것을 알릴것인지?
-//
-//                                 if ((idx + 1) == targetArr.length) reloadJqGrid();
-//                             });
-//                         });
-//
-// //                             reloadJqGrid();
-//                     });
-//                 } else {
-//                     alert('삭제하실 센서종류를 선택해주세요.');
-//                     return;
-//                 }
-//             });
 
             // 팝업에서 삭제 버튼 클릭 시
             $('#lay-form-write .deleteBtn').on('click', function() {
@@ -299,14 +277,14 @@
 <section
         id="wrap">
     <!--[s] 상단 -->
-    <jsp:include page="../common/include_top.jsp" flush="true"></jsp:include>
+    <jsp:include page="../common/include_top.jsp" flush="true" />
     <!--[e] 상단 -->
 
     <!--[s] 왼쪽 메뉴 -->
     <div
             id="global-menu">
         <!--[s] 주 메뉴 -->
-        <jsp:include page="../common/include_sidebar.jsp" flush="true"></jsp:include>
+        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
         <!--[e] 주 메뉴 -->
     </div>
     <!--[e] 왼쪽 메뉴 -->
@@ -323,13 +301,8 @@
                     <input class="search_input" type="text" id="search" name="search"
                            placeholder="센서타입명 / 센서ID / 로거명 / 센서상태"/>
                     <a class="searchBtn">검색</a>
-
-<%--                    <a class="insertBtn">등록</a>--%>
-<%--                    <a class="modifyBtn">수정</a>--%>
                     <a class="insertBtn">신규 등록</a>
                     <a class="modifyBtn">상세정보</a>
-<%--                    <a class="deleteBtn">삭제</a>--%>
-
                     <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>
                     <form id="uploadForm" style="display:none;">
                         <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
@@ -338,7 +311,7 @@
                     <a class="excelBtn">다운로드</a>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>
+                    <jsp:include page="../common/include_jqgrid.jsp" flush="true" />
                 </div>
             </div>
         </div>

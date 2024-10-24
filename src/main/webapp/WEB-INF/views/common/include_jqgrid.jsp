@@ -424,8 +424,6 @@ afterLoadGrid   : 그리드의 로딩 및 출력이 모두 완료된후 발생
                 }
             },
             // sortable: true,
-            autowidth: true,
-            shrinkToFit: true,
             beforeRequest: function (e) {
                 var params = Object.assign($(".jqGrid").jqGrid('getGridParam', 'postData'), $('.ui-search-input input').filter(function () {
                     return !!this.value;
