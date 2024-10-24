@@ -33,7 +33,7 @@ public class BroadcastTextController extends JqGridAbstract<BroadcastTextDto> {
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         setParam(param);
         return broadcastTextService.getTotalCount(param);
     }

@@ -38,7 +38,7 @@ public class SiteInfoController extends JqGridAbstract<SiteInfoDto> {
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         return siteInfoService.getTotalCount(param);
     }
 

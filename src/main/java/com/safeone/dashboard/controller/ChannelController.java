@@ -61,7 +61,7 @@ public class ChannelController extends JqGridAbstract<ChannelDto> {
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         return channelService.getTotalCount(param);
     }
 

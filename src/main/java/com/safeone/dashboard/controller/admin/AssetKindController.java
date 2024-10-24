@@ -54,7 +54,7 @@ public class AssetKindController extends JqGridAbstract<AssetKindDto> {
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
     	if(param.containsKey("mod_date")) {
         	String[] dates = ((String)param.get("mod_date")).split(" ~ ");
         	if(dates.length > 1) {

@@ -36,7 +36,7 @@ public class AreaController extends JqGridAbstract<AreaDto> {
     }
     
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         return areaService.getTotalCount(param);
     }
 

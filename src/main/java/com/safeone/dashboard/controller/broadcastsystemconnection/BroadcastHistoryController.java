@@ -31,7 +31,7 @@ public class BroadcastHistoryController extends JqGridAbstract<BroadcastHistoryD
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         setParam(param);
         return broadcastHistoryService.getTotalCount(param);
     }

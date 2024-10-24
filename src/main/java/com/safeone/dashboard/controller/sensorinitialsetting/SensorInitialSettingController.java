@@ -36,7 +36,7 @@ public class SensorInitialSettingController extends JqGridAbstract<SensorInitial
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         setParam(param);
         return sensorInitialSettingService.getTotalCount(param);
     }

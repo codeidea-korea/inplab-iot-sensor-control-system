@@ -36,7 +36,7 @@ public class SensorGroupingController extends JqGridAbstract<SensorGroupingDto> 
 	}
 
 	@Override
-	protected int getTotalCount(Map param) {
+	protected int getTotalRows(Map param) {
 		return sensorGroupingService.getTotalCount(param);
 	}
 

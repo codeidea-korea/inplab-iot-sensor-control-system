@@ -82,7 +82,7 @@ public class UserController extends JqGridAbstract<UserDto> {
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
     	if(param.containsKey("reg_date")) {
         	String[] dates = ((String)param.get("reg_date")).split(" ~ ");
         	if(dates.length > 1) {

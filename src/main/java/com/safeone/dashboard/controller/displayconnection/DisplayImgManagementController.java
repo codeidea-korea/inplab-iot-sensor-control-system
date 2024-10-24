@@ -28,7 +28,7 @@ public class DisplayImgManagementController extends JqGridAbstract<DisplayImgMan
 	}
 
 	@Override
-	protected int getTotalCount(Map param) {
+	protected int getTotalRows(Map param) {
 		return service.getTotalCount(param);
 	}
 

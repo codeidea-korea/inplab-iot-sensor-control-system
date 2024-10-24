@@ -45,7 +45,7 @@ public class AlarmDetailsController extends JqGridAbstract<AlarmDetailsDto> {
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         if (param.containsKey("reg_day")) {
             String[] dates = ((String) param.get("reg_day")).split(" ~ ");
             if (dates.length > 1) {

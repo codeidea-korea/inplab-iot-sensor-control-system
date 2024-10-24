@@ -33,7 +33,7 @@ public class MeasureDetailsController extends JqGridAbstract<MeasureDetailsDto> 
 //	}
 
 	@Override
-	protected int getTotalCount(Map param) {
+	protected int getTotalRows(Map param) {
 		return measureDetailsService.getTotalCount(param);
 	}
 

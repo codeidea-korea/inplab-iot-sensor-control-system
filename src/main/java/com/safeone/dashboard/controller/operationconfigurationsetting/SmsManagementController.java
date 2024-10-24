@@ -35,7 +35,7 @@ public class SmsManagementController extends JqGridAbstract<SmsManagementDto> {
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         setParam(param);
         return smsManagementService.getTotalCount(param);
     }

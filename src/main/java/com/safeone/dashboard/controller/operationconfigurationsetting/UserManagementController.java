@@ -30,7 +30,7 @@ public class UserManagementController extends JqGridAbstract<UserManagementDto> 
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         setParam(param);
         return userManagementService.getTotalCount(param);
     }

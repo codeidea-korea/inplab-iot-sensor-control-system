@@ -35,7 +35,7 @@ public class AlertStandardManagementController extends JqGridAbstract<AlertStand
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         setParam(param);
         return alertStandardManagementService.getTotalCount(param);
     }

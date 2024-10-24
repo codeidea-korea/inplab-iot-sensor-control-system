@@ -81,7 +81,7 @@ public class SensorByChannelController extends JqGridAbstract<SensorDto> {
 	}
 
 	@Override
-	protected int getTotalCount(Map param) {
+	protected int getTotalRows(Map param) {
 		if(param.containsKey("ch_collect_date")) {
 			String[] dates = ((String)param.get("ch_collect_date")).split(" ~ ");
 			if(dates.length > 1) {

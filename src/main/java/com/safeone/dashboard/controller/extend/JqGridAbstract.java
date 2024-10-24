@@ -38,7 +38,7 @@ public abstract class JqGridAbstract<T> {
      * @param param
      * @return
      */
-    protected abstract int getTotalCount(Map param);
+    protected abstract int getTotalRows(Map param);
 
     protected abstract String setViewPage();
 
@@ -104,7 +104,7 @@ public abstract class JqGridAbstract<T> {
     @GetMapping("/list")
     public JqGridResponse<T> list(@RequestParam Map<String, Object> param) {
         List<T> list = getList(param);
-        int totalRows = getTotalCount(param);
+        int totalRows = getTotalRows(param);
 
         int rows = Integer.parseInt(param.get("rows").toString());
         int page = Integer.parseInt(param.get("page").toString());

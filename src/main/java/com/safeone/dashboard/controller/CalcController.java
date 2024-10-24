@@ -61,7 +61,7 @@ public class CalcController extends JqGridAbstract<CalcDto> {
     }
 
     @Override
-    protected int getTotalCount(Map param) {
+    protected int getTotalRows(Map param) {
         return calcService.getTotalCount(param);
     }
 
