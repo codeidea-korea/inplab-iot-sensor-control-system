@@ -1,15 +1,13 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true" />
-
+    <jsp:include page="../common/include_head.jsp" flush="true"/>
     <style>
         #map {
             width: 100%;
-            /* height: calc(100% - 48px); */
             height: 500px;
         }
 
@@ -19,14 +17,13 @@
             top: calc(50% - 27px);
         }
     </style>
-
+    <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
-        window.jqgridOption = {
-            columnAutoWidth: true,
-            multiselect: true,
-            multiboxonly: false
-        }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
-
+        $(function () {
+            initGrid($("#jq-grid"), "/adminAdd/sensorInfo", $('#grid-wrapper'))
+        });
+    </script>
+    <script>
         var _popupClearData;
 
         $(function () {
@@ -84,15 +81,15 @@
             });
 
             // 팝업에서 삭제 버튼 클릭 시
-            $('#lay-form-write .deleteBtn').on('click', function() {
+            $('#lay-form-write .deleteBtn').on('click', function () {
                 var sensNo = $('#sens_no').val();
 
                 if (!sensNo) {
                     alert('삭제할 센서가 선택되지 않았습니다.');
                     return;
                 }
-                confirm('삭제하시겠습니까?', function() {
-                    $.get('/adminAdd/sensorInfo/del', {sens_no: sensNo}, function(res) {
+                confirm('삭제하시겠습니까?', function () {
+                    $.get('/adminAdd/sensorInfo/del', {sens_no: sensNo}, function (res) {
                         if (res === 1) {  // 성공 시
                             alert('삭제되었습니다.');
                             popFancyClose('#lay-form-write');
@@ -122,10 +119,10 @@
                 $('#logr_no').off('change').on('change', function () {
                     $('#senstype_no').val('');
                 });
-               
+
                 $('#senstype_no').off('change').on('change', function () {
                     var senstypeNo = $(this).val();
-                    var logrFlag = $('#logr_no').val(); 
+                    var logrFlag = $('#logr_no').val();
 
                     if (logrFlag === "") {
                         alert("먼저 로거명을 선택하세요.");
@@ -170,7 +167,10 @@
             }
 
             function getNewSensorSeq(senstypeAbbr, logrFlag, callback) {
-                $.get('/adminAdd/common/code/newSensorSeq', {sensor_seq: senstypeAbbr, logr_no : logrFlag}, function (res) {
+                $.get('/adminAdd/common/code/newSensorSeq', {
+                    sensor_seq: senstypeAbbr,
+                    logr_no: logrFlag
+                }, function (res) {
                     var new_sensor_seq = res[0].new_sensor_seq;
                     callback(new_sensor_seq);  // 결과를 콜백 함수로 전달
                 });
@@ -272,23 +272,12 @@
 
     </script>
 </head>
-
 <body data-pgcode="0000">
-<section
-        id="wrap">
-    <!--[s] 상단 -->
-    <jsp:include page="../common/include_top.jsp" flush="true" />
-    <!--[e] 상단 -->
-
-    <!--[s] 왼쪽 메뉴 -->
-    <div
-            id="global-menu">
-        <!--[s] 주 메뉴 -->
-        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
-        <!--[e] 주 메뉴 -->
+<section id="wrap">
+    <jsp:include page="../common/include_top.jsp" flush="true"/>
+    <div id="global-menu">
+        <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
-    <!--[e] 왼쪽 메뉴 -->
-
     <div id="container">
         <h2 class="txt">
             관리자 전용
@@ -307,22 +296,16 @@
                     <form id="uploadForm" style="display:none;">
                         <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
                     </form>
-
                     <a class="excelBtn">다운로드</a>
                 </div>
-                <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid.jsp" flush="true" />
+                <div id="grid-wrapper" class="contents-in">
+                    <table id="jq-grid"></table>
                 </div>
             </div>
         </div>
     </div>
-    <!--[e] 컨텐츠 영역 -->
-
-    <!--[s] 센서 등록 팝업 -->
     <div id="lay-form-write" class="layer-base">
-
         <input type="hidden" id="sens_no" name="sens_no"/>
-
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
         </div>
@@ -337,7 +320,6 @@
                         <col width="*"/>
                     </colgroup>
                     <tbody>
-                    
                     <tr>
                         <th class="required_th">로거명</th>
                         <td colspan="3">
@@ -346,7 +328,6 @@
                             </select>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">센서타입명</th>
                         <td colspan="3">
@@ -355,30 +336,25 @@
                             </select>
                         </td>
                     </tr>
-
                     <tr>
                         <th>센서 ID</th>
                         <td colspan="3">
                             <input type="text" name="sens_nm" readonly/>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">단면번호</th>
                         <td colspan="3">
                             <input type="text" name="sect_no" class="required"/>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">미수신허용(분)</th>
                         <td colspan="3">
-<%--                            <input type="text" name="nonrecv_limit_min" class="required number-only"/>--%>
-                            <input type="number" name="nonrecv_limit_min" class="required number-only" min="0" step="1" />
+                            <input type="number" name="nonrecv_limit_min" class="required number-only" min="0"
+                                   step="1"/>
                         </td>
                     </tr>
-
-
                     <tr>
                         <th class="required_th">경보사용</th>
                         <td colspan="3">
@@ -387,7 +363,6 @@
                             </select>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">문자발송</th>
                         <td colspan="3">
@@ -396,7 +371,6 @@
                             </select>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">화면표시</th>
                         <td colspan="3">
@@ -405,14 +379,12 @@
                             </select>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">설치일자</th>
                         <td colspan="3">
                             <input type="text" name="inst_ymd" class="datetimepickerOne required"/>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">센서상태</th>
                         <td colspan="3">
@@ -421,7 +393,6 @@
                             </select>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">위도</th>
                         <td>
@@ -433,7 +404,6 @@
                             <input type="text" name="sens_lon" class="required"/>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">모델명</th>
                         <td>
@@ -444,8 +414,6 @@
                             <input type="text" name="sens_maker" class="required"/>
                         </td>
                     </tr>
-
-
                     </tbody>
                 </table>
             </div>
@@ -456,8 +424,6 @@
             </div>
         </div>
     </div>
-    <!--[e] 센서 등록 팝업 -->
-
     <div id="lay-form-address" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>

@@ -4,87 +4,12 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
-
-    <style>
-        /*#map {*/
-        /*    width: 100%;*/
-        /*    !* height: calc(100% - 48px); *!*/
-        /*    height: 500px;*/
-        /*}*/
-
-        /*.centerMarker {*/
-        /*    position: absolute;*/
-        /*    left: calc(50% - 15px);*/
-        /*    top: calc(50% - 27px);*/
-        /*}*/
-    </style>
-
+    <jsp:include page="../common/include_head.jsp" flush="true"/>
     <script>
-        window.jqgridOption = {
-            columnAutoWidth: true,
-            // multiselect: true,
-            // multiboxonly: false
-        }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
-
         var _popupClearData;
 
         $(function () {
-
-            // window.vworld = new vwutil({
-            //     mapId: "map",
-            //     initPosition: {
-            //         center: [
-            //             // 126.88624657982738, 37.480957215573261
-            //             127.449482276989, 36.9317789946793
-            //         ], // [14124968.051077379, 4506389.894300204],
-            //         zoom: 18,
-            //         rotation: 0.5
-            //     }
-            // });
-            //
-            // window.vworld.vwmap2d();
-
-
             _popupClearData = getSerialize('#lay-form-write');
-            // 초기화할 데이터값
-
-            // $.get('/adminAdd/common/code/list', {code_grp_nm: "유지보수상태"}, function (res) {
-            //     let option = '<option value="">선택</option>';
-            //     $.each(res, function (idx) {
-            //         option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
-            //     });
-            //     $('#maint_sts_cd').html(option);
-            // });
-            //
-            // $.get('/adminAdd/common/code/list', {code_grp_nm: "사용유무"}, function (res) {
-            //     let option = '<option value="">선택</option>';
-            //     $.each(res, function (idx) {
-            //         option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
-            //     });
-            //     $('#alarm_use_yn').html(option);
-            //     $('#sms_snd_yn').html(option);
-            //     $('#sens_disp_yn').html(option);
-            // });
-            //
-            // $.get('/adminAdd/common/code/loggerInfo', null, function (res) {
-            //     let option = '<option value="">선택</option>';
-            //     $.each(res, function (idx) {
-            //         option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
-            //     });
-            //     $('#logr_no').html(option);
-            // });
-            //
-            // $.get('/adminAdd/common/code/sensorType', null, function (res) {
-            //     let option = '<option value="">선택</option>';
-            //     $.each(res, function (idx) {
-            //         option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
-            //     });
-            //     $('#senstype_no').html(option);
-            // });
-
-
-            // 삭제
             $('.deleteBtn').on('click', function () {
                 var targetArr = getSelectedCheckData();
 
@@ -96,8 +21,6 @@
                                 if ((idx + 1) == targetArr.length) reloadJqGrid();
                             });
                         });
-
-//                             reloadJqGrid();
                     });
                 } else {
                     alert('삭제하실 센서종류를 선택해주세요.');
@@ -119,10 +42,10 @@
                 $('#logr_no').off('change').on('change', function () {
                     $('#senstype_no').val('');
                 });
-               
+
                 $('#senstype_no').off('change').on('change', function () {
                     var senstypeNo = $(this).val();
-                    var logrFlag = $('#logr_no').val(); 
+                    var logrFlag = $('#logr_no').val();
 
                     if (logrFlag === "") {
                         alert("먼저 로거명을 선택하세요.");
@@ -167,7 +90,10 @@
             }
 
             function getNewSensorSeq(senstypeAbbr, logrFlag, callback) {
-                $.get('/adminAdd/common/code/newSensorSeq', {sensor_seq: senstypeAbbr, logr_no : logrFlag}, function (res) {
+                $.get('/adminAdd/common/code/newSensorSeq', {
+                    sensor_seq: senstypeAbbr,
+                    logr_no: logrFlag
+                }, function (res) {
                     var new_sensor_seq = res[0].new_sensor_seq;
                     callback(new_sensor_seq);  // 결과를 콜백 함수로 전달
                 });
@@ -269,24 +195,20 @@
         }
 
     </script>
+    <script type="text/javascript" src="/jqgrid.js"></script>
+    <script>
+        $(function () {
+            initGrid($("#jq-grid"), "/adminAdd/logrIdxMap", $('#grid-wrapper'))
+        });
+    </script>
 </head>
 
 <body data-pgcode="0000">
-<section
-        id="wrap">
-    <!--[s] 상단 -->
-    <jsp:include page="../common/include_top.jsp" flush="true"></jsp:include>
-    <!--[e] 상단 -->
-
-    <!--[s] 왼쪽 메뉴 -->
-    <div
-            id="global-menu">
-        <!--[s] 주 메뉴 -->
-        <jsp:include page="../common/include_sidebar.jsp" flush="true"></jsp:include>
-        <!--[e] 주 메뉴 -->
+<section id="wrap">
+    <jsp:include page="../common/include_top.jsp" flush="true"/>
+    <div id="global-menu">
+        <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
-    <!--[e] 왼쪽 메뉴 -->
-
     <div id="container">
         <h2 class="txt">
             관리자 전용
@@ -299,31 +221,19 @@
                     <input class="search_input" type="text" id="search" name="search"
                            placeholder="현장명 / 센서타입명 / 로거명"/>
                     <a class="searchBtn">검색</a>
-
-<%--                    <a class="insertBtn">등록</a>--%>
-<%--                    <a class="modifyBtn">수정</a>--%>
-<%--                    <a class="deleteBtn">삭제</a>--%>
-
                     <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>
                     <form id="uploadForm" style="display:none;">
                         <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
                     </form>
-
-<%--                    <a class="excelBtn">다운로드</a>--%>
                 </div>
-                <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>
+                <div id="grid-wrapper" class="contents-in">
+                    <table id="jq-grid"></table>
                 </div>
             </div>
         </div>
     </div>
-    <!--[e] 컨텐츠 영역 -->
-
-    <!--[s] 센서 등록 팝업 -->
     <div id="lay-form-write" class="layer-base">
-
         <input type="hidden" id="sens_no" name="sens_no"/>
-
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
         </div>
@@ -338,7 +248,7 @@
                         <col width="*"/>
                     </colgroup>
                     <tbody>
-                    
+
                     <tr>
                         <th class="required_th">로거명</th>
                         <td colspan="3">
@@ -374,8 +284,8 @@
                     <tr>
                         <th class="required_th">미수신허용(분)</th>
                         <td colspan="3">
-<%--                            <input type="text" name="nonrecv_limit_min" class="required number-only"/>--%>
-                            <input type="number" name="nonrecv_limit_min" class="required number-only" min="0" step="1" />
+                            <input type="number" name="nonrecv_limit_min" class="required number-only" min="0"
+                                   step="1"/>
                         </td>
                     </tr>
 
@@ -456,7 +366,6 @@
             </div>
         </div>
     </div>
-    <!--[e] 센서 등록 팝업 -->
 
     <div id="lay-form-address" class="layer-base">
         <div class="layer-base-btns">
