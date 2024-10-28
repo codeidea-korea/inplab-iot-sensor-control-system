@@ -15,15 +15,6 @@
         .contents_header {
             display: flex;
             align-items: center;
-            /*justify-content: space-between;*/
-        }
-
-        .search-top {
-            position: static;
-        }
-
-        #contents .contents-re {
-            position: static;
         }
 
         .search-top-label {
@@ -41,7 +32,6 @@
 
         #contents .contents-in {
             position: static;
-            height: auto;
             padding: 3rem;
             margin-top: 3rem;
         }
@@ -51,14 +41,7 @@
         }
 
         .cctv_area .contents-in {
-            height: auto !important;
             overflow: hidden;
-        }
-
-        .search-top {
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem
         }
 
         .search-top > div {
@@ -147,7 +130,6 @@
         .filter-area {
             display: flex;
         }
-
         .search-top-label {
             color: #ffffff76;
             font-size: 1.5rem;
@@ -156,394 +138,303 @@
             padding: 1rem;
         }
     </style>
-</head>
+    <script type="text/javascript" src="/jqgrid.js"></script>
+    <script>
+        $(function () {
+            const $districtSelect = $('#district-select');
 
-<script>
-    $(function () {
-        const $grpGrid = $("#measure-details-grid");
-        const $detailsGrid = $("#measure-details-data-grid");
+            const $leftGrid = $("#left-jq-grid");
+            const leftPath = "/measure-details"
+            initGrid($leftGrid, leftPath, $('#left-grid-wrapper'), {
+                multiselect: true,
+                multiboxonly: false,
+                useFilterToolbar: true,
+            })
 
-        $.ajax({
-            url: '/adminAdd/districtInfo/all',
-            type: 'GET',
-            success: function (res) {
-                res.forEach((item) => {
-                    $('#district-no').append(
-                        "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
-                    );
-                });
-            },
-            error: function () {
-                alert('알 수 없는 오류가 발생했습니다.');
-            }
-        });
+            const $rightGrid = $("#right-jq-grid");
+            const rightPath = "/measure-details-data"
+            initGrid($rightGrid, rightPath, $('#right-grid-wrapper'), {
+                multiselect: true,
+                multiboxonly: false,
+                useFilterToolbar: true,
+            })
 
-        $("#district-no").on('change', function () {
-            $grpGrid.setGridParam({
-                postData: {
-                    ...$grpGrid.jqGrid('getGridParam', 'postData'),
-                    district_no: $('#district-no').val()
+            $.ajax({
+                url: '/adminAdd/districtInfo/all',
+                type: 'GET',
+                success: function (res) {
+                    res.forEach((item) => {
+                        $districtSelect.append(
+                            "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
+                        );
+                    });
+                },
+                error: function () {
+                    alert('알 수 없는 오류가 발생했습니다.');
                 }
-            }, true);
-            $grpGrid.trigger('reloadGrid');
-        });
-
-        $("#search-btn").on('click', function () {
-            const targetArr = getSelectedCheckData($grpGrid);
-            if (targetArr.length > 1) {
-                alert('조회할 데이터를 1건만 선택해주세요.');
-                return;
-            } else if (targetArr.length === 0) {
-                alert('조회할 데이터를 선택해주세요.');
-                return;
-            } else {
-                $detailsGrid.setGridParam({
+            });
+            $districtSelect.on('change', (e) => {
+                const value = e.target.value;
+                if (value === '') {
+                    return
+                }
+                $leftGrid.setGridParam({
+                    page: 1,
                     postData: {
-                        ...$detailsGrid.jqGrid('getGridParam', 'postData'),
-                        sens_no: targetArr[0].sens_no
+                        ...$leftGrid.jqGrid('getGridParam', 'postData'),
+                        district_no: value
                     }
-                }, true);
-                $detailsGrid.trigger('reloadGrid');
-                $("#district_nm").text($('#district-no option:selected').text());
-                $("#sens_tp_nm").text(targetArr[0].sens_tp_nm);
-                $("#sens_nm").text(targetArr[0].sens_nm);
-            }
-        });
-
-        const currentYear = new Date().getFullYear();
-
-        const startDate = new Date(currentYear, 0, 1); // 0은 1월
-        $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
-
-        const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
-        $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
-
-        function popFancy(name) {
-            // 팝업 열기
-            new Fancybox([{src: name, type: "inline"}], Object.assign({
-                dragToClose: false,  // 드래그로 닫기 비활성화
-                animated: false,     // 애니메이션 제거 (선택적)
-                on: {
-                    "*": (event, fancybox, slide) => {
-                    },
-                },
-                touch: {
-                    vertical: false, // 세로 드래그 비활성화
-                    momentum: false, // 드래그 후 팝업이 밀리는 현상 방지
-                }
-            }));
-        }
-
-        $("#view-chart").click(() => {
-            const targetArr = getSelectedCheckData($grpGrid);
-            if (targetArr.length > 1) {
-                alert('조회할 데이터를 1건만 선택해주세요.');
-                return;
-            } else if (targetArr.length === 0) {
-                alert('조회할 데이터를 선택해주세요.');
-                return;
-            }
-            popFancy('#chart-popup')
-            $("#graph-search-btn").trigger('click');
-        });
-
-        const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
-
-        $("#graph-search-btn").click(() => {
-            const startDateTime = $('#start-date').val();
-            const endDateTime = $('#end-date').val();
-            chartDataArray.length = 0; // 배열 초기화
-
-            const targetArr = getSelectedCheckData($grpGrid);
-
-            const requests = targetArr.map((item) => {
-                let sensChnlId = ''
-                if (item.sens_chnl_nm) {
-                    sensChnlId = item.sens_chnl_nm.slice(-1)
-                }
-                return getChartData(item.sens_no, startDateTime, endDateTime, sensChnlId);
+                }).trigger('reloadGrid', [{page: 1}]);
             });
 
-            // 모든 요청이 완료된 후 차트를 그립니다.
-            Promise.all(requests).then(() => {
-                updateChart(chartDataArray); // 차트 업데이트 함수 호출
-            }).catch(() => {
-                alert('데이터를 가져오는 중 오류가 발생했습니다.');
+            $("#search-btn").on('click', function () {
+                const targetArr = getSelectedCheckData($leftGrid);
+                if (targetArr.length > 1) {
+                    alert('조회할 데이터를 1건만 선택해주세요.');
+                    return;
+                } else if (targetArr.length === 0) {
+                    alert('조회할 데이터를 선택해주세요.');
+                    return;
+                } else {
+                    $rightGrid.setGridParam({
+                        page: 1,
+                        postData: {
+                            ...$rightGrid.jqGrid('getGridParam', 'postData'),
+                            sens_no: targetArr[0].sens_no
+                        }
+                    }).trigger('reloadGrid', [{page: 1}]);
+                    $("#district_nm").text($('#district-no option:selected').text());
+                    $("#sens_tp_nm").text(targetArr[0].sens_tp_nm);
+                    $("#sens_nm").text(targetArr[0].sens_nm);
+                }
             });
-        });
 
-        function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
-                    type: 'GET',
-                    success: function (res) {
-                        chartDataArray.push(res); // 데이터 추가
-                        resolve();
+            const currentYear = new Date().getFullYear();
+
+            const startDate = new Date(currentYear, 0, 1); // 0은 1월
+            $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+
+            const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
+            $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+
+            function popFancy(name) {
+                // 팝업 열기
+                new Fancybox([{src: name, type: "inline"}], Object.assign({
+                    dragToClose: false,  // 드래그로 닫기 비활성화
+                    animated: false,     // 애니메이션 제거 (선택적)
+                    on: {
+                        "*": (event, fancybox, slide) => {
+                        },
                     },
-                    error: function () {
-                        reject();
+                    touch: {
+                        vertical: false, // 세로 드래그 비활성화
+                        momentum: false, // 드래그 후 팝업이 밀리는 현상 방지
                     }
+                }));
+            }
+
+            $("#view-chart").click(() => {
+                const targetArr = getSelectedCheckData($grpGrid);
+                if (targetArr.length > 1) {
+                    alert('조회할 데이터를 1건만 선택해주세요.');
+                    return;
+                } else if (targetArr.length === 0) {
+                    alert('조회할 데이터를 선택해주세요.');
+                    return;
+                }
+                popFancy('#chart-popup')
+                $("#graph-search-btn").trigger('click');
+            });
+
+            const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
+
+            $("#graph-search-btn").click(() => {
+                const startDateTime = $('#start-date').val();
+                const endDateTime = $('#end-date').val();
+                chartDataArray.length = 0; // 배열 초기화
+
+                const targetArr = getSelectedCheckData($grpGrid);
+
+                const requests = targetArr.map((item) => {
+                    let sensChnlId = ''
+                    if (item.sens_chnl_nm) {
+                        sensChnlId = item.sens_chnl_nm.slice(-1)
+                    }
+                    return getChartData(item.sens_no, startDateTime, endDateTime, sensChnlId);
+                });
+
+                // 모든 요청이 완료된 후 차트를 그립니다.
+                Promise.all(requests).then(() => {
+                    updateChart(chartDataArray); // 차트 업데이트 함수 호출
+                }).catch(() => {
+                    alert('데이터를 가져오는 중 오류가 발생했습니다.');
                 });
             });
-        }
 
-        const ctx = document.getElementById('myChart').getContext('2d');
-        const myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [], // 초기 레이블
-                datasets: [] // 초기 데이터셋
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    zoom: {
-                        pan: {
-                            enabled: true,
-                            mode: 'xy', // x, y축 모두 이동 가능
-                            threshold: 10, // 이동을 시작하는 최소 드래그 거리(px)
+            function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
+                        type: 'GET',
+                        success: function (res) {
+                            chartDataArray.push(res); // 데이터 추가
+                            resolve();
                         },
+                        error: function () {
+                            reject();
+                        }
+                    });
+                });
+            }
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], // 초기 레이블
+                    datasets: [] // 초기 데이터셋
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
                         zoom: {
-                            drag: {
+                            pan: {
                                 enabled: true,
-                                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                                mode: 'xy', // x, y축 모두 이동 가능
+                                threshold: 10, // 이동을 시작하는 최소 드래그 거리(px)
                             },
-                            wheel: {
-                                enabled: true, // 마우스 휠로 줌 가능
-                            },
-                            pinch: {
-                                enabled: true // 터치로 줌 가능
-                            },
-                            mode: 'xy', // x, y축 모두 줌 가능
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        type: 'time', // 시간 축 설정
-                        time: {
-                            displayFormats: {
-                                minute: 'YYYY-MM-DD HH:mm' // 분 단위까지 표시
-                            },
-                            unit: 'minute', // 단위를 분(minute)으로 설정
-                        },
-                        adapters: {
-                            date: {} // 어댑터 설정(필요시 사용)
+                            zoom: {
+                                drag: {
+                                    enabled: true,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                                },
+                                wheel: {
+                                    enabled: true, // 마우스 휠로 줌 가능
+                                },
+                                pinch: {
+                                    enabled: true // 터치로 줌 가능
+                                },
+                                mode: 'xy', // x, y축 모두 줌 가능
+                            }
                         }
                     },
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        function getRandomHSL() {
-            const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
-            const saturation = 100; // 채도 고정
-            const lightness = 50; // 밝기 고정
-            return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
-        }
-
-        function updateChart(data) {
-            // 차트 업데이트 로직
-            const labels = data[0].map(item => {
-                const date = new Date(item.meas_dt);
-                return date.getFullYear() + '-' +
-                    (date.getMonth() + 1).toString().padStart(2, '0') + ' ' + // 월
-                    date.getDate().toString().padStart(2, '0') + ' ' + // 일
-                    date.getHours().toString().padStart(2, '0') + ':' + // 시간
-                    date.getMinutes().toString().padStart(2, '0') + ':' + // 분
-                    date.getSeconds().toString().padStart(2, '0'); // 초
-            }); // 첫 번째 데이터의 시간
-
-            const datasets = data.map((item, index) => ({
-                label: item[0].sens_nm, // 센서 이름
-                data: item.map(i => i.formul_data), // 센서 데이터
-                borderColor: getRandomHSL(),
-                fill: false,
-                pointRadius: 0, // 꼭지점 원 크기 제거
-                borderWidth: 1, // 선 두께 줄이기
-            }));
-
-            myChart.data.labels = labels;
-            myChart.data.datasets = datasets;
-
-            // 기존의 annotation을 초기화
-            myChart.options.plugins.annotation.annotations = {};
-
-            // 각 센서 데이터에서 최대 레벨 값을 가져와 점선을 추가
-            data.forEach(item => {
-                const maxLevels = [parseFloat(item[0].lvl_max1), parseFloat(item[0].lvl_max2), parseFloat(item[0].lvl_max3), parseFloat(item[0].lvl_max4)];
-                const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
-
-                maxLevels.forEach((maxLevel, index) => {
-                    if (!isNaN(maxLevel)) {
-                        myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
-                            type: 'line',
-                            yMin: maxLevel,
-                            yMax: maxLevel,
-                            borderColor: colors[index],
-                            borderWidth: 1.5,
-                            borderDash: [5, 4]
-                        };
-
-                        // 라벨 이름을 "센서이름 1차 Deg" 형식으로 설정
-                        const labelName = item[0].sens_nm + ' ' + (index + 1) + '차 경고';
-
-                        myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + index] = {
-                            type: 'label',
-                            xValue: 0.4, // x 위치를 조정할 수 있습니다.
-                            yValue: maxLevel,
-                            backgroundColor: colors[index],
-                            content: [labelName], // 수정된 라벨 내용
-                            font: {
-                                size: 8
+                    scales: {
+                        x: {
+                            type: 'time', // 시간 축 설정
+                            time: {
+                                displayFormats: {
+                                    minute: 'YYYY-MM-DD HH:mm' // 분 단위까지 표시
+                                },
+                                unit: 'minute', // 단위를 분(minute)으로 설정
+                            },
+                            adapters: {
+                                date: {} // 어댑터 설정(필요시 사용)
                             }
-                        };
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
                     }
-                });
-            });
-            myChart.update(); // 차트 업데이트
-        }
-    });
-</script>
-<script>
-    $(function () {
-        const $detailsGrid = $("#measure-details-grid");
-        const $detailsDateGrid = $("#measure-details-data-grid");
-
-
-        $('#add-row').click(() => {
-            const selectedSensor = getSelectedCheckData($detailsGrid);
-            if (selectedSensor.length === 0) {
-                alert('센서를 선택해주세요.');
-                return;
-            }
-            addEmptyRow(selectedSensor, $detailsDateGrid)
-        });
-
-        function addEmptyRow(sensor, $grid) {
-            const newRowId = "new_row_" + new Date().getTime();
-            const defaultRowData = {sens_no: sensor[0].sens_no, is_new: true};
-            $grid.jqGrid('addRowData', newRowId, defaultRowData, "last");
-        }
-
-        $("#save-button").click(() => {
-            $.ajax({
-                method: 'post',
-                url: '/measure-details-data/save',
-                traditional: true,
-                data: {jsonData: JSON.stringify($detailsDateGrid.jqGrid('getRowData'))},
-                dataType: 'json',
-                success: function (res) {
-                    alert('저장되었습니다.');
-                    $detailsDateGrid.trigger('reloadGrid');
-                },
-                error: function () {
-                    alert('입력값을 확인해 주세요.');
                 }
             });
-        })
 
-        $("#del-row").click(() => {
-            const selectedRow = getSelectedCheckData($detailsDateGrid);
-            if (selectedRow.length === 0) {
-                alert('삭제할 데이터를 선택해주세요.');
-                return;
-            }
-            $.ajax({
-                method: 'post',
-                url: '/measure-details-data/del',
-                traditional: true,
-                data: {jsonData: JSON.stringify(selectedRow)},
-                dataType: 'json',
-                success: function (res) {
-                    alert('삭제되었습니다.');
-                    $detailsDateGrid.trigger('reloadGrid');
-                },
-                error: function () {
-                    alert('입력값을 확인해 주세요.');
-                }
-            });
-        });
-
-        // 버튼 클릭 시 파일 입력창 열기
-        $('#upload-excel').click(function (e) {
-            const selectedRow = getSelectedCheckData($detailsGrid);
-            if (selectedRow.length === 0) {
-                alert('업로드할 데이터를 선택해주세요.');
-                return;
+            function getRandomHSL() {
+                const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
+                const saturation = 100; // 채도 고정
+                const lightness = 50; // 밝기 고정
+                return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
             }
 
-            e.preventDefault();  // 링크의 기본 동작 방지
-            $('#excel-file').click();  // 숨겨진 파일 입력 창 열기
-        });
+            function updateChart(data) {
+                // 차트 업데이트 로직
+                const labels = data[0].map(item => {
+                    const date = new Date(item.meas_dt);
+                    return date.getFullYear() + '-' +
+                        (date.getMonth() + 1).toString().padStart(2, '0') + ' ' + // 월
+                        date.getDate().toString().padStart(2, '0') + ' ' + // 일
+                        date.getHours().toString().padStart(2, '0') + ':' + // 시간
+                        date.getMinutes().toString().padStart(2, '0') + ':' + // 분
+                        date.getSeconds().toString().padStart(2, '0'); // 초
+                }); // 첫 번째 데이터의 시간
 
-        // 파일이 선택되면 처리
-        $('#excel-file').on('change', function (e) {
-            const file = e.target.files[0];  // 선택한 파일 가져오기
-            if (!file) return;
+                const datasets = data.map((item, index) => ({
+                    label: item[0].sens_nm, // 센서 이름
+                    data: item.map(i => i.formul_data), // 센서 데이터
+                    borderColor: getRandomHSL(),
+                    fill: false,
+                    pointRadius: 0, // 꼭지점 원 크기 제거
+                    borderWidth: 1, // 선 두께 줄이기
+                }));
 
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const data = new Uint8Array(event.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
+                myChart.data.labels = labels;
+                myChart.data.datasets = datasets;
 
+                // 기존의 annotation을 초기화
+                myChart.options.plugins.annotation.annotations = {};
 
-                // 첫 번째 시트의 데이터를 JSON 형태로 변환
-                const sheetName = workbook.SheetNames[0];  // 첫 번째 시트 이름 가져오기
-                const sheet = workbook.Sheets[sheetName];
-                let jsonData = XLSX.utils.sheet_to_json(sheet);
+                // 각 센서 데이터에서 최대 레벨 값을 가져와 점선을 추가
+                data.forEach(item => {
+                    const maxLevels = [parseFloat(item[0].lvl_max1), parseFloat(item[0].lvl_max2), parseFloat(item[0].lvl_max3), parseFloat(item[0].lvl_max4)];
+                    const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
 
-                jsonData.forEach((item) => {
-                    var parts = item['계측일시'].split(" ");
-                    var date = parts[0];
-                    var time = parts[1].replace(/:/g, '-'); // ':'를 '-'로 대체
+                    maxLevels.forEach((maxLevel, index) => {
+                        if (!isNaN(maxLevel)) {
+                            myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
+                                type: 'line',
+                                yMin: maxLevel,
+                                yMax: maxLevel,
+                                borderColor: colors[index],
+                                borderWidth: 1.5,
+                                borderDash: [5, 4]
+                            };
 
-                    item.meas_dt = date + '-' + time;
-                    item.raw_data = item['Raw Data'];
-                    item.formul_data = item['보정(Deg)'];
-                    item.raw_data_x = item['Raw Data(X)'];
-                    item.formul_data_x = item['X 보정(Deg)'];
-                    item.raw_data_y = item['Raw Data(Y)'];
-                    item.formul_data_y = item['Y 보정(Deg)'];
-                    item.raw_data_z = item['Raw Data(Z)'];
-                    item.formul_data_z = item['Z 보정(Deg)'];
+                            // 라벨 이름을 "센서이름 1차 Deg" 형식으로 설정
+                            const labelName = item[0].sens_nm + ' ' + (index + 1) + '차 경고';
 
-                    // 숫자형 데이터 파싱 (빈 값은 0.0으로 처리)
-                    item.raw_data = parseFloat(item['Raw Data']) || 0.0;
-                    item.formul_data = parseFloat(item['보정(Deg)']) || 0.0;
-                    item.raw_data_x = parseFloat(item['Raw Data(X)']) || 0.0;
-                    item.formul_data_x = parseFloat(item['X 보정(Deg)']) || 0.0;
-                    item.raw_data_y = parseFloat(item['Raw Data(Y)']) || 0.0;
-                    item.formul_data_y = parseFloat(item['Y 보정(Deg)']) || 0.0;
-                    item.raw_data_z = parseFloat(item['Raw Data(Z)']) || 0.0;
-                    item.formul_data_z = parseFloat(item['Z 보정(Deg)']) || 0.0;
-
-
-                    delete item['계측일시'];
-                    delete item['Raw Data'];
-                    delete item['보정(Deg)'];
-                    delete item['Raw Data(X)'];
-                    delete item['X 보정(Deg)'];
-                    delete item['Raw Data(Y)'];
-                    delete item['Y 보정(Deg)'];
-                    delete item['Raw Data(Z)'];
-                    delete item['Z 보정(Deg)'];
-                    delete item['__EMPTY'];
-                    delete item['__EMPTY_1'];
-                    delete item['__EMPTY_2'];
+                            myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + index] = {
+                                type: 'label',
+                                xValue: 0.4, // x 위치를 조정할 수 있습니다.
+                                yValue: maxLevel,
+                                backgroundColor: colors[index],
+                                content: [labelName], // 수정된 라벨 내용
+                                font: {
+                                    size: 8
+                                }
+                            };
+                        }
+                    });
                 });
+                myChart.update(); // 차트 업데이트
+            }
+        });
+    </script>
+    <script>
+        $(function () {
+            const $detailsGrid = $("#measure-details-grid");
+            const $detailsDateGrid = $("#measure-details-data-grid");
 
-                const selectedRow = getSelectedCheckData($detailsGrid);
 
+            $('#add-row').click(() => {
+                const selectedSensor = getSelectedCheckData($detailsGrid);
+                if (selectedSensor.length === 0) {
+                    alert('센서를 선택해주세요.');
+                    return;
+                }
+                addEmptyRow(selectedSensor, $detailsDateGrid)
+            });
+
+            function addEmptyRow(sensor, $grid) {
+                const newRowId = "new_row_" + new Date().getTime();
+                const defaultRowData = {sens_no: sensor[0].sens_no, is_new: true};
+                $grid.jqGrid('addRowData', newRowId, defaultRowData, "last");
+            }
+
+            $("#save-button").click(() => {
                 $.ajax({
-                    method: 'POST',
-                    url: '/measure-details-data/excel',
-                    contentType: 'application/json',  // JSON 형식으로 전송
-                    data: JSON.stringify({jsonData, sensNo: selectedRow[0].sens_no}),  // JSON 데이터 직렬화
+                    method: 'post',
+                    url: '/measure-details-data/save',
+                    traditional: true,
+                    data: {jsonData: JSON.stringify($detailsDateGrid.jqGrid('getRowData'))},
                     dataType: 'json',
                     success: function (res) {
                         alert('저장되었습니다.');
@@ -553,15 +444,120 @@
                         alert('입력값을 확인해 주세요.');
                     }
                 });
+            })
+
+            $("#del-row").click(() => {
+                const selectedRow = getSelectedCheckData($detailsDateGrid);
+                if (selectedRow.length === 0) {
+                    alert('삭제할 데이터를 선택해주세요.');
+                    return;
+                }
+                $.ajax({
+                    method: 'post',
+                    url: '/measure-details-data/del',
+                    traditional: true,
+                    data: {jsonData: JSON.stringify(selectedRow)},
+                    dataType: 'json',
+                    success: function (res) {
+                        alert('삭제되었습니다.');
+                        $detailsDateGrid.trigger('reloadGrid');
+                    },
+                    error: function () {
+                        alert('입력값을 확인해 주세요.');
+                    }
+                });
+            });
+
+            // 버튼 클릭 시 파일 입력창 열기
+            $('#upload-excel').click(function (e) {
+                const selectedRow = getSelectedCheckData($detailsGrid);
+                if (selectedRow.length === 0) {
+                    alert('업로드할 데이터를 선택해주세요.');
+                    return;
+                }
+
+                e.preventDefault();  // 링크의 기본 동작 방지
+                $('#excel-file').click();  // 숨겨진 파일 입력 창 열기
+            });
+
+            // 파일이 선택되면 처리
+            $('#excel-file').on('change', function (e) {
+                const file = e.target.files[0];  // 선택한 파일 가져오기
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
 
 
-            };
+                    // 첫 번째 시트의 데이터를 JSON 형태로 변환
+                    const sheetName = workbook.SheetNames[0];  // 첫 번째 시트 이름 가져오기
+                    const sheet = workbook.Sheets[sheetName];
+                    let jsonData = XLSX.utils.sheet_to_json(sheet);
 
-            reader.readAsArrayBuffer(file);  // 파일 읽기
+                    jsonData.forEach((item) => {
+                        var parts = item['계측일시'].split(" ");
+                        var date = parts[0];
+                        var time = parts[1].replace(/:/g, '-'); // ':'를 '-'로 대체
+
+                        item.meas_dt = date + '-' + time;
+                        item.raw_data = item['Raw Data'];
+                        item.formul_data = item['보정(Deg)'];
+                        item.raw_data_x = item['Raw Data(X)'];
+                        item.formul_data_x = item['X 보정(Deg)'];
+                        item.raw_data_y = item['Raw Data(Y)'];
+                        item.formul_data_y = item['Y 보정(Deg)'];
+                        item.raw_data_z = item['Raw Data(Z)'];
+                        item.formul_data_z = item['Z 보정(Deg)'];
+
+                        // 숫자형 데이터 파싱 (빈 값은 0.0으로 처리)
+                        item.raw_data = parseFloat(item['Raw Data']) || 0.0;
+                        item.formul_data = parseFloat(item['보정(Deg)']) || 0.0;
+                        item.raw_data_x = parseFloat(item['Raw Data(X)']) || 0.0;
+                        item.formul_data_x = parseFloat(item['X 보정(Deg)']) || 0.0;
+                        item.raw_data_y = parseFloat(item['Raw Data(Y)']) || 0.0;
+                        item.formul_data_y = parseFloat(item['Y 보정(Deg)']) || 0.0;
+                        item.raw_data_z = parseFloat(item['Raw Data(Z)']) || 0.0;
+                        item.formul_data_z = parseFloat(item['Z 보정(Deg)']) || 0.0;
+
+
+                        delete item['계측일시'];
+                        delete item['Raw Data'];
+                        delete item['보정(Deg)'];
+                        delete item['Raw Data(X)'];
+                        delete item['X 보정(Deg)'];
+                        delete item['Raw Data(Y)'];
+                        delete item['Y 보정(Deg)'];
+                        delete item['Raw Data(Z)'];
+                        delete item['Z 보정(Deg)'];
+                        delete item['__EMPTY'];
+                        delete item['__EMPTY_1'];
+                        delete item['__EMPTY_2'];
+                    });
+
+                    const selectedRow = getSelectedCheckData($detailsGrid);
+
+                    $.ajax({
+                        method: 'POST',
+                        url: '/measure-details-data/excel',
+                        contentType: 'application/json',  // JSON 형식으로 전송
+                        data: JSON.stringify({jsonData, sensNo: selectedRow[0].sens_no}),  // JSON 데이터 직렬화
+                        dataType: 'json',
+                        success: function (res) {
+                            alert('저장되었습니다.');
+                            $detailsDateGrid.trigger('reloadGrid');
+                        },
+                        error: function () {
+                            alert('입력값을 확인해 주세요.');
+                        }
+                    });
+                };
+                reader.readAsArrayBuffer(file);  // 파일 읽기
+            });
         });
-    });
-</script>
-
+    </script>
+</head>
 
 <body data-pgcode="0000">
 <section id="wrap">
@@ -569,32 +565,23 @@
     <div id="global-menu">
         <jsp:include page="common/include_sidebar.jsp" flush="true"/>
     </div>
-
-    <!--[s] 컨텐츠 영역 -->
     <div id="container">
-        <h2 class="txt">
-            관리자 전용
+        <h2 class="txt">관리자 전용
             <span class="arr">데이터 관리</span>
             <span class="arr">계측기 데이터 관리</span>
         </h2>
         <div id="contents">
-            <div class="contents-re" style="width: 40%">
-                <div class="contents_header">
-                    <h3 class="txt">센서 계측 현황</h3>
-                    <div class="search-top">
-                        <p class="search-top-label">현장명</p>
-                        <select id="district-no">
-                            <option value="">선택</option>
-                        </select>
-                        <div class="search-btn-wrapper">
-                            <a id="search-btn">조회</a>
-                        </div>
-                    </div>
+            <div class="contents-re">
+                <h3 class="txt">센서 계측 현황</h3>
+                <div class="btn-group">
+                    <p class="search-top-label">현장명</p>
+                    <select id="district-select">
+                        <option value="">선택</option>
+                    </select>
+                    <a id="search-btn">조회</a>
                 </div>
-                <div class="contents-in">
-                    <div class="bTable">
-                        <jsp:include page="./measure-details-grid.jsp" flush="true"/>
-                    </div>
+                <div id="left-grid-wrapper" class="contents-in">
+                    <table id="left-jq-grid"></table>
                 </div>
             </div>
 
@@ -610,22 +597,15 @@
                         <a id="add-row">행추가</a>
                         <a id="del-row">행삭제</a>
                         <a id="save-button">저장</a>
-
-<%--                        <a id="upload-excel" href="#">업로드</a>--%>
-<%--                        <input type="file" id="excel-file" style="display: none;" accept=".xlsx, .xls"/>--%>
-
                         <a id="download-excel">다운로드</a>
                         <a id="view-chart">차트조회</a>
                     </div>
                 </div>
-
-                <div class="contents-in">
-                    <div class="bTable">
-                        <jsp:include page="./measure-details-data-grid.jsp" flush="true"/>
-                    </div>
+                <div id="right-grid-wrapper" class="contents-in">
+                    <table id="right-jq-grid"></table>
                 </div>
-
             </div>
+
         </div>
     </div>
 

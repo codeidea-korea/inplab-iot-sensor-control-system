@@ -8,16 +8,16 @@ import java.io.Serializable;
 @Data
 public class SensorGroupingDto implements Serializable {
 
-    @FieldLabel(title = "센서타입명", width = 240)
+    @FieldLabel(title = "센서타입명")
     private String sens_tp_nm;
 
-    @FieldLabel(title = "센서명", width = 240)
+    @FieldLabel(title = "센서명")
     private String sens_nm;
 
-    @FieldLabel(title = "최종계측일", type = "range", width = 240)
+    @FieldLabel(title = "최종계측일", type = "range")
     private String last_apply_dt;
 
-    @FieldLabel(title = "통신상태", width = 240)
+    @FieldLabel(title = "통신상태")
     private String networ_status;
 
     @FieldLabel(title = "현장명", type = "hidden")

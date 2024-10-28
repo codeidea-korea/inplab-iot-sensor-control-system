@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
+    <jsp:include page="../common/include_head.jsp" flush="true" />
     <style>
         input[type=date], input[type=number] {
             text-align: left !important;
@@ -73,13 +73,17 @@
             z-index: 10;
         }
     </style>
+    <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
-        window.jqgridOption = {
-            columnAutoWidth: true,
-            multiselect: true,
-            multiboxonly: false
-        };
         $(function () {
+            const $grid = $("#jq-grid");
+            const path = "/maintenance/details"
+            initGrid($grid, path, $('#grid-wrapper'), {
+                multiselect: true,
+                multiboxonly: false,
+                useFilterToolbar: true,
+            })
+
             initDistrict();
             initMaintComp();
 
@@ -93,7 +97,7 @@
 
             $('.modifyBtn').on('click', () => {
                 resetForm();
-                const targetArr = getSelectedCheckData();
+                const targetArr = getSelectedCheckData($grid);
                 if (targetArr.length > 1) {
                     alert('수정할 데이터를 1건만 선택해주세요.');
                     return;
@@ -187,7 +191,7 @@
             })
 
             $('.excelBtn').on('click', () => {
-                downloadExcel('maintenance details');
+                downloadExcel('maintenance details', $grid, path);
             });
 
             function getAllSensorTypesBySensTypeNo(senstypeNo, callback) {
@@ -422,9 +426,9 @@
 
 <body data-pgcode="0000">
 <section id="wrap">
-    <jsp:include page="../common/include_top.jsp" flush="true"></jsp:include>
+    <jsp:include page="../common/include_top.jsp" flush="true" />
     <div id="global-menu">
-        <jsp:include page="../common/include_sidebar.jsp" flush="true"></jsp:include>
+        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
     </div>
     <div id="container">
         <h2 class="txt">유지보수관리</h2>
@@ -436,8 +440,8 @@
                     <a class="modifyBtn">상세정보</a>
                     <a class="excelBtn">다운로드</a>
                 </div>
-                <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid_old.jsp" flush="true"></jsp:include>
+                <div id="grid-wrapper" class="contents-in">
+                    <table id="jq-grid"></table>
                 </div>
             </div>
         </div>

@@ -4,14 +4,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true" />
+    <jsp:include page="../common/include_head.jsp" flush="true"/>
     <style>
         .layer-base-conts table td:first-child {
             border-left: 1px solid rgba(0, 0, 0, 0.2);
-        }
-
-        .message_text {
-            border: 0
         }
 
         .message_text > tbody > tr > td {
@@ -33,17 +29,17 @@
             align-items: center;
             padding: 1rem;
         }
-
     </style>
+    <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
-        // window.jqgridOption = {
-        //     multiselect: true,
-        //     multiboxonly: false,
-        //     columnAutoWidth: true,
-        // };
-
         $(document).ready(function () {
-            const $grid = $("#alarm-details-grid");
+            const $grid = $("#jq-grid");
+            const path = "/sensor/alarm-details"
+            initGrid($grid, path, $('#grid-wrapper'), {
+                multiselect: true,
+                multiboxonly: true,
+                useFilterToolbar: true,
+            })
 
             const currentYear = new Date().getFullYear();
             const startDate = currentYear + "-01-01";
@@ -57,15 +53,16 @@
 
             function setGridData() {
                 $grid.setGridParam({
+                    page: 1,
                     postData: {
                         ...$grid.jqGrid('getGridParam', 'postData'),
                         reg_day: $('#history-date-range').val()
                     }
-                }, true);
+                }).trigger('reloadGrid', [{page: 1}]);
             }
 
             $('.excelBtn').on('click', function () {
-                downloadExcel('alarm-list');
+                downloadExcel('alarm-list', $grid, path);
             });
 
             $("#open-modal").click(() => {
@@ -106,13 +103,13 @@
         <div id="contents">
             <div class="contents-re">
                 <h3 class="txt">알람이력조회</h3>
-                <div class="contents-in">
-                    <jsp:include page="./alarm-details-grid.jsp" flush="true" />
+                <div id="grid-wrapper" class="contents-in">
+                    <table id="jq-grid"></table>
                 </div>
             </div>
         </div>
     </div>
-    <jsp:include page="./sms-details.jsp" flush="true" />
+    <jsp:include page="./sms-details.jsp" flush="true"/>
 </section>
 </body>
 </html>

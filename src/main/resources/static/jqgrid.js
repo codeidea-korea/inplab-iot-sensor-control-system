@@ -3,6 +3,7 @@ function initGrid($grid, path, $gridWrapper, options = {
     shrinkToFit: true
 }) {
     getColumns(path, (columns) => {
+        console.log('jq initGrid');
         const columnData = {
             model: []
         };
@@ -13,7 +14,7 @@ function initGrid($grid, path, $gridWrapper, options = {
 
         $(window).trigger('beforeLoadGrid', columnData)
 
-        const setting = {
+        const setting = Object.assign({}, {
             url: path + '/list',
             datatype: "json",
             cellEdit: true,
@@ -22,7 +23,6 @@ function initGrid($grid, path, $gridWrapper, options = {
             colModel: columnData.model,
             rowNum: 50,
             scroll: true,
-            formatter: "actions",
             scrollrows: true,
             height: "auto",
             viewrecords: true,
@@ -30,13 +30,6 @@ function initGrid($grid, path, $gridWrapper, options = {
             autowidth: true,
             shrinkToFit: true,
             emptyrecords: "조회된 데이터가 없습니다",
-            jsonReader: {
-                root: "rows",
-                page: "page",
-                total: "total",
-                records: "records",
-                repeatitems: false
-            },
             loadComplete: function () {
                 console.log('jq loadComplete');
                 $(window).trigger('loadComplete');
@@ -90,8 +83,14 @@ function initGrid($grid, path, $gridWrapper, options = {
                     }
                 }));
             },
-        };
+        }, options);
+
         $grid.jqGrid(setting);
+
+        if (options.useFilterToolbar) {
+            $grid.jqGrid('filterToolbar');
+        }
+
         setAdditionalFunc($grid, $gridWrapper);
     });
 }
@@ -101,6 +100,7 @@ function getColumns(path, callback) {
         method: 'GET',
         url: path + "/columns",
         success: (columns) => {
+            console.log('jq getColumns', columns);
             callback(columns);
         }
     })
@@ -166,4 +166,20 @@ function setAdditionalFunc($grid, $gridWrapper) {
         $grid.jqGrid('setGridHeight', gridHeight);
     });
     $(window).trigger('resize');
+}
+
+function downloadExcel(fileName, $grid, path) {
+    const gridData = $grid.getGridParam('postData');
+    const urlParameters = Object.entries(gridData).map(e => e.join('=')).join('&');
+
+    const url = path + "/excel/" + fileName + '?' + urlParameters;
+    const hiddenIFrameId = 'hiddenDownloader';
+    let iframe = document.getElementById(hiddenIFrameId);
+    if (iframe === null) {
+        iframe = document.createElement('iframe');
+        iframe.id = hiddenIFrameId;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+    }
+    iframe.src = url;
 }
