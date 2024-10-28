@@ -10,16 +10,19 @@ function initGrid($grid, path, $gridWrapper, options = {
         $.each(columns, (index) => {
             columnData.model.push(setColumn(columns[index]));
         });
+
         $(window).trigger('beforeLoadGrid', columnData)
 
         const setting = {
             url: path + '/list',
             datatype: "json",
             cellEdit: true,
+            cellsubmit: 'clientArray',
             mtype: "GET",
             colModel: columnData.model,
             rowNum: 50,
             scroll: true,
+            formatter: "actions",
             scrollrows: true,
             height: "auto",
             viewrecords: true,
@@ -35,22 +38,58 @@ function initGrid($grid, path, $gridWrapper, options = {
                 repeatitems: false
             },
             loadComplete: function () {
+                console.log('jq loadComplete');
                 $(window).trigger('loadComplete');
             },
             gridComplete: function () {
+                console.log('jq gridComplete');
                 $(window).trigger('resize');
             },
             beforeRequest: () => {
+                console.log('jq beforeRequest');
                 const currentPage = $grid.getGridParam('page');
                 const postData = $grid.jqGrid('getGridParam', 'postData');
                 postData.page = currentPage;
             },
             ondblClickRow: function (rowId) {
+                console.log('jq ondblClickRow');
                 $(window).trigger('gridDblClick', {rowId, ...$grid.jqGrid('getRowData', rowId)});
             },
             onSelectRow: (rowId) => {
+                console.log('jq onSelectRow');
                 // $(window).trigger('onSelectRow', {rowId, ...$grid.jqGrid('getRowData', rowId)});
-            }
+            },
+            afterEditCell: function (rowid, cellname, value, iRow, iCol) {
+                console.log('jq afterEditCell');
+                $(window).trigger('afterEditCell', Object.assign($grid.jqGrid('getRowData', rowid), {
+                    cell: {
+                        id: rowid,
+                        cellname: cellname,
+                        value: value,
+                        iRow: iRow,
+                        iCol: iCol
+                    }
+                }));
+                $("#" + iRow + "_" + cellname.valueOf()).bind('blur', function () {
+                    $grid.saveCell(iRow, iCol);
+                });
+            },
+            beforeSubmitCell: function (rowid, cellname, value) { // submit 전
+                console.log('jq, beforeSubmitCell');
+                return {"id": rowid, "cellName": cellname, "cellValue": value}
+            },
+            afterSaveCell: function (rowid, cellname, value, iRow, iCol) {
+                console.log('jq afterSaveCell');
+                $(window).trigger('afterSaveCell', Object.assign($grid.jqGrid('getRowData', rowid), {
+                    cell: {
+                        id: rowid,
+                        cellname: cellname,
+                        value: value,
+                        iRow: iRow,
+                        iCol: iCol
+                    }
+                }));
+            },
         };
         $grid.jqGrid(setting);
         setAdditionalFunc($grid, $gridWrapper);
@@ -100,10 +139,8 @@ function setColumn(column) {
     }
 
     if (column['type'] === 'editable') {
-        console.log('editable', column);
         _column.editable = true;
     }
-    console.log(_column)
     return _column;
 }
 

@@ -63,7 +63,7 @@
             resultType="com.safeone.dashboard.dto.sensorinitialsetting.SensorInitialSettingDto">
         select tst.sens_tp_nm
         , tsinfo.sens_nm
---         , tai.sens_chnl_nm
+        -- , tai.sens_chnl_nm
         , tsi.formul_data
         , tsi.init_apply_dt
         , tsi.last_apply_dt
@@ -73,7 +73,7 @@
         from tb_sensor_info tsinfo
         left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
         left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
---         left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
+        -- left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
         WHERE 1=1
         and
         tsinfo.sens_no in
@@ -109,10 +109,13 @@
 
     <update id="updateSensorInitialSetting" parameterType="java.util.Map">
         UPDATE tb_sensor_init
-        SET formul_data = #{formul_data}::float
-          , emer_status = #{emer_status}
-          , mod_dt      = now()
+        SET
+        <if test="formul_data != null and formul_data != ''">
+            formul_data = #{formul_data}::float ,
+        </if>
+        emer_status = #{emer_status}
+        , mod_dt = now()
         WHERE sens_no = #{sens_no}
-          and sens_chnl_id = #{sens_chnl_id}
+        and sens_chnl_id = #{sens_chnl_id}
     </update>
 </mapper>
