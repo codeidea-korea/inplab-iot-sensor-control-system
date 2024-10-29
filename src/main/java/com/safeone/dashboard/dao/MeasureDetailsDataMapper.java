@@ -24,7 +24,5 @@ public interface MeasureDetailsDataMapper {
     List<MeasureDetailsDataDto> isAlreadyExists(Map param);
 
     List<MeasureDetailsDataDto> selectXYZ(Map request);
-
-//    List<SensorChartDto> selectSensorChartData(Map param);
 }
     

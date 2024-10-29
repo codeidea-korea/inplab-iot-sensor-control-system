@@ -25,13 +25,6 @@ public class MeasureDetailsController extends JqGridAbstract<MeasureDetailsDto> 
 		return measureDetailsService.getList(param);
 	}
 
-//	@GetMapping("/chart")
-//	@ResponseBody
-//	public List<SensorChartDto> getChartData(@RequestParam Map<String, Object> param) {
-//		System.out.println("param = " + param);
-//		return measureDetailsService.getSensorChartData(param);
-//	}
-
 	@Override
 	protected int getTotalRows(Map param) {
 		return measureDetailsService.getTotalCount(param);

@@ -85,6 +85,20 @@
             display: inline-block;
             vertical-align: top;
         }
+
+        #district-select {
+            width: 150px;
+            height: 3.6rem;
+            padding: 0 1rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            display: inline-block;
+            vertical-align: top;
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
@@ -107,7 +121,6 @@
             const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
             $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
 
-            const $grpGrid = $("#sensor-grouping-grid");
             const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
 
             $.ajax({
@@ -169,9 +182,8 @@
                     Promise.all(requests).then((d) => {
                         updateChart(chartDataArray.filter((item) => item.length > 0));
                     }).catch((e) => {
-                        console
-                            .log('error', e);
-                        alert('데이터를 가져오는 중 오류가 발생했습니다.');
+                        console.log('error', e);
+                        alert('조회할 수 없는 데이터 입니다.');
                     });
                 }
             });

@@ -15,6 +15,7 @@
         align-items: stretch;
         grid-template-columns: 1fr 1fr;
     }
+
     .contents-re {
         width: 100%;
     }
@@ -96,7 +97,7 @@
     .bTable {
         width: 100%; /* 부모 컨테이너에 맞춤 */
         height: 100%; /* 높이도 최대로 확장 */
-        overflow: auto; /* 스크롤 필요 시 표시 */
+        /*overflow: auto; !* 스크롤 필요 시 표시 *!*/
         display: grid;
     }
 
@@ -151,7 +152,6 @@
     };
 
     $(document).ready(() => {
-
         const $normalGrid = $('#display-send-management-normal');
         const $emerGrid = $('#display-send-management-emer');
         const $sensorGrid = $('#display-send-management-sensor');
@@ -189,6 +189,10 @@
                     );
 
                     $('#dispbd_group').append(
+                        "<option value='" + item.img_grp_nm + "'>" + item.img_grp_nm + "</option>"
+                    );
+
+                    $('#send_group').append(
                         "<option value='" + item.img_grp_nm + "'>" + item.img_grp_nm + "</option>"
                     );
                 });
@@ -290,6 +294,18 @@
             });
         })
 
+        $(".insert-btn").click((e) => {
+            const eventFlag = e.target.dataset.image;
+            if (eventFlag === '0') {
+                $('#event_flag').val('평시');
+            } else if (eventFlag === '1') {
+                $('#event_flag').val('긴급');
+            } else {
+                $('#event_flag').val('센서 경보');
+            }
+            popFancy('#lay-form-write');
+        })
+
         function setGridData($grid, img_grp_nm, dispbd_evnt_flag) {
             $grid.setGridParam({
                 postData: {
@@ -299,14 +315,95 @@
                 }
             }, true);
         }
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                if (!file) {
+                    reject(new Error("이미지 파일을 선택해주세요."));
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error("파일을 읽는 도중 에러가 발생했습니다."));
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        $("#form-submit-btn").click( async () => {
+            let eventFlagCode = $("#event_flag").val();
+            let eventFlag;
+            let base64Image;
+
+            if (eventFlagCode === '평시') {
+                eventFlag = 0;
+            } else if (eventFlagCode === '긴급') {
+                eventFlag = 1;
+            } else {
+                eventFlag = 2;
+            }
+
+            try {
+                base64Image = await readFileAsBase64($("#image_file")[0].files[0]);
+            } catch (error) {
+                alert(error.message);
+                return;
+            }
+
+            if ($("#send_group").val() === '') {
+                alert('전송그룹을 선택해주세요.');
+                return;
+            }
+
+            if ($("#effect").val() === '') {
+                alert('표시효과를 선택해주세요.');
+                return;
+            }
+
+            if ($("#effect_sec").val() === '') {
+                alert('표시시간을 입력해주세요.');
+                return;
+            }
+
+            if ($("#dispbd_autosnd_yn").val() === '') {
+                alert('자동여부를 선택해주세요.');
+                return;
+            }
+
+            if ($("#use_yn").val() === '') {
+                alert('사용여부를 선택해주세요.');
+                return;
+            }
+
+            $.ajax({
+                url: '/display-connection/display-img-management/add',
+                type: 'POST',
+                data: {
+                    img_grp_nm: $("#send_group").val(),
+                    img_file_path: base64Image,
+                    dispbd_evnt_flag: eventFlag,
+                    img_effect_cd: $("#effect").val(),
+                    img_disp_min: $("#effect_sec").val(),
+                    dispbd_autosnd_yn: $("#dispbd_autosnd_yn").val(),
+                    use_yn: $("#use_yn").val(),
+                    dispbd_imgfile_nm: 'temp'
+                },
+                success: function (_res) {
+                    popFancyClose('#lay-form-write');
+                },
+                error: function (err) {
+                    alert('알 수 없는 오류가 발생했습니다.');
+                }
+            });
+
+        })
     });
 </script>
 
 <body data-pgCode="0000">
 <section id="wrap">
-    <jsp:include page="../common/include_top.jsp" flush="true"></jsp:include>
+    <jsp:include page="../common/include_top.jsp" flush="true"/>
     <div id="global-menu">
-        <jsp:include page="../common/include_sidebar.jsp" flush="true"></jsp:include>
+        <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
     <div id="container">
         <h2 class="txt">전광판 연계 > 전광판 전송 관리</h2>
@@ -320,12 +417,12 @@
                             <select id="normal-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
-                            <a href="javascript:void(0);">등록</a>
+                            <a data-image="0" class="insert-btn">등록</a>
                         </div>
                     </div>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="./display-send-management-normal-grid.jsp" flush="true"></jsp:include>
+                    <jsp:include page="./display-send-management-normal-grid.jsp" flush="true"/>
                 </div>
             </div>
             <div class="contents-re">
@@ -393,12 +490,12 @@
                             <select id="emer-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
-                            <a href="javascript:void(0);">등록</a>
+                            <a data-image="1" class="insert-btn">등록</a>
                         </div>
                     </div>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="./display-send-management-emer-grid.jsp" flush="true"></jsp:include>
+                    <jsp:include page="./display-send-management-emer-grid.jsp" flush="true"/>
                 </div>
             </div>
             <div class="contents-re">
@@ -408,7 +505,7 @@
                     </div>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="./display-send-history-grid.jsp" flush="true"></jsp:include>
+                    <jsp:include page="./display-send-history-grid.jsp" flush="true"/>
                 </div>
             </div>
             <div class="contents-re">
@@ -420,13 +517,13 @@
                             <select id="sensor-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
-                            <a href="javascript:void(0);">등록</a>
+                            <a data-image="2" class="insert-btn">등록</a>
                         </div>
                     </div>
                 </div>
                 <div class="contents-in">
                     <div class="bTable">
-                        <jsp:include page="./display-send-management-sensor-grid.jsp" flush="true"></jsp:include>
+                        <jsp:include page="./display-send-management-sensor-grid.jsp" flush="true"/>
                     </div>
                 </div>
             </div>
@@ -436,13 +533,10 @@
 
     <!-- 팝업 -->
     <div id="lay-form-write" class="layer-base">
-
-        <input type="hidden" name="alarm_kind_id"/>
-
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">업로드</div>
+        <div class="layer-base-title">사용자 <span id="form_sub_title">등록/수정</span></div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
@@ -452,19 +546,71 @@
                     </colgroup>
                     <tbody>
                     <tr>
-                        <th>엑셀파일</th>
-                        <td><input type="file" id="uploadFile" name="uploadFile" value="" placeholder=""/></td>
+                        <th>이미지 ID</th>
+                        <td><input type="text" id="image_id" placeholder="Ex) Seq"/></td>
+                    </tr>
+                    <tr>
+                        <th>이벤트 구분</th>
+                        <td><input type="text" id="event_flag" placeholder="Ex) 평시" readonly/></td>
+                    </tr>
+                    <tr>
+                        <th>이미지 파일</th>
+                        <td><input type="file" id="image_file" accept="image/*" /></td>
+                    </tr>
+                    <tr>
+                        <th>전송그룹명</th>
+                        <td>
+                            <select id="send_group">
+                                <option value="">선택</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>표시효과</th>
+                        <td>
+                            <select id="effect">
+                                <option value="">선택</option>
+                                <option value="DSP001">바로 표시</option>
+                                <option value="DSP002">우에서 좌로 스크롤</option>
+                                <option value="DSP003">하에서 상으로 스크롤</option>
+                                <option value="DSP004">상에서 하로 스크롤</option>
+                                <option value="DSP005">레이저효과</option>
+                                <option value="DSP006">중앙에서 상하로 떨어짐</option>
+                                <option value="DSP007">상하에서 중앙으로 모임</option>
+                                <option value="DSP008">1단으로 좌측 스크롤</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>표시시간(초)</th>
+                        <td><input type="number" id="effect_sec" placeholder="Ex) 4"/></td>
+                    </tr>
+                    <tr>
+                        <th>자동여부</th>
+                        <td><select id="dispbd_autosnd_yn">
+                            <option value="">선택</option>
+                            <option value="Y">자동</option>
+                            <option value="N">수동</option>
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <th>사용여부</th>
+                        <td><select id="use_yn">
+                            <option value="">선택</option>
+                            <option value="Y">사용</option>
+                            <option value="N">미사용</option>
+                        </select></td>
                     </tr>
                     </tbody>
                 </table>
             </div>
             <div class="btn-btm">
-                <input type="submit" blue value="저장"/>
-                <button type="button" data-fancybox-close>취소</button>
+                <input type="button" id="form-submit-btn" blue value="저장"/>
+                <button type="button" data-fancybox-close>닫기</button>
             </div>
         </div>
     </div>
     <!-- 팝업 -->
-</section>
+
 </body>
 </html>

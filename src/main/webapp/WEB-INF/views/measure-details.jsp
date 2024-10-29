@@ -137,6 +137,20 @@
             align-items: center;
             padding: 1rem;
         }
+
+        #district-select {
+            width: 150px;
+            height: 3.6rem;
+            padding: 0 1rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            display: inline-block;
+            vertical-align: top;
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
@@ -149,6 +163,11 @@
                 multiselect: true,
                 multiboxonly: false,
                 useFilterToolbar: true,
+            }, () => {
+                const allRowIds = $leftGrid.jqGrid('getDataIDs');
+                allRowIds.forEach(rowId => {
+                    $leftGrid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
+                });
             })
 
             const $rightGrid = $("#right-jq-grid");
@@ -173,6 +192,7 @@
                     alert('알 수 없는 오류가 발생했습니다.');
                 }
             });
+
             $districtSelect.on('change', (e) => {
                 const value = e.target.value;
                 if (value === '') {
@@ -203,7 +223,7 @@
                             sens_no: targetArr[0].sens_no
                         }
                     }).trigger('reloadGrid', [{page: 1}]);
-                    $("#district_nm").text($('#district-no option:selected').text());
+                    $("#district_nm").text($('#district-select option:selected').text());
                     $("#sens_tp_nm").text(targetArr[0].sens_tp_nm);
                     $("#sens_nm").text(targetArr[0].sens_nm);
                 }
@@ -234,7 +254,7 @@
             }
 
             $("#view-chart").click(() => {
-                const targetArr = getSelectedCheckData($grpGrid);
+                const targetArr = getSelectedCheckData($leftGrid);
                 if (targetArr.length > 1) {
                     alert('조회할 데이터를 1건만 선택해주세요.');
                     return;
@@ -253,7 +273,7 @@
                 const endDateTime = $('#end-date').val();
                 chartDataArray.length = 0; // 배열 초기화
 
-                const targetArr = getSelectedCheckData($grpGrid);
+                const targetArr = getSelectedCheckData($leftGrid);
 
                 const requests = targetArr.map((item) => {
                     let sensChnlId = ''
@@ -266,8 +286,9 @@
                 // 모든 요청이 완료된 후 차트를 그립니다.
                 Promise.all(requests).then(() => {
                     updateChart(chartDataArray); // 차트 업데이트 함수 호출
-                }).catch(() => {
-                    alert('데이터를 가져오는 중 오류가 발생했습니다.');
+                }).catch((e) => {
+                    console.log('error', e);
+                    alert('조회할 수 없는 데이터 입니다.');
                 });
             });
 
@@ -410,23 +431,22 @@
     </script>
     <script>
         $(function () {
-            const $detailsGrid = $("#measure-details-grid");
-            const $detailsDateGrid = $("#measure-details-data-grid");
-
+            const $leftGrid = $("#left-jq-grid");
+            const $rightGrid = $("#right-jq-grid");
 
             $('#add-row').click(() => {
-                const selectedSensor = getSelectedCheckData($detailsGrid);
+                const selectedSensor = getSelectedCheckData($leftGrid);
                 if (selectedSensor.length === 0) {
                     alert('센서를 선택해주세요.');
                     return;
                 }
-                addEmptyRow(selectedSensor, $detailsDateGrid)
+                addEmptyRow(selectedSensor, $rightGrid)
             });
 
             function addEmptyRow(sensor, $grid) {
                 const newRowId = "new_row_" + new Date().getTime();
                 const defaultRowData = {sens_no: sensor[0].sens_no, is_new: true};
-                $grid.jqGrid('addRowData', newRowId, defaultRowData, "last");
+                $grid.jqGrid('addRowData', newRowId, defaultRowData, "first");
             }
 
             $("#save-button").click(() => {
@@ -434,11 +454,11 @@
                     method: 'post',
                     url: '/measure-details-data/save',
                     traditional: true,
-                    data: {jsonData: JSON.stringify($detailsDateGrid.jqGrid('getRowData'))},
+                    data: {jsonData: JSON.stringify($rightGrid.jqGrid('getRowData'))},
                     dataType: 'json',
                     success: function (res) {
                         alert('저장되었습니다.');
-                        $detailsDateGrid.trigger('reloadGrid');
+                        $rightGrid.trigger('reloadGrid');
                     },
                     error: function () {
                         alert('입력값을 확인해 주세요.');
@@ -447,7 +467,7 @@
             })
 
             $("#del-row").click(() => {
-                const selectedRow = getSelectedCheckData($detailsDateGrid);
+                const selectedRow = getSelectedCheckData($rightGrid);
                 if (selectedRow.length === 0) {
                     alert('삭제할 데이터를 선택해주세요.');
                     return;
@@ -460,7 +480,7 @@
                     dataType: 'json',
                     success: function (res) {
                         alert('삭제되었습니다.');
-                        $detailsDateGrid.trigger('reloadGrid');
+                        $rightGrid.trigger('reloadGrid');
                     },
                     error: function () {
                         alert('입력값을 확인해 주세요.');
@@ -470,7 +490,7 @@
 
             // 버튼 클릭 시 파일 입력창 열기
             $('#upload-excel').click(function (e) {
-                const selectedRow = getSelectedCheckData($detailsGrid);
+                const selectedRow = getSelectedCheckData($leftGrid);
                 if (selectedRow.length === 0) {
                     alert('업로드할 데이터를 선택해주세요.');
                     return;
@@ -536,7 +556,7 @@
                         delete item['__EMPTY_2'];
                     });
 
-                    const selectedRow = getSelectedCheckData($detailsGrid);
+                    const selectedRow = getSelectedCheckData($leftGrid);
 
                     $.ajax({
                         method: 'POST',
@@ -546,7 +566,7 @@
                         dataType: 'json',
                         success: function (res) {
                             alert('저장되었습니다.');
-                            $detailsDateGrid.trigger('reloadGrid');
+                            $rightGrid.trigger('reloadGrid');
                         },
                         error: function () {
                             alert('입력값을 확인해 주세요.');
@@ -558,7 +578,6 @@
         });
     </script>
 </head>
-
 <body data-pgcode="0000">
 <section id="wrap">
     <jsp:include page="common/include_top.jsp" flush="true"/>

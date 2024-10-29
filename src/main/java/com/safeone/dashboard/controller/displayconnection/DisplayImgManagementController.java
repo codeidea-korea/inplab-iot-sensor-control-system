@@ -38,7 +38,7 @@ public class DisplayImgManagementController extends JqGridAbstract<DisplayImgMan
 	}
 
 	@ResponseBody
-	@GetMapping("/add")
+	@PostMapping("/add")
 	public boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
 		return service.create(param);
 	}

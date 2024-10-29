@@ -58,6 +58,19 @@ public class MeasureDetailsDataController extends JqGridAbstract<MeasureDetailsD
         return true;
     }
 
+    @ResponseBody
+    @PostMapping("/del")
+    public boolean del(@RequestParam Map<String, Object> param) {
+        JsonArray jArray = (new JsonParser())
+                .parse(param.get("jsonData").toString())
+                .getAsJsonArray();
+        for (JsonElement el : jArray) {
+            Map m = (new Gson()).fromJson(el, Map.class);
+            measureDetailsDataService.deleteRow(m);
+        }
+        return true;
+    }
+
     @Override
     protected int getTotalRows(Map param) {
         return measureDetailsDataService.getTotalCount(param);

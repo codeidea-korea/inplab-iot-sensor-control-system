@@ -1,7 +1,7 @@
 function initGrid($grid, path, $gridWrapper, options = {
     autowidth: true,
     shrinkToFit: true
-}) {
+}, loadCompleteCallback) {
     getColumns(path, (columns) => {
         console.log('jq initGrid');
         const columnData = {
@@ -31,8 +31,10 @@ function initGrid($grid, path, $gridWrapper, options = {
             shrinkToFit: true,
             emptyrecords: "조회된 데이터가 없습니다",
             loadComplete: function () {
-                console.log('jq loadComplete');
                 $(window).trigger('loadComplete');
+                if (loadCompleteCallback) {
+                    loadCompleteCallback();
+                }
             },
             gridComplete: function () {
                 console.log('jq gridComplete');

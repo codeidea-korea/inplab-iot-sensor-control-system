@@ -9,7 +9,12 @@
         $(function () {
             const $grid = $("#jq-grid");
             const $districtSelect = $('#district-select');
-            initGrid($grid, "/sensor-initial-setting", $('#grid-wrapper'))
+            initGrid($grid, "/sensor-initial-setting", $('#grid-wrapper'), {}, () => {
+                const allRowIds = $grid.jqGrid('getDataIDs');
+                allRowIds.forEach(rowId => {
+                    $grid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
+                });
+            })
 
             $.ajax({
                 url: '/adminAdd/districtInfo/all',

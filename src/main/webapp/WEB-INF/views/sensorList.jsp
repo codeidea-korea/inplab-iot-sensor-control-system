@@ -3,9 +3,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="./common/include_head.jsp" flush="true"></jsp:include>
+    <jsp:include page="./common/include_head.jsp" flush="true" />
     <style>
-        /* 검색 행의 input 필드에 border 추가 */
         .ui-search-toolbar input {
             border: 1px solid #ccc; /* 원하는 border 색상 */
             padding: 2px;
@@ -61,23 +60,13 @@
             align-items: center;
             padding: 1rem;
         }
-
-        /*#chart-popup {*/
-        /*    position: fixed; !* 화면에 고정 *!*/
-        /*    top: 50%; !* 화면 중앙에 배치 *!*/
-        /*    left: 50%;*/
-        /*    transform: translate(-50%, -50%); !* 정확한 중앙 정렬 *!*/
-        /*    z-index: 1000; !* 다른 요소 위에 배치 *!*/
-        /*    pointer-events: none; !* 클릭 이벤트 비활성화 *!*/
-        /*}*/
-
     </style>
     <script type="text/javascript" src="/admin_add.js"></script>
     <script>
         window.jqgridOption = {
             multiselect: true,
             multiboxonly: false
-        }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
+        };
 
         let $grid;
         const limit = 25;
@@ -298,11 +287,11 @@
                     return getChartData(item.sens_no, startDateTime, endDateTime, sensChnlId);
                 });
 
-                // 모든 요청이 완료된 후 차트를 그립니다.
                 Promise.all(requests).then(() => {
-                    updateChart(chartDataArray); // 차트 업데이트 함수 호출
-                }).catch(() => {
-                    alert('데이터를 가져오는 중 오류가 발생했습니다.');
+                    updateChart(chartDataArray.filter(item => item.length > 0));
+                }).catch((e) => {
+                    console.log('error > ', e);
+                    alert('조회할 수 없는 데이터 입니다.');
                 });
             });
 

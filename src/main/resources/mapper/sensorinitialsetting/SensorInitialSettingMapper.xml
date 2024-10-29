@@ -9,8 +9,8 @@
         <if test="sens_nm != null and sens_nm != ''">
             and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'
         </if>
-        <if test="sens_chnl_nm != null and sens_chnl_nm != ''">
-            and tai.sens_chnl_nm ilike '%' || #{sens_chnl_nm} || '%'
+        <if test="sens_chnl_id != null and sens_chnl_id != ''">
+            and tsi.sens_chnl_id ilike '%' || #{sens_chnl_id} || '%'
         </if>
         <if test="formul_data != null and formul_data != ''">
             and tsi.formul_data ilike '%' || #{formul_data} || '%'
@@ -37,8 +37,8 @@
                 <when test="'sens_nm' == sidx and sidx != ''">
                     tsinfo.sens_nm ${sord}
                 </when>
-                <when test="'sens_chnl_nm' == sidx and sidx != ''">
-                    tai.sens_chnl_nm ${sord}
+                <when test="'sens_chnl_id' == sidx and sidx != ''">
+                    tsi.sens_chnl_id ${sord}
                 </when>
                 <when test="'formul_data' == sidx and sidx != ''">
                     tsi.formul_data ${sord}
@@ -61,22 +61,19 @@
 
     <select id="selectSensorInitialSettingList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.sensorinitialsetting.SensorInitialSettingDto">
-        select tst.sens_tp_nm
-        , tsinfo.sens_nm
-        -- , tai.sens_chnl_nm
-        , tsi.formul_data
+        select tsi.formul_data
         , tsi.init_apply_dt
+        , tst.sens_tp_nm
         , tsi.last_apply_dt
         , tsi.emer_status
-        , tsi.sens_no
         , tsi.sens_chnl_id
-        from tb_sensor_info tsinfo
-        left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
+        , tsi.sens_no
+        , tsinfo.sens_nm
+        from tb_sensor_init tsi
+        left join tb_sensor_info tsinfo on tsi.sens_no = tsinfo.sens_no
         left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
-        -- left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
-        WHERE 1=1
-        and
-        tsinfo.sens_no in
+        WHERE 1 = 1
+        and tsi.sens_no in
         (select tlim.sens_no
         from tb_logr_idx_map tlim
         where logr_no in (select tli.logr_no
@@ -90,14 +87,12 @@
         </if>
     </select>
     <select id="selectSensorInitialSettingListTotal" parameterType="java.util.Map" resultType="int">
-        select count(tsinfo.sens_no)
-        from tb_sensor_info tsinfo
-        left join tb_sensor_init tsi on tsinfo.sens_no = tsi.sens_no
+        select count(tsi.sens_no)
+        from tb_sensor_init tsi
+        left join tb_sensor_info tsinfo on tsi.sens_no = tsinfo.sens_no
         left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
-        left join tb_alarm_info tai on tsi.sens_chnl_id = tai.sens_chnl_id
-        WHERE 1=1
-        and
-        tsinfo.sens_no in
+        WHERE 1 = 1
+        and tsi.sens_no in
         (select tlim.sens_no
         from tb_logr_idx_map tlim
         where logr_no in (select tli.logr_no

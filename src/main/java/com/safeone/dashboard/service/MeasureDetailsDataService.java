@@ -155,17 +155,11 @@ public class MeasureDetailsDataService implements JqGridService<MeasureDetailsDa
         return !mapper.isAlreadyExists(param).isEmpty();
     }
 
-    public void deleteRow(Map m) {
-        mapper.deleteRow(m);
-    }
-
     public void save(Map m, Object sensNo) {
         Map request = new HashMap();
         request.put("sens_no", sensNo);
         request.put("meas_dt", formattedDateTime(m.get("meas_dt").toString()));
         List<MeasureDetailsDataDto> measureDetailsDataDtos = mapper.selectXYZ(request);
-
-        System.out.println("measureDetailsDataDtos = " + measureDetailsDataDtos);
     }
 
     private String formattedDateTime(String formattedDateTime) {
@@ -175,4 +169,7 @@ public class MeasureDetailsDataService implements JqGridService<MeasureDetailsDa
         return date + " " + time; // 최종 문자열 조합
     }
 
+    public void deleteRow(Map m) {
+        mapper.deleteRow(m);
+    }
 }
