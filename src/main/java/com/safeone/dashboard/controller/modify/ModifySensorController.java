@@ -2,15 +2,14 @@ package com.safeone.dashboard.controller.modify;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dto.GetModifySensorDto;
+import com.safeone.dashboard.dto.SensorDto;
 import com.safeone.dashboard.service.ModifySensorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,21 +17,27 @@ import java.util.Map;
 @RequestMapping("/modify/sensor")
 public class ModifySensorController {
 
-    private final ModifySensorService modifyCctvService;
+    private final ModifySensorService service;
 
     @RequestMapping(value = "/sensor", produces = MediaType.APPLICATION_JSON_VALUE, method = { RequestMethod.GET })
     public ResponseEntity<ObjectNode> getSensor(GetModifySensorDto getModifyCctvDto) {
-        return ResponseEntity.ok(modifyCctvService.getSensor(getModifyCctvDto));
+        return ResponseEntity.ok(service.getSensor(getModifyCctvDto));
     }
 
     @RequestMapping(value = "/distinct", produces = MediaType.APPLICATION_JSON_VALUE, method = { RequestMethod.GET })
     public ResponseEntity<ObjectNode> getDistinct() {
-        return ResponseEntity.ok(modifyCctvService.getDistinct());
+        return ResponseEntity.ok(service.getDistinct());
     }
 
 
     @GetMapping("/count")
     public int count(Map param) {
-        return modifyCctvService.getSimpleTotalCount(param);
+        return service.getSimpleTotalCount(param);
+    }
+
+    @GetMapping("/all")
+    @ResponseBody
+    public List<SensorDto> getAll(@RequestParam  Map<String, Object> param) {
+        return service.getAll(param);
     }
 }

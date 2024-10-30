@@ -115,4 +115,8 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
     public List<SensorTypeDto> getAllSensorTypesBySensTypeNo(Map<String, Object> param) {
         return mapper.getAllSensorTypesBySensTypeNo(param);
     }
+
+    public List<SensorTypeDto> getAll() {
+        return mapper.getAll();
+    }
 }

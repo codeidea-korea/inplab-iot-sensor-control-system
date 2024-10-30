@@ -6,7 +6,6 @@
         SELECT * FROM tb_district_info
     </select>
 
-
     <sql id="rowSearch">
         <if test="district_no != null and district_no != ''">
             and MG.district_no = #{district_no}

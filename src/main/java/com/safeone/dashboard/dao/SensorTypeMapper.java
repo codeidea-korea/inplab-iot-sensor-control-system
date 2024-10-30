@@ -15,5 +15,7 @@ public interface SensorTypeMapper {
     int deleteSensorType(Map param);
 
     List<SensorTypeDto> getAllSensorTypesBySensTypeNo(Map<String, Object> param);
+
+    List<SensorTypeDto> getAll();
 }
     

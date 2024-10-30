@@ -1,12 +1,9 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" %>
-
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
-    <jsp:include page="common/include_head.jsp" flush="true"></jsp:include>
-
+    <jsp:include page="common/include_head.jsp" flush="true"/>
     <style>
         #map {
             width: 100%;
@@ -23,10 +20,6 @@
             height: 100%;
             background-color: #888;
         }
-
-        /* #site-status.view .site-status-details {
-            display: initial;
-        } */
 
         .rv_marker {
             display: none;
@@ -174,10 +167,8 @@
             font-size: 1.2rem;
         }
     </style>
-
 </head>
 <script>
-    // const ALARM_LATENCY = 30 * 1000; // 30초 마다
     const LATENCY = 60 * 1000; // 1분마다
     const ALARM_EFFECT_TIME = 500;
     const MARKER_CHANGE_LEVEL = 17.5;
@@ -190,34 +181,7 @@
         wsUrl = 'ws://121.159.33.107:9090';
     }
 
-    // let _weatherCode = [
-    //     { "name" : "감포읍", "lat" : 35.806238	, "lng" : 129.478526, "code" : 4713025000},
-    //     { "name" : "안강읍", "lat" : 35.981397	, "lng" : 129.184153, "code" : 4713025300},
-    //     { "name" : "건천읍", "lat" : 35.831737	, "lng" : 129.103245, "code" : 4713025600},
-    //     { "name" : "외동읍", "lat" : 35.712278	, "lng" : 129.313413, "code" : 4713025900},
-    //     { "name" : "양북면", "lat" : 35.798579	, "lng" : 129.413944, "code" : 4713031000},
-    //     { "name" : "양남면", "lat" : 35.704082	, "lng" : 129.417765, "code" : 4713032000},
-    //     { "name" : "내남면", "lat" : 35.7476	, "lng" : 129.174754, "code" : 4713033000},
-    //     { "name" : "산내면", "lat" : 35.749125	, "lng" : 129.037357, "code" : 4713034000},
-    //     { "name" : "서면",  "lat" : 35.896736	, "lng" : 129.065466, "code" : 4713035000},
-    //     { "name" : "현곡면", "lat" : 35.896781	, "lng" : 129.169965, "code" : 4713036000},
-    //     { "name" : "강동면", "lat" : 35.995421	, "lng" : 129.272166, "code" : 4713037000},
-    //     { "name" : "천북면", "lat" : 35.90431	, "lng" : 129.27671,  "code" : 4713038000},
-    //     { "name" : "중부동", "lat" : 35.842076	, "lng" : 129.206254, "code" : 4713051500},
-    //     { "name" : "황오동", "lat" : 35.84208	, "lng" : 129.220168, "code" : 4713053000},
-    //     { "name" : "성건동", "lat" : 35.851076	, "lng" : 129.204785, "code" : 4713055000},
-    //     { "name" : "황남동", "lat" : 35.834096	, "lng" : 129.212884, "code" : 4713057000},
-    //     { "name" : "선도동", "lat" : 35.84364	, "lng" : 129.174852, "code" : 4713059000},
-    //     { "name" : "월성동", "lat" : 35.836542	, "lng" : 129.219651, "code" : 4713060500},
-    //     { "name" : "용강동", "lat" : 35.871726	, "lng" : 129.232205, "code" : 4713061500},
-    //     { "name" : "황성동", "lat" : 35.868609	, "lng" : 129.215182, "code" : 4713062100},
-    //     { "name" : "동천동", "lat" : 35.850882	, "lng" : 129.237196, "code" : 4713063000},
-    //     { "name" : "불국동", "lat" : 35.775237	, "lng" : 129.300534, "code" : 4713065000},
-    //     { "name" : "보덕동", "lat" : 35.834681	, "lng" : 129.287448, "code" : 4713066000}
-    // ];
-
     try {
-        // 공통코드 자산종류 가져오기
         var _assetKind = ${assetKind};
         var _areaInfo = ${areaInfo};
     } catch (e) {
@@ -230,7 +194,6 @@
     window.marker.risk = [];
     window.zoneDetail = {};
 
-    // [s] jquery
     $(function () {
         const autoLogin = JSON.parse(localStorage.getItem('autoLogin'));
 
@@ -728,118 +691,175 @@
         }
     }
 
-    // function refrashDongWeather() {
-    //     $.each(_weatherCode, function() {
-    //         try {
-    //             let area = this;
-    //             $.get('/weather/today/' + area.code, function(res) {
-    //                 // console.log(res);
-    //                 area = Object.assign(area, res);
-    //             }).error(function(jqXHR, textStatus, errorThrown) {
-    //                 console.log('ERROR - ' + textStatus);
-    //             });
-    //         } catch(e) {
-    //             console.log('ERROR - ' + area);
-    //         }
-    //     });     // 동별 날씨정보 가져오기
-    // }
-
     function initDashboard() {
         initZoneSelect();                   // 현장내 지구 리스트
         initSiteZone();
-
-        // refrashDongWeather();
-        // setInterval(function() {
-        //     refrashDongWeather();
-        // }, 300 * 1000);
-
         loadAlarm();
     }
 
     function initZoneSelect() {
-        $.get('/getZoneList', {use_flag: 'Y'}, function (res) {
+        $.get("/adminAdd/districtInfo/all", (res) => {
             $('select.selectZone').empty();
-            $('select.selectZone').append('<option value="">지구 선택</option>');
+            $('select.selectZone').append('<option value="">현장 선택</option>');
 
             // 지구 마커 표시
             $.each(res, function () {
-                $('select.selectZone').append('<option value="' + this.zone_id + '" lat="' + this.lat + '" lng="' + this.lng + '">' + this.name + '</option>');
+                $('select.selectZone').append('<option value="' + this.district_no + '" lat="' + this.dist_lat + '" lng="' + this.dist_lon + '">' + this.district_nm + '</option>');
 
-                let zone = this;
-                $.get('/getAssetList', {zone_id: zone.zone_id}, function (res) {
+                const district = this;
+
+                $.get('/new-dashboard/get-asset-count', {district_no: district.district_no}, function (res) {
                     window.marker.zone.push(window.vworld.addOverlay(
-                        '<div class="marker zone" zoneid="' + zone.zone_id
-                        + '"><img src="/images/icon_area1.png"/><span class="count">' + res.length
-                        + '</span><span class="title">' + zone.name + '</span></div>', [zone.lng, zone.lat],
-                        '/images/icon_area1.png', zone.name, res.length, {type: 'area', zone_id: zone.zone_id}));
+                        '<div class="marker zone" district_no="' + district.district_no + '">' +
+                        '<img src="/images/icon_area1.png"/>' +
+                        '<span class="count">' + res + '</span>' +
+                        '<span class="title">' + district.district_nm + '</span>' +
+                        '</div>'
+                        , [district.dist_lon, district.dist_lat]
+                        , '/images/icon_area1.png', district.district_nm, res, {
+                            type: 'area',
+                            district_no: district.district_no
+                        }));
                     redrawMarker();
                 });
 
-                loadMarker(zone.zone_id, [zone.lng, zone.lat]);
-            });
-
-            // 지구 선택시
-            // 해당 지구으로 지도 이동 후 줌 처리하고
-            // 상세 표기 버튼 활성화 시킨다
-            // 지구 선택시 해당 지구의 강우량 표기
-            $('select.selectZone').off().on('change', function () {
-                let $selected = $("option:selected", this);
-                const zoneId = $selected.val();
-
-                $('.rain-info').hide();
-
-                if ($selected.index() > 0) {
-                    $('.rain-info').show();
-                    $('.site-status-toggle').addClass('active')
-
-                    $.get('/getAssetList', {zone_id: zoneId}, function (res) {
-                        $('.zoneSelected').data('zoneid', zoneId);
-
-                        $('.site-zone-list li .site-zone-conts ul').empty();
-
-                        $.each(res, function (idx, ele) {
-                            // console.log(res);
-                            if (ele.asset_kind_id === '4') {
-                                // console.log(ele.real_value);
-                                $('.rain-info span').html(ele.real_value + " mm");
-                            }
-
-
-                            let status = window.marker.risk.find(r => r.zone_id == zoneId && r.asset_id == ele.asset_id);
-
-                            let fc_step = !!status?.risk_level ? 'fc_step' + status.risk_level : '';
-
-                            // console.log(status, ele);
-
-                            let html = '';
-
-                            html += '<li ' + fc_step + ' asset_id="' + ele.asset_id + '">';
-                            html += '<a href="javascript:void(0);" data-coords="' + ele.x + ',' + ele.y + '">' + ele.name + '</a>' +
-                                '<div><i class="fa-regular fa-eye"></i>　' +
-                                '<p class="check-box" notxt="" small=""><input type="checkbox" id="check_conts01_' + idx + '" name="check_conts01_' + idx + '" value="" checked>';
-                            html += '<label for="check_conts01_' + idx + '"><span class="graphic"></span></label></p></div></li>';
-
-                            $('.site-zone-list li[kind=' + ele.asset_kind_id + '] .site-zone-conts ul').append(html);
-                        });
-
-                        $(document).trigger('map_action_end');
-                    });
-
-                    $('.zoneSelected').show();
-                    window.vworld.setPanBy([parseFloat($selected.attr('lng')), parseFloat($selected.attr('lat'))], 18);
-                } else {
-                    $('.zoneSelected').hide();
-                    $('.site-status-toggle').removeClass('active');
-                    $('.site-status-details .close-btns').trigger('click');
-                    $(document).trigger('map_action_end');
-                }
-
-                if ($('div.site-status-toggle.active > button').hasClass("show") && $selected.val() > 0) {
-                    getZoneDetail();
-                }
+                loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
             });
         });
     }
+
+    function loadMarker(district_no, default_coords) {
+        $.get('/getMarkerList', {zone_id: zone_id}, function (res) {
+            $.each(res, function (idx) {
+                let img = '';
+                let type = 'sensor';
+
+                if (this.name === '구조물경사계') {
+                    img = 'icon_sensor_tm.png';
+                } else if (this.name === '강우량계') {
+                    img = 'icon_sensor_p.png';
+                } else if (this.name === '지표변위계') {
+                    img = 'icon_sensor_s.png';
+                } else if (this.name === 'CCTV') {
+                    img = 'icon_cctv.png';
+                    type = 'cctv';
+                } else if (this.name === '재난방송') {
+                    img = 'icon_speaker.png';
+                    type = 'speaker';
+                } else if (this.name === '전광판') {
+                    img = 'icon_text.png';
+                    // type = 'display';
+                } else if (this.name.indexOf('지하수위계') > -1) {
+                    img = 'icon_sensor_ttw.png';
+                }
+
+                let coords;
+                if (this.x === null && this.y === null) {
+                    coords = default_coords;
+                } else {
+                    coords = [this.x, this.y];
+                }
+
+                let uid = window.vworld.addOverlay(
+                    '<div class="marker asset" zoneid="' + this.zone_id + '" assetid="' + this.asset_id
+                    + '"><img src="/images/' + img + '"/><span class="title">' + this.asset_name
+                    + '</span></div>', coords,
+                    '/images/' + img, this.asset_name, null, {
+                        type: type,
+                        asset_id: this.asset_id,
+                        zone_id: this.zone_id,
+                        etc1: this.etc1
+                    });
+
+                window.marker.asset.push(uid);
+                window.vworld.visibleOverlay(uid, false);
+            });
+        });
+    }
+
+
+        // $.get('/getZoneList', {use_flag: 'Y'}, function (res) {
+        //     $('select.selectZone').empty();
+        //     $('select.selectZone').append('<option value="">현장 선택</option>');
+        //
+        //     // 지구 마커 표시
+        //     $.each(res, function () {
+        //         $('select.selectZone').append('<option value="' + this.zone_id + '" lat="' + this.lat + '" lng="' + this.lng + '">' + this.name + '</option>');
+        //
+        //         let zone = this;
+        //         $.get('/getAssetList', {zone_id: zone.zone_id}, function (res) {
+        //             window.marker.zone.push(window.vworld.addOverlay(
+        //                 '<div class="marker zone" zoneid="' + zone.zone_id
+        //                 + '"><img src="/images/icon_area1.png"/><span class="count">' + res.length
+        //                 + '</span><span class="title">' + zone.name + '</span></div>', [zone.lng, zone.lat],
+        //                 '/images/icon_area1.png', zone.name, res.length, {type: 'area', zone_id: zone.zone_id}));
+        //             redrawMarker();
+        //         });
+        //
+        //         loadMarker(zone.zone_id, [zone.lng, zone.lat]);
+        //     });
+        //
+        //     // 지구 선택시
+        //     // 해당 지구으로 지도 이동 후 줌 처리하고
+        //     // 상세 표기 버튼 활성화 시킨다
+        //     // 지구 선택시 해당 지구의 강우량 표기
+        //     $('select.selectZone').off().on('change', function () {
+        //         let $selected = $("option:selected", this);
+        //         const zoneId = $selected.val();
+        //
+        //         $('.rain-info').hide();
+        //
+        //         if ($selected.index() > 0) {
+        //             $('.rain-info').show();
+        //             $('.site-status-toggle').addClass('active')
+        //
+        //             $.get('/getAssetList', {zone_id: zoneId}, function (res) {
+        //                 $('.zoneSelected').data('zoneid', zoneId);
+        //
+        //                 $('.site-zone-list li .site-zone-conts ul').empty();
+        //
+        //                 $.each(res, function (idx, ele) {
+        //                     // console.log(res);
+        //                     if (ele.asset_kind_id === '4') {
+        //                         // console.log(ele.real_value);
+        //                         $('.rain-info span').html(ele.real_value + " mm");
+        //                     }
+        //
+        //
+        //                     let status = window.marker.risk.find(r => r.zone_id == zoneId && r.asset_id == ele.asset_id);
+        //
+        //                     let fc_step = !!status?.risk_level ? 'fc_step' + status.risk_level : '';
+        //
+        //                     // console.log(status, ele);
+        //
+        //                     let html = '';
+        //
+        //                     html += '<li ' + fc_step + ' asset_id="' + ele.asset_id + '">';
+        //                     html += '<a href="javascript:void(0);" data-coords="' + ele.x + ',' + ele.y + '">' + ele.name + '</a>' +
+        //                         '<div><i class="fa-regular fa-eye"></i>　' +
+        //                         '<p class="check-box" notxt="" small=""><input type="checkbox" id="check_conts01_' + idx + '" name="check_conts01_' + idx + '" value="" checked>';
+        //                     html += '<label for="check_conts01_' + idx + '"><span class="graphic"></span></label></p></div></li>';
+        //
+        //                     $('.site-zone-list li[kind=' + ele.asset_kind_id + '] .site-zone-conts ul').append(html);
+        //                 });
+        //
+        //                 $(document).trigger('map_action_end');
+        //             });
+        //
+        //             $('.zoneSelected').show();
+        //             window.vworld.setPanBy([parseFloat($selected.attr('lng')), parseFloat($selected.attr('lat'))], 18);
+        //         } else {
+        //             $('.zoneSelected').hide();
+        //             $('.site-status-toggle').removeClass('active');
+        //             $('.site-status-details .close-btns').trigger('click');
+        //             $(document).trigger('map_action_end');
+        //         }
+        //
+        //         if ($('div.site-status-toggle.active > button').hasClass("show") && $selected.val() > 0) {
+        //             getZoneDetail();
+        //         }
+        //     });
+        // });
 
     // 자산 종류 출력
     function initSiteZone() {
@@ -872,55 +892,6 @@
             } else {
                 $(".roadViewContainer").addClass("open");
             }
-        });
-    }
-
-    function loadMarker(zone_id, default_coords) {
-        $.get('/getMarkerList', {zone_id: zone_id}, function (res) {
-            $.each(res, function (idx) {
-                let img = '';
-                let type = 'sensor';
-
-                if (this.name == '구조물경사계') {
-                    img = 'icon_sensor_tm.png';
-                } else if (this.name == '강우량계') {
-                    img = 'icon_sensor_p.png';
-                } else if (this.name == '지표변위계') {
-                    img = 'icon_sensor_s.png';
-                } else if (this.name == 'CCTV') {
-                    img = 'icon_cctv.png';
-                    type = 'cctv';
-                } else if (this.name == '재난방송') {
-                    img = 'icon_speaker.png';
-                    type = 'speaker';
-                } else if (this.name == '전광판') {
-                    img = 'icon_text.png';
-                    // type = 'display';
-                } else if (this.name.indexOf('지하수위계') > -1) {
-                    img = 'icon_sensor_ttw.png';
-                }
-
-                let coords;
-                if (this.x == null && this.y == null) {
-                    coords = default_coords;
-                } else {
-                    coords = [this.x, this.y];
-                }
-
-                let uid = window.vworld.addOverlay(
-                    '<div class="marker asset" zoneid="' + this.zone_id + '" assetid="' + this.asset_id
-                    + '"><img src="/images/' + img + '"/><span class="title">' + this.asset_name
-                    + '</span></div>', coords,
-                    '/images/' + img, this.asset_name, null, {
-                        type: type,
-                        asset_id: this.asset_id,
-                        zone_id: this.zone_id,
-                        etc1: this.etc1
-                    });
-
-                window.marker.asset.push(uid);
-                window.vworld.visibleOverlay(uid, false);
-            });
         });
     }
 
@@ -1132,30 +1103,16 @@
 </script>
 
 <body data-pgcode="0000">
-<section
-        id="wrap">
-    <!-- [s] 상단 -->
-    <jsp:include page="common/include_top.jsp" flush="true"></jsp:include>
-    <!--[e] 상단 -->
-
-    <!--[s] 왼쪽 메뉴 -->
-    <div
-            id="global-menu">
-        <!--[s] 주 메뉴 -->
-        <jsp:include page="common/include_sidebar.jsp" flush="true"></jsp:include>
-        <!--[e] 주 메뉴 -->
-
-        <!--[s] 종합 현황 내역 -->
-        <jsp:include page="layout/total_status.jsp" flush="true"></jsp:include>
-        <!--[e] 종합 현황 내역 -->
-
-        <!--[s] 현장 현황 부분 -->
+<section id="wrap">
+    <jsp:include page="common/include_top.jsp" flush="true"/>
+    <div id="global-menu">
+        <jsp:include page="common/include_sidebar.jsp" flush="true"/>
+        <jsp:include page="layout/total_status.jsp" flush="true"/>
         <div id="site-status">
-            <!--[s] 현장 현황 -->
             <div class="site-status-list">
                 <div class="status-container">
                     <div class="title">
-                        <span>지구 현황</span>
+                        <span>현장 현황</span>
                     </div>
                     <div class="rain-info" style="display: none">
                         <img src="images/weather/rain_ic.png"/>
@@ -1172,29 +1129,17 @@
                     </div>
                 </div>
             </div>
-            <!--[s] 토글 버튼 -->
             <div class="site-status-toggle">
                 <button type="button" class="overall-status-btn">
                     <span class="f_arr">←</span>
                 </button>
             </div>
-            <!--[e] 토글 버튼 -->
-            <!--[e] 현장 현황 -->
-
             <div class="site-status-details">
             </div>
         </div>
-        <!--[e] 현장 현황 부분 -->
     </div>
-    <!--[e] 왼쪽 메뉴 -->
-
-    <!--[s] 우측 알람 -->
     <div id="right-alarm" class="alarmContainer">
-
     </div>
-    <!-- [e] 우측 알람 -->
-
-    <!-- [s] 맵 영역 -->
     <div id="map"></div>
     <div class="map_typecontrol">
                 <span id="btnSatmap" class="btn map-sat-btn"><img src="/images/map_sky.jpg" alt=""/><i>항공 지도</i>
@@ -1204,35 +1149,23 @@
         <span id="btnSkyview" class="btn map-3d-btn"><img src="/images/map_3d.jpg" alt=""/><i>3D 지도</i>
                 </span>
     </div>
-
-    <!-- 로드뷰 -->
     <div class="roadViewContainer" id="road-map">
         <button type="button" class="road-map-close">
             <img src="/images/btn_lay_close.png" alt="닫기"/>
         </button>
         <div class="roadView"></div>
-        <!-- <img src="/images/img_roadmap.jpg" class="road-map" alt=""/> -->
     </div>
-    <!-- [e] 맵 영역 -->
-
-    <!--[s] 오늘의 날씨 팝업 -->
     <div id="lay-weather-area" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
         </div>
         <div class="layer-base-title">오늘의 날씨</div>
-        <div
-                class="layer-base-conts" style="height: 700px;">
-            <!-- api 불러와 주세요 -->
-            <!-- <img src="/images/img_weather_lay.png" alt="오늘의 날씨"/> -->
+        <div class="layer-base-conts" style="height: 700px;">
             <iframe src="https://www.weather.go.kr/w/weather/forecast/short-term.do?nolayout=Y#dong/4375035000"
                     width="100%" height="100%" frameborder="0" style="padding: 10px">
             </iframe>
         </div>
     </div>
-    <!--[e] 오늘의 날씨 팝업 -->
-
-    <!--[s] 기상특보 팝업 -->
     <div id="lay-weather-area2" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
@@ -1244,27 +1177,19 @@
             </iframe>
         </div>
     </div>
-    <!--[e] 기상특보 팝업 -->
-
-    <!--[s] 센서정보 팝업 -->
     <div id="lay-sensor-info" class="layer-base">
         <div class="layer-base-btns">
-            <!-- <a href="javascript:void(0);"><img src="/images/btn_lay_full.png" data-fancybox-full alt="전체화면"/></a> -->
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
         </div>
         <div class="layer-base-title icon">
             센서정보
         </div>
     </div>
-    <!--[e] 센서정보 팝업 -->
-
-    <!--[s] [맵 클릭] CCTV 팝업 -->
     <div id="lay-cctv-view" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);" class="fullscreen"><img src="/images/btn_lay_full.png" data-fancybox-full
                                                                   alt="전체화면"/></a>
             <a href="javascript:void(0);" class="closeCctv"><img src="/images/btn_lay_close.png" data-fancybox-close
-                                                                 alt="닫기"/></a>
         </div>
         <div class="layer-base-title icon cctv"></div>
         <div class="layer-base-conts nosignal">
@@ -1274,12 +1199,8 @@
             <img src="" alt="CCTV" style="position:relative; z-index: 10;"/>
         </div>
     </div>
-    <!--[e] [맵 클릭] CCTV 팝업 -->
-
-    <!--[s] [맵 클릭] 재난 방송 시스템 -->
     <div id="lay-disaster-broadcast" class="layer-base">
         <div class="layer-base-btns">
-            <!-- <a href="javascript:void(0);"><img src="/images/btn_lay_full.png" data-fancybox-full alt="전체화면"/></a> -->
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
         </div>
         <div class="layer-base-title icon broadcast">재난 방송 시스템</div>
@@ -1303,7 +1224,6 @@
                 </li>
             </ul>
         </div>
-
         <div class="layer-base-conts">
             <p class="layer-base-tit">방송 안내 문구</p>
             <div class="broadcast-form">
@@ -1321,9 +1241,6 @@
             </div>
         </div>
     </div>
-    <!--[e] [맵 클릭] 재난 방송 시스템 -->
-
-    <!--[s] EDIT MODE 팝업 -->
     <div id="lay-edit-mode" class="layer-alarm">
         <div class="layer-alarm-btns">
             <a href="javascript:popFancyClose();"><img src="/images/btn_lay_close.png" alt="닫기"/></a>
@@ -1339,9 +1256,6 @@
             </p>
         </div>
     </div>
-    <!--[e] EDIT MODE 팝업 -->
-
-    <!--[s] EDIT MODE 사용중 -->
     <div class="edit-mode-use">
         <p class="tit">Edit Mode를 사용중입니다.</p>
         <p class="btn">
@@ -1349,7 +1263,6 @@
             <a href="javascript:editMode('close');">취소</a>
         </p>
     </div>
-    <!--[e] EDIT MODE 사용중 -->
 </section>
 </body>
 

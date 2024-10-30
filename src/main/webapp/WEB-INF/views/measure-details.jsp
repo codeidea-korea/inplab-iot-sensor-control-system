@@ -7,6 +7,47 @@
 <head>
     <jsp:include page="common/include_head.jsp" flush="true"/>
     <style>
+        .tab-container {
+            display: flex;
+            justify-content: flex-start; /* Align buttons to the left */
+            margin-left: 10px;
+            overflow: hidden; /* Ensure rounded corners are visible */
+        }
+
+        .tab-button {
+            padding: 10px 40px; /* Increase padding to make buttons longer */
+            cursor: pointer;
+            background-color: #555; /* Slightly lighter dark color for unselected buttons */
+            color: #fff; /* White text color for better contrast */
+            border: none;
+            outline: none;
+            transition: background-color 0.3s;
+            width: 150px; /* Set a fixed width for the buttons */
+            text-align: center; /* Center the text */
+            border-radius: 10px 10px 0 0; /* Round top corners */
+            margin-right: 10px; /* Add spacing between buttons */
+            font-size: 1.4rem; /* Increase font size */
+        }
+
+        .tab-button.active {
+            background-color: #4682B4; /* Slightly darker sky blue color for the active button */
+            color: #000; /* Black text color for better contrast */
+        }
+
+        .tab-button:hover {
+            background-color: #666; /* Slightly lighter dark color for hover effect */
+        }
+
+        .chart-content {
+            display: none;
+            border-radius: 10px; /* Add this line to round the corners */
+        }
+
+        .chart-content.active {
+            display: block;
+            border-radius: 10px; /* Add this line to round the corners */
+        }
+
         h3.txt {
             margin: 0;
             width: 15rem;
@@ -15,6 +56,45 @@
         .contents_header {
             display: flex;
             align-items: center;
+        }
+
+        .modal-header {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+        }
+
+        #district-select,
+        #chart-district-select,
+        #sensor-name-select,
+        #sensor-type-select,
+        #select-condition {
+            width: 150px;
+            height: 3.6rem;
+            padding: 0 1rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .modal-header input[type="datetime-local"] {
+            width: 100%;
+            height: 3.6rem;
+            padding: 0 2rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            text-align: center;
+            display: inline-block;
+            vertical-align: top;
         }
 
         .search-top-label {
@@ -51,12 +131,6 @@
 
         .search-top div:nth-child(2) > p {
             margin-right: 1rem;
-        }
-
-        .contents_header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
 
         .filter-area .select_filter .search-top-label {
@@ -130,6 +204,31 @@
         .filter-area {
             display: flex;
         }
+
+        .btn-group3 {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            right: 4rem;
+            top: 3.7rem;
+        }
+
+        .btn-group3 > a {
+            height: 2.8rem;
+            margin-left: 1rem;
+            padding: 0 2rem;
+            background-color: #6975ac;
+            font-weight: 500;
+            font-size: 1.4rem;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
         .search-top-label {
             color: #ffffff76;
             font-size: 1.5rem;
@@ -137,24 +236,17 @@
             align-items: center;
             padding: 1rem;
         }
-
-        #district-select {
-            width: 150px;
-            height: 3.6rem;
-            padding: 0 1rem;
-            background-color: #fff;
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            font-weight: 300;
-            font-size: 1.5rem;
-            line-height: 3.4rem;
-            color: #47474c;
-            display: inline-block;
-            vertical-align: top;
-        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
+            $('.tab-button').click(function () {
+                $('.tab-button').removeClass('active');
+                $(this).addClass('active');
+                $('.chart-content').removeClass('active').hide();
+                $('#' + $(this).data('chart')).addClass('active').show();
+            });
+            $('#chart1').show();
             const $districtSelect = $('#district-select');
 
             const $leftGrid = $("#left-jq-grid");
@@ -263,14 +355,99 @@
                     return;
                 }
                 popFancy('#chart-popup')
+                setChartModal(targetArr[0].district_nm, targetArr[0].senstype_no, targetArr[0].sens_no)
                 $("#graph-search-btn").trigger('click');
             });
 
             const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
 
+            async function setChartModal(district_nm, senstype_no, sens_no) {
+                let district_no = '';
+
+                await $.ajax({
+                    url: '/adminAdd/districtInfo/all',
+                    type: 'GET',
+                    success: (res) => {
+                        $("#chart-district-select").empty();
+                        $("#chart-district-select").append(
+                            "<option value=''>선택</option>"
+                        )
+                        res.forEach((item) => {
+                            $("#chart-district-select").append(
+                                "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
+                            )
+                        })
+                        $("#chart-district-select option").filter(function() {
+                            return $(this).text() === district_nm;
+                        }).prop('selected', true);
+
+                        district_no = $("#chart-district-select").val();
+                    }
+                });
+
+                await $.ajax({
+                    url: '/sensor-type',
+                    type: 'GET',
+                    success: (res) => {
+                        $("#sensor-type-select").empty();
+                        $("#sensor-type-select").append(
+                            "<option value=''>선택</option>"
+                        )
+                        res.forEach((item) => {
+                            $("#sensor-type-select").append(
+                                "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "</option>"
+                            )
+                        })
+                        $("#sensor-type-select").val(senstype_no);
+                    }
+                });
+
+                await getSensors(district_no, senstype_no);
+                $("#sensor-name-select option").filter(function() {
+                    return $(this).text().includes(sens_no);
+                }).prop('selected', true);
+            }
+
+            $("#chart-district-select").on('change', (e) => {
+                const district_no = e.target.value;
+                const senstype_no = $("#sensor-type-select").val();
+                if (district_no === '' || senstype_no === '') {
+                    return;
+                }
+                getSensors(district_no, senstype_no);
+            });
+
+            $("#sensor-type-select").on('change', (e) => {
+                const district_no = $("#chart-district-select").val();
+                const senstype_no = e.target.value;
+                if (district_no === '' || senstype_no === '') {
+                    return;
+                }
+                getSensors(district_no, senstype_no);
+            });
+
+            async function getSensors(district_no, senstype_no) {
+                await $.ajax({
+                    url: '/modify/sensor/all' + '?district_no=' + district_no + '&senstype_no=' + senstype_no,
+                    type: 'GET',
+                    success: (res) => {
+                        $("#sensor-name-select").empty();
+                        $("#sensor-name-select").append(
+                            "<option value=''>선택</option>"
+                        )
+                        res.forEach((item) => {
+                            $("#sensor-name-select").append(
+                                "<option value='" + item.sens_no + "'>" + item.sens_nm + "(" + item.sens_no + ")" + "</option>"
+                            )
+                        })
+                    }
+                });
+            }
+
             $("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
+                const popupSensorNo = $("#sensor-name-select").val();
                 chartDataArray.length = 0; // 배열 초기화
 
                 const targetArr = getSelectedCheckData($leftGrid);
@@ -280,14 +457,16 @@
                     if (item.sens_chnl_nm) {
                         sensChnlId = item.sens_chnl_nm.slice(-1)
                     }
-                    return getChartData(item.sens_no, startDateTime, endDateTime, sensChnlId);
+
+                    const targetSensorNo = popupSensorNo || item.sens_no;
+
+                    return getChartData(targetSensorNo, startDateTime, endDateTime, sensChnlId);
                 });
 
                 // 모든 요청이 완료된 후 차트를 그립니다.
                 Promise.all(requests).then(() => {
                     updateChart(chartDataArray); // 차트 업데이트 함수 호출
                 }).catch((e) => {
-                    console.log('error', e);
                     alert('조회할 수 없는 데이터 입니다.');
                 });
             });
@@ -308,7 +487,7 @@
                 });
             }
 
-            const ctx = document.getElementById('myChart').getContext('2d');
+            const ctx = document.getElementById('myChart1').getContext('2d');
             const myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -359,6 +538,38 @@
                 }
             });
 
+            const ctxBar = document.getElementById("myChart2").getContext("2d");
+            const myBarChart = new Chart(ctxBar, {
+                type: "bar",
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: "최소-최대 범위",
+                        data: [],
+                        backgroundColor: "rgba(75, 192, 192, 0.3)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    const value = tooltipItem.raw;
+                                    return "Min: " + value.y[0] + ", Max: " + value.y[1];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { type: "category" },
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
             function getRandomHSL() {
                 const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
                 const saturation = 100; // 채도 고정
@@ -366,7 +577,48 @@
                 return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
             }
 
+            function preprocessDataForBarChart(data, aggregationType) {
+                const processedData = {};
+
+                data.forEach(item => {
+                    const date = new Date(item.meas_dt);
+                    let key;
+
+                    if (aggregationType === "daily") {
+                        key = date.getFullYear() + "-" +
+                            (date.getMonth() + 1).toString().padStart(2, "0") + "-" +
+                            date.getDate().toString().padStart(2, "0");
+                    } else {
+                        key = date.getFullYear() + "-" +
+                            (date.getMonth() + 1).toString().padStart(2, "0") + "-" +
+                            date.getDate().toString().padStart(2, "0") + " " +
+                            date.getHours().toString().padStart(2, "0") + ":00:00";
+                    }
+
+                    if (!processedData[key]) {
+                        processedData[key] = { min: Infinity, max: -Infinity };
+                    }
+
+                    const value = item.formul_data;
+
+                    if (value < processedData[key].min) processedData[key].min = value;
+                    if (value > processedData[key].max) processedData[key].max = value;
+                });
+
+                const labels = Object.keys(processedData);
+                const ranges = labels.map(label => ({
+                    x: label,
+                    y: [processedData[label].min, processedData[label].max]
+                }));
+
+                return { labels, ranges };
+            }
+
             function updateChart(data) {
+                const aggregationType = $("#select-condition").val() || "daily";
+                // Preprocess data for bar chart
+                const barChartData = preprocessDataForBarChart(data[0], aggregationType);
+
                 // 차트 업데이트 로직
                 const labels = data[0].map(item => {
                     const date = new Date(item.meas_dt);
@@ -389,11 +641,11 @@
 
                 myChart.data.labels = labels;
                 myChart.data.datasets = datasets;
-
-                // 기존의 annotation을 초기화
                 myChart.options.plugins.annotation.annotations = {};
 
-                // 각 센서 데이터에서 최대 레벨 값을 가져와 점선을 추가
+                myBarChart.data.labels = barChartData.labels;
+                myBarChart.data.datasets[0].data = barChartData.ranges;
+
                 data.forEach(item => {
                     const maxLevels = [parseFloat(item[0].lvl_max1), parseFloat(item[0].lvl_max2), parseFloat(item[0].lvl_max3), parseFloat(item[0].lvl_max4)];
                     const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
@@ -425,7 +677,9 @@
                         }
                     });
                 });
+
                 myChart.update(); // 차트 업데이트
+                myBarChart.update();
             }
         });
     </script>
@@ -628,15 +882,36 @@
         </div>
     </div>
 
-    <!--[e] 컨텐츠 영역 -->
     <div id="chart-popup" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_full.png" data-fancybox-full alt="전체화면"></a>
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="contents_header" style="margin-bottom: 10px">
-            <h3 class="txt">차트</h3>
-            <div class="filter-area" style="margin-right: 150px">
+        <div class="modal-header" style="margin-bottom: 10px">
+            <div style="margin-bottom: 10px">
+                <h3 class="txt">계측 이력 그래프</h3>
+            </div>
+            <div class="filter-area" style="margin-right: 150px; margin-bottom: 10px">
+                <div style="display:flex;">
+                    <p class="search-top-label">현장명</p>
+                    <select id="chart-district-select">
+                        <option value="">선택</option>
+                    </select>
+                </div>
+                <div style="display:flex;">
+                    <p class="search-top-label">센서타입</p>
+                    <select id="sensor-type-select">
+                        <option value="">선택</option>
+                    </select>
+                </div>
+                <div style="display:flex;">
+                    <p class="search-top-label">센서명</p>
+                    <select id="sensor-name-select">
+                        <option value="">선택</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-area" style="margin-right: 150px; margin-bottom: 10px">
                 <div style="display:flex;">
                     <p class="search-top-label">조회기간</p>
                     <input id="start-date" type="datetime-local"/>
@@ -645,17 +920,33 @@
                     <p class="search-top-label">~</p>
                     <input id="end-date" type="datetime-local"/>
                 </div>
-                <div class="btn-group" style="margin-right: 50px">
+                <div style="display:flex;">
+                    <p class="search-top-label">조회조건</p>
+                    <select id="select-condition">
+                        <option value="">선택</option>
+                        <option value="daily">일별</option>
+                        <option value="hourly">시간별</option>
+                    </select>
+                </div>
+                <div class="btn-group3">
                     <a id="graph-search-btn" data-fancybox data-src="">조회</a>
                 </div>
             </div>
         </div>
+        <div class="tab-container">
+            <button class="tab-button active" data-chart="chart1">라인차트</button>
+            <button class="tab-button" data-chart="chart2">캔들차트</button>
+        </div>
         <div class="layer-base-conts min bTable">
-            <div>
-                <canvas id="myChart"></canvas>
+            <div id="chart1" class="chart-content active">
+                <canvas id="myChart1"></canvas>
+            </div>
+            <div id="chart2" class="chart-content">
+                <canvas id="myChart2"></canvas>
             </div>
         </div>
     </div>
+
 </section>
 </body>
 </html>

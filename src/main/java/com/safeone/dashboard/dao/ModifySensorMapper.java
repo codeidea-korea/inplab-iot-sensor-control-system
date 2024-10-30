@@ -1,5 +1,6 @@
 package com.safeone.dashboard.dao;
 
+import com.safeone.dashboard.dto.SensorDto;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -34,5 +35,9 @@ public class ModifySensorMapper {
 
     public int getSimpleTotalCount(Map param) {
         return sqlSession.selectOne("com.safeone.dashboard.dao.ModifySensorMapper.getSimpleTotalCount", param);
+    }
+
+    public List<SensorDto> getAll(Map<String, Object> param) {
+        return sqlSession.selectList("com.safeone.dashboard.dao.ModifySensorMapper.getAll", param);
     }
 }

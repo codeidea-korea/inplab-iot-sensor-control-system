@@ -46,4 +46,8 @@ public class SensorService implements JqGridService<SensorDto> {
 	public int delete(Map param) {
 		throw new UnsupportedOperationException("Unimplemented method 'delete'");//return 0;
 	}
+
+	public List<SensorDto> getAll(Map<String, Object> param) {
+		return mapper.getAll(param);
+	}
 }

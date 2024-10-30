@@ -3,7 +3,6 @@ function initGrid($grid, path, $gridWrapper, options = {
     shrinkToFit: true
 }, loadCompleteCallback) {
     getColumns(path, (columns) => {
-        console.log('jq initGrid');
         const columnData = {
             model: []
         };
@@ -37,25 +36,20 @@ function initGrid($grid, path, $gridWrapper, options = {
                 }
             },
             gridComplete: function () {
-                console.log('jq gridComplete');
                 $(window).trigger('resize');
             },
             beforeRequest: () => {
-                console.log('jq beforeRequest');
                 const currentPage = $grid.getGridParam('page');
                 const postData = $grid.jqGrid('getGridParam', 'postData');
                 postData.page = currentPage;
             },
             ondblClickRow: function (rowId) {
-                console.log('jq ondblClickRow');
                 $(window).trigger('gridDblClick', {rowId, ...$grid.jqGrid('getRowData', rowId)});
             },
             onSelectRow: (rowId) => {
-                console.log('jq onSelectRow');
                 // $(window).trigger('onSelectRow', {rowId, ...$grid.jqGrid('getRowData', rowId)});
             },
             afterEditCell: function (rowid, cellname, value, iRow, iCol) {
-                console.log('jq afterEditCell');
                 $(window).trigger('afterEditCell', Object.assign($grid.jqGrid('getRowData', rowid), {
                     cell: {
                         id: rowid,
@@ -70,11 +64,9 @@ function initGrid($grid, path, $gridWrapper, options = {
                 });
             },
             beforeSubmitCell: function (rowid, cellname, value) { // submit 전
-                console.log('jq, beforeSubmitCell');
                 return {"id": rowid, "cellName": cellname, "cellValue": value}
             },
             afterSaveCell: function (rowid, cellname, value, iRow, iCol) {
-                console.log('jq afterSaveCell');
                 $(window).trigger('afterSaveCell', Object.assign($grid.jqGrid('getRowData', rowid), {
                     cell: {
                         id: rowid,
@@ -102,7 +94,6 @@ function getColumns(path, callback) {
         method: 'GET',
         url: path + "/columns",
         success: (columns) => {
-            console.log('jq getColumns', columns);
             callback(columns);
         }
     })

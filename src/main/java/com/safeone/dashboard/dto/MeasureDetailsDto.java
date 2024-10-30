@@ -46,4 +46,7 @@ public class MeasureDetailsDto implements Serializable {
 
     @FieldLabel(title = "채널_id", type = "hidden")
     private String sens_chnl_id;
+
+    @FieldLabel(title = "senstype_no", type = "hidden")
+    private String senstype_no;
 }

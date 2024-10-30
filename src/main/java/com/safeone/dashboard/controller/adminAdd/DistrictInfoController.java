@@ -49,13 +49,6 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
         return districtInfoService.getAll();
     }
 
-//    @ResponseBody
-//    @GetMapping("/del")
-//    public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-//        // todo : 관리자 권한 체크, 삭제에 대한 validate
-//        return districtInfoService.delete(param);
-//    }
-
     @ResponseBody
     @GetMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
@@ -66,46 +59,6 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
         // 삭제 수행
         return districtInfoService.delete(param); // 1: 성공, 0: 실패 (삭제할 항목이 없거나 삭제 실패)
     }
-
-//    @ResponseBody
-//    @PostMapping("/add")
-//    public synchronized boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param,
-//                          @RequestParam("dist_pic") MultipartFile file1,
-//                          @RequestParam("dist_view_pic") MultipartFile file2) {
-//
-//        try {
-//
-//            int Chk = districtInfoService.getDistrictInfoAbbrChk(param.get("dist_addr").toString());
-//
-//            if(Chk != 0){
-//                return false;
-//            }
-//
-//            if (!file1.isEmpty()) {
-//                byte[] fileBytes1 = file1.getBytes();
-//                param.put("dist_pic", fileBytes1);
-//            }
-//
-//            if (!file2.isEmpty()) {
-//                byte[] fileBytes2 = file2.getBytes();
-//                param.put("dist_view_pic", fileBytes2);
-//            }
-//
-//            //district_no 생성
-//            Map<String, Object> newMap = new HashMap<>();
-//            newMap.put("table_nm", "tb_district_info");
-//            newMap.put("column_nm", "district_no");
-//            ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-//            param.put("district_no", generationKeyOn.get("newId").asText());
-//
-//            // 서비스 호출하여 데이터베이스에 데이터 저장
-//            return districtInfoService.create(param);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return false; // 오류 발생 시 false 반환
-//        }
-//
-//    }
 
     @ResponseBody
     @PostMapping("/add")

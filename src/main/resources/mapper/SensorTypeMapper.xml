@@ -189,4 +189,9 @@
         FROM tb_sensor_type
         WHERE senstype_no = #{senstype_no}
     </delete>
+
+    <select id="getAll" resultType="com.safeone.dashboard.dto.SensorTypeDto">
+        select *
+        from tb_sensor_type
+    </select>
 </mapper>
