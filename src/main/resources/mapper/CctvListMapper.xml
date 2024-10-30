@@ -116,7 +116,7 @@
     </select>
 
     <select id="selectCctvListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT count(1)
+        SELECT count(A.cctv_no)
 		FROM tb_cctv_info A
 		LEFT OUTER JOIN tb_district_info B ON A.district_no = B.district_no
 		LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') C ON A.maint_sts_cd = C.code_id

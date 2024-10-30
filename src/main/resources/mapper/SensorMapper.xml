@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-    
+
 <mapper namespace="com.safeone.dashboard.dao.ModifySensorMapper">
     <sql id="rowSearch">
         <if test="asset_kind_id != null and asset_kind_id != ''">
@@ -9,18 +9,19 @@
         <if test="name != null and name != ''">
             and MG.name ilike '%' || #{name} || '%'
         </if>
-		<if test="zone_id != null and zone_id != ''">
-			and MG.zone_id = #{zone_id}
-		</if>
-		<if test="zone_name != null and zone_name != ''">
-			and MG.zone_name ilike #{zone_name} || '%'
-		</if>
-		<if test="install_date_start != null and install_date_start != '' and install_date_end != null and install_date_end != ''">
-			and MG.install_date::timestamp between concat(#{install_date_start},' 00:00:00')::timestamp and concat(#{install_date_end},' 23:59:59')::timestamp
-		</if>
-		<if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
-			and to_date(MG.collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
-		</if>
+        <if test="zone_id != null and zone_id != ''">
+            and MG.zone_id = #{zone_id}
+        </if>
+        <if test="zone_name != null and zone_name != ''">
+            and MG.zone_name ilike #{zone_name} || '%'
+        </if>
+        <if test="install_date_start != null and install_date_start != '' and install_date_end != null and install_date_end != ''">
+            and MG.install_date::timestamp between concat(#{install_date_start},' 00:00:00')::timestamp and
+            concat(#{install_date_end},' 23:59:59')::timestamp
+        </if>
+        <if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
+            and to_date(MG.collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
+        </if>
         <if test="status != null and status != ''">
             and MG.status ilike '%' || #{status} || '%'
         </if>
@@ -32,10 +33,10 @@
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
-				<when test="'asset_kind_id' == sidx and sidx != ''">
+                <when test="'asset_kind_id' == sidx and sidx != ''">
                     MG.asset_kind_id ${sord}
                 </when>
-				<when test="'name' == sidx and sidx != ''">
+                <when test="'name' == sidx and sidx != ''">
                     MG.name ${sord}
                 </when>
                 <when test="'zone_id' == sidx and sidx != ''">
@@ -60,12 +61,12 @@
                     MG.real_value ${sord}
                 </when>
                 <otherwise>
-					MG.zone_id, MG.name
+                    MG.zone_id, MG.name
                 </otherwise>
             </choose>
         </trim>
     </sql>
-    
+
     <sql id="chRowSearch">
         <if test="asset_kind_id != null and asset_kind_id != ''">
             and MG.asset_kind_id = #{asset_kind_id}
@@ -76,15 +77,16 @@
         <if test="zone_id != null and zone_id != ''">
             and MG.zone_id = #{zone_id}
         </if>
-		<if test="zone_name != null and zone_name != ''">
-			and MG.zone_name ilike '%' || #{zone_name} || '%'
-		</if>
+        <if test="zone_name != null and zone_name != ''">
+            and MG.zone_name ilike '%' || #{zone_name} || '%'
+        </if>
         <if test="install_date != null and install_date != ''">
             and MG.install_date ilike '%' || #{install_date} || '%'
         </if>
-		<if test="ch_collect_date_start != null and ch_collect_date_start != '' and ch_collect_date_end != null and ch_collect_date_end != ''">
-			and to_date(MG.ch_collect_date, 'YYYY-MM-DD') between #{ch_collect_date_start}::date and #{ch_collect_date_end}::date
-		</if>
+        <if test="ch_collect_date_start != null and ch_collect_date_start != '' and ch_collect_date_end != null and ch_collect_date_end != ''">
+            and to_date(MG.ch_collect_date, 'YYYY-MM-DD') between #{ch_collect_date_start}::date and
+            #{ch_collect_date_end}::date
+        </if>
         <if test="status != null and status != ''">
             and MG.status ilike '%' || #{status} || '%'
         </if>
@@ -96,10 +98,10 @@
     <sql id="chRowOrder">
         <trim prefix="order by">
             <choose>
-				<when test="'asset_kind_id' == sidx and sidx != ''">
+                <when test="'asset_kind_id' == sidx and sidx != ''">
                     MG.asset_kind_id ${sord}
                 </when>
-				<when test="'name' == sidx and sidx != ''">
+                <when test="'name' == sidx and sidx != ''">
                     MG.name ${sord}
                 </when>
                 <when test="'zone_id' == sidx and sidx != ''">
@@ -124,299 +126,304 @@
                     MG.real_value ${sord}
                 </when>
                 <otherwise>
-					MG.zone_id, MG.name
+                    MG.zone_id, MG.name
                 </otherwise>
             </choose>
         </trim>
     </sql>
-    
+
     <select id="selectGroupSensorList" parameterType="java.util.Map" resultType="java.util.Map">
-		SELECT MG.*
-		FROM (
-			SELECT
-				ass.*
-				, zo.name as zone_name
-		FROM ( 
-			select
-				tak.name asset_kind_name,
-				tak.asset_kind_id,
-				ta.asset_id,
-				ta."name",
-				ta.status,
-				TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date,
-				ta.zone_id
-			from tb_asset ta
-				left join tb_asset_kind tak on ta.asset_kind_id = tak.asset_kind_id 
-				LEFT outer join tb_channel ch ON ta.asset_id = ch.asset_id
-				left outer join 
-				(
-					SELECT *
-					FROM tb_dps_basecollection
-					WHERE (sensor_id, zone_id, collect_date)
-					IN ( SELECT sensor_id, zone_id, MAX(collect_date)
-						FROM tb_dps_basecollection
-						GROUP BY sensor_id, zone_id )
-				) dbc on ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
-			where ta.asset_kind_id IN ('2','3','4','6','7')    
-			group by tak.name, tak.asset_kind_id, ta.asset_id, ta."name", ta.status
-			order by ta.asset_kind_id desc
-			) ass
-			LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
-			WHERE zo.use_flag = 'Y'
-		) MG
-		WHERE 1=1
-		<include refid="rowSearch"/>
+        SELECT MG.*
+        FROM (
+        SELECT
+        ass.*
+        , zo.name as zone_name
+        FROM (
+        select
+        tak.name asset_kind_name,
+        tak.asset_kind_id,
+        ta.asset_id,
+        ta."name",
+        ta.status,
+        TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date,
+        ta.zone_id
+        from tb_asset ta
+        left join tb_asset_kind tak on ta.asset_kind_id = tak.asset_kind_id
+        LEFT outer join tb_channel ch ON ta.asset_id = ch.asset_id
+        left outer join
+        (
+        SELECT *
+        FROM tb_dps_basecollection
+        WHERE (sensor_id, zone_id, collect_date)
+        IN ( SELECT sensor_id, zone_id, MAX(collect_date)
+        FROM tb_dps_basecollection
+        GROUP BY sensor_id, zone_id )
+        ) dbc on ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
+        where ta.asset_kind_id IN ('2','3','4','6','7')
+        group by tak.name, tak.asset_kind_id, ta.asset_id, ta."name", ta.status
+        order by ta.asset_kind_id desc
+        ) ass
+        LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
+        WHERE zo.use_flag = 'Y'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
         </if>
-		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
-			LIMIT ${limit} OFFSET ${offset}
-		</if>
-	</select>
+        <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+            LIMIT ${limit} OFFSET ${offset}
+        </if>
+    </select>
 
-	<select id="selectGroupSensorTotal" parameterType="java.util.Map" resultType="int">
-		SELECT count(1)
-		FROM (
-			SELECT
-				ass.*
-				, zo.name as zone_name
-		FROM (
-			select
-				tak.name asset_kind_name,
-				tak.asset_kind_id,
-				ta.asset_id,
-				ta."name",
-				ta.status,
-				TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date,
-				ta.zone_id
-			from tb_asset ta 
-				left join tb_asset_kind tak on ta.asset_kind_id = tak.asset_kind_id 
-				LEFT outer join tb_channel ch ON ta.asset_id = ch.asset_id
-				left outer join 
-				(
-					SELECT *
-					FROM tb_dps_basecollection
-					WHERE (sensor_id, zone_id, collect_date)
-					IN ( SELECT sensor_id, zone_id, MAX(collect_date)
-						FROM tb_dps_basecollection
-						GROUP BY sensor_id, zone_id )
-				) dbc on ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
-			where ta.asset_kind_id IN ('2','3','4','6','7')    
-			group by tak.name, tak.asset_kind_id, ta.asset_id, ta."name", ta.status
-			order by ta.asset_kind_id desc
-			) ass
-			LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
-			WHERE zo.use_flag = 'Y'
-		) MG
-		WHERE 1=1
-		<include refid="rowSearch"/>
-	</select>
+    <select id="selectGroupSensorTotal" parameterType="java.util.Map" resultType="int">
+        SELECT count(1)
+        FROM (
+        SELECT
+        ass.*
+        , zo.name as zone_name
+        FROM (
+        select
+        tak.name asset_kind_name,
+        tak.asset_kind_id,
+        ta.asset_id,
+        ta."name",
+        ta.status,
+        TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date,
+        ta.zone_id
+        from tb_asset ta
+        left join tb_asset_kind tak on ta.asset_kind_id = tak.asset_kind_id
+        LEFT outer join tb_channel ch ON ta.asset_id = ch.asset_id
+        left outer join
+        (
+        SELECT *
+        FROM tb_dps_basecollection
+        WHERE (sensor_id, zone_id, collect_date)
+        IN ( SELECT sensor_id, zone_id, MAX(collect_date)
+        FROM tb_dps_basecollection
+        GROUP BY sensor_id, zone_id )
+        ) dbc on ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
+        where ta.asset_kind_id IN ('2','3','4','6','7')
+        group by tak.name, tak.asset_kind_id, ta.asset_id, ta."name", ta.status
+        order by ta.asset_kind_id desc
+        ) ass
+        LEFT JOIN tb_zone zo ON zo.zone_id = ass.zone_id
+        WHERE zo.use_flag = 'Y'
+        ) MG
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
 
     <select id="selectSensorList" parameterType="java.util.Map" resultType="java.util.Map">
-		SELECT
-			C.district_no
-			,G.district_nm
-			,A.sens_no
-			,A.logr_no
-			,D.logr_nm
-			,A.senstype_no
-			,B.sens_tp_nm
-			,A.sens_nm
-			,C.sens_chnl_nm
-			,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
-			,A.sect_no
-			,A.multi_sens_yn
-			,A.disp_prior_yn
-			,A.multi_senstype_no
-			,A.multi_sens_no
-			,A.nonrecv_limit_min
-			,A.alarm_use_yn
-			,A.sms_snd_yn
-			,A.sens_disp_yn
-			,A.maint_sts_cd
-			,E.code_nm AS maint_sts_nm
-			,A.sens_lon
-			,A.sens_lat
-			,A.sens_maker
-			,A.model_nm
-			,D.maint_sts_cd AS logger_maint_sts_cd
-			,F.net_err_yn
-			,F.formul_data
-			,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
-			,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
-			,TO_CHAR(F.meas_dt, 'YYYY-MM-DD HH24:MI:SS') AS meas_dt
-		FROM tb_sensor_info A
-		LEFT OUTER JOIN tb_sensor_type B ON A.senstype_no = B.senstype_no
-		LEFT OUTER JOIN (
-						SELECT
-							sbt1.*
-						FROM tb_logr_idx_map sbt1
-						JOIN (
-							SELECT
-								sens_chnl_id, logr_no, MAX(reg_dt) AS max_reg_dt
-							FROM tb_logr_idx_map
-							GROUP BY sens_chnl_id, logr_no
-						) AS sbt2
-						ON sbt1.sens_chnl_id = sbt2.sens_chnl_id
-						AND sbt1.logr_no = sbt2.logr_no
-						AND sbt1.reg_dt = sbt2.max_reg_dt
-		) C ON A.sens_no = C.sens_no
-		LEFT OUTER JOIN tb_logger_info D ON C.logr_no = D.logr_no
-		LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') E ON A.maint_sts_cd = E.code_id
-		LEFT OUTER JOIN (
-						SELECT
-							sbt1.*
-						FROM tb_measure_details sbt1
-						JOIN (
-							SELECT
-								sens_no, sens_chnl_id, MAX(meas_dt) AS max_meas_dt
-							FROM tb_measure_details
-							GROUP BY sens_no, sens_chnl_id
-						) sbt2
-						ON sbt1.sens_no = sbt2.sens_no
-						AND sbt1.sens_chnl_id = sbt2.sens_chnl_id
-						AND sbt1.meas_dt = sbt2.max_meas_dt
-		) F ON C.sens_no = F.sens_no AND C.sens_chnl_id = F.sens_chnl_id
-		LEFT OUTER JOIN tb_district_info G ON C.district_no = G.district_no
-		WHERE 1=1
+        SELECT
+        C.district_no
+        ,G.district_nm
+        ,A.sens_no
+        ,A.logr_no
+        ,D.logr_nm
+        ,A.senstype_no
+        ,B.sens_tp_nm
+        ,A.sens_nm
+        ,C.sens_chnl_nm
+        ,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
+        ,A.sect_no
+        ,A.multi_sens_yn
+        ,A.disp_prior_yn
+        ,A.multi_senstype_no
+        ,A.multi_sens_no
+        ,A.nonrecv_limit_min
+        ,A.alarm_use_yn
+        ,A.sms_snd_yn
+        ,A.sens_disp_yn
+        ,A.maint_sts_cd
+        ,E.code_nm AS maint_sts_nm
+        ,A.sens_lon
+        ,A.sens_lat
+        ,A.sens_maker
+        ,A.model_nm
+        ,D.maint_sts_cd AS logger_maint_sts_cd
+        ,F.net_err_yn
+        ,F.formul_data
+        ,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
+        ,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
+        ,TO_CHAR(F.meas_dt, 'YYYY-MM-DD HH24:MI:SS') AS meas_dt
+        FROM tb_sensor_info A
+        LEFT OUTER JOIN tb_sensor_type B ON A.senstype_no = B.senstype_no
+        LEFT OUTER JOIN (
+        SELECT
+        sbt1.*
+        FROM tb_logr_idx_map sbt1
+        JOIN (
+        SELECT
+        sens_chnl_id, logr_no, MAX(reg_dt) AS max_reg_dt
+        FROM tb_logr_idx_map
+        GROUP BY sens_chnl_id, logr_no
+        ) AS sbt2
+        ON sbt1.sens_chnl_id = sbt2.sens_chnl_id
+        AND sbt1.logr_no = sbt2.logr_no
+        AND sbt1.reg_dt = sbt2.max_reg_dt
+        ) C ON A.sens_no = C.sens_no
+        LEFT OUTER JOIN tb_logger_info D ON C.logr_no = D.logr_no
+        LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') E ON A.maint_sts_cd = E.code_id
+        LEFT OUTER JOIN (
+        SELECT
+        sbt1.*
+        FROM tb_measure_details sbt1
+        JOIN (
+        SELECT
+        sens_no, sens_chnl_id, MAX(meas_dt) AS max_meas_dt
+        FROM tb_measure_details
+        GROUP BY sens_no, sens_chnl_id
+        ) sbt2
+        ON sbt1.sens_no = sbt2.sens_no
+        AND sbt1.sens_chnl_id = sbt2.sens_chnl_id
+        AND sbt1.meas_dt = sbt2.max_meas_dt
+        ) F ON C.sens_no = F.sens_no AND C.sens_chnl_id = F.sens_chnl_id
+        LEFT OUTER JOIN tb_district_info G ON C.district_no = G.district_no
+        WHERE 1=1
         <include refid="rowSearch"/>
         <!--<include refid="rowOrder"/>-->
         <!--<if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
         </if>-->
-		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
-			LIMIT ${limit} OFFSET ${offset}
-		</if>
+        <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+            LIMIT ${limit} OFFSET ${offset}
+        </if>
     </select>
-    
+
     <select id="selectSensorListTotal" parameterType="java.util.Map" resultType="int">
-		SELECT
-			COUNT(1)
-		FROM tb_sensor_info A
-		LEFT OUTER JOIN tb_sensor_type B ON A.senstype_no = B.senstype_no
-		LEFT OUTER JOIN (
-						SELECT
-							sbt1.*
-						FROM tb_logr_idx_map sbt1
-						JOIN (
-							SELECT
-								sens_chnl_id, logr_no, MAX(reg_dt) AS max_reg_dt
-							FROM tb_logr_idx_map
-							GROUP BY sens_chnl_id, logr_no
-						) AS sbt2
-						ON sbt1.sens_chnl_id = sbt2.sens_chnl_id
-						AND sbt1.logr_no = sbt2.logr_no
-						AND sbt1.reg_dt = sbt2.max_reg_dt
-		) C ON A.sens_no = C.sens_no
-		LEFT OUTER JOIN tb_logger_info D ON C.logr_no = D.logr_no
-		LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') E ON A.maint_sts_cd = E.code_id
-		LEFT OUTER JOIN (
-						SELECT
-							sbt1.*
-						FROM tb_measure_details sbt1
-						JOIN (
-							SELECT
-								sens_no, sens_chnl_id, MAX(meas_dt) AS max_meas_dt
-							FROM tb_measure_details
-							GROUP BY sens_no, sens_chnl_id
-						) sbt2
-						ON sbt1.sens_no = sbt2.sens_no
-						AND sbt1.sens_chnl_id = sbt2.sens_chnl_id
-						AND sbt1.meas_dt = sbt2.max_meas_dt
-		) F ON C.sens_no = F.sens_no AND C.sens_chnl_id = F.sens_chnl_id
-		LEFT OUTER JOIN tb_district_info G ON C.district_no = G.district_no
-		WHERE 1=1
+        SELECT
+        COUNT(1)
+        FROM tb_sensor_info A
+        LEFT OUTER JOIN tb_sensor_type B ON A.senstype_no = B.senstype_no
+        LEFT OUTER JOIN (
+        SELECT
+        sbt1.*
+        FROM tb_logr_idx_map sbt1
+        JOIN (
+        SELECT
+        sens_chnl_id, logr_no, MAX(reg_dt) AS max_reg_dt
+        FROM tb_logr_idx_map
+        GROUP BY sens_chnl_id, logr_no
+        ) AS sbt2
+        ON sbt1.sens_chnl_id = sbt2.sens_chnl_id
+        AND sbt1.logr_no = sbt2.logr_no
+        AND sbt1.reg_dt = sbt2.max_reg_dt
+        ) C ON A.sens_no = C.sens_no
+        LEFT OUTER JOIN tb_logger_info D ON C.logr_no = D.logr_no
+        LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') E ON A.maint_sts_cd = E.code_id
+        LEFT OUTER JOIN (
+        SELECT
+        sbt1.*
+        FROM tb_measure_details sbt1
+        JOIN (
+        SELECT
+        sens_no, sens_chnl_id, MAX(meas_dt) AS max_meas_dt
+        FROM tb_measure_details
+        GROUP BY sens_no, sens_chnl_id
+        ) sbt2
+        ON sbt1.sens_no = sbt2.sens_no
+        AND sbt1.sens_chnl_id = sbt2.sens_chnl_id
+        AND sbt1.meas_dt = sbt2.max_meas_dt
+        ) F ON C.sens_no = F.sens_no AND C.sens_chnl_id = F.sens_chnl_id
+        LEFT OUTER JOIN tb_district_info G ON C.district_no = G.district_no
+        WHERE 1=1
         <include refid="rowSearch"/>
     </select>
-    
+
     <select id="selectSensorByChannelList" parameterType="java.util.Map" resultType="java.util.Map">
-		SELECT MG.*
-		FROM ( 
-			SELECT ass.asset_id
-			    	, ass.asset_kind_id
-					, ass.asset_kind_id asset_kind_id_hid
-					, ass.name
-					-- , '' ch_name
-					-- , '' sensor_id
-					, ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') ch_name_sensor_keys
-					-- , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id),',') sensor_ids
-					, ass.zone_id
-					, ass.status
-					, TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
-					, TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as ch_collect_date
-					, MAX(dbc.real_value) real_value
-					, (select name from tb_zone WHERE zone_id = ass.zone_id) zone_name
-			FROM tb_asset ass
-				LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
-					LEFT JOIN (SELECT *
-								FROM tb_dps_basecollection
-								WHERE (sensor_id, zone_id, collect_date)
-								IN ( SELECT sensor_id, zone_id, MAX(collect_date)
-									 FROM tb_dps_basecollection
-									GROUP BY sensor_id, zone_id )
-								) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
-			WHERE ass.asset_kind_id IN ('2','3','4','6','7')
-			GROUP BY ass.asset_id, ass.asset_kind_id,ass.name, ass.zone_id, ass.status, ass.install_date
-		) MG
-		LEFT JOIN tb_zone zo ON zo.zone_id = MG.zone_id
-		WHERE 1=1
-		and zo.use_flag = 'Y'
+        SELECT MG.*
+        FROM (
+        SELECT ass.asset_id
+        , ass.asset_kind_id
+        , ass.asset_kind_id asset_kind_id_hid
+        , ass.name
+        -- , '' ch_name
+        -- , '' sensor_id
+        , ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') ch_name_sensor_keys
+        -- , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id),',') sensor_ids
+        , ass.zone_id
+        , ass.status
+        , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
+        , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as
+        ch_collect_date
+        , MAX(dbc.real_value) real_value
+        , (select name from tb_zone WHERE zone_id = ass.zone_id) zone_name
+        FROM tb_asset ass
+        LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
+        LEFT JOIN (SELECT *
+        FROM tb_dps_basecollection
+        WHERE (sensor_id, zone_id, collect_date)
+        IN ( SELECT sensor_id, zone_id, MAX(collect_date)
+        FROM tb_dps_basecollection
+        GROUP BY sensor_id, zone_id )
+        ) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
+        WHERE ass.asset_kind_id IN ('2','3','4','6','7')
+        GROUP BY ass.asset_id, ass.asset_kind_id,ass.name, ass.zone_id, ass.status, ass.install_date
+        ) MG
+        LEFT JOIN tb_zone zo ON zo.zone_id = MG.zone_id
+        WHERE 1=1
+        and zo.use_flag = 'Y'
         <include refid="chRowSearch"/>
         <include refid="chRowOrder"/>
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
         </if>
     </select>
-    
+
     <select id="selectSensorByChannelListTotal" parameterType="java.util.Map" resultType="int">
-    	-- selectSensorByChannelListTotal
-		SELECT count(1) 
-		FROM ( 
-			SELECT ass.asset_kind_id
-					, ass.asset_kind_id asset_kind_id_hid
-					, ass.name
-					-- , '' ch_name
-					-- , '' sensor_id
-					, ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') ch_name_sensor_keys
-					-- , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id),',') sensor_ids
-					, ass.zone_id
-					, ass.status
-					, TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
-					, TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as ch_collect_date
-					, MAX(dbc.real_value) real_value
-					, (select name from tb_zone WHERE zone_id = ass.zone_id) zone_name
-			FROM tb_asset ass
-				LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
-					LEFT JOIN (SELECT *
-								FROM tb_dps_basecollection
-								WHERE (sensor_id, zone_id, collect_date)
-								IN ( SELECT sensor_id, zone_id, MAX(collect_date)
-									 FROM tb_dps_basecollection
-									GROUP BY sensor_id, zone_id )
-								) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
-			WHERE ass.asset_kind_id IN ('2','3','4','6','7')
-			GROUP BY ass.asset_id, ass.asset_kind_id,ass.name, ass.zone_id, ass.status, ass.install_date
-		) MG
-		LEFT JOIN tb_zone zo ON zo.zone_id = MG.zone_id
-		WHERE 1=1
-		and zo.use_flag = 'Y'
+        -- selectSensorByChannelListTotal
+        SELECT count(1)
+        FROM (
+        SELECT ass.asset_kind_id
+        , ass.asset_kind_id asset_kind_id_hid
+        , ass.name
+        -- , '' ch_name
+        -- , '' sensor_id
+        , ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') ch_name_sensor_keys
+        -- , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id),',') sensor_ids
+        , ass.zone_id
+        , ass.status
+        , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
+        , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as
+        ch_collect_date
+        , MAX(dbc.real_value) real_value
+        , (select name from tb_zone WHERE zone_id = ass.zone_id) zone_name
+        FROM tb_asset ass
+        LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
+        LEFT JOIN (SELECT *
+        FROM tb_dps_basecollection
+        WHERE (sensor_id, zone_id, collect_date)
+        IN ( SELECT sensor_id, zone_id, MAX(collect_date)
+        FROM tb_dps_basecollection
+        GROUP BY sensor_id, zone_id )
+        ) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
+        WHERE ass.asset_kind_id IN ('2','3','4','6','7')
+        GROUP BY ass.asset_id, ass.asset_kind_id,ass.name, ass.zone_id, ass.status, ass.install_date
+        ) MG
+        LEFT JOIN tb_zone zo ON zo.zone_id = MG.zone_id
+        WHERE 1=1
+        and zo.use_flag = 'Y'
         <include refid="chRowSearch"/>
     </select>
 
-	<select id="getDistinctDistrict" parameterType="java.util.Map" resultType="java.util.Map">
-			/* getDistinctDistrict */
-			SELECT
-			    DISTINCT district_nm
-			FROM tb_district_info
-			ORDER BY district_nm ASC
-	</select>
+    <select id="getDistinctDistrict" parameterType="java.util.Map" resultType="java.util.Map">
+        /* getDistinctDistrict */
+        SELECT DISTINCT district_nm
+        FROM tb_district_info
+        ORDER BY district_nm ASC
+    </select>
 
-	<select id="getDistinctSensorType" parameterType="java.util.Map" resultType="java.util.Map">
-		/* getDistinctSensorType */
-		SELECT
-			DISTINCT sens_tp_nm
-		FROM tb_sensor_type
-		ORDER BY sens_tp_nm ASC
-	</select>
+    <select id="getDistinctSensorType" parameterType="java.util.Map" resultType="java.util.Map">
+        /* getDistinctSensorType */
+        SELECT DISTINCT sens_tp_nm
+        FROM tb_sensor_type
+        ORDER BY sens_tp_nm ASC
+    </select>
+
+    <select id="getSimpleTotalCount" parameterType="java.util.Map" resultType="int">
+        select count(tsi.sens_no)
+        from tb_sensor_info tsi
+    </select>
 </mapper>

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dao.ModifySensorMapper;
-import com.safeone.dashboard.dto.*;
+import com.safeone.dashboard.dto.GetModifySensorDto;
 import com.safeone.dashboard.service.ModifySensorService;
 import com.safeone.dashboard.util.CommonUtils;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +59,10 @@ public class ModifySensorServiceImpl implements ModifySensorService {
         on.put("sensor_type", an);
 
         return on;
+    }
+
+    @Override
+    public int getSimpleTotalCount(Map param) {
+        return modifySensorMapper.getSimpleTotalCount(param);
     }
 }

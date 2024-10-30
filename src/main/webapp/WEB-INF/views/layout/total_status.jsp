@@ -363,34 +363,26 @@
 
     // 시스템 상태
     function loadSystemCount() {
-        $.get('/systemCount', function (res) {
-                $.each(res, function (i) {
-                    if (res.length > 0) $('.overall-status_re .status-number .conts').css("cursor", "pointer");
-                    // console.log(res[i]);
-                    if (res[i].grouped_asset_kind_id === '2-7') {
-                        $('.sensor.status-number dt:eq(0)').html(res[i].total_count);
-                        $('.sensor.status-number dt:eq(1)').html(res[i].status_1_count);
-                        $('.sensor.status-number dt:eq(2)').html(res[i].status_2_count);
-                    } else if (res[i].grouped_asset_kind_id === '8') {
-                        $('.cctv.status-number dt:eq(0)').html(res[i].total_count);
-                        $('.cctv.status-number dt:eq(1)').html(res[i].status_1_count);
-                        $('.cctv.status-number dt:eq(2)').html(res[i].status_2_count);
-                    }
-                });
-        });
+        $.get("/cctv/count", (res) => {
+            $('.cctv.status-number dt:eq(0)').html(res);
+        })
+
+        $.get("/modify/sensor/count", (res) => {
+            $('.sensor.status-number dt:eq(0)').html(res);
+        })
     }
 
     // 지역 날씨
     function loadWeatherInfo() {
         $.get('/weather/today/4375035000', function (res) {
             // console.log(res);
-            if (res.wfKor == '구름 많음') {
+            if (res.wfKor === '구름 많음') {
                 $('.weather-img img').attr('src', 'images/weather/mostlycloudy.png');
-            } else if (res.wfKor == '비/눈') {
+            } else if (res.wfKor === '비/눈') {
                 $('.weather-img img').attr('src', 'images/weather/rainsnow.png');
-            } else if (res.wfKor == '빗방울/눈날림') {
+            } else if (res.wfKor === '빗방울/눈날림') {
                 $('.weather-img img').attr('src', 'images/weather/rainsnowdrifting.png');
-            } else if (res.wfKor == '눈날림') {
+            } else if (res.wfKor === '눈날림') {
                 $('.weather-img img').attr('src', 'images/weather/snowdrifting.png');
             } else {
                 $('.weather-img img').attr('src', 'images/weather/' + res.wfEn.toLowerCase() + '.png');
