@@ -1,7 +1,6 @@
 `
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -377,7 +376,7 @@
                                 "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
                             )
                         })
-                        $("#chart-district-select option").filter(function() {
+                        $("#chart-district-select option").filter(function () {
                             return $(this).text() === district_nm;
                         }).prop('selected', true);
 
@@ -403,7 +402,7 @@
                 });
 
                 await getSensors(district_no, senstype_no);
-                $("#sensor-name-select option").filter(function() {
+                $("#sensor-name-select option").filter(function () {
                     return $(this).text().includes(sens_no);
                 }).prop('selected', true);
             }
@@ -564,8 +563,8 @@
                         }
                     },
                     scales: {
-                        x: { type: "category" },
-                        y: { beginAtZero: true }
+                        x: {type: "category"},
+                        y: {beginAtZero: true}
                     }
                 }
             });
@@ -596,7 +595,7 @@
                     }
 
                     if (!processedData[key]) {
-                        processedData[key] = { min: Infinity, max: -Infinity };
+                        processedData[key] = {min: Infinity, max: -Infinity};
                     }
 
                     const value = item.formul_data;
@@ -611,7 +610,7 @@
                     y: [processedData[label].min, processedData[label].max]
                 }));
 
-                return { labels, ranges };
+                return {labels, ranges};
             }
 
             function updateChart(data) {
@@ -946,7 +945,6 @@
             </div>
         </div>
     </div>
-
 </section>
 </body>
 </html>
