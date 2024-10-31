@@ -1,11 +1,10 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
-
+    <jsp:include page="../common/include_head.jsp" flush="true" />
     <style>
         #map {
             width: 100%;
@@ -18,17 +17,13 @@
             top: calc(50% - 27px);
         }
     </style>
-
     <script>
-
         window.jqgridOption = {
             columnAutoWidth: true,
-            // filterToolbarCheck: true,
             multiselect: true,
             multiboxonly: false
-        }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
+        };
 
-        //             var _popupClearData;
         let firstCode = '';
         $(function () {
             window.vworld = new vwutil({
@@ -74,7 +69,6 @@
                 reader.readAsDataURL(file);
             });
 
-
             $("#site_title_logo").on("change", function (event) {
                 var file = event.target.files[0];
                 $('#lay-form-write input[name=site_title_logo_nm]').val(file.name);
@@ -88,45 +82,6 @@
                 reader.readAsDataURL(file);
             });
 
-            // 등록
-            // $('.insertBtn').on('click', function () {
-            //
-            // 	$("#form_sub_title").html('등록');
-            //
-            // 	initForm();
-            //
-            // 	$('#uploadFileImg').css("cursor","");
-            // 	$('#uploadFileImg').off('click');
-            //
-            //     popFancy('#lay-form-write');
-            //      $('#site_no').val(firstCode).change();
-            //     // 저장버튼 클릭시
-            //     $('#lay-form-write input[type=submit]').off().on('click', function () {
-            //         if(!validate()) return;
-            //
-            // 		const form = $('#lay-form-write')[0]; // 폼 요소 선택
-            // 		const formData = new FormData(form); // FormData 객체 생성
-            //
-            // 		$.ajax({
-            // 			url: '/adminAdd/siteInfo/add',
-            // 			type: 'POST',
-            // 			data: formData,
-            // 			contentType: false, // 서버에 전송되는 데이터의 타입을 기본 설정으로 둠
-            // 			processData: false, // 데이터의 처리 방법 설정 (false로 해야 파일을 처리할 수 있음)
-            // 			success: function(res) {
-            // 				alert('저장되었습니다.', function() {
-            // 					popFancyClose('#lay-form-write');
-            // 				});
-            // 				reloadJqGrid();
-            // 			},
-            // 			error: function(err) {
-            // 				alert('파일 업로드에 실패했습니다.');
-            // 			}
-            // 		});
-            // 	});
-            // });
-
-            // 수정 팝업
             $('.modifyBtn').on('click', function () {
 
                 $("#form_sub_title").html('상세정보');
@@ -192,9 +147,6 @@
                 $('#site_no').html(option);
             });
 
-            // $('.excelBtn').on('click', function () {
-            //     downloadExcel('기관관리');
-            // });
         });
 
         function initForm() {
@@ -215,19 +167,10 @@
 
 <body data-pgcode="0000">
 <section id="wrap">
-    <!--[s] 상단 -->
-    <jsp:include page="../common/include_top.jsp" flush="true"></jsp:include>
-    <!--[e] 상단 -->
-
-    <!--[s] 왼쪽 메뉴 -->
-    <div
-            id="global-menu">
-        <!--[s] 주 메뉴 -->
-        <jsp:include page="../common/include_sidebar.jsp" flush="true"></jsp:include>
-        <!--[e] 주 메뉴 -->
+    <jsp:include page="../common/include_top.jsp" flush="true" />
+    <div id="global-menu">
+        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
     </div>
-    <!--[e] 왼쪽 메뉴 -->
-
     <div id="container">
         <h2 class="txt">
             관리자 전용
@@ -237,23 +180,15 @@
             <div class="contents-re">
                 <h3 class="txt">기관 정보 관리</h3>
                 <div class="btn-group">
-                    <%--                            <a class="insertBtn" style="display:none;">신규 등록</a>--%>
                     <a class="modifyBtn" style="display:none;">상세정보</a>
-                    <%--<a class="deleteBtn">삭제</a>--%>
-                    <%--<a class="excelBtn">다운로드</a>--%>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>
-<%--                    <jsp:include page="../common/include_slickgrid.jsp" flush="true"></jsp:include>--%>
+                    <jsp:include page="../common/include_jqgrid.jsp" flush="true" />
                 </div>
             </div>
         </div>
     </div>
-    <!--[e] 컨텐츠 영역 -->
-
-    <!--[s] 유지보수 등록 팝업 -->
     <form id="lay-form-write" class="layer-base" style="width:900px">
-
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
@@ -265,25 +200,17 @@
                         <col width="130"/>
                         <col width="*"/>
                         <col width="*"/>
-                        <%--                        <col width="300"/>--%>
                     </colgroup>
                     <tbody>
                     <tr>
                         <th class="required_th">사이트 ID</th>
                         <td><input type="text" id="site_no" name="site_no" value="" placeholder="" readonly/></td>
-<%--                        <td>--%>
-<%--                            <select id="site_no" name="site_no" disabled>--%>
-<%--                                <option value="">선택</option>--%>
-<%--                            </select>--%>
-<%--                        </td>--%>
                     </tr>
                     <tr>
                         <th class="required_th">관리 기관명</th>
                         <td><input type="text" id="site_nm" name="site_nm" value="" class="required" placeholder=""/>
                         </td>
                     </tr>
-
-
                     <tr>
                         <th class="required_th" style="vertical-align: middle;">우편번호</th>
                         <td colspan="2" style="display: flex; align-items: center;">
@@ -296,7 +223,6 @@
                             </div>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">주소</th>
                         <td><input type="text" name="site_addr" class="required" readonly/></td>
@@ -305,15 +231,12 @@
                         <th class="required_th">도로명주소</th>
                         <td><input type="text" name="site_road_addr" class="required" readonly/></td>
                     </tr>
-
-
                     <tr>
                         <th class="required_th">시스템명칭</th>
                         <td><input type="text" id="site_sys_nm" name="site_sys_nm" value="" class="required"
                                    placeholder=""/>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">지자체로고</th>
                         <td colspan="2" style="display: flex; align-items: center;">
@@ -324,7 +247,6 @@
                             </div>
                         </td>
                     </tr>
-
                     <tr>
                         <th class="required_th">지자체 타이틀 로고</th>
                         <td colspan="2" style="display: flex; align-items: center;">
@@ -336,21 +258,6 @@
                             <div style="margin-left: 10px">권장 사이즈 460 x 310</div>
                         </td>
                     </tr>
-
-<%--                    <tr>--%>
-<%--                        <th>지자체로고 사진</th>--%>
-<%--                        <td style="height:250px">--%>
-<%--                            <img id="uploadFileImg" src="" alt="" style="width:300px">--%>
-<%--                        </td>--%>
-<%--                    </tr>--%>
-
-<%--                    <tr>--%>
-<%--                        <th>지자체 타이틀 로고 사진</th>--%>
-<%--                        <td style="height:250px">--%>
-<%--                            <img id="uploadFileImg2" src="" alt="" style="width:300px">--%>
-<%--                        </td>--%>
-<%--                    </tr>--%>
-
                     </tbody>
                 </table>
             </div>
@@ -360,8 +267,6 @@
             </div>
         </div>
     </form>
-    <!--[e] 유지보수 등록 팝업 -->
-
     <div id="lay-form-address" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
@@ -376,7 +281,6 @@
             </div>
         </div>
     </div>
-
 </section>
 </body>
 </html>
