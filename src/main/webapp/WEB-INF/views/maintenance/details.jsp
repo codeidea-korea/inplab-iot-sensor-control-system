@@ -112,6 +112,10 @@
             function initModifyForm(data) {
                 $("#form_sub_title").html('상세 정보');
 
+                $('#district_no').prop('disabled', true);
+                $('#sens_nm').prop('disabled', true);
+                $('#senstype_no').prop('disabled', true);
+
                 $("#deleteBtn").show();
                 $("#form-submit-btn").hide();
                 $("#form-update-btn").show();
@@ -176,6 +180,10 @@
             }
 
             function initInsertForm() {
+                $('#district_no').prop('disabled', false);
+                $('#sens_nm').prop('disabled', false);
+                $('#senstype_no').prop('disabled', false);
+
                 $("#form_sub_title").html('등록');
                 $("#form-submit-btn").show()
                 $("#deleteBtn").hide();

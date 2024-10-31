@@ -13,6 +13,18 @@
                 multiselect: true,
                 multiboxonly: false,
                 useFilterToolbar: true,
+            }, null, {
+                partner_type_flag: {
+                    formatter: function (cellValue) {
+                        if (cellValue === '0') {
+                            return '시공사';
+                        } else if (cellValue === '1') {
+                            return '계측사';
+                        } else if (cellValue === '2') {
+                            return 'ALL';
+                        }
+                    }
+                }
             })
 
             $('.insertBtn').on('click', () => {
@@ -53,7 +65,14 @@
 
                 $('#partner_comp_id').val(data.partner_comp_id);
                 $('#partner_comp_nm').val(data.partner_comp_nm);
-                $('#partner_type_flag').val(data.partner_type_flag);
+
+                $('#partner_type_flag option').each(function () {
+                    if ($(this).text() === data.partner_type_flag) {
+                        $(this).prop('selected', true);
+                    }
+                });
+
+
                 $('#partner_comp_addr').val(data.partner_comp_addr);
                 $('#comp_biz_no').val(data.comp_biz_no);
                 $('#maint_rep_nm').val(data.maint_rep_nm);
@@ -78,7 +97,6 @@
                 $("#form_sub_title").html('등록');
                 $("#deleteBtn").hide()
                 $("#form-update-btn").hide();
-                $("#partner_comp_id").attr('readonly', false);
             }
 
             function resetForm() {
@@ -101,7 +119,6 @@
                     url: '/maintenance/company-management/add',
                     type: 'POST',
                     data: {
-                        partner_comp_id: $('#partner_comp_id').val(),
                         partner_comp_nm: $('#partner_comp_nm').val(),
                         partner_type_flag: $('#partner_type_flag').val(),
                         partner_comp_addr: $('#partner_comp_addr').val(),
@@ -113,7 +130,7 @@
                     },
                     success: function (_res) {
                         popFancyClose('#lay-form-write');
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     },
                     error: function (_err) {
                         alert('등록에 실패했습니다. 다시 시도해 주세요.');
@@ -141,7 +158,7 @@
                     },
                     success: function (_res) {
                         popFancyClose('#lay-form-write');
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     },
                     error: function (_err) {
                         alert('수정에 실패했습니다. 다시 시도해 주세요.');
@@ -150,18 +167,13 @@
             });
 
             function validated() {
-                if ($('#partner_comp_id').val() === '') {
-                    alert('협력사 ID를 입력해주세요.');
-                    return false;
-                }
-
                 if ($('#partner_comp_nm').val() === '') {
                     alert('협력사명을 입력해주세요.');
                     return false;
                 }
 
                 if ($('#partner_type_flag').val() === '') {
-                    alert('협력사구분을 입력해주세요.');
+                    alert('협력사구분을 선택해주세요.');
                     return false;
                 }
 
@@ -211,7 +223,7 @@
                         },
                         success: function (_res) {
                             popFancyClose('#lay-form-write');
-                            reloadJqGrid();
+                            reloadJqGrid($grid);
                         },
                         error: function (_err) {
                             alert('삭제에 실패했습니다. 다시 시도해 주세요.');
@@ -263,7 +275,7 @@
                     <tbody>
                     <tr>
                         <th>협력사 ID</th>
-                        <td><input type="text" id="partner_comp_id" placeholder="Ex) H-1"/></td>
+                        <td><input type="text" id="partner_comp_id" readonly/></td>
                     </tr>
                     <tr>
                         <th>협력사명</th>
@@ -271,7 +283,14 @@
                     </tr>
                     <tr>
                         <th>협력사구분</th>
-                        <td><input type="text" id="partner_type_flag" placeholder="Ex) 0.시공사/1.계측사"/></td>
+                        <td>
+                            <select id="partner_type_flag">
+                                <option value="">선택</option>
+                                <option value="0">시공사</option>
+                                <option value="1">계측사</option>
+                                <option value="2">ALL</option>
+                            </select>
+                        </td>
                     </tr>
                     <tr>
                         <th style="vertical-align: middle;">주소</th>

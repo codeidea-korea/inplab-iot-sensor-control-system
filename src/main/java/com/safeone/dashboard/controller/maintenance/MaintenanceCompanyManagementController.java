@@ -84,8 +84,7 @@ public class MaintenanceCompanyManagementController extends JqGridAbstract<Maint
     @ResponseBody
     @PostMapping("/mod")
     public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        param.put("file1", (String) param.get("serverFileName"));
-
+        System.out.println("partner_type_flag : " +  param.get("partner_type_flag"));
         return maintenanceCompanyManagementService.update(param);
     }
 

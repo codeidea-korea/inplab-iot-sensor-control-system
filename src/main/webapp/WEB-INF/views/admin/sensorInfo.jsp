@@ -20,13 +20,17 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
-            initGrid($("#jq-grid"), "/adminAdd/sensorInfo", $('#grid-wrapper'))
+            initGrid($("#jq-grid"), "/adminAdd/sensorInfo", $('#grid-wrapper'), {
+                multiselect: true,
+                multiboxonly: false,
+            })
         });
     </script>
     <script>
         var _popupClearData;
-
         $(function () {
+            const $grid = $('#jq-grid');
+
             $('.deleteBtn').hide();
             window.vworld = new vwutil({
                 mapId: "map",
@@ -93,7 +97,7 @@
                         if (res === 1) {  // 성공 시
                             alert('삭제되었습니다.');
                             popFancyClose('#lay-form-write');
-                            reloadJqGrid();  // 그리드를 리로드하여 변경 사항을 반영
+                            reloadJqGrid($grid);  // 그리드를 리로드하여 변경 사항을 반영
                         } else if (res === -1) {  // 검증 실패 시
                             alert('이 센서는 삭제할 수 없습니다. 이미 사용 중이거나 다른 제약이 있습니다.');
                         } else {
@@ -153,7 +157,7 @@
                         alert('저장되었습니다.', function () {
                             popFancyClose('#lay-form-write');
                         });
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     });
                 });
             });
@@ -181,12 +185,12 @@
 
                 $("#form_sub_title").html('상세정보');
                 $('input[type="submit"]').val('수정');
-                var targetArr = getSelectedCheckData();
+                var targetArr = getSelectedCheckData($grid);
 
                 if (targetArr.length > 1) {
                     alert('수정 할 데이터를 1건만 선택해주세요.');
                     return;
-                } else if (targetArr.length == 0) {
+                } else if (targetArr.length === 0) {
                     alert('수정할 데이터를 선택해주세요.');
                     return;
                 }
@@ -207,7 +211,7 @@
                         alert('저장되었습니다.', function () {
                             popFancyClose('#lay-form-write');
                         });
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     });
                 });
             });
@@ -267,9 +271,8 @@
             } else {
                 alert("No file selected.");
             }
-            reloadJqGrid();
+            reloadJqGrid($grid);
         }
-
     </script>
 </head>
 <body data-pgcode="0000">

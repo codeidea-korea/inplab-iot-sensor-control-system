@@ -293,10 +293,10 @@
             , meas_comp_id2 = #{meas_comp_id2}
         </if>
         <if test="meas_str_ymd != null">
-            , meas_str_ymd = , to_char(to_date(#{meas_str_ymd}, 'YYYY-MM-DD'), 'YYYYMMDD')
+            , meas_str_ymd = to_char(to_date(#{meas_str_ymd}, 'YYYY-MM-DD'), 'YYYYMMDD')
         </if>
         <if test="meas_end_ymd != null">
-            , meas_end_ymd = , to_char(to_date(#{meas_end_ymd}, 'YYYY-MM-DD'), 'YYYYMMDD')
+            , meas_end_ymd = to_char(to_date(#{meas_end_ymd}, 'YYYY-MM-DD'), 'YYYYMMDD')
         </if>
         <if test="dist_offi_nm != null">
             , dist_offi_nm = #{dist_offi_nm}

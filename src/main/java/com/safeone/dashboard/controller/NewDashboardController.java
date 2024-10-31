@@ -11,9 +11,8 @@ import java.util.Map;
 public class NewDashboardController {
 
 
-    @GetMapping("/get-asset-count")
+    @GetMapping("/asset/count")
     public int getAssetCount(Map<String, Object> map) {
-        System.out.println("/get-asset-count: " + map.get("district_no"));
         return 0;
     }
 

@@ -66,6 +66,8 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
                                                    @RequestParam("dist_pic") MultipartFile file1,
                                                    @RequestParam("dist_view_pic") MultipartFile file2) {
 
+        System.out.println("add param : " + param);
+
         Map<String, Object> response = new HashMap<>();
         try {
 

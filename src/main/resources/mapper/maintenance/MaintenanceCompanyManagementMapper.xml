@@ -143,4 +143,9 @@
         FROM tb_maintcomp_info
         WHERE partner_comp_id = #{partner_comp_id}
     </delete>
+
+    <select id="getBiggestId" resultType="java.lang.String">
+        SELECT max(partner_comp_id)
+        FROM tb_maintcomp_info
+    </select>
 </mapper>

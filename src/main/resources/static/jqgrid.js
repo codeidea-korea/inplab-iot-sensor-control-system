@@ -1,14 +1,14 @@
 function initGrid($grid, path, $gridWrapper, options = {
     autowidth: true,
     shrinkToFit: true
-}, loadCompleteCallback) {
+}, loadCompleteCallback, formatters) {
     getColumns(path, (columns) => {
         const columnData = {
             model: []
         };
 
         $.each(columns, (index) => {
-            columnData.model.push(setColumn(columns[index]));
+            columnData.model.push(setColumn(columns[index], formatters));
         });
 
         $(window).trigger('beforeLoadGrid', columnData)
@@ -99,7 +99,7 @@ function getColumns(path, callback) {
     })
 }
 
-function setColumn(column) {
+function setColumn(column, formatters) {
     const _column = {
         name: column['columnName'],
         label: column['title'],
@@ -134,6 +134,11 @@ function setColumn(column) {
     if (column['type'] === 'editable') {
         _column.editable = true;
     }
+
+    if (formatters && formatters[column['columnName']]) {
+        _column.formatter = formatters[column['columnName']].formatter;
+    }
+
     return _column;
 }
 

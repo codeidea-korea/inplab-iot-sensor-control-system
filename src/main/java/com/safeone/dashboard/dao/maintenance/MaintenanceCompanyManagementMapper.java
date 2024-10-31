@@ -15,5 +15,7 @@ public interface MaintenanceCompanyManagementMapper {
     int deleteMaintenanceCompanyManagement(Map param);
 
     List<MaintenanceCompanyManagementDto> selectAllMaintenanceCompanyManagementList();
+
+    String getBiggestId();
 }
     
