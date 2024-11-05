@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true" />
+    <jsp:include page="../common/include_head.jsp" flush="true"/>
     <style>
         input[type=date], input[type=number] {
             text-align: left !important;
@@ -112,9 +112,8 @@
             function initModifyForm(data) {
                 $("#form_sub_title").html('상세 정보');
 
-                $('#district_no').prop('disabled', true);
-                $('#sens_nm').prop('disabled', true);
-                $('#senstype_no').prop('disabled', true);
+                $('#district_no, #sens_nm, #senstype_no').prop('disabled', true);
+                $('.disabled-select').css('background-color', 'lightgray');
 
                 $("#deleteBtn").show();
                 $("#form-submit-btn").hide();
@@ -180,9 +179,8 @@
             }
 
             function initInsertForm() {
-                $('#district_no').prop('disabled', false);
-                $('#sens_nm').prop('disabled', false);
-                $('#senstype_no').prop('disabled', false);
+                $('#district_no, #sens_nm, #senstype_no').prop('disabled', false);
+                $('.disabled-select').css('background-color', 'white');
 
                 $("#form_sub_title").html('등록');
                 $("#form-submit-btn").show()
@@ -434,9 +432,9 @@
 
 <body data-pgcode="0000">
 <section id="wrap">
-    <jsp:include page="../common/include_top.jsp" flush="true" />
+    <jsp:include page="../common/include_top.jsp" flush="true"/>
     <div id="global-menu">
-        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
+        <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
     <div id="container">
         <h2 class="txt">유지보수관리</h2>
@@ -467,7 +465,7 @@
                     <tbody>
                     <tr>
                         <th>현장명</th>
-                        <td>
+                        <td class="disabled-select">
                             <select id="district_no">
                                 <option value="">Ex) 이월지구</option>
                             </select>
@@ -475,13 +473,13 @@
                     </tr>
                     <tr>
                         <th>센서ID</th>
-                        <td><select id="sens_nm">
+                        <td class="disabled-select"><select id="sens_nm">
                             <option value="">Ex) TM-01</option>
                         </select></td>
                     </tr>
                     <tr>
                         <th>센서타입</th>
-                        <td><select id="senstype_no">
+                        <td class="disabled-select"><select id="senstype_no">
                             <option value="">Ex) TM</option>
                         </select></td>
                     </tr>
