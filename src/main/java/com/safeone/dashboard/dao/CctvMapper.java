@@ -63,4 +63,8 @@ public class CctvMapper {
     public int getMaintCompListTotalCnt(Map<String, Object> map) {
         return sqlSession.selectOne("getMaintCompListTotalCnt", map);
     }
+
+    public String getMaxNo() {
+        return sqlSession.selectOne("getCctvMaxNo");
+    }
 }

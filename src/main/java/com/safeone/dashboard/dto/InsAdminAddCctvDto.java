@@ -1,7 +1,6 @@
 package com.safeone.dashboard.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class InsAdminAddCctvDto {
+
+    @Schema(description = "cctv번호")
+    private String cctv_no;
 
     @Schema(example = "JC1CCTV-01", description = "cctv명")
     private String cctv_nm;

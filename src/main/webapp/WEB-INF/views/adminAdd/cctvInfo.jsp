@@ -288,6 +288,14 @@
 
 				$('.insertBtn').on('click', function() {
 					initForm();
+
+					$.get('/adminAdd/cctv/max-no', null, (res) => {
+						if (res !== null && res !== undefined) {
+							const newId = 'T' + (parseInt(res.substring(1)) + 1).toString().padStart(2, '0');
+							$('input[name=cctv_no]').val(newId)
+						}
+					});
+
 					Promise.all([getMaintCompInfo({partner_type_flag : '1'}), getDistrictInfo()]).then(([res1, res2]) => {
 						let partner_comp_id = $('select[name=partner_comp_id]');
 						partner_comp_id.empty();
@@ -306,7 +314,7 @@
 						$('#ins_cctv').show();
 						$('#udt_cctv').hide();
 						$('#del_cctv').hide();
-						$('#tr_cctv_no').hide();
+
 						popFancy('#lay-form-write08');
 					}).catch((fail) => {
 						console.log('fail > ', fail);
@@ -426,7 +434,6 @@
 						$('#ins_cctv').hide();
 						$('#udt_cctv').show();
 						$('#del_cctv').show();
-						$('#tr_cctv_no').show();
 						popFancy('#lay-form-write08');
 					}).catch((fail) => {
 						console.log('fail > ', fail);
@@ -461,19 +468,10 @@
 
 	<body data-pgcode="0000">
 		<section id="wrap">
-		    <!--[s] 상단 -->
-		    <jsp:include page="../common/include_top.jsp" flush="true"></jsp:include>
-		    <!--[e] 상단 -->
-		
-		    <!--[s] 왼쪽 메뉴 -->
+		    <jsp:include page="../common/include_top.jsp" flush="true" />
 		    <div id="global-menu">
-		        <!--[s] 주 메뉴 -->
-		        <jsp:include page="../common/include_sidebar.jsp" flush="true"></jsp:include>
-		        <!--[e] 주 메뉴 -->
+		        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
 		    </div>
-		    <!--[e] 왼쪽 메뉴 -->
-		
-			<!--[s] 컨텐츠 영역 -->
 				<div id="container">
 					<h2 class="txt">
 						관리자 전용 
@@ -491,14 +489,10 @@
 	                        </div>
 	                        <div class="contents-in">
 								<table id="jqGrid"></table>
-	                            <%--<jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>--%>
 	                        </div>
 	                    </div>
 	                </div>
 				</div>
-			<!--[e] 컨텐츠 영역 -->
-			
-			<!--[s] 사용자 등록 팝업 -->
 			<div id="lay-form-write08" class="layer-base">
 				<div class="layer-base-btns">
 					<a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
@@ -515,7 +509,7 @@
 							</colgroup>
 							<tbody>
 								<tr id="tr_cctv_no">
-									<th>CCTV NO <span style="color: red">*</span></th>
+									<th>CCTV ID <span style="color: red">*</span></th>
 									<td colspan="3">
 										<input type="text" name="cctv_no" value="" readonly>
 									</td>

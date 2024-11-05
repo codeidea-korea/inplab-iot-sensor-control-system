@@ -257,4 +257,10 @@
 		WHERE table_nm = #{table_nm}
 		AND column_nm = #{column_nm}
 	</update>
+
+	<select id="getCctvMaxNo" resultType="String">
+		SELECT
+			MAX(cctv_no) as cctv_no
+		FROM tb_cctv_info
+	</select>
 </mapper>

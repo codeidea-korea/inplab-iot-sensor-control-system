@@ -21,4 +21,6 @@ public interface CctvService {
   ObjectNode getMaintComp(GetAdminAddMaintCompDto getAdminAddDistrictDto);
 
   ObjectNode newGenerationKey(Map<String, Object> map);
+
+  String getMaxNo();
 }

@@ -205,4 +205,9 @@ public class CctvServiceImpl implements CctvService {
         CommonUtils.setCountInfo("udt", count, on);
         return on;
     }
+
+    @Override
+    public String getMaxNo() {
+        return cctvMapper.getMaxNo();
+    }
 }
