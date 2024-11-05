@@ -45,11 +45,11 @@
         height: 2.8rem;
         margin-left: 1rem;
         padding: 0 2rem;
-        background-color: #2e5fc3;
+        background-color: #fff;
         font-weight: 500;
         font-size: 1.4rem;
         line-height: 1;
-        color: #fff;
+        color: #000;
         text-align: center;
         border-radius: 99px;
         display: flex;
@@ -57,15 +57,15 @@
         cursor: pointer;
     }
 
-    .btn-group a:nth-of-type(2) {
+    .btn-group a:nth-of-type(2), #dispbd-send-btn {
         height: 2.8rem;
         margin-left: 1rem;
         padding: 0 2rem;
-        background-color: #fff;
+        background-color: #2e5fc3;
         font-weight: 500;
         font-size: 1.4rem;
         line-height: 1;
-        color: #000;
+        color: #fff;
         text-align: center;
         border-radius: 99px;
         display: flex;
@@ -536,7 +536,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">사용자 <span id="form_sub_title">등록/수정</span></div>
+        <div class="layer-base-title">전송그룹별 이미지 등록</div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
@@ -545,10 +545,6 @@
                         <col width="*"/>
                     </colgroup>
                     <tbody>
-                    <tr>
-                        <th>이미지 ID</th>
-                        <td><input type="text" id="image_id" placeholder="Ex) Seq"/></td>
-                    </tr>
                     <tr>
                         <th>이벤트 구분</th>
                         <td><input type="text" id="event_flag" placeholder="Ex) 평시" readonly/></td>
