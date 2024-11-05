@@ -67,4 +67,7 @@ public class MaintenanceDetailsDto implements Serializable {
     @FieldLabel(title = "센서타입", type = "hidden")
     private String sens_tp_nm;
 
+    @FieldLabel(title = "센서타입no", type = "hidden")
+    private String senstype_no;
+
 }

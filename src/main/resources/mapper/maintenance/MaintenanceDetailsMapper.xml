@@ -86,6 +86,7 @@
             resultType="com.safeone.dashboard.dto.maintenance.MaintenanceDetailsDto">
         SELECT tmd.mgnt_no
         , tst.sens_tp_nm
+        , tst.senstype_no
         , TO_CHAR(tmd.maint_accpt_ymd::timestamp, 'YYYY-MM-DD') AS maint_accpt_ymd
         , TO_CHAR(tmd.maint_str_ymd::timestamp, 'YYYY-MM-DD') AS maint_str_ymd
         , TO_CHAR(tmd.maint_end_ymd::timestamp, 'YYYY-MM-DD') AS maint_end_ymd
@@ -170,8 +171,6 @@
         SET maint_accpt_ymd = #{maint_accpt_ymd}
           , maint_str_ymd   = #{maint_str_ymd}
           , maint_end_ymd   = #{maint_end_ymd}
-          , district_no     = #{district_no}
-          , sens_no         = #{sens_no}
           , maint_rslt_cd   = #{maint_rslt_cd}
           , maint_dtls      = #{maint_dtls}
           , maint_comp_nm   = #{maint_comp_nm}

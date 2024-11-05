@@ -120,13 +120,10 @@
                 $("#form-update-btn").show();
                 $('#district_no').val(data.district_no);
 
-                getAllSensorInfoByDistrictNo(data.district_no, () => {
-                    $('#sens_nm').val(data.sens_no);
-
-                    const selectedSensTypeNo = $('#sens_nm').find(':selected').data('senstypeno');
-
-                    getAllSensorTypesBySensTypeNo(selectedSensTypeNo, () => {
-                        $('#senstype_no').val(selectedSensTypeNo);
+                getAllSensorTypes(() => {
+                    $('#senstype_no').val(data.senstype_no);
+                    getAllSensorInfo(data.district_no, data.senstype_no, () => {
+                        $('#sens_nm').val(data.sens_no);
                     });
                 });
 
@@ -151,7 +148,7 @@
                 emptySensorTypes()
                 const selectedDistrictNo = $('#district_no').val();
                 if (selectedDistrictNo) {
-                    getAllSensorInfoByDistrictNo(selectedDistrictNo);
+                    getAllSensorTypes();
                 }
             })
 
@@ -188,11 +185,12 @@
                 $("#form-update-btn").hide();
             }
 
-            $('#sens_nm').on('change', () => {
-                emptySensorTypes();
-                const selectedSensTypeNo = $('#sens_nm').find(':selected').data('senstypeno');
-                if (selectedSensTypeNo) {
-                    getAllSensorTypesBySensTypeNo(selectedSensTypeNo);
+            $('#senstype_no').on('change', () => {
+                emptySensorInfo();
+                const selectedSensTypeNo = $('#senstype_no').find(':selected').val();
+                const selectedDistrictNo = $('#district_no').find(':selected').val();
+                if (selectedSensTypeNo && selectedDistrictNo) {
+                    getAllSensorInfo(selectedDistrictNo, selectedSensTypeNo);
                 }
             })
 
@@ -200,55 +198,35 @@
                 downloadExcel('maintenance details', $grid, path);
             });
 
-            function getAllSensorTypesBySensTypeNo(senstypeNo, callback) {
+            function getAllSensorTypes(callback) {
                 $.ajax({
-                    url: '/adminAdd/sensorType/all-by-sens-type-no',
+                    url: '/adminAdd/sensorType/all',
                     type: 'GET',
-                    data: {senstype_no: senstypeNo},
                     success: function (res) {
-                        if (res.length === 0) {
-                            emptySensorTypes();
-                        } else {
-                            res.forEach((item) => {
-                                $('#senstype_no').append(
-                                    "<option value='" + item.senstype_no + "'>" + item.sens_abbr + "</option>"
-                                )
-                            })
-                        }
-                        if (callback) {
-                            callback();
-                        }
-
-                    },
-                    error: function () {
-                        alert('알 수 없는 오류가 발생했습니다.');
+                        res.forEach((item) => {
+                            $('#senstype_no').append(
+                                item.sens_abbr ? "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "(" + item.sens_abbr + ")" + "</option>" :
+                                    "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "</option>"
+                            )
+                        })
+                        callback && callback();
                     }
                 });
             }
 
-            function getAllSensorInfoByDistrictNo(districtNo, callback) {
+            function getAllSensorInfo(districtNo, senstypeNo, callback) {
                 $.ajax({
-                    url: '/adminAdd/sensorInfo/all-by-district-no',
+                    url: '/adminAdd/sensorInfo/all-by-district-no-and-senstype-no',
                     type: 'GET',
-                    data: {district_no: districtNo},
+                    data: {district_no: districtNo, senstype_no: senstypeNo},
                     success: function (res) {
-                        if (res.length === 0) {
-                            emptySensorInfo();
-                        } else {
-                            res.forEach((item) => {
-                                $('#sens_nm').append(
-                                    "<option data-senstypeno=" + item.senstype_no + " value='" + item.sens_no + "'>" + item.sens_nm + "</option>"
-                                )
-                            })
-                        }
-                        if (callback) {
-                            callback();
-                        }
-
+                        res.forEach((item) => {
+                            $('#sens_nm').append(
+                                "<option data-senstypeno=" + item.senstype_no + " value='" + item.sens_no + "'>" + item.sens_nm + "</option>"
+                            )
+                        })
+                        callback && callback();
                     },
-                    error: function () {
-                        alert('알 수 없는 오류가 발생했습니다.');
-                    }
                 });
             }
 
@@ -345,7 +323,64 @@
                 imageStorage[index] = imageUrl; // 기본 이미지 저장
             }
 
+            function validate() {
+                if (!$('#district_no').val()) {
+                    alert('현장명을 선택해주세요.');
+                    return false;
+                }
+
+                if (!$('#senstype_no').val()) {
+                    alert('센서타입을 선택해주세요.');
+                    return false;
+                }
+
+                if (!$('#sens_nm').val()) {
+                    alert('센서ID를 선택해주세요.');
+                    return false;
+                }
+
+                if (!$('#maint_accpt_ymd').val()) {
+                    alert('접수일을 입력해주세요.');
+                    return false;
+                }
+
+                if (!$('#maint_str_ymd').val()) {
+                    alert('작업시작일을 입력해주세요.');
+                    return false;
+                }
+
+                if (!$('#maint_end_ymd').val()) {
+                    alert('작업종료일을 입력해주세요.');
+                    return false;
+                }
+
+                if (!$('#maint_comp_nm').val()) {
+                    alert('작업업체를 선택해주세요.');
+                    return false;
+                }
+
+                if (!$('#maint_chgr_nm').val()) {
+                    alert('작업담당자를 입력해주세요.');
+                    return false;
+                }
+
+                if (!$('#maint_chgr_ph').val()) {
+                    alert('연락처를 입력해주세요.');
+                    return false;
+                }
+
+                if (!$('#maint_rslt_cd').val()) {
+                    alert('작업결과를 선택해주세요.');
+                    return false;
+                }
+                return true;
+            }
+
             $("#form-submit-btn").on('click', function () {
+                if (!validate()) {
+                    return;
+                }
+
                 $.ajax({
                     url: '/maintenance/details/add',
                     type: 'POST',
@@ -367,7 +402,7 @@
                     },
                     success: function () {
                         popFancyClose('#lay-maintenance-history');
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     },
                     error: function () {
                         alert('잘못된 입력입니다. 다시 시도해 주세요.');
@@ -376,13 +411,15 @@
             });
 
             $("#form-update-btn").on('click', function () {
+                if (!validate()) {
+                    return;
+                }
+
                 $.ajax({
                     url: '/maintenance/details/mod',
                     type: 'POST',
                     data: {
                         mgnt_no: $('#mgnt_no').val(),
-                        district_no: $('#district_no').val(),
-                        sens_no: $('#sens_nm').val(),
                         maint_accpt_ymd: $('#maint_accpt_ymd').val().replaceAll('-', ''),
                         maint_str_ymd: $('#maint_str_ymd').val().replaceAll('-', ''),
                         maint_end_ymd: $('#maint_end_ymd').val().replaceAll('-', ''),
@@ -398,7 +435,7 @@
                     },
                     success: function () {
                         popFancyClose('#lay-maintenance-history');
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     },
                     error: function () {
                         alert('잘못된 입력입니다. 다시 시도해 주세요.');
@@ -416,7 +453,7 @@
                         },
                         success: function (_res) {
                             popFancyClose('#lay-maintenance-history');
-                            reloadJqGrid();
+                            reloadJqGrid($grid);
                         },
                         error: function (_err) {
                             alert('삭제에 실패했습니다. 다시 시도해 주세요.');
@@ -457,7 +494,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">유지보수업체 <span id="form_sub_title"></span></div>
+        <div class="layer-base-title">유지 보수 이력 <span id="form_sub_title"></span></div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
@@ -472,15 +509,15 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>센서ID</th>
-                        <td class="disabled-select"><select id="sens_nm">
-                            <option value="">Ex) TM-01</option>
-                        </select></td>
-                    </tr>
-                    <tr>
                         <th>센서타입</th>
                         <td class="disabled-select"><select id="senstype_no">
                             <option value="">Ex) TM</option>
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <th>센서ID</th>
+                        <td class="disabled-select"><select id="sens_nm">
+                            <option value="">Ex) TM-01</option>
                         </select></td>
                     </tr>
                     <tr>

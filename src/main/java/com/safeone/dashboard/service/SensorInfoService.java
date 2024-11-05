@@ -119,7 +119,7 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
     }
 
 
-    public List<SensorInfoDto> getAllSensorInfoByDistrictNo(Map<String, Object> param) {
-        return mapper.getAllSensorInfoByDistrictNo(param);
+    public List<SensorInfoDto> getAllSensorInfo(Map<String, Object> param) {
+        return mapper.getAllSensorInfo(param);
     }
 }

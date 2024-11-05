@@ -76,9 +76,9 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
     }
 
     @ResponseBody
-    @GetMapping("/all-by-district-no")
-    public List<SensorInfoDto> getAllSensorInfoByDistrictNo(@RequestParam Map<String, Object> param) {
-        return sensorInfoService.getAllSensorInfoByDistrictNo(param);
+    @GetMapping("/all-by-district-no-and-senstype-no")
+    public List<SensorInfoDto> getAllSensorInfo(@RequestParam Map<String, Object> param) {
+        return sensorInfoService.getAllSensorInfo(param);
     }
 
     @ResponseBody

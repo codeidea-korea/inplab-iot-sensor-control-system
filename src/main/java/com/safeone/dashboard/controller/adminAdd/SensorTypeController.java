@@ -2,7 +2,6 @@ package com.safeone.dashboard.controller.adminAdd;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
-import com.safeone.dashboard.dto.SensorInfoDto;
 import com.safeone.dashboard.dto.SensorTypeDto;
 import com.safeone.dashboard.service.CommonCodeEditService;
 import com.safeone.dashboard.service.SensorTypeService;
@@ -119,6 +118,12 @@ public class SensorTypeController extends JqGridAbstract<SensorTypeDto> {
     @GetMapping("/all-by-sens-type-no")
     public List<SensorTypeDto> getAllSensorTypesBySensTypeNo(@RequestParam Map<String, Object> param) {
         return sensorTypeService.getAllSensorTypesBySensTypeNo(param);
+    }
+
+    @ResponseBody
+    @GetMapping("/all")
+    public List<SensorTypeDto> getAll() {
+        return sensorTypeService.getAll();
     }
 
 }

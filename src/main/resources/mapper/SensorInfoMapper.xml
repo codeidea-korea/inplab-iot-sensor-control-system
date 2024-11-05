@@ -113,7 +113,7 @@
         <!--        </if>-->
     </select>
 
-    <select id="getAllSensorInfoByDistrictNo" parameterType="java.util.Map"
+    <select id="getAllSensorInfo" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.SensorInfoDto">
         select sens_no, senstype_no, sens_nm
         from tb_sensor_info
@@ -123,6 +123,7 @@
                                                            from tb_district_info tdi
                                                                     left outer join tb_logger_info tli on tli.district_no = tdi.district_no
                                                            where tdi.district_no = #{district_no}))
+          and tb_sensor_info.senstype_no = #{senstype_no}
     </select>
 
     <select id="selectSensorInfoListTotal" parameterType="java.util.Map" resultType="int">

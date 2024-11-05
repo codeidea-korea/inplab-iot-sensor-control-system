@@ -13,6 +13,6 @@ public interface SensorInfoMapper {
     int insertSensorInfo(Map param);
     int updateSensorInfo(Map param);
     int deleteSensorInfo(Map param);
-    List<SensorInfoDto> getAllSensorInfoByDistrictNo(Map<String, Object> param);
+    List<SensorInfoDto> getAllSensorInfo(Map<String, Object> param);
 }
     
