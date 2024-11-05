@@ -17,5 +17,7 @@ public interface SensorTypeMapper {
     List<SensorTypeDto> getAllSensorTypesBySensTypeNo(Map<String, Object> param);
 
     List<SensorTypeDto> getAll();
+
+    String getMaxNo();
 }
     

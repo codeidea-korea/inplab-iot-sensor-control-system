@@ -119,4 +119,8 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
     public List<SensorTypeDto> getAll() {
         return mapper.getAll();
     }
+
+    public String getMaxNo() {
+        return mapper.getMaxNo();
+    }
 }

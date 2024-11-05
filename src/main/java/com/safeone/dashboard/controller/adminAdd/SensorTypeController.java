@@ -126,4 +126,10 @@ public class SensorTypeController extends JqGridAbstract<SensorTypeDto> {
         return sensorTypeService.getAll();
     }
 
+    @ResponseBody
+    @GetMapping("/max-no")
+    public String getMaxNo() {
+        return sensorTypeService.getMaxNo();
+    }
+
 }

@@ -379,7 +379,7 @@
             viewrecords: true,
             emptyrecords: '조회된 데이터가 없습니다',
             height: 'auto',
-            rowNum: _rowList[0],
+            rowNum: _rowList[2],
             rowList: _rowList,
             autowidth: true,
             shrinkToFit: true
