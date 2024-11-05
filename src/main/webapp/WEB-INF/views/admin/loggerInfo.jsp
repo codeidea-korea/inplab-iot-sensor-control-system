@@ -1,15 +1,13 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
-
+    <jsp:include page="../common/include_head.jsp" flush="true" />
     <style>
         #map {
             width: 100%;
-            /* height: calc(100% - 48px); */
             height: 500px;
         }
 
@@ -19,13 +17,12 @@
             top: calc(50% - 27px);
         }
     </style>
-
     <script>
         window.jqgridOption = {
             columnAutoWidth: true,
             multiselect: true,
             multiboxonly: false
-        }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
+        };
 
         var _popupClearData;
 
@@ -44,10 +41,7 @@
             });
 
             window.vworld.vwmap2d();
-
-
             _popupClearData = getSerialize('#lay-form-write');
-            // 초기화할 데이터값
 
             $.get('/adminAdd/common/code/list', {code_grp_nm: "로거구분"}, function (res) {
                 let option = '<option value="">선택</option>';
@@ -72,81 +66,6 @@
                 });
                 $('#district_no').html(option);
             });
-
-
-            // 삭제
-//             $('.deleteBtn').on('click', function () {
-//                 var targetArr = getSelectedCheckData();
-//
-//                 if (targetArr.length > 0) {
-//                     confirm(targetArr.length + '건의 데이터를 삭제하시겠습니까?', function () {
-//                         $.each(targetArr, function (idx) {
-//                             $.get('/adminAdd/loggerInfo/del', this, function (res) { // todo : 1이 아닌 경우 삭제가 실패된것을 알릴것인지?
-//
-//                                 if ((idx + 1) == targetArr.length) reloadJqGrid();
-//                             });
-//                         });
-//
-// //                             reloadJqGrid();
-//                     });
-//                 } else {
-//                     alert('삭제하실 로거종류를 선택해주세요.');
-//                     return;
-//                 }
-//             });
-
-            // // 업로드
-            // $('.uploadBtn').on('click', function () {
-            //
-            //         var formData = new FormData();
-            //         formData.append("file", $("#file")[0].files[0]);
-            //
-            //         $.ajax({
-            //             url: "/adminAdd/loggerInfo/upload",
-            //             type: "POST",
-            //             data: formData,
-            //             processData: false,
-            //             contentType: false,
-            //             success: function(response) {
-            //                 alert(response);
-            //             },
-            //             error: function(response) {
-            //                 alert("Error: " + response.responseText);
-            //             }
-            //         });
-            //
-            // });
-
-            // 등록
-            // $('.insertBtn').on('click', function () {
-            //
-            // 	$("#form_sub_title").html('등록');
-            //
-            //
-            //     //district_no 셋팅
-            //     $.get('/adminAdd/common/code/getNewGenerationKey', { table_nm: "tb_logger_info", column_nm: "logr_no", pre_type: "" }, function (res) {
-            //         if (res.length > 0) {
-            //             $('#lay-form-write input[name=logr_no]').val(res[0].new_id);
-            //         }
-            //     });
-            //
-            //     setSerialize('#lay-form-write', _popupClearData);
-            //
-            //     popFancy('#lay-form-write');
-            //
-            //     // 저장버튼 클릭시
-            //     $('#lay-form-write input[type=submit]').off().on('click', function () {
-            //         if (!validate())
-            //             return;
-            //
-            //         $.get('/adminAdd/loggerInfo/add', getSerialize('#lay-form-write'), function (res) {
-            //             alert('저장되었습니다.', function () {
-            //                 popFancyClose('#lay-form-write');
-            //             });
-            //             reloadJqGrid();
-            //         });
-            //     });
-            // });
 
             // 팝업에서 삭제 버튼 클릭 시
             $('#lay-form-write .deleteBtn').on('click', function() {
@@ -179,9 +98,6 @@
                 setSerialize('#lay-form-write', _popupClearData);
 
                 popFancy('#lay-form-write');
-
-                $('#logr_flag').prop('disabled', false);
-                $('#district_no').prop('disabled', false);
 
                 $('#logr_flag').off('change').on('change', function () {
                     var logrFlag = $(this).val(); // 로거 구분 값
@@ -283,9 +199,6 @@
                 $('.deleteBtn').show();
                 popFancy('#lay-form-write');
 
-                $('#logr_flag').prop('disabled', true);
-                $('#district_no').prop('disabled', true);
-
                 // 저장버튼 클릭시
                 $('#lay-form-write input[type=submit]').off().on('click', function () {
                     if (!validate())
@@ -363,21 +276,11 @@
 </head>
 
 <body data-pgcode="0000">
-<section
-        id="wrap">
-    <!--[s] 상단 -->
-    <jsp:include page="../common/include_top.jsp" flush="true"></jsp:include>
-    <!--[e] 상단 -->
-
-    <!--[s] 왼쪽 메뉴 -->
-    <div
-            id="global-menu">
-        <!--[s] 주 메뉴 -->
-        <jsp:include page="../common/include_sidebar.jsp" flush="true"></jsp:include>
-        <!--[e] 주 메뉴 -->
+<section id="wrap">
+    <jsp:include page="../common/include_top.jsp" flush="true" />
+    <div id="global-menu">
+        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
     </div>
-    <!--[e] 왼쪽 메뉴 -->
-
     <div id="container">
         <h2 class="txt">
             관리자 전용
@@ -390,31 +293,21 @@
                     <input class="search_input" type="text" id="search" name="search"
                            placeholder="로거명 / 현장명 / 모델명 / 제조사명"/>
                     <a class="searchBtn">검색</a>
-
                     <a class="insertBtn">신규 등록</a>
                     <a class="modifyBtn">상세정보</a>
-<%--                    <a class="deleteBtn">삭제</a>--%>
-
                     <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>
                     <form id="uploadForm" style="display:none;">
                         <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
                     </form>
-
                     <a class="excelBtn">다운로드</a>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid.jsp" flush="true"></jsp:include>
+                    <jsp:include page="../common/include_jqgrid.jsp" flush="true" />
                 </div>
             </div>
         </div>
     </div>
-    <!--[e] 컨텐츠 영역 -->
-
-    <!--[s] 로거 등록 팝업 -->
     <div id="lay-form-write" class="layer-base">
-
-<%--        <input type="hidden" id="logr_no" name="logr_no"/>--%>
-
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
         </div>
