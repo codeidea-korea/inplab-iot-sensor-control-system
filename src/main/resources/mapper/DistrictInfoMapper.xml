@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-    
+
 <mapper namespace="com.safeone.dashboard.dao.DistrictInfoMapper">
     <select id="selectAll" resultType="com.safeone.dashboard.dto.DistrictInfoDto">
-        SELECT * FROM tb_district_info
+        SELECT *
+        FROM tb_district_info
     </select>
 
     <sql id="rowSearch">
@@ -16,21 +17,21 @@
         <if test="site_no != null and site_no != ''">
             and MG.site_no ilike '%' || #{site_no} || '%'
         </if>
-		<if test="dist_addr != null and dist_addr != ''">
-			and MG.dist_addr ilike '%' || #{dist_addr} || '%'
-		</if>
+        <if test="dist_addr != null and dist_addr != ''">
+            and MG.dist_addr ilike '%' || #{dist_addr} || '%'
+        </if>
         <if test="dist_zip != null and dist_zip != ''">
-			and MG.dist_zip ilike '%' || #{dist_zip} || '%'
-		</if>
-		<if test="dist_road_addr != null and dist_road_addr != ''">
-			and MG.dist_road_addr ilike '%' || #{dist_road_addr} || '%'
-		</if>
-		<if test="dist_type_cd != null and dist_type_cd != ''">
-			and MG.dist_type_cd ilike '%' || #{dist_type_cd} || '%'
-		</if>
-		<if test="dist_abbr != null and dist_abbr != ''">
-			and MG.dist_abbr ilike '%' || #{dist_abbr} || '%'
-		</if>
+            and MG.dist_zip ilike '%' || #{dist_zip} || '%'
+        </if>
+        <if test="dist_road_addr != null and dist_road_addr != ''">
+            and MG.dist_road_addr ilike '%' || #{dist_road_addr} || '%'
+        </if>
+        <if test="dist_type_cd != null and dist_type_cd != ''">
+            and MG.dist_type_cd ilike '%' || #{dist_type_cd} || '%'
+        </if>
+        <if test="dist_abbr != null and dist_abbr != ''">
+            and MG.dist_abbr ilike '%' || #{dist_abbr} || '%'
+        </if>
         <if test="inst_comp_id1 != null and inst_comp_id1 != ''">
             and MG.inst_comp_id1 = #{inst_comp_id1}
         </if>
@@ -56,36 +57,38 @@
         <if test="searchKeyword  != null and searchKeyword  != ''">
             and MG.district_nm LIKE '%' || #{searchKeyword} || '%' OR
             MG.dist_addr LIKE '%' || #{searchKeyword} || '%' OR
-            (select B.partner_comp_nm from tb_maintcomp_info B where B.partner_comp_id = MG.inst_comp_id1) LIKE '%' || #{searchKeyword} || '%' OR
-            (select B.partner_comp_nm from tb_maintcomp_info B where B.partner_comp_id = MG.meas_comp_id1) LIKE '%' || #{searchKeyword} || '%'
+            (select B.partner_comp_nm from tb_maintcomp_info B where B.partner_comp_id = MG.inst_comp_id1) LIKE '%' ||
+            #{searchKeyword} || '%' OR
+            (select B.partner_comp_nm from tb_maintcomp_info B where B.partner_comp_id = MG.meas_comp_id1) LIKE '%' ||
+            #{searchKeyword} || '%'
         </if>
     </sql>
 
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
-				<when test="'district_nm' == sidx and sidx != ''">
+                <when test="'district_nm' == sidx and sidx != ''">
                     MG.district_nm ${sord}
                 </when>
                 <when test="'district_no' == sidx and sidx != ''">
                     MG.district_no ${sord}
                 </when>
-				<when test="'site_no' == sidx and sidx != ''">
+                <when test="'site_no' == sidx and sidx != ''">
                     MG.site_no ${sord}
                 </when>
-				<when test="'dist_addr' == sidx and sidx != ''">
+                <when test="'dist_addr' == sidx and sidx != ''">
                     MG.dist_addr ${sord}
                 </when>
                 <when test="'dist_zip' == sidx and sidx != ''">
                     MG.dist_zip ${sord}
                 </when>
-				<when test="'dist_road_addr' == sidx and sidx != ''">
+                <when test="'dist_road_addr' == sidx and sidx != ''">
                     MG.dist_road_addr ${sord}
                 </when>
-				<when test="'dist_type_cd_nm' == sidx and sidx != ''">
+                <when test="'dist_type_cd_nm' == sidx and sidx != ''">
                     MG.dist_type_cd ${sord}
                 </when>
-				<when test="'dist_abbr' == sidx and sidx != ''">
+                <when test="'dist_abbr' == sidx and sidx != ''">
                     MG.dist_abbr ${sord}
                 </when>
                 <when test="'inst_comp_id1_nm' == sidx and sidx != ''">
@@ -119,137 +122,130 @@
     <select id="selectDistrictInfoList" parameterType="java.util.Map" resultType="java.util.Map">
         SELECT MG.*
         FROM (
-			SELECT z.district_no
-				 , z.site_no
-				 , z.district_nm
-				 , z.dist_addr
-				 , z.dist_zip
-				 , z.dist_road_addr
-				 , z.dist_type_cd
-				 , z.dist_abbr
-				 , z.dist_lon
-				 , z.dist_lat
-				 , z.dist_zoom
-				 , z.dist_pic
-				 , z.dist_view_pic
-				 , z.inst_comp_id1
-				 , z.meas_comp_id1
-				 , z.inst_comp_id2
-				 , z.meas_comp_id2
-                 , COALESCE(to_char(to_date(NULLIF(z.meas_str_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_str_ymd
-                 , COALESCE(to_char(to_date(NULLIF(z.meas_end_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_end_ymd
-				 , z.dist_offi_nm
-                , fn_common(z.dist_type_cd ,'현장구분') as dist_type_cd_nm
-                , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.inst_comp_id1) as inst_comp_id1_nm
-                , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.meas_comp_id1) as meas_comp_id1_nm
-			FROM tb_district_info z
-		) MG
-		WHERE 1=1
+        SELECT z.district_no
+        , z.site_no
+        , z.district_nm
+        , z.dist_addr
+        , z.dist_zip
+        , z.dist_road_addr
+        , z.dist_type_cd
+        , z.dist_abbr
+        , z.dist_lon
+        , z.dist_lat
+        , z.dist_zoom
+        , z.dist_pic
+        , z.dist_view_pic
+        , z.inst_comp_id1
+        , z.meas_comp_id1
+        , z.inst_comp_id2
+        , z.meas_comp_id2
+        , COALESCE(to_char(to_date(NULLIF(z.meas_str_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_str_ymd
+        , COALESCE(to_char(to_date(NULLIF(z.meas_end_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_end_ymd
+        , z.dist_offi_nm
+        , fn_common(z.dist_type_cd ,'현장구분') as dist_type_cd_nm
+        , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.inst_comp_id1) as inst_comp_id1_nm
+        , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.meas_comp_id1) as meas_comp_id1_nm
+        FROM tb_district_info z
+        ) MG
+        WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
-<!--        <if test="page != null and page > 0">-->
-<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
-<!--        </if>-->
+        <!--        <if test="page != null and page > 0">-->
+        <!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+        <!--        </if>-->
     </select>
 
     <select id="selectDistrictInfoAbbrChk" parameterType="java.util.Map" resultType="int">
-        SELECT
-            count(1)
-        FROM
-            tb_district_info
+        SELECT count(1)
+        FROM tb_district_info
         where dist_abbr = #{dist_abbr}
     </select>
 
     <select id="selectDistrictInfoNmChk" parameterType="java.util.Map" resultType="int">
-        SELECT
-            count(1)
-        FROM
-            tb_district_info
+        SELECT count(1)
+        FROM tb_district_info
         where district_nm = #{district_nm}
     </select>
 
     <select id="selectDistrictInfoListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(*)
         FROM (
-                SELECT z.district_no
-                , z.site_no
-                , z.district_nm
-                , z.dist_addr
-                , z.dist_zip
-                , z.dist_road_addr
-                , z.dist_type_cd
-                , z.dist_abbr
-                , z.dist_lon
-                , z.dist_lat
-                , z.dist_zoom
-                , z.dist_pic
-                , z.dist_view_pic
-                , z.inst_comp_id1
-                , z.meas_comp_id1
-                , z.inst_comp_id2
-                , z.meas_comp_id2
-                , COALESCE(to_char(to_date(NULLIF(z.meas_str_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_str_ymd
-                , COALESCE(to_char(to_date(NULLIF(z.meas_end_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_end_ymd
-                , z.dist_offi_nm
-                , fn_common(z.dist_type_cd ,'현장구분') as dist_type_cd_nm
-                , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.inst_comp_id1) as inst_comp_id1_nm
-                , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.meas_comp_id1) as meas_comp_id1_nm
-			FROM tb_district_info z
-		) MG
-		WHERE 1=1
+        SELECT z.district_no
+        , z.site_no
+        , z.district_nm
+        , z.dist_addr
+        , z.dist_zip
+        , z.dist_road_addr
+        , z.dist_type_cd
+        , z.dist_abbr
+        , z.dist_lon
+        , z.dist_lat
+        , z.dist_zoom
+        , z.dist_pic
+        , z.dist_view_pic
+        , z.inst_comp_id1
+        , z.meas_comp_id1
+        , z.inst_comp_id2
+        , z.meas_comp_id2
+        , COALESCE(to_char(to_date(NULLIF(z.meas_str_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_str_ymd
+        , COALESCE(to_char(to_date(NULLIF(z.meas_end_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_end_ymd
+        , z.dist_offi_nm
+        , fn_common(z.dist_type_cd ,'현장구분') as dist_type_cd_nm
+        , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.inst_comp_id1) as inst_comp_id1_nm
+        , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.meas_comp_id1) as meas_comp_id1_nm
+        FROM tb_district_info z
+        ) MG
+        WHERE 1=1
         <include refid="rowSearch"/>
     </select>
 
     <insert id="insertDistrictInfo" parameterType="java.util.Map">
-        INSERT INTO tb_district_info (
-                               district_no
-					         , site_no
-					         , district_nm
-							 , dist_addr
-							 , dist_zip
-							 , dist_road_addr
-							 , dist_type_cd
-							 , dist_abbr
-							 , dist_pic
-							 , dist_view_pic
-							 , dist_lon
-                             , dist_lat
-                             , dist_zoom
-							 , inst_comp_id1
-							 , meas_comp_id1
-							 , inst_comp_id2
-							 , meas_comp_id2
-							 , meas_str_ymd
-							 , meas_end_ymd
-							 , dist_offi_nm
-		) VALUES (
-		          #{district_no}
-		         , #{site_no}
-				 , #{district_nm}
-				 , #{dist_addr}
-				 , #{dist_zip}
-				 , #{dist_road_addr}
-				 , #{dist_type_cd}
-				 , #{dist_abbr}
-                 , #{dist_pic}
-				 , #{dist_view_pic}
-                 , CAST(#{dist_lon} AS double precision)
-                 , CAST(#{dist_lat} AS double precision)
-                 , CAST(#{dist_zoom} AS double precision)
-				 , #{inst_comp_id1}
-				 , #{meas_comp_id1}
-				 , #{inst_comp_id2}
-				 , #{meas_comp_id2}
-                 , COALESCE(TO_CHAR(TO_DATE(NULLIF(#{meas_str_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), '')
-                 , COALESCE(TO_CHAR(TO_DATE(NULLIF(#{meas_end_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), '')
-				 , #{dist_offi_nm}
-            )
+        INSERT INTO tb_district_info ( district_no
+                                     , site_no
+                                     , district_nm
+                                     , dist_addr
+                                     , dist_zip
+                                     , dist_road_addr
+                                     , dist_type_cd
+                                     , dist_abbr
+                                     , dist_pic
+                                     , dist_view_pic
+                                     , dist_lon
+                                     , dist_lat
+                                     , dist_zoom
+                                     , inst_comp_id1
+                                     , meas_comp_id1
+                                     , inst_comp_id2
+                                     , meas_comp_id2
+                                     , meas_str_ymd
+                                     , meas_end_ymd
+                                     , dist_offi_nm)
+        VALUES ( #{district_no}
+               , #{site_no}
+               , #{district_nm}
+               , #{dist_addr}
+               , #{dist_zip}
+               , #{dist_road_addr}
+               , #{dist_type_cd}
+               , #{dist_abbr}
+               , #{dist_pic}
+               , #{dist_view_pic}
+               , CAST(#{dist_lon} AS double precision)
+               , CAST(#{dist_lat} AS double precision)
+               , CAST(#{dist_zoom} AS double precision)
+               , #{inst_comp_id1}
+               , #{meas_comp_id1}
+               , #{inst_comp_id2}
+               , #{meas_comp_id2}
+               , COALESCE(TO_CHAR(TO_DATE(NULLIF(#{meas_str_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), '')
+               , COALESCE(TO_CHAR(TO_DATE(NULLIF(#{meas_end_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'), '')
+               , #{dist_offi_nm})
     </insert>
 
     <update id="updateDistrictInfo" parameterType="java.util.Map">
         update tb_district_info set
-            district_nm = #{district_nm}
-            , mod_dt = now()
+        district_nm = #{district_nm}
+        , mod_dt = now()
         <if test="dist_addr != null">
             , dist_addr = #{dist_addr}
         </if>
@@ -305,15 +301,16 @@
     </update>
 
     <update id="updateDistrictInfoLocation" parameterType="java.util.Map">
-        update tb_district_info set
-            dist_type_cd = #{dist_type_cd}
-            , dist_abbr = #{dist_abbr}
+        update tb_district_info
+        set dist_type_cd = #{dist_type_cd}
+          , dist_abbr    = #{dist_abbr}
         where district_no = #{district_no}
     </update>
 
     <delete id="deleteDistrictInfo" parameterType="java.util.Map">
-        DELETE FROM tb_district_info
-         WHERE district_no = #{district_no}
+        DELETE
+        FROM tb_district_info
+        WHERE district_no = #{district_no}
     </delete>
 
 
@@ -321,6 +318,11 @@
         SELECT district_no
         FROM tb_logger_info tm
         where tm.logr_no = #{logr_no}
+    </select>
+
+    <select id="selectMaxNo" resultType="string">
+        select max(district_no)
+        from tb_district_info
     </select>
 
 </mapper>

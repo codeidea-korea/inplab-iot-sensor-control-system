@@ -116,16 +116,16 @@
             });
 
             $('.insertBtn').on('click', function () {
-
                 $('.deleteBtn').hide();
                 $("#form_sub_title").html('신규 등록');
                 $('input[type="submit"]').val('저장');
 
                 initForm();
 
-                $.get('/adminAdd/common/code/getNewGenerationKey', { table_nm: "tb_district_info", column_nm: "district_no", pre_type: "" }, function (res) {
-                    if (res.length > 0) {
-                        $('#lay-form-write input[name=district_no]').val(res[0].new_id);
+                $.get('/adminAdd/districtInfo/max-no', null, (res) => {
+                    if (res !== null && res !== undefined) {
+                        const newId = 'D' + (parseInt(res.substring(1)) + 1).toString().padStart(2, '0');
+                        $('#lay-form-write input[name=district_no]').val(newId);
                     }
                 });
 

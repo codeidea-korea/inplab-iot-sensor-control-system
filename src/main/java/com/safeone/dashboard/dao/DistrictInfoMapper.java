@@ -18,5 +18,7 @@ public interface DistrictInfoMapper {
     int updateDistrictInfoLocation(Map param);
     int deleteDistrictInfo(Map param);
     List<DistrictInfoDto> selectAll();
+
+    String selectMaxNo();
 }
     

@@ -119,6 +119,12 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
         }
     }
 
+    @ResponseBody
+    @GetMapping("/max-no")
+    public String getMaxNo() {
+        return districtInfoService.getMaxNo();
+    }
+
 
     @ResponseBody
     @PostMapping("/mod")

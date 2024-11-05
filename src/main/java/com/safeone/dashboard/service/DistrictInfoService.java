@@ -67,4 +67,7 @@ public class DistrictInfoService implements JqGridService<DistrictInfoDto> {
 		return mapper.deleteDistrictInfo(param);
 	}
 
+    public String getMaxNo() {
+		return mapper.selectMaxNo();
+    }
 }
