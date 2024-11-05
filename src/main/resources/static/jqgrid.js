@@ -1,14 +1,14 @@
 function initGrid($grid, path, $gridWrapper, options = {
     autowidth: true,
     shrinkToFit: true
-}, loadCompleteCallback, formatters) {
+}, loadCompleteCallback, formatters, selectables) {
     getColumns(path, (columns) => {
         const columnData = {
             model: []
         };
 
         $.each(columns, (index) => {
-            columnData.model.push(setColumn(columns[index], formatters));
+            columnData.model.push(setColumn(columns[index], formatters, selectables));
         });
 
         $(window).trigger('beforeLoadGrid', columnData)
@@ -99,7 +99,7 @@ function getColumns(path, callback) {
     })
 }
 
-function setColumn(column, formatters) {
+function setColumn(column, formatters, selectables) {
     const _column = {
         name: column['columnName'],
         label: column['title'],
@@ -137,6 +137,12 @@ function setColumn(column, formatters) {
 
     if (formatters && formatters[column['columnName']]) {
         _column.formatter = formatters[column['columnName']].formatter;
+    }
+
+    if (column['type'] === 'selectable') {
+        _column.editable = true;
+        _column.edittype = 'select';
+        _column.editoptions = { value: selectables[column['columnName']] };
     }
 
     return _column;
