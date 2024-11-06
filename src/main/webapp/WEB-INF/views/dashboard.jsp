@@ -321,6 +321,7 @@
         function getToggleStatus(uid) {
             let assetId = null;
             $.each(window.vworld.overlays, function () {
+                console.log('getToggleStatus', this)
                 if (this.uid === uid) {
                     assetId = this.asset_id;
                     return false;
@@ -351,6 +352,7 @@
 
                     $.each(window.marker.asset, function () {
                         if (getToggleStatus(this)) {
+                            console.log('???')
                             window.vworld.visibleOverlay(this, true);
                         }
                     });
@@ -804,10 +806,10 @@
                 if (sensor.sens_lon === null && sensor.sens_lat === null) {
                     coords = default_coords;
                 } else {
-                    // coords = [sensor.sens_lon, sensor.sens_lat];
-                    coords = [sensor.sens_lat, sensor.sens_lat];
+                    coords = [sensor.sens_lon, sensor.sens_lat];
+                    // coords = [sensor.sens_lat, sensor.sens_lat];
                 }
-                let uid = window.vworld.addOverlay(
+                const uid = window.vworld.addOverlay(
                     '<div class="marker asset" zoneid="' + district_no + '" assetid="' + sensor.sens_no + '">' +
                     '    <img src="/images/' + img + '"/>' +
                     '    <span class="title">' + sensor.sens_nm + '</span>' +
