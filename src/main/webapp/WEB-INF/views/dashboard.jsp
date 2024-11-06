@@ -754,7 +754,7 @@
                                 '        </p>' +
                                 '    </div>' +
                                 '</li>';
-                            $('.site-zone-list li[kind=' + ele.asset_kind_id + '] .site-zone-conts ul').append(html);
+                            $('.site-zone-list li[kind=' + sensor.senstype_no + '] .site-zone-conts ul').append(html);
                         });
                         $(document).trigger('map_action_end');
                     });
@@ -806,6 +806,7 @@
                     coords = default_coords;
                 } else {
                     coords = [sensor.sens_lon, sensor.sens_lat];
+                    // coords = [sensor.sens_lat, sensor.sens_lat];
                 }
                 let uid = window.vworld.addOverlay(
                     '<div class="marker asset" zoneid="' + district_no + '" assetid="' + sensor.sens_no + '">' +
