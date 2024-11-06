@@ -261,12 +261,12 @@
         });
 
         $(document).on("click", ".right-utill .roadview", function () {           // 로드뷰 열기/닫기
-                                                                                  // if (window.vworld.map.type != '2D') {
-                                                                                  //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
-                                                                                  //     $(this).removeClass("active");
-                                                                                  //     $(".roadViewContainer").removeClass("open");
-                                                                                  //     return;
-                                                                                  // }
+            // if (window.vworld.map.type != '2D') {
+            //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
+            //     $(this).removeClass("active");
+            //     $(".roadViewContainer").removeClass("open");
+            //     return;
+            // }
 
             if (!$(this).hasClass("active")) {
                 $(this).addClass("active");
@@ -321,13 +321,11 @@
         function getToggleStatus(uid) {
             let assetId = null;
             $.each(window.vworld.overlays, function () {
-                console.log('getToggleStatus', this)
                 if (this.uid === uid) {
                     assetId = this.asset_id;
                     return false;
                 }
             });
-
             return $('.site-zone-list li[asset_id=' + assetId + '] p.check-box input').is(':checked');
         }
 
@@ -349,12 +347,10 @@
                     $.each(window.marker.zone, function () {
                         window.vworld.visibleOverlay(this, false);
                     });
-
                     $.each(window.marker.asset, function () {
-                        if (getToggleStatus(this)) {
-                            console.log('???')
-                            window.vworld.visibleOverlay(this, true);
-                        }
+                        // if (getToggleStatus(this)) {
+                        window.vworld.visibleOverlay(this, true);
+                        // }
                     });
                 } else {
                     $.each(window.marker.zone, function () {
@@ -806,8 +802,8 @@
                 if (sensor.sens_lon === null && sensor.sens_lat === null) {
                     coords = default_coords;
                 } else {
-                    coords = [sensor.sens_lon, sensor.sens_lat];
-                    // coords = [sensor.sens_lat, sensor.sens_lat];
+                    // coords = [sensor.sens_lon, sensor.sens_lat];
+                    coords = [sensor.sens_lat, sensor.sens_lat];
                 }
                 const uid = window.vworld.addOverlay(
                     '<div class="marker asset" zoneid="' + district_no + '" assetid="' + sensor.sens_no + '">' +
