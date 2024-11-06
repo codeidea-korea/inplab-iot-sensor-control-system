@@ -1,9 +1,7 @@
 package com.safeone.dashboard.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.gson.Gson;
+import com.safeone.dashboard.service.*;
 import com.safeone.dashboard.util.ExcelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -16,18 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.gson.Gson;
-import com.safeone.dashboard.service.AlarmListService;
-import com.safeone.dashboard.service.AreaService;
-import com.safeone.dashboard.service.AssetListService;
-import com.safeone.dashboard.service.CommonCodeService;
-import com.safeone.dashboard.service.DashboardService;
-import com.safeone.dashboard.service.EmergencyCallService;
-import com.safeone.dashboard.service.maintenance.MaintenanceManageService;
-import com.safeone.dashboard.service.ZoneService;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class DashboardController {
@@ -45,9 +36,13 @@ public class DashboardController {
     private CommonCodeService commonCodeService;
     @Autowired
     private DashboardService dashboardService;
+
+    @Autowired
+    private NewDashboardService newDashboardService;
     
     @GetMapping(value = "dashboard")
     public String main(Model model) {
+        model.addAttribute("sensorTypes", (new Gson()).toJson(newDashboardService.getSensorTypes()));
         model.addAttribute("assetKind", (new Gson()).toJson(commonCodeService.getAssetKindList()));
         model.addAttribute("areaInfo", (new Gson()).toJson(areaService.getList(null).get(0)));
         return "dashboard";

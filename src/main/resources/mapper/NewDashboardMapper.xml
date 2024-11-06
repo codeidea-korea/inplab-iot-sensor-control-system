@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.NewDashboardMapper">
+    <select id="getSensors" parameterType="java.util.Map" resultType="java.util.Map">
+        select tsi.*, tst.sens_tp_nm
+        from tb_sensor_info tsi
+                 left join tb_sensor_type tst on tsi.senstype_no = tst.senstype_no
+        where tsi.sens_no in (select tlim.sens_no
+                              from tb_logr_idx_map tlim
+                              where logr_no in (select tli.logr_no
+                                                from tb_district_info tdi
+                                                         left outer join tb_logger_info tli on tli.district_no = tdi.district_no
+                                                where tdi.district_no = #{district_no}))
+    </select>
+
+    <select id="getSensorTypes" resultType="java.util.Map">
+        select *
+        from tb_sensor_type
+    </select>
+</mapper>
