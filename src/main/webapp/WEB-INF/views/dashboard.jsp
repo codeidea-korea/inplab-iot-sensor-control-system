@@ -1030,8 +1030,9 @@
         $setInterval1 = setInterval(startInterval, LATENCY); // 60초마다
 
         $.get('/popup/zoneDetail', {
-            zone_id: $('.site-status-list select.selectZone option:selected').val()
+            zone_id: 1
         }, function (html) {
+            console.log(html);
             $('.site-status-details').html(html);
             $('.site-status-details').show();
             setTimeout(function () {

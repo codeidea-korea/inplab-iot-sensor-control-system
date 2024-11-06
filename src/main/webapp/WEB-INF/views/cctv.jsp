@@ -261,6 +261,8 @@
                 {name : 'partner_comp_nm', index : 'partner_comp_nm', align : 'center', hidden:false},
                 {name : 'partner_comp_user_nm', index : 'partner_comp_user_nm', width: 100, align : 'center', hidden:false},
                 {name : 'partner_comp_user_phone', index : 'partner_comp_user_phone', width: 100, align : 'center', hidden:false},
+                {name : 'web_port', index : 'web_port', align : 'center', hidden:false},
+                {name : 'rtsp_port', index : 'rtsp_port', align : 'center', hidden:false},
 
                 {name : 'cctv_no', index : 'cctv_no', align : 'center', hidden:true},
                 {name : 'district_no', index : 'district_no', align : 'center', hidden:true},
@@ -271,8 +273,6 @@
                 {name : 'model_nm', index : 'model_nm', align : 'center', hidden:true},
                 {name : 'cctv_maker', index : 'cctv_maker', align : 'center', hidden:true},
                 {name : 'cctv_ip', index : 'cctv_ip', align : 'center', hidden:true},
-                {name : 'web_port', index : 'web_port', align : 'center', hidden:true},
-                {name : 'rtsp_port', index : 'rtsp_port', align : 'center', hidden:true},
                 {name : 'cctv_conn_id', index : 'cctv_conn_id', align : 'center', hidden:true},
                 {name : 'cctv_conn_pwd', index : 'cctv_conn_pwd', align : 'center', hidden:true},
                 {name : 'relay_nm', index : 'relay_nm', align : 'center', hidden:true},
@@ -288,7 +288,7 @@
 
             const header = [
                 '','현장명','CCTV명','계측사','담당자','전화번호',
-                '','','','','','','','','','','','','','','','','','','','','',''
+                'RTSP 연결','계측 상태','','','','','','','','','','','','','','','','','','','',''
                 /*'cctv_no','district_no','maint_sts_cd','maint_sts_nm',
                 'partner_comp_id','inst_ymd','model_nm','cctv_maker',
                 'cctv_ip','web_port','rtsp_port','cctv_conn_id','cctv_conn_pwd',
