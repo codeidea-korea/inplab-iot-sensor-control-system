@@ -182,7 +182,7 @@
     }
 
     try {
-        var _assetKind = ${assetKind};
+        var _sensorTypes = ${sensorTypes};
         var _areaInfo = ${areaInfo};
     } catch (e) {
     }
@@ -218,7 +218,7 @@
         window.vworld.vwmap2d();
 
         $(document).on('click', '.map-2d-btn', function () {
-            if (window.vworld.map.type == '2D') {
+            if (window.vworld.map.type === '2D') {
                 window.vworld.getMap().getLayers().clear();
                 window.vworld.getMap().addLayer(Base);
             } else {
@@ -321,7 +321,7 @@
         function getToggleStatus(uid) {
             let assetId = null;
             $.each(window.vworld.overlays, function () {
-                if (this.uid == uid) {
+                if (this.uid === uid) {
                     assetId = this.asset_id;
                     return false;
                 }
@@ -335,7 +335,7 @@
                 window.isRoadView = true;
             }
 
-            if ($('.site-status-list select.selectZone option:selected').val() == '') {
+            if ($('.site-status-list select.selectZone option:selected').val() === '') {
                 $.each(window.marker.zone, function () {
                     window.vworld.visibleOverlay(this, true);
                 });
@@ -358,14 +358,13 @@
                     $.each(window.marker.zone, function () {
                         window.vworld.visibleOverlay(this, true);
                     });
-
-                    $.each(window.marker.asset, function () {
-                        window.vworld.visibleOverlay(this, false);
+                    $.each(window.marker.asset, (_index, item) => {
+                        window.vworld.visibleOverlay(item, false);
                     });
                 }
             }
 
-            if (window.vworld.map.type == '2D') {
+            if (window.vworld.map.type === '2D') {
                 $('button.editmode').closest('li').show();
             } else {
                 $('button.editmode').closest('li').hide();
@@ -570,7 +569,7 @@
     function markerVisible(asset_id, visible) {
         $.each(window.vworld.overlays, function () {
             if (typeof this['asset_id'] != 'undefined') {
-                if (this.asset_id == asset_id) {
+                if (this.asset_id === asset_id) {
                     window.vworld.visibleOverlay(this.uid, visible);
                     return false;
                 }
@@ -716,7 +715,7 @@
                         , [district.dist_lon, district.dist_lat]
                         , '/images/icon_area1.png', district.district_nm, res, {
                             type: 'area',
-                            district_no: district.district_no
+                            zone_id: district.district_no
                         }));
                     redrawMarker();
                 });
@@ -805,8 +804,8 @@
                 if (sensor.sens_lon === null && sensor.sens_lat === null) {
                     coords = default_coords;
                 } else {
-                    coords = [sensor.sens_lon, sensor.sens_lat];
-                    // coords = [sensor.sens_lat, sensor.sens_lat];
+                    // coords = [sensor.sens_lon, sensor.sens_lat];
+                    coords = [sensor.sens_lat, sensor.sens_lat];
                 }
                 let uid = window.vworld.addOverlay(
                     '<div class="marker asset" zoneid="' + district_no + '" assetid="' + sensor.sens_no + '">' +
@@ -829,11 +828,25 @@
     // 자산 종류 출력
     function initSiteZone() {
         $('.site-zone-area ul.site-zone-list').empty();
-
-        $.each(_assetKind, function (idx) {
-            let html = '<li kind="' + this.code + '"><div class="site-zone-title"><strong><i id="arrow-up" class="fa-solid fa-arrow-up fa-xl arrow-up" style="color: #ffffff; margin-right: 10px; cursor: pointer;"></i>' + this.name + '</strong><p class="check-box" notxt="" small="">';
-            html += '<input type="checkbox" checked id="check_tit01_' + idx + '" name="check_tit01_' + idx + '" value=""><label for="check_tit01_' + idx + '"><span class="graphic"></span></label></p></div>';
-            html += '<div class="site-zone-conts"><ul></ul></div></li>';
+        $.each(_sensorTypes, (idx, item) => {
+            const html =
+                '  <li kind="' + item.senstype_no + '">'
+                + '    <div class="site-zone-title">'
+                + '        <strong>'
+                + '            <i id="arrow-up" class="fa-solid fa-arrow-up fa-xl arrow-up" style="color: #ffffff; margin-right: 10px; cursor: pointer;"></i>'
+                + item.sens_tp_nm
+                + '        </strong>'
+                + '        <p class="check-box" notxt="" small="">'
+                + '            <input type="checkbox" checked id="check_tit01_' + idx + '" name="check_tit01_' + idx + '" value="">'
+                + '            <label for="check_tit01_' + idx + '">'
+                + '                <span class="graphic"></span>'
+                + '            </label>'
+                + '        </p>'
+                + '    </div>'
+                + '    <div class="site-zone-conts">'
+                + '        <ul></ul>'
+                + '    </div>'
+                + '</li>';
             $('.site-zone-area ul.site-zone-list').append(html);
         });
     }
