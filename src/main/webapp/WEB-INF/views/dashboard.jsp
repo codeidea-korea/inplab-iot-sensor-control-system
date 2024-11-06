@@ -261,12 +261,12 @@
         });
 
         $(document).on("click", ".right-utill .roadview", function () {           // 로드뷰 열기/닫기
-            // if (window.vworld.map.type != '2D') {
-            //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
-            //     $(this).removeClass("active");
-            //     $(".roadViewContainer").removeClass("open");
-            //     return;
-            // }
+                                                                                  // if (window.vworld.map.type != '2D') {
+                                                                                  //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
+                                                                                  //     $(this).removeClass("active");
+                                                                                  //     $(".roadViewContainer").removeClass("open");
+                                                                                  //     return;
+                                                                                  // }
 
             if (!$(this).hasClass("active")) {
                 $(this).addClass("active");
@@ -703,14 +703,12 @@
             $('select.selectZone').append('<option value="">현장 선택</option>');
 
             // 지구 마커 표시
-            $.each(res, () => {
-                $('select.selectZone').append('<option value="' + this.district_no + '" lat="' + this.dist_lat + '" lng="' + this.dist_lon + '">' + this.district_nm + '</option>');
-
-                const district = this;
+            $.each(res, (_idx, district) => {
+                $('select.selectZone').append('<option value="' + district.district_no + '" lat="' + district.dist_lat + '" lng="' + district.dist_lon + '">' + district.district_nm + '</option>');
 
                 $.get('/new-dashboard/asset/count', {district_no: district.district_no}, (res) => {
                     window.marker.zone.push(window.vworld.addOverlay(
-                        '<div class="marker zone" district_no="' + district.district_no + '">' +
+                        '<div class="marker zone" zoneid="' + district.district_no + '">' +
                         '    <img src="/images/icon_area1.png"/>' +
                         '    <span class="count">' + res + '</span>' +
                         '    <span class="title">' + district.district_nm + '</span>' +
@@ -722,143 +720,110 @@
                         }));
                     redrawMarker();
                 });
-
                 loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
             });
+
+            /////
+            $('select.selectZone').off().on('change', function () {
+                let $selected = $("option:selected", this);
+                const district_no = $selected.val();
+                $('.rain-info').hide();
+
+                if ($selected.index() > 0) {
+                    $('.rain-info').show();
+                    $('.site-status-toggle').addClass('active')
+
+                    $.get('/new-dashboard/asset/all', {district_no: district_no}, (res) => {
+                        $('.zoneSelected').data('zoneid', district_no);
+                        $('.site-zone-list li .site-zone-conts ul').empty();
+
+                        $.each(res.sensors, (_idx, sensor) => {
+                            let status = window.marker.risk.find(r => r.zone_id === district_no && r.asset_id === sensor.sens_no);
+                            let fc_step = !!status?.risk_level ? 'fc_step' + status.risk_level : '';
+
+                            const html =
+                                '<li ' + fc_step + ' asset_id="' + sensor.sens_no + '">' +
+                                '    <a href="javascript:void(0);" data-coords="' + sensor.sens_lon + ',' + sensor.sens_lat + '">' + sensor.sens_nm + '</a>' +
+                                '    <div>' +
+                                '        <i class="fa-regular fa-eye"></i>　' +
+                                '        <p class="check-box" notxt="" small="">' +
+                                '            <input type="checkbox" id="check_conts01_' + _idx + '" name="check_conts01_' + _idx + '" value="" checked>' +
+                                '            <label for="check_conts01_' + _idx + '">' +
+                                '                <span class="graphic"></span>' +
+                                '            </label>' +
+                                '        </p>' +
+                                '    </div>' +
+                                '</li>';
+                            $('.site-zone-list li[kind=' + ele.asset_kind_id + '] .site-zone-conts ul').append(html);
+                        });
+                        $(document).trigger('map_action_end');
+                    });
+
+                    $('.zoneSelected').show();
+                    window.vworld.setPanBy([parseFloat($selected.attr('lng')), parseFloat($selected.attr('lat'))], 18);
+                } else {
+                    $('.zoneSelected').hide();
+                    $('.site-status-toggle').removeClass('active');
+                    $('.site-status-details .close-btns').trigger('click');
+                    $(document).trigger('map_action_end');
+                }
+
+                if ($('div.site-status-toggle.active > button').hasClass("show") && $selected.val() > 0) {
+                    getZoneDetail();
+                }
+            });
+            /////
+
         });
     }
 
     function loadMarker(district_no, default_coords) {
-        $.get('/getMarkerList', {zone_id: zone_id}, function (res) {
-            $.each(res, function (idx) {
+        $.get('/new-dashboard/asset/all', {district_no: district_no}, (res) => {
+            $.each(res.sensors, (_idx, sensor) => {
                 let img = '';
                 let type = 'sensor';
 
-                if (this.name === '구조물경사계') {
+                if (sensor.sens_tp_nm === '구조물경사계') {
                     img = 'icon_sensor_tm.png';
-                } else if (this.name === '강우량계') {
+                } else if (sensor.sens_tp_nm === '강우량계') {
                     img = 'icon_sensor_p.png';
-                } else if (this.name === '지표변위계') {
+                } else if (sensor.sens_tp_nm === '지표변위계') {
                     img = 'icon_sensor_s.png';
-                } else if (this.name === 'CCTV') {
+                } else if (sensor.sens_tp_nm === 'CCTV') {
                     img = 'icon_cctv.png';
                     type = 'cctv';
-                } else if (this.name === '재난방송') {
+                } else if (sensor.sens_tp_nm === '재난방송') {
                     img = 'icon_speaker.png';
                     type = 'speaker';
-                } else if (this.name === '전광판') {
+                } else if (sensor.sens_tp_nm === '전광판') {
                     img = 'icon_text.png';
-                } else if (this.name.indexOf('지하수위계') > -1) {
+                } else if (sensor.sens_tp_nm.indexOf('지하수위계') > -1) {
                     img = 'icon_sensor_ttw.png';
                 }
 
                 let coords;
-                if (this.x === null && this.y === null) {
+                if (sensor.sens_lon === null && sensor.sens_lat === null) {
                     coords = default_coords;
                 } else {
-                    coords = [this.x, this.y];
+                    coords = [sensor.sens_lon, sensor.sens_lat];
                 }
-
                 let uid = window.vworld.addOverlay(
-                    '<div class="marker asset" zoneid="' + this.zone_id + '" assetid="' + this.asset_id
-                    + '"><img src="/images/' + img + '"/><span class="title">' + this.asset_name
-                    + '</span></div>', coords,
-                    '/images/' + img, this.asset_name, null, {
+                    '<div class="marker asset" zoneid="' + district_no + '" assetid="' + sensor.sens_no + '">' +
+                    '    <img src="/images/' + img + '"/>' +
+                    '    <span class="title">' + sensor.sens_nm + '</span>' +
+                    '</div>'
+                    , coords,
+                    '/images/' + img, sensor.sens_nm, null, {
                         type: type,
-                        asset_id: this.asset_id,
-                        zone_id: this.zone_id,
-                        etc1: this.etc1
+                        asset_id: sensor.sens_no,
+                        zone_id: district_no,
+                        // etc1: this.etc1
                     });
-
                 window.marker.asset.push(uid);
                 window.vworld.visibleOverlay(uid, false);
             });
         });
     }
-
-
-    // $.get('/getZoneList', {use_flag: 'Y'}, function (res) {
-    //     $('select.selectZone').empty();
-    //     $('select.selectZone').append('<option value="">현장 선택</option>');
-    //
-    //     // 지구 마커 표시
-    //     $.each(res, function () {
-    //         $('select.selectZone').append('<option value="' + this.zone_id + '" lat="' + this.lat + '" lng="' + this.lng + '">' + this.name + '</option>');
-    //
-    //         let zone = this;
-    //         $.get('/getAssetList', {zone_id: zone.zone_id}, function (res) {
-    //             window.marker.zone.push(window.vworld.addOverlay(
-    //                 '<div class="marker zone" zoneid="' + zone.zone_id
-    //                 + '"><img src="/images/icon_area1.png"/><span class="count">' + res.length
-    //                 + '</span><span class="title">' + zone.name + '</span></div>', [zone.lng, zone.lat],
-    //                 '/images/icon_area1.png', zone.name, res.length, {type: 'area', zone_id: zone.zone_id}));
-    //             redrawMarker();
-    //         });
-    //
-    //         loadMarker(zone.zone_id, [zone.lng, zone.lat]);
-    //     });
-    //
-    //     // 지구 선택시
-    //     // 해당 지구으로 지도 이동 후 줌 처리하고
-    //     // 상세 표기 버튼 활성화 시킨다
-    //     // 지구 선택시 해당 지구의 강우량 표기
-    //     $('select.selectZone').off().on('change', function () {
-    //         let $selected = $("option:selected", this);
-    //         const zoneId = $selected.val();
-    //
-    //         $('.rain-info').hide();
-    //
-    //         if ($selected.index() > 0) {
-    //             $('.rain-info').show();
-    //             $('.site-status-toggle').addClass('active')
-    //
-    //             $.get('/getAssetList', {zone_id: zoneId}, function (res) {
-    //                 $('.zoneSelected').data('zoneid', zoneId);
-    //
-    //                 $('.site-zone-list li .site-zone-conts ul').empty();
-    //
-    //                 $.each(res, function (idx, ele) {
-    //                     // console.log(res);
-    //                     if (ele.asset_kind_id === '4') {
-    //                         // console.log(ele.real_value);
-    //                         $('.rain-info span').html(ele.real_value + " mm");
-    //                     }
-    //
-    //
-    //                     let status = window.marker.risk.find(r => r.zone_id == zoneId && r.asset_id == ele.asset_id);
-    //
-    //                     let fc_step = !!status?.risk_level ? 'fc_step' + status.risk_level : '';
-    //
-    //                     // console.log(status, ele);
-    //
-    //                     let html = '';
-    //
-    //                     html += '<li ' + fc_step + ' asset_id="' + ele.asset_id + '">';
-    //                     html += '<a href="javascript:void(0);" data-coords="' + ele.x + ',' + ele.y + '">' + ele.name + '</a>' +
-    //                         '<div><i class="fa-regular fa-eye"></i>　' +
-    //                         '<p class="check-box" notxt="" small=""><input type="checkbox" id="check_conts01_' + idx + '" name="check_conts01_' + idx + '" value="" checked>';
-    //                     html += '<label for="check_conts01_' + idx + '"><span class="graphic"></span></label></p></div></li>';
-    //
-    //                     $('.site-zone-list li[kind=' + ele.asset_kind_id + '] .site-zone-conts ul').append(html);
-    //                 });
-    //
-    //                 $(document).trigger('map_action_end');
-    //             });
-    //
-    //             $('.zoneSelected').show();
-    //             window.vworld.setPanBy([parseFloat($selected.attr('lng')), parseFloat($selected.attr('lat'))], 18);
-    //         } else {
-    //             $('.zoneSelected').hide();
-    //             $('.site-status-toggle').removeClass('active');
-    //             $('.site-status-details .close-btns').trigger('click');
-    //             $(document).trigger('map_action_end');
-    //         }
-    //
-    //         if ($('div.site-status-toggle.active > button').hasClass("show") && $selected.val() > 0) {
-    //             getZoneDetail();
-    //         }
-    //     });
-    // });
 
     // 자산 종류 출력
     function initSiteZone() {
