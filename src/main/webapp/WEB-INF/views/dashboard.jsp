@@ -796,14 +796,15 @@
                     img = 'icon_text.png';
                 } else if (sensor.sens_tp_nm.indexOf('지하수위계') > -1) {
                     img = 'icon_sensor_ttw.png';
+                } else {
+                    img = 'icon_sensor_tm.png';
                 }
 
                 let coords;
                 if (sensor.sens_lon === null && sensor.sens_lat === null) {
                     coords = default_coords;
                 } else {
-                    // coords = [sensor.sens_lon, sensor.sens_lat];
-                    coords = [sensor.sens_lat, sensor.sens_lat];
+                    coords = [sensor.sens_lon, sensor.sens_lat];
                 }
                 const uid = window.vworld.addOverlay(
                     '<div class="marker asset" zoneid="' + district_no + '" assetid="' + sensor.sens_no + '">' +
