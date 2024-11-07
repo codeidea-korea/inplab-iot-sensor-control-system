@@ -9,4 +9,6 @@ import java.util.Map;
 public interface ModifyCctvService {
 
   ObjectNode getCctv(GetModifyCctvDto getModifyCctvDto);
+
+    String operation(Map<String, Object> param);
 }

@@ -10,5 +10,6 @@ import com.safeone.dashboard.dto.CctvListDto;
 @Repository
 public interface CctvListMapper {
     List<CctvListDto> selectCctvList(Map param);
-    int selectCctvListTotal(Map param);    
+    int selectCctvListTotal(Map param);
+    CctvListDto getCctvInfo(Map param);
 }
