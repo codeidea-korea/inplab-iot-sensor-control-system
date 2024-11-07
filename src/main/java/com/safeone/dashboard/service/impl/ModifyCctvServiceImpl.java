@@ -60,14 +60,12 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
         String operator = param.get("operator").toString();
         CctvListDto cctvInfo = cctvListMapper.getCctvInfo(param);
 
-        // PTZ 상태 조회
         String currentValues = getPtzValues(cctvInfo.getCctv_ip(), cctvInfo.getWeb_port(), cctvInfo.getCctv_conn_id(), cctvInfo.getCctv_conn_pwd());
 
         double pan = parseValue(currentValues, "Pan");
         double tilt = parseValue(currentValues, "Tilt");
         double zoom = parseValue(currentValues, "Zoom");
 
-        // operator 값에 따른 pan/tilt/zoom 값 조정
         if (operator.equals("left")) {
             pan = pan - 10;
         } else if (operator.equals("right")) {
@@ -82,20 +80,16 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
             zoom = zoom - 1;
         }
 
-        // pan, tilt, zoom 제한 범위 설정 (예시로 pan은 0~180, tilt는 -45~45, zoom은 1~10으로 설정)
         pan = Math.max(0, Math.min(180, pan));
         tilt = Math.max(-45, Math.min(45, tilt));
         zoom = Math.max(1, Math.min(10, zoom));
 
-        // 새로운 PTZ 설정 값 전송
         return setPtzValues(cctvInfo.getCctv_ip(), cctvInfo.getWeb_port(), cctvInfo.getCctv_conn_id(), cctvInfo.getCctv_conn_pwd(), pan, tilt, zoom);
     }
 
-    // PTZ 설정 메서드 (Tilt 추가)
     private String setPtzValues(String ipAddress, String port, String id, String password, double pan, double tilt, double zoom) {
         String requestUrl = "http://" + ipAddress + ":" + port + "/stw-cgi/ptzcontrol.cgi?msubmenu=absolute&action=control&Pan=" + pan + "&Tilt=" + tilt + "&Zoom=" + zoom;
 
-        // 인증 및 요청 설정 (이전과 동일)
         Credentials credentials = new UsernamePasswordCredentials(id, password.toCharArray());
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(new AuthScope(ipAddress, Integer.parseInt(port)), credentials);
@@ -122,7 +116,6 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
         }
     }
 
-    // 파싱 메서드 예시 (변경 없음)
     private double parseValue(String data, String key) {
         int index = data.indexOf(key + "=");
         if (index == -1) return 0;
@@ -136,12 +129,10 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
     private String getPtzValues(String ipAddress, String port, String id, String password) {
         String requestUrl = "http://" + ipAddress + ":" + port + "/stw-cgi/ptzcontrol.cgi?msubmenu=query&action=view&Channel=0&Query=Pan,Tilt,Zoom";
 
-        // 인증 설정
         Credentials credentials = new UsernamePasswordCredentials(id, password.toCharArray());
         BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(new AuthScope(ipAddress, Integer.parseInt(port)), credentials);
 
-        // HttpClientContext 생성하여 CredentialsProvider 설정
         HttpClientContext context = HttpClientContext.create();
         context.setCredentialsProvider(credentialsProvider);
 
