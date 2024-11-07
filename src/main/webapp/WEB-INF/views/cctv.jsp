@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="ko">
     <head>
-        <jsp:include page="common/include_head.jsp" flush="true"></jsp:include>
+        <jsp:include page="common/include_head.jsp" flush="true" />
         <style>
             .cctv-list li video {
                 width: 315px;
@@ -139,7 +139,6 @@
                     '<div class="cctvcontrol"><span>ZOOM</span> <div class="conbtn_area"> <button type="button" class="plusbtn">+</button> <button type="button" class="minusbtn">-</button> </div> </div>'
                 '</div>' +
                 '</li>';
-                // let html = '<li cctvno=' + data.cctv_no + '><video id="vid_' + data.cctv_no +'" src="/video/proxy?url=' + data.etc1 + '" controls autoplay></video>';
                 $('.cctv-list').append(html);
 
                 $('#vid_' + data.cctv_no).on('ended', function (e) {
@@ -190,16 +189,6 @@
                         $('#contents .cctv-list .btnClose').trigger('click');
                         $('.paging_all').remove();
 
-                        // WebSocket 닫기
-                        /*Object.keys(window.videoWs).forEach((key) => {
-                            try {
-                                window.videoWs[key].send(JSON.stringify({ type: "close" }));
-                                window.videoWs[key].close();
-                                console.log('socket close - ' + key);
-                            } catch (e) {
-                                console.error('WebSocket close error:', e);
-                            }
-                        });*/
                         return; // 모든 행을 처리했으면 종료
                     }
 
@@ -209,8 +198,6 @@
                     // 다음 행을 지연 처리
                     setTimeout(() => processRow(index + 1), delay);
                 }
-
-                // 첫 번째 행부터 시작
                 processRow(0);
             };
 
@@ -263,7 +250,6 @@
                 {name : 'partner_comp_user_phone', index : 'partner_comp_user_phone', width: 100, align : 'center', hidden:false},
                 {name : 'web_port', index : 'web_port', align : 'center', hidden:false},
                 {name : 'rtsp_port', index : 'rtsp_port', align : 'center', hidden:false},
-
                 {name : 'cctv_no', index : 'cctv_no', align : 'center', hidden:true},
                 {name : 'district_no', index : 'district_no', align : 'center', hidden:true},
                 {name : 'maint_sts_cd', index : 'maint_sts_cd', align : 'center', hidden:true},
@@ -289,11 +275,6 @@
             const header = [
                 '','현장명','CCTV명','계측사','담당자','전화번호',
                 'RTSP 연결','계측 상태','','','','','','','','','','','','','','','','','','','',''
-                /*'cctv_no','district_no','maint_sts_cd','maint_sts_nm',
-                'partner_comp_id','inst_ymd','model_nm','cctv_maker',
-                'cctv_ip','web_port','rtsp_port','cctv_conn_id','cctv_conn_pwd',
-                'relay_nm','relay_ip','relay_port','cctv_lat','cctv_lon',
-                'admin_center','etc1','etc2','etc3'*/
             ];
 
             const gridComplete2 = () => {
@@ -363,6 +344,7 @@
             };
 
             const getCctv = (obj) => {
+                console.log("getCctv obj > ", obj);
                 return new Promise((resolve, reject) => {
                     $.ajax({
                         type: 'GET',
@@ -375,13 +357,13 @@
                         resolve(res);
                     }).fail(function(fail) {
                         reject(fail);
-                        console.log('getCctv fail > ', fail);
                         alert2('CCTV 정보를 가져오는데 실패했습니다.', function() {});
                     });
                 });
             };
 
             const onSelectRow2 = (rowId, status, e) => {
+                console.log('select')
                 const data = $("#jqGrid").jqGrid('getRowData', rowId);
                 let isExist = false;
 
@@ -425,42 +407,6 @@
 
             // window.jqgrid 
             $(function () {
-                // $(document).on('timeupdate', '.cctv-list video', function(e) {
-                //     console.log($(this).attr('id'));
-                // });
-
-                /*$.get('/cctv/columns', function (res) {
-                    console.log(res);
-
-                    $grid = jqgridUtil($('table.grid'), {
-                        listPathUrl: "/cctv",
-                        gridComplete: function() {
-                            setTimeout(function() {
-                                const gridHeight = $('.contents-in:eq(0)').height();
-                                $('.ui-jqgrid-bdiv:eq(0) div').height(gridHeight-80);
-                            }, 150);
-                        },
-                        reorderColumns: true,
-                    }, res, false);
-
-                    $('.ui-th-div input.cbox').hide();
-                    $('.ui-th-div input.cbox').after('<input type="checkbox" id="check-all">');
-                    // 헤더 체크박스 선택 시, 전체 행의 클릭 이벤트 트리거
-                    $('#check-all').on('click', function() {
-                        const isChecked = $(this).is(':checked');  // 헤더 체크박스 상태 확인
-
-                        if (isChecked) {
-                            $.each($('tr[id^=g0_]'), function (idx, ele) {
-                                if (!$(ele).hasClass("cctv_selected")) {
-                                    $(ele).trigger('click', { rowId: $(ele).attr('id'), asset_id: $(ele).attr('asset_id') });
-                                }
-                            });
-                        } else {
-                            uncheckedAllCctvList();
-                        }
-                    });
-                });*/
-
                 getCctv({limit : limit, offset : offset}).then((res) => {
                     console.log('res > ', res);
                     setJqGridTable(res.rows, column, header, gridComplete2, onSelectRow2, ['cctv_no'], 'jqGrid', limit, offset, getCctv, null, loadComplete2);
@@ -497,7 +443,6 @@
                     });
 
                     const isChecked = $('tr[id='+data.rowId+'] input[type=checkbox]').is(':checked');
-                    //if ($('.cctv-list li[cctvno=' + data.cctv_no + ']').length > 0) {
                     if (!isChecked) {
                         try {
                             window.videoWs['vid_' + data.cctv_no].send(JSON.stringify({ type: "close" }));
@@ -508,22 +453,10 @@
                         }
                         $('.cctv-list li[cctvno=' + data.cctv_no + ']').remove();
                     } else {
-                        /*if ($('.cctvContainer').length >= 6) {
-                            alert('CCTV는 동시에 6개까지 확인할 수 있습니다.');
-                            $target = $('.ui-jqgrid-btable tr[id=' + data.rowId + ']');
-                            // checkbox 풀기
-                            $target.find('td input:checkbox').prop("checked", false);
-                            // css 제거
-                            $target.removeClass("cctv_selected");
-                            return;
-                        }*/
-                        // let html = '<li cctvno=' + data.cctv_no + '><video id="vid_' + data.cctv_no +'" class="video-js" controls preload="auto">' +
-                        //     + '<p class="vjs-no-js">지원되지 않는 브라우져 입니다.</p></video>';
                         if (cctvArray.length < 7) {
                             setCctvVideoList(data);
                         }
                     }
-
                     reloadCctvList();
                     $('.paging_all').remove();
                     if (cctvArray.length > 0) {
@@ -703,8 +636,6 @@
                     e.stopImmediatePropagation(); // 현재 이벤트가 다른 이벤트 핸들러로 전파되는 것을 방지
                     const isChecked = $(this).is(':checked');
                     const rowId = $(this).closest('tr').attr('id');
-
-                    // row클릭시 cctvArray 에 등록되고 동작해야한다
                     loadComplete2();
 
                     if (!isChecked) {
@@ -768,26 +699,16 @@
 
     <body data-pgcode="0000">
         <section id="wrap">
-            <!--[s] 상단 -->
-            <jsp:include page="common/include_top.jsp" flush="true"></jsp:include>
-            <!--[e] 상단 -->
-
-            <!--[s] 왼쪽 메뉴 -->
+            <jsp:include page="common/include_top.jsp" flush="true" />
             <div id="global-menu">
-                <!--[s] 주 메뉴 -->
-                <jsp:include page="common/include_sidebar.jsp" flush="true"></jsp:include>
-                <!--[e] 주 메뉴 -->
+                <jsp:include page="common/include_sidebar.jsp" flush="true" />
             </div>
-            <!--[e] 왼쪽 메뉴 -->
-
             <div id="container">
                 <h2 class="txt">CCTV</h2>
-
                 <div id="contents" class="cctvList">
                     <div class="contents-re">
                         <h3 class="txt">CCTV 리스트</h3>
                         <div class="contents-in">
-                            <%--<table class="grid"></table>--%>
                             <table id="jqGrid"></table>
                         </div>
                     </div>
@@ -804,8 +725,6 @@
                     </div>
                 </div>
             </div>
-            <!--[e] 컨텐츠 영역 -->
-
             <div class="dimm"></div>
             <i class="fa-regular fa-rectangle-xmark btnFullScreenClose"></i>
         </section>
