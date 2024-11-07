@@ -88,6 +88,9 @@
         , A.logr_idx_str
         , A.logr_idx_end
         , A.logr_flag
+        , A.mod_dt
+        , A.contactor_nm
+        , A.contactor_phone
         FROM tb_sensor_type A
         ) MG
         WHERE 1=1
@@ -136,6 +139,8 @@
             <if test="logr_idx_str != null">logr_idx_str,</if>
             <if test="logr_idx_end != null">logr_idx_end,</if>
             <if test="logr_flag != null">logr_flag,</if>
+            <if test="contactor_nm != null">contactor_nm,</if>
+            <if test="contactor_phone != null">contactor_phone,</if>
         </trim>
         )
         VALUES (
@@ -149,6 +154,8 @@
             <if test="logr_idx_str != null">#{logr_idx_str},</if>
             <if test="logr_idx_end != null">#{logr_idx_end},</if>
             <if test="logr_flag != null">#{logr_flag},</if>
+            <if test="contactor_nm != null">#{contactor_nm},</if>
+            <if test="contactor_phone != null">#{contactor_phone},</if>
         </trim>
         )
     </insert>
@@ -180,6 +187,12 @@
         </if>
         <if test="logr_flag != null">
             , logr_flag = #{logr_flag}
+        </if>
+        <if test="contactor_nm != null">
+            , contactor_nm = #{contactor_nm}
+        </if>
+        <if test="contactor_phone != null">
+            , contactor_phone = #{contactor_phone}
         </if>
         where senstype_no = #{senstype_no}
     </update>

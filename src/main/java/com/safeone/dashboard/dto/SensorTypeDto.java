@@ -35,4 +35,10 @@ public class SensorTypeDto implements Serializable {
     @FieldLabel(title="로거_idx_E")
     String logr_idx_end;
 
+    @FieldLabel(title="담당자")
+    String contactor_nm;
+
+    @FieldLabel(title="연락처")
+    String contactor_phone;
+
 }

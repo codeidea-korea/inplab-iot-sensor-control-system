@@ -182,7 +182,6 @@
             } else {
                 alert("No file selected.");
             }
-
             reloadJqGrid();
         }
 
@@ -247,14 +246,14 @@
                             <input type="text" name="sens_tp_nm" class="required"/>
                         </td>
                     </tr>
-                    <tr>
-                        <th class="required_th">로거 구분</th>
-                        <td colspan="3">
-                            <select id="logr_flag" name="logr_flag" class="required">
-                                <option value="">선택</option>
-                            </select>
-                        </td>
-                    </tr>
+<%--                    <tr>--%>
+<%--                        <th class="required_th">로거 구분</th>--%>
+<%--                        <td colspan="3">--%>
+<%--                            <select id="logr_flag" name="logr_flag" class="required">--%>
+<%--                                <option value="">선택</option>--%>
+<%--                            </select>--%>
+<%--                        </td>--%>
+<%--                    </tr>--%>
                     <tr>
                         <th class="required_th">센서약어</th>
                         <td colspan="3">
@@ -290,6 +289,20 @@
                         <th class="required_th">로거_idx_E</th>
                         <td>
                             <input type="text" name="logr_idx_end" class="logr_idx required"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>담당자</th>
+                        <td colspan="3">
+                            <input type="text" name="contactor_nm"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th>연락처</th>
+                        <td colspan="3">
+                            <input type="text" name="contactor_phone"/>
                         </td>
                     </tr>
 
