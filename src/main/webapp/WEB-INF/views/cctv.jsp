@@ -285,11 +285,41 @@
                 align: 'center',
                 hidden: false
             },
-            {name: 'web_port', index: 'web_port', align: 'center', hidden: false},
-            {name: 'rtsp_port', index: 'rtsp_port', align: 'center', hidden: false},
+            {
+                name: 'rtsp_status',
+                index: 'rtsp_status',
+                align: 'center',
+                hidden: false,
+                formatter: (cellValue, _options, _rowObject) => {
+                    if (cellValue === 'Y') {
+                        return '정상';
+                    } else {
+                        return '에러';
+                    }
+                }
+            },
+            {
+                name: 'maint_sts_cd',
+                index: 'maint_sts_cd',
+                align: 'center',
+                hidden: false,
+                formatter: (cellValue, _options, _rowObject) => {
+                    let value = '';
+                    if (cellValue === 'MTN001') {
+                        value = '정상';
+                    } else if (cellValue === 'MTN002') {
+                        value = '망실';
+                    } else if (cellValue === 'MTN003') {
+                        value = '점검';
+                    } else if (cellValue === 'MTN004') {
+                        value = '철거';
+                    }
+                    return value
+                }
+            },
+            {name: 'rtsp_port', index: 'rtsp_port', align: 'center', hidden: true},
             {name: 'cctv_no', index: 'cctv_no', align: 'center', hidden: true},
             {name: 'district_no', index: 'district_no', align: 'center', hidden: true},
-            {name: 'maint_sts_cd', index: 'maint_sts_cd', align: 'center', hidden: true},
             {name: 'maint_sts_nm', index: 'maint_sts_nm', align: 'center', hidden: true},
             {name: 'partner_comp_id', index: 'partner_comp_id', align: 'center', hidden: true},
             {name: 'inst_ymd', index: 'inst_ymd', align: 'center', hidden: true},

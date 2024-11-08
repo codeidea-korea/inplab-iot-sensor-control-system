@@ -44,6 +44,17 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
 
         Map<String, Object> map = CommonUtils.dtoToMap(getModifyCctvDto);
         List<CctvListDto> list = cctvListMapper.selectCctvList(map);
+        for (CctvListDto dto : list) {
+            if (dto.getCctv_ip() == null || dto.getWeb_port() == null || dto.getCctv_conn_id() == null || dto.getCctv_conn_pwd() == null) {
+                dto.setRtsp_status("N");
+            } else {
+                if (getPtzValues(dto.getCctv_ip(), dto.getWeb_port(), dto.getCctv_conn_id(), dto.getCctv_conn_pwd()).equals("FAIL")) {
+                    dto.setRtsp_status("N");
+                } else {
+                    dto.setRtsp_status("Y");
+                }
+            }
+        }
         int totalCnt = cctvListMapper.selectCctvListTotal(map);
         an = om.valueToTree(list);
 
@@ -146,12 +157,12 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
                 if (response.getCode() == 200) {
                     return EntityUtils.toString(response.getEntity());
                 } else {
-                    return "Error: " + response.getCode() + " - " + response.getReasonPhrase();
+                    return "FAIL";
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return "Error retrieving PTZ values";
+            return "FAIL";
         }
     }
 }

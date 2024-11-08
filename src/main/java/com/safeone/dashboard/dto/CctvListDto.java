@@ -21,6 +21,8 @@ public class CctvListDto implements Serializable {
     @FieldLabel(title="CCTV명", width = 180)
     String cctv_nm;
 
+    String rtsp_status;
+
     @FieldLabel(title="협력업체 ID", type="hidden")
     String partner_comp_id;
 
@@ -36,7 +38,7 @@ public class CctvListDto implements Serializable {
     @FieldLabel(title="유지보수 CD", type="hidden")
     String maint_sts_cd;
 
-    @FieldLabel(title="유지보수명", type="hidden")
+    @FieldLabel(title="유지보수명")
     String maint_sts_nm;
 
     @FieldLabel(title="설치일", type="hidden")
