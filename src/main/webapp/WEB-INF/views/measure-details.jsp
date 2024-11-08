@@ -235,8 +235,42 @@
             align-items: center;
             padding: 1rem;
         }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* 다른 요소들 위에 표시되도록 설정 */
+        }
+
+        /* 로딩 스피너 스타일 */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 6px solid #ccc;
+            border-top: 6px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* 로딩 애니메이션 */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
+    <script src="jquery.loading.js"></script>
     <script>
         $(function () {
             $('.tab-button').click(function () {
@@ -687,6 +721,10 @@
             const $leftGrid = $("#left-jq-grid");
             const $rightGrid = $("#right-jq-grid");
 
+            $("#download-excel").click(() => {
+                downloadExcel('measure-details-data', $rightGrid, "/measure-details-data");
+            })
+
             $('#add-row').click(() => {
                 const selectedSensor = getSelectedCheckData($leftGrid);
                 if (selectedSensor.length === 0) {
@@ -785,14 +823,14 @@
                         item.formul_data_z = item['Z 보정(Deg)'];
 
                         // 숫자형 데이터 파싱 (빈 값은 0.0으로 처리)
-                        item.raw_data = parseFloat(item['Raw Data']) || 0.0;
-                        item.formul_data = parseFloat(item['보정(Deg)']) || 0.0;
-                        item.raw_data_x = parseFloat(item['Raw Data(X)']) || 0.0;
-                        item.formul_data_x = parseFloat(item['X 보정(Deg)']) || 0.0;
-                        item.raw_data_y = parseFloat(item['Raw Data(Y)']) || 0.0;
-                        item.formul_data_y = parseFloat(item['Y 보정(Deg)']) || 0.0;
-                        item.raw_data_z = parseFloat(item['Raw Data(Z)']) || 0.0;
-                        item.formul_data_z = parseFloat(item['Z 보정(Deg)']) || 0.0;
+                        item.raw_data = parseFloat(item['Raw Data']) || null;
+                        item.formul_data = parseFloat(item['보정(Deg)']) || null;
+                        item.raw_data_x = parseFloat(item['Raw Data(X)']) || null;
+                        item.formul_data_x = parseFloat(item['X 보정(Deg)']) || null;
+                        item.raw_data_y = parseFloat(item['Raw Data(Y)']) || null;
+                        item.formul_data_y = parseFloat(item['Y 보정(Deg)']) || null;
+                        item.raw_data_z = parseFloat(item['Raw Data(Z)']) || null;
+                        item.formul_data_z = parseFloat(item['Z 보정(Deg)']) || null;
 
 
                         delete item['계측일시'];
@@ -817,12 +855,21 @@
                         contentType: 'application/json',  // JSON 형식으로 전송
                         data: JSON.stringify({jsonData, sensNo: selectedRow[0].sens_no}),  // JSON 데이터 직렬화
                         dataType: 'json',
+                        beforeSend: function () {
+                            $('#loading').show();
+                        },
+
                         success: function (res) {
                             alert('저장되었습니다.');
-                            $rightGrid.trigger('reloadGrid');
+                            $("#search-btn").click();
                         },
+
                         error: function () {
                             alert('입력값을 확인해 주세요.');
+                        },
+
+                        complete: function () {
+                            $('#loading').hide();
                         }
                     });
                 };
@@ -836,6 +883,9 @@
     <jsp:include page="common/include_top.jsp" flush="true"/>
     <div id="global-menu">
         <jsp:include page="common/include_sidebar.jsp" flush="true"/>
+    </div>
+    <div id="loading" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
     </div>
     <div id="container">
         <h2 class="txt">관리자 전용
@@ -869,6 +919,8 @@
                         <a id="add-row">행추가</a>
                         <a id="del-row">행삭제</a>
                         <a id="save-button">저장</a>
+                        <a id="upload-excel">업로드</a>
+                        <input type="file" id="excel-file" style="display: none;" accept=".xlsx, .xls"/>
                         <a id="download-excel">다운로드</a>
                         <a id="view-chart">차트조회</a>
                     </div>

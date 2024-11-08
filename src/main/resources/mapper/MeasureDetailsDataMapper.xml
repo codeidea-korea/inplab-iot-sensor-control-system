@@ -160,4 +160,9 @@
         sens_no, meas_dt
         ) as total
     </select>
+
+    <delete id="deleteAll" parameterType="java.util.Map">
+        DELETE FROM tb_measure_details
+        WHERE sens_no = #{sens_no}
+    </delete>
 </mapper>

@@ -48,6 +48,8 @@ public class MeasureDetailsDataController extends JqGridAbstract<MeasureDetailsD
     @ResponseBody
     @PostMapping("/excel")
     public boolean excel(@RequestBody Map<String, Object> param) {
+        measureDetailsDataService.deleteAll(param);
+
         JsonArray jArray = (new JsonParser())
                 .parse(param.get("jsonData").toString())
                 .getAsJsonArray();

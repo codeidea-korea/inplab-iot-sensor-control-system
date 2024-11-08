@@ -23,6 +23,7 @@ public interface MeasureDetailsDataMapper {
 
     List<MeasureDetailsDataDto> isAlreadyExists(Map param);
 
-    List<MeasureDetailsDataDto> selectXYZ(Map request);
+    int deleteAll(Map param);
+
 }
     
