@@ -20,6 +20,9 @@ public class EmergencyContactDto implements Serializable {
     @FieldLabel(title = "소속 기관")
     private String partner_comp_nm;
 
+    @FieldLabel(title = "partner_comp_id", type = "hidden")
+    private String partner_comp_id;
+
     @FieldLabel(title = "이름")
     private String emerg_chgr_nm;
 

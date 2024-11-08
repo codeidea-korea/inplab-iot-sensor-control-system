@@ -13,7 +13,7 @@
                 multiselect: true,
                 multiboxonly: false,
                 useFilterToolbar: true,
-            }, null, null, {alarm_lvl_nm: "1:1차 초과 이상;2:2차 초과 이상;3:3차 초과 이상;4:4차 초과 이상"})
+            }, null, null, {alarm_lvl_nm: "1:1차 초과 이상;2:2차 초과 이상;3:3차 초과 이상;4:4차 초과 이상", sms_autosnd_yn: "Y:Y;N:N"});
 
             $('.save-btn').on('click', function () {
                 const allRowData = $grid.jqGrid("getRowData");

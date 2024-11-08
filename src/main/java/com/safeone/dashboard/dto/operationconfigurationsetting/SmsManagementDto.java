@@ -14,7 +14,7 @@ public class SmsManagementDto implements Serializable {
     private String district_no;
 
     @FieldLabel(title = "소속 기관")
-    private String sms_recv_dept;
+    private String partner_comp_nm;
 
     @FieldLabel(title = "이름")
     private String sms_chgr_nm;
@@ -28,7 +28,7 @@ public class SmsManagementDto implements Serializable {
     @FieldLabel(title = "상태")
     private String sms_status;
 
-    @FieldLabel(title = "자동 전송 여부")
+    @FieldLabel(title = "자동 전송 여부", type = "selectable")
     private String sms_autosnd_yn;
 
     @FieldLabel(title = "등록일시", type = "hidden")

@@ -16,7 +16,7 @@
                     tdi.district_nm ${sord}
                 </when>
                 <when test="'partner_comp_nm' == sidx and sidx != ''">
-                    tec.partner_comp_nm ${sord}
+                    tmi.partner_comp_nm ${sord}
                 </when>
                 <when test="'emerg_chgr_nm' == sidx and sidx != ''">
                     tec.emerg_chgr_nm ${sord}
@@ -45,7 +45,6 @@
         SELECT tec.mgnt_no
         , tec.district_no
         , tdi.district_nm
-        , tec.partner_comp_nm
         , tec.emerg_chgr_nm
         , tec.emerg_chgr_role
         , tec.emerg_recv_ph
@@ -53,8 +52,11 @@
         , tec.e_mail
         , tec.reg_dt
         , tec.mod_dt
+        , tmi.partner_comp_id
+        , tmi.partner_comp_nm
         FROM tb_emerg_contact tec
-        LEFT OUTER JOIN tb_district_info tdi ON tec.district_no = tdi.district_no
+        LEFT JOIN tb_district_info tdi ON tec.district_no = tdi.district_no
+        left join tb_maintcomp_info tmi on tec.partner_comp_id = tmi.partner_comp_id
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -66,18 +68,17 @@
     <select id="selectEmergencyContactListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(tec.mgnt_no)
         FROM tb_emerg_contact tec
-        LEFT OUTER JOIN tb_district_info tdi ON tec.district_no = tdi.district_no
         WHERE 1 = 1
         <include refid="rowSearch"/>
     </select>
 
     <insert id="insertEmergencyContact" parameterType="java.util.Map">
-        INSERT INTO tb_emerg_contact (mgnt_no, district_no, partner_comp_nm, emerg_chgr_nm, emerg_chgr_role,
+        INSERT INTO tb_emerg_contact (mgnt_no, district_no, partner_comp_id, emerg_chgr_nm, emerg_chgr_role,
                                       emerg_recv_ph,
                                       emerg_tel, e_mail, reg_dt, mod_dt)
         VALUES ( (SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_emerg_contact)
                , #{district_no}
-               , #{partner_comp_nm}
+               , #{partner_comp_id}
                , #{emerg_chgr_nm}
                , #{emerg_chgr_role}
                , #{emerg_recv_ph}
@@ -90,7 +91,7 @@
     <update id="updateEmergencyContact" parameterType="java.util.Map">
         UPDATE tb_emerg_contact
         SET district_no     = #{district_no}
-          , partner_comp_nm = #{partner_comp_nm}
+          , partner_comp_id = #{partner_comp_id}
           , emerg_chgr_nm   = #{emerg_chgr_nm}
           , emerg_chgr_role = #{emerg_chgr_role}
           , emerg_recv_ph   = #{emerg_recv_ph}

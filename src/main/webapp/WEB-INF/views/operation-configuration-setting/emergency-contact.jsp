@@ -16,6 +16,18 @@
             })
 
             $.ajax({
+                url: '/maintenance/company-management/all',
+                type: 'GET',
+                success: function (res) {
+                    res.forEach((item) => {
+                        $('#partner_comp').append(
+                            "<option value='" + item.partner_comp_id + "'>" + item.partner_comp_nm + "</option>"
+                        )
+                    })
+                }
+            });
+
+            $.ajax({
                 url: '/adminAdd/districtInfo/all',
                 type: 'GET',
                 success: function (res) {
@@ -24,12 +36,8 @@
                             "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
                         )
                     })
-                },
-                error: function (err) {
-                    console.log(err)
                 }
             });
-
 
             $('.insertBtn').on('click', () => {
                 resetForm();
@@ -61,7 +69,7 @@
 
                 $('#mgnt_no').val(data.mgnt_no);
                 $('#district_no').val(data.district_no);
-                $('#partner_comp_nm').val(data.partner_comp_nm);
+                $('#partner_comp').val(data.partner_comp_id);
                 $('#emerg_chgr_nm').val(data.emerg_chgr_nm);
                 $('#emerg_chgr_role').val(data.emerg_chgr_role);
                 $('#emerg_recv_ph').val(data.emerg_recv_ph);
@@ -75,8 +83,10 @@
 
             function initInsertForm() {
                 $("#form_sub_title").html('신규 등록');
+
                 $("#deleteBtn").hide()
                 $("#form-update-btn").hide();
+                $("#form-submit-btn").show();
             }
 
             function resetForm() {
@@ -98,7 +108,7 @@
                     type: 'POST',
                     data: {
                         district_no: $('#district_no').val(),
-                        partner_comp_nm: $('#partner_comp_nm').val(),
+                        partner_comp_id: $('#partner_comp').val(),
                         emerg_chgr_nm: $('#emerg_chgr_nm').val(),
                         emerg_chgr_role: $('#emerg_chgr_role').val(),
                         emerg_recv_ph: $('#emerg_recv_ph').val(),
@@ -107,7 +117,7 @@
                     },
                     success: function (_res) {
                         popFancyClose('#lay-form-write');
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     },
                     error: function (err) {
                         console.log(err)
@@ -125,7 +135,7 @@
                     data: {
                         mgnt_no: $('#mgnt_no').val(),
                         district_no: $('#district_no').val(),
-                        partner_comp_nm: $('#partner_comp_nm').val(),
+                        partner_comp_id: $('#partner_comp').val(),
                         emerg_chgr_nm: $('#emerg_chgr_nm').val(),
                         emerg_chgr_role: $('#emerg_chgr_role').val(),
                         emerg_recv_ph: $('#emerg_recv_ph').val(),
@@ -134,7 +144,7 @@
                     },
                     success: function (_res) {
                         popFancyClose('#lay-form-write');
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     },
                     error: function (_err) {
                         alert('수정에 실패했습니다. 다시 시도해 주세요.');
@@ -148,8 +158,8 @@
                     return false;
                 }
 
-                if ($('#partner_comp_nm').val() === '') {
-                    alert('소속 기관을 입력해 주세요.');
+                if ($('#partner_comp').val() === '') {
+                    alert('소속 기관을 선택해 주세요.');
                     return false;
                 }
 
@@ -171,6 +181,10 @@
                 return true;
             }
 
+            $("#excelBtn").click(() => {
+                downloadExcel('emergency contact', $grid, path);
+            });
+
             $('#deleteBtn').on('click', () => {
                 confirm('삭제하시겠습니까?', () => {
                     $.ajax({
@@ -181,7 +195,7 @@
                         },
                         success: function (_res) {
                             popFancyClose('#lay-form-write');
-                            reloadJqGrid();
+                            reloadJqGrid($grid);
                         },
                         error: function (_err) {
                             alert('삭제에 실패했습니다. 다시 시도해 주세요.');
@@ -244,7 +258,9 @@
                     </tr>
                     <tr>
                         <th class="required_th">소속 기관</th>
-                        <td><input type="text" id="partner_comp_nm" placeholder="Ex) 인플랩" class="required"/></td>
+                        <td><select id="partner_comp" class="required">
+                            <option value="">선택</option>
+                        </select></td>
                     </tr>
                     <tr>
                         <th class="required_th">이름</th>
