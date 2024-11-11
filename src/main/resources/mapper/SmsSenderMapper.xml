@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.dao.SmsSenderMapper">
+    <select id="getAlertStandards" resultType="com.safeone.dashboard.dto.AlertStandardDto">
+        select tai.sens_no
+             , tai.district_no
+             , tai.sens_chnl_id
+             , tai."1st_lvl_min" as min1
+             , tai."1st_lvl_max" as max1
+             , tai."2nd_lvl_min" as min2
+             , tai."2nd_lvl_max" as max2
+             , tai."3rd_lvl_min" as min3
+             , tai."3rd_lvl_max" as max3
+             , tai."4th_lvl_min" as min4
+             , tai."4th_lvl_max" as max4
+             , tai.lvl_apply_dt
+        from tb_alarm_info tai
+    </select>
+
+    <select id="getMeasuredData" resultType="com.safeone.dashboard.dto.MeasureDataDto">
+        select tmd.mgnt_no
+             , tmd.raw_data
+             , tmd.meas_dt
+             , tmd.formul_data
+        from tb_measure_details tmd
+        where tmd.sens_no = #{sens_no}
+          and tmd.sens_chnl_id = #{sens_chnl_id}
+          and tmd.meas_dt between TO_TIMESTAMP(#{meas_dt_start}, 'yyyy-mm-dd hh24:mi:ss.ff6') and TO_TIMESTAMP(#{meas_dt_end}, 'yyyy-mm-dd hh24:mi:ss.ff6')
+          and tmd.raw_data >= #{raw_data}::double precision
+    </select>
+
+    <select id="getSmsTargetList" resultType="com.safeone.dashboard.dto.SmsTargetDto">
+        select tsr.alarm_lvl_nm
+             , tsr.mgnt_no
+             , tsr.district_no
+             , tsr.sms_recv_ph
+             , tsr.sms_chgr_nm
+        from tb_sms_receiver tsr
+        where tsr.district_no = #{district_no}
+    </select>
+
+    <select id="getMaxMgntNoFromAlarmDetails" resultType="int">
+        SELECT (COALESCE(max(mgnt_no::integer), 0) + 1)
+        from tb_alarm_details
+    </select>
+
+    <insert id="saveAlarmDetails">
+        insert into tb_alarm_details (district_no, mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data)
+        values (#{district_no}, #{mgnt_no}, #{sens_no}, #{sens_chnl_id}, #{meas_dt}::timestamp,
+                #{raw_data}::double precision, #{formul_data}::double precision)
+    </insert>
+
+    <insert id="saveSmsDetails">
+        insert into tb_sms_details ( mgnt_no
+                                   , alarm_mgnt_no
+                                   , sms_trans_dt
+                                   , sms_subj
+                                   , sms_msg_dtls
+                                   , sms_recv_ph
+                                   , sms_recv_chgr
+                                   , district_nm
+                                   , inst_comp_nm
+                                   , inst_comp_chgr
+                                   , inst_comp_ph
+                                   , alarm_lvl_nm
+                                   , send_tp_nm
+                                   , inst_sens_cnt
+                                   , alarm_sens_cnt
+                                   , nonrecv_sens_cnt
+                                   , sens_nm
+                                   , dps_chgr_nm
+                                   , dps_chgr_ph
+                                   , mobil_link_url
+                                   , sms_rslt_yn)
+        values ( (SELECT COALESCE(max(mgnt_no::integer), 0) + 1 from tb_sms_details)
+               , #{alarm_mgnt_no}
+               , now()
+               , #{sms_subj}
+               , #{sms_msg_dtls}
+               , #{sms_recv_ph}
+               , #{sms_recv_chgr}
+               , #{district_nm}
+               , #{inst_comp_nm}
+               , #{inst_comp_chgr}
+               , #{inst_comp_ph}
+               , #{alarm_lvl_nm}
+               , #{send_tp_nm}
+               , #{inst_sens_cnt}
+               , #{alarm_sens_cnt}
+               , #{nonrecv_sens_cnt}
+               , #{sens_nm}
+               , #{dps_chgr_nm}
+               , #{dps_chgr_ph}
+               , #{mobil_link_url}
+               , #{sms_rslt_yn})
+    </insert>
+
+</mapper>

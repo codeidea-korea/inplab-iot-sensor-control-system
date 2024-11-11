@@ -14,6 +14,9 @@ public class AlertStandardManagementDto implements Serializable {
     @FieldLabel(title = "센서타입명")
     private String sens_tp_nm;
 
+    @FieldLabel(title = "district_no", type = "hidden")
+    private String district_no;
+
     @FieldLabel(title = "센서명")
     private String sens_nm;
 

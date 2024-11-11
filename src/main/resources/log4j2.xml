@@ -49,7 +49,7 @@
         <!-- MyBatis 관련 로그 설정-->
         <logger name="jdbc" level="OFF"/>
         <logger name="jdbc.sqlonly" level="INFO"/>
-        <logger name="jdbc.resultsettable" level="OFF"/>
+        <logger name="jdbc.resultsettable" level="INFO"/>
         <logger name="jdbc.audit" level="OFF"/>
         <logger name="jdbc.resultset" level="OFF"/>
         <logger name="jdbc.connection" level="OFF"/>

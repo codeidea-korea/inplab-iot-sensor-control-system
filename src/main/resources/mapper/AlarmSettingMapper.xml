@@ -70,7 +70,7 @@
 		            , A.asset_kind_id asset_kind_id_hid
 		            , A.use_flag
 		            , A.dupe_check_min
-		            , TO_CHAR(A.mod_date::timestamp, 'YYYY-MM-DD') AS mod_date
+		            , TO_CHAR(A.mod_date`::timestamp`, 'YYYY-MM-DD') AS mod_date
 		            , A.mod_user
 		    FROM tb_alarm_kind A
 		    WHERE A.type = '1'
