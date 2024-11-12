@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class SmsSenderService {
 
     private final SmsSenderMapper mapper;
+    private static final int SMS_SEND_TERM_MINUTE = 5;
 
     @Transactional
     public void run() {
@@ -184,13 +185,11 @@ public class SmsSenderService {
         param.put("sens_chnl_id", alertStandard.getSens_chnl_id());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // TODO: 아래 코드로 변경
-//        param.put("meas_dt_start", now.minusMinutes(SMS_SEND_TERM_MINUTE));
-//        param.put("meas_dt_end", now);
+        param.put("meas_dt_start", now.minusMinutes(SMS_SEND_TERM_MINUTE).format(formatter));
+        param.put("meas_dt_end", now.format(formatter));
 
-        System.out.println("abc" + now.withHour(0).withMinute(0).withSecond(0).format(formatter));
-        param.put("meas_dt_start", now.withHour(0).withMinute(0).withSecond(0).format(formatter));
-        param.put("meas_dt_end", now.withHour(23).withMinute(59).withSecond(59).format(formatter));
+//        param.put("meas_dt_start", now.withHour(0).withMinute(0).withSecond(0).format(formatter));
+//        param.put("meas_dt_end", now.withHour(23).withMinute(59).withSecond(59).format(formatter));
 
         param.put("raw_data", alertStandard.getMax4());
         MeasureDataDto data = mapper.getMeasuredData(param);

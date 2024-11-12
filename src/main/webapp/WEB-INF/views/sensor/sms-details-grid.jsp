@@ -336,11 +336,25 @@
                     });
                     $(window).trigger('afterSaveCell', retVal);
                 },
-                onSelectRow: function (rowId) { // add 2019.08.19
+                onSelectRow: function (rowId) {
+                    const $grid = $("#" + gridId);
+                    $("#sms-content").text($grid.jqGrid("getRowData", rowId).sms_msg_dtls);
+
+                    const selectedRows = $grid.jqGrid("getGridParam", "selarrrow");
+
+                    if (selectedRows.length > 1) {
+                        // 다중 선택이 된 경우, 마지막 선택된 로우만 남기고 나머지를 해제
+                        selectedRows.forEach(function (id) {
+                            if (id !== rowId) {
+                                $grid.jqGrid("setSelection", id, false);
+                            }
+                        });
+                    }
+
                     $('.ui-jqgrid-btable tr').removeClass('custom_selected');
                     $('.ui-jqgrid-btable tr[aria-selected=true]').addClass('custom_selected');
 
-                    var rowData = {rowId, ...jQuery(this).getRowData(rowId)};
+                    const rowData = { rowId, ...jQuery(this).getRowData(rowId) };
                     $(window).trigger('onSelectRow', rowData);
                 },
                 loadonce: false,

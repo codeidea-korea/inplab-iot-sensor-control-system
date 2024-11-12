@@ -28,7 +28,7 @@
                 <tbody>
                 <tr>
                     <td>
-
+                        <textarea id="sms-content"></textarea>
                     </td>
                 </tr>
                 </tbody>

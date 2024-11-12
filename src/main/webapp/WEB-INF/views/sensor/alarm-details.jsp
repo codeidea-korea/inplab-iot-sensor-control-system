@@ -29,6 +29,9 @@
             align-items: center;
             padding: 1rem;
         }
+        #cb_sms-details-grid {
+            display: none;
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
