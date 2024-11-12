@@ -79,6 +79,7 @@
         , tai."3rd_lvl_min" as min3
         , tai."4th_lvl_max" as max4
         , tai."4th_lvl_min" as min4
+        , (select count(*) from tb_sms_details where alarm_mgnt_no = tad.mgnt_no) as sms_cnt
         FROM tb_alarm_details tad
         left join tb_district_info tdi on tad.district_no = tdi.district_no
         left join tb_sensor_info tsi on tad.sens_no = tsi.sens_no

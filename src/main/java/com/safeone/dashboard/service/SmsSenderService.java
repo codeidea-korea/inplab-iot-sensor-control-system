@@ -143,6 +143,8 @@ public class SmsSenderService {
         param.put("raw_data", alertStandardDto.getRaw_data());
         param.put("formul_data", alertStandardDto.getFormul_data());
         param.put("mgnt_no", nextMgntNo);
+        param.put("alarm_lvl_cd", alertStandardDto.getOver());
+        param.put("net_err_yn", 'Y');
         mapper.saveAlarmDetails(param);
 
         return nextMgntNo;

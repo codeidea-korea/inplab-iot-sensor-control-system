@@ -42,6 +42,17 @@
                 multiselect: true,
                 multiboxonly: true,
                 useFilterToolbar: true,
+            }, null, {
+                sms_cnt: {
+                    formatter: function (cellValue) {
+                        return cellValue + "/" + cellValue;
+                    }
+                },
+                standard: {
+                    formatter: function (cellValue) {
+                        return "-"
+                    }
+                }
             })
 
             const currentYear = new Date().getFullYear();

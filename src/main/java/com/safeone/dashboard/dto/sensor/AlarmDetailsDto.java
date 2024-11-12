@@ -34,7 +34,7 @@ public class AlarmDetailsDto implements Serializable {
     private String net_err_yn;
 
     @FieldLabel(title = "문자(성공/대상)(명)")
-    private String sms_success;
+    private String sms_cnt;
 
     @FieldLabel(title = "max1", type = "hidden")
     private String max1;

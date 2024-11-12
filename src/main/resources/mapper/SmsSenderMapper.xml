@@ -47,9 +47,9 @@
     </select>
 
     <insert id="saveAlarmDetails">
-        insert into tb_alarm_details (district_no, mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data)
+        insert into tb_alarm_details (district_no, mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data, alarm_lvl_cd, net_err_yn)
         values (#{district_no}, #{mgnt_no}, #{sens_no}, #{sens_chnl_id}, #{meas_dt}::timestamp,
-                #{raw_data}::double precision, #{formul_data}::double precision)
+                #{raw_data}::double precision, #{formul_data}::double precision, #{alarm_lvl_cd}, #{net_err_yn})
     </insert>
 
     <insert id="saveSmsDetails">
