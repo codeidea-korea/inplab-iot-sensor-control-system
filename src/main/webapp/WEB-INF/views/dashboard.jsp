@@ -478,8 +478,6 @@
             const zoneId = $(this).closest('div.right-alarm_re').data('zoneid');
             const assetId = $(this).closest('div.right-alarm_re').data('assetid');
 
-            console.log('right-alram', coords, zoneId, assetId);
-
             $.get('/getAssetList', {zone_id: zoneId}, function (res) {
                 $('.zoneSelected').data('zoneid', zoneId);
 
@@ -753,6 +751,7 @@
                                 '</li>';
                             $('.site-zone-list li[kind=' + sensor.senstype_no + '] .site-zone-conts ul').append(html);
                         });
+                        sortAssetsByLength()
                         $(document).trigger('map_action_end');
                     });
 
@@ -769,9 +768,17 @@
                     getZoneDetail();
                 }
             });
-            /////
-
         });
+    }
+
+    function sortAssetsByLength() {
+        const $liElements = $('.site-zone-list > li');
+        $liElements.sort(function(a, b) {
+            const aCount = $(a).find('.site-zone-conts ul li').length;
+            const bCount = $(b).find('.site-zone-conts ul li').length;
+            return bCount - aCount;
+        });
+        $('.site-zone-list').append($liElements);
     }
 
     function loadMarker(district_no, default_coords) {
