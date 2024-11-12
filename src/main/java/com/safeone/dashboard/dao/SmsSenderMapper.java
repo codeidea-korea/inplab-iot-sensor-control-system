@@ -1,8 +1,6 @@
 package com.safeone.dashboard.dao;
 
-import com.safeone.dashboard.dto.AlertStandardDto;
-import com.safeone.dashboard.dto.MeasureDataDto;
-import com.safeone.dashboard.dto.SmsTargetDto;
+import com.safeone.dashboard.dto.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,5 +20,9 @@ public interface SmsSenderMapper {
     int getMaxMgntNoFromAlarmDetails();
 
     void saveSmsDetails(Map<String, Object> param);
+
+    DistrictInfoDto getDistrictInfo(Map<String, Object> param);
+
+    SensInfoDto getSensInfo(String sensNo);
 }
     

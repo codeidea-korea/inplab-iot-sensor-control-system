@@ -36,6 +36,7 @@
              , tsr.district_no
              , tsr.sms_recv_ph
              , tsr.sms_chgr_nm
+             , tsr.sms_recv_dept
         from tb_sms_receiver tsr
         where tsr.district_no = #{district_no}
     </select>
@@ -96,4 +97,38 @@
                , #{sms_rslt_yn})
     </insert>
 
+    <select id="getDistrictInfo" resultType="com.safeone.dashboard.dto.DistrictInfoDto">
+        select district_no
+             , site_no
+             , district_nm
+             , dist_addr
+             , dist_zip
+             , dist_road_addr
+             , dist_type_cd
+             , dist_abbr
+             , dist_pic
+             , dist_view_pic
+             , dist_lon
+             , dist_lat
+             , dist_zoom
+             , inst_comp_id1
+             , meas_comp_id1
+             , inst_comp_id2
+             , meas_comp_id2
+             , meas_str_ymd
+             , meas_end_ymd
+             , dist_offi_nm
+        from tb_district_info
+        where district_no = #{district_no}
+    </select>
+
+    <select id="getSensInfo" resultType="com.safeone.dashboard.dto.SensInfoDto">
+        select tsi.sens_no,
+               tsi.sens_nm,
+               tsi.senstype_no,
+               tst.sens_tp_nm
+        from tb_sensor_info tsi
+                 left join tb_sensor_type tst on tsi.senstype_no = tst.senstype_no
+        where sens_no = #{sens_no}
+    </select>
 </mapper>

@@ -1,19 +1,14 @@
 package com.safeone.dashboard.service;
 
 import com.safeone.dashboard.dao.SmsSenderMapper;
-import com.safeone.dashboard.dto.AlertStandardDto;
-import com.safeone.dashboard.dto.MeasureDataDto;
-import com.safeone.dashboard.dto.SmsTargetDto;
+import com.safeone.dashboard.dto.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -28,7 +23,6 @@ import java.util.stream.Collectors;
 public class SmsSenderService {
 
     private final SmsSenderMapper mapper;
-    private static final int SMS_SEND_TERM_MINUTE = 5;
 
     @Transactional
     public void run() {
@@ -42,6 +36,10 @@ public class SmsSenderService {
 
         // 2. district_no 기준으로 순회
         map.forEach((districtNo, alertStandardList) -> {
+            DistrictInfoDto districtInfo = mapper.getDistrictInfo(Collections.singletonMap("district_no", districtNo));
+
+            System.out.println("districtInfo = " + districtInfo);
+
             alertStandardList.forEach(alertStandard -> {
 
                 // 3. 경보기준으로 경보기준이 넘는 데이터가 있는지 확인한다
@@ -58,28 +56,55 @@ public class SmsSenderService {
             // 5. 후보군을 필터링하여 실질적으로 문자를 발송할 대상을 선정한다
             List<SmsTargetDto> smsTargets = filterToTarget(candidates, maxOver);
 
+            HashMap<String, List<SensInfoDto>> sensInfos = getSensInfos(alertStandardList);
+
             alertStandardList.stream().filter(item -> item.getOver() != null).forEach(item -> {
 
                 // 6. 알람이력을 저장한다
                 int insertedMgntNo = saveAlarmDetails(item);
 
-                String sms = makeSms();
 
                 // 7. 알람이력 > 문자 전송 상세내역을 저장한다
                 smsTargets.forEach(smsTarget -> {
-                    saveSmsDetails(smsTarget, insertedMgntNo, sms);
+                    String msg = makeMessage(smsTarget, districtInfo, sensInfos);
+                    msg = msg.replace("[$MOBILE]", smsTarget.getSms_recv_ph());
+                    msg = msg.replace("[$NAME]", smsTarget.getSms_chgr_nm());
+
+                    saveSmsDetails(smsTarget, insertedMgntNo, msg);
                 });
+
             });
+
+            System.out.println("smsTargets = " + smsTargets);
+            System.out.println("alertStandardList = " + alertStandardList);
 
             // 8. 문자를 발송한다
             smsTargets.forEach(smsTarget -> {
                 try {
-                    sendSms(smsTarget.getSms_recv_ph(), makeSms());
+                    sendSms(smsTarget, districtInfo, sensInfos);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             });
         });
+    }
+
+    private HashMap<String, List<SensInfoDto>> getSensInfos(List<AlertStandardDto> alertStandardList) {
+        HashMap<String, List<SensInfoDto>> sensInfos = new HashMap<>();
+
+        for (AlertStandardDto alertStandard : alertStandardList) {
+            SensInfoDto sensInfo = mapper.getSensInfo(alertStandard.getSens_no());
+            if (alertStandard.getOver() != null) {
+                sensInfo.setOver(true);
+            }
+            if (sensInfos.containsKey(sensInfo.getSens_tp_nm())) {
+                sensInfos.get(sensInfo.getSens_tp_nm()).add(sensInfo);
+            } else {
+                sensInfos.put(sensInfo.getSens_tp_nm(), Collections.singletonList(sensInfo));
+            }
+        }
+
+        return sensInfos;
     }
 
     private void saveSmsDetails(SmsTargetDto smsTarget, int insertedMgntNo, String sms) {
@@ -143,10 +168,6 @@ public class SmsSenderService {
         return mapper.getSmsTargetList(Collections.singletonMap("district_no", districtNo));
     }
 
-    private String makeSms() {
-        return "문자 내용";
-    }
-
     private int getMaxOver(List<AlertStandardDto> alertStandardList) {
         int maxOver = 0;
         for (AlertStandardDto alertStandard : alertStandardList) {
@@ -206,10 +227,62 @@ public class SmsSenderService {
         return mapper.getAlertStandards();
     }
 
-    private void sendSms(String target, String sms) throws IOException {
-        System.out.println("smsSendSSSSSS");
+    private String makeSensorMessage(HashMap<String, List<SensInfoDto>> sensInfos) {
+        StringBuilder sb = new StringBuilder();
 
-        String url = "https://directsend.co.kr/index.php/api_v2/sms_change_word";        // URL
+        for (String key : sensInfos.keySet()) {
+            sb.append("\n").append("[").append(key).append("]");
+            sb.append("\n").append("설치수량 : ").append(sensInfos.get(key).size()).append("EA ").append("/ 초과수량 : ").append(
+                    sensInfos.get(key).stream().filter(SensInfoDto::isOver).count()
+            ).append("EA ").append("/ 미측정 : 0EA");
+
+        }
+
+        return sb.toString();
+    }
+
+    private String makeErrorSensorMessage(HashMap<String, List<SensInfoDto>> sensInfos) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        for (String key : sensInfos.keySet()) {
+            for (SensInfoDto sensInfo : sensInfos.get(key)) {
+                if (sensInfo.isOver()) {
+                    sb.append(sensInfo.getSens_nm()).append(" ");
+                }
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private String makeMessage(SmsTargetDto target, DistrictInfoDto district, HashMap<String, List<SensInfoDto>> sensInfos) {
+        return "<<<현장 상태 이상 경보 문자>>>" +
+                "\n수신정보 전화번호 : [$MOBILE] [$NAME](" + target.getSms_recv_dept() + ")" +
+                "\n" +
+                "\n전송정보 : 비탈면 IoT 통합 시스템 경보문자" +
+                "\n**현장명 정보 :" +
+                "\n[" + district.getDistrict_nm() + "]" +
+                "\n" + district.getDist_road_addr() +
+                "\n" +
+                "\n**시공업체정보 :" +
+                "\n아주엔지니어링 / 권순기 이사" +
+                "\n010-6207-9185" +
+                "\n" +
+                "\n**24시간내 전송된 회차 :" +
+                "\n1회차" +
+                "\n" +
+                "\n**현장 요약:" +
+                "\n관리기준상태 / 수신 100% / 누적강수량: 0mm" +
+                "\n" +
+                "\n**센서 상태 통계 :" +
+                makeSensorMessage(sensInfos) +
+                "\n" +
+                "\n**이상센서 리스트 :" +
+                makeErrorSensorMessage(sensInfos);
+    }
+
+    private void sendSms(SmsTargetDto target, DistrictInfoDto district, HashMap<String, List<SensInfoDto>> sensInfos) throws IOException {
+        String url = "https://directsend.co.kr/index.php/api_v2/sms_change_word";
 
         java.net.URL obj;
         obj = new java.net.URL(url);
@@ -219,22 +292,18 @@ public class SmsSenderService {
         con.setRequestProperty("Accept", "application/json");
 
         String title = "코드아이디어";
-        String message = "[$NAME]님 알림 문자 입니다. 전화번호 : [$MOBILE] 비고1 : [$NOTE1] 비고2 : [$NOTE2] 비고3 : [$NOTE3] 비고4 : [$NOTE4] 비고5 : [$NOTE5] ";            //필수입력
-        String sender = "01054405414";                  //필수입력
-        String username = "codeidea";              //필수입력
-        String key = "mUJrCPVuyMOq02W";          //필수입력
+        String message = makeMessage(target, district, sensInfos);
+
+        String sender = "01054405414";
+        String username = "codeidea";
+        String key = "mUJrCPVuyMOq02W";
+
+        System.out.println("message : " + message);
 
         String receiver = "{\n" +
-                "  \"name\": \"강길동\",\n" +
-                "  \"mobile\": \"01080306604\",\n" +
-                "  \"note1\": \"\",\n" +
-                "  \"note2\": \"\",\n" +
-                "  \"note3\": \"\",\n" +
-                "  \"note4\": \"\",\n" +
-                "  \"note5\": \"\"\n" +
+                "  \"mobile\": \"" + target.getSms_recv_ph() + "\",\n" +
+                "  \"name\": \"" + target.getSms_chgr_nm() + "\"\n" +
                 "}";
-
-
         receiver = "[" + receiver + "]";
 
         String urlParameters = "\"title\":\"" + title + "\" "

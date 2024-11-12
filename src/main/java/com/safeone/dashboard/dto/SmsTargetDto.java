@@ -12,6 +12,7 @@ public class SmsTargetDto implements Serializable {
     private String district_no;
     private String sms_recv_ph;
     private String sms_chgr_nm;
+    private String sms_recv_dept;
 
 
 }
