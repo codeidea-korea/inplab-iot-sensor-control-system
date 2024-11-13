@@ -113,4 +113,11 @@
         WHERE sens_no = #{sens_no}
         and sens_chnl_id = #{sens_chnl_id}
     </update>
+
+    <insert id="insertSensorInitialSetting" parameterType="java.util.Map">
+        INSERT INTO tb_sensor_init
+        (sens_no)
+        VALUES
+        (#{sens_no})
+    </insert>
 </mapper>

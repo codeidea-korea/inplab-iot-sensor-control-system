@@ -13,5 +13,7 @@ public interface LoggerInfoMapper {
     int insertLoggerInfo(Map param);
     int updateLoggerInfo(Map param);
     int deleteLoggerInfo(Map param);
+
+    LoggerInfoDto getLoggerInfo(Map param);
 }
     

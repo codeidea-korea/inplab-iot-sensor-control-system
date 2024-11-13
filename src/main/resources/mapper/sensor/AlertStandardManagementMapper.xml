@@ -146,4 +146,10 @@
         where sens_no = #{sens_no}
           and sens_chnl_id = #{sens_chnl_id}
     </update>
+
+    <insert id="insertAlarm" parameterType="java.util.Map">
+        insert into tb_alarm_info
+            (sens_no, district_no)
+        values (#{sens_no}, #{district_no})
+    </insert>
 </mapper>

@@ -227,4 +227,12 @@
         DELETE FROM tb_logger_info
          WHERE logr_no = #{logr_no}
     </delete>
+
+    <select id="getLoggerInfo" parameterType="java.util.Map">
+        SELECT
+        A.logr_no
+        , A.district_no
+        FROM tb_logger_info A
+        WHERE logr_no = #{logr_no}
+    </select>
 </mapper>

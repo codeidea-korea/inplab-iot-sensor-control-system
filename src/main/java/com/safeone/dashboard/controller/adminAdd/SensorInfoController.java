@@ -3,10 +3,9 @@ package com.safeone.dashboard.controller.adminAdd;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.SensorInfoDto;
-import com.safeone.dashboard.service.CommonCodeEditService;
-import com.safeone.dashboard.service.DistrictInfoService;
-import com.safeone.dashboard.service.LogrIdxMapService;
-import com.safeone.dashboard.service.SensorInfoService;
+import com.safeone.dashboard.service.*;
+import com.safeone.dashboard.service.sensor.AlertStandardManagementService;
+import com.safeone.dashboard.service.sensorinitialsetting.SensorInitialSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +27,10 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
     private CommonCodeEditService commonCodeEditService;
     @Autowired
     private SensorInfoService sensorInfoService;
+    @Autowired
+    private AlertStandardManagementService alertStandardManagementService;
+    @Autowired
+    private SensorInitialSettingService sensorInitialSettingService;
 
     @Autowired
     private LogrIdxMapService logrIdxMapService;
@@ -123,6 +126,9 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
         param.put("district_no", district_no);
 
         logrIdxMapService.create(param);
+
+        alertStandardManagementService.create(param);
+        sensorInitialSettingService.create(param);
 
         return sensorInfoService.create(param);
     }
