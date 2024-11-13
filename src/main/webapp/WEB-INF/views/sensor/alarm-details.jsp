@@ -29,6 +29,7 @@
             align-items: center;
             padding: 1rem;
         }
+
         #cb_sms-details-grid {
             display: none;
         }
@@ -49,8 +50,19 @@
                     }
                 },
                 standard: {
-                    formatter: function (cellValue) {
-                        return "-"
+                    formatter: function (cellValue, options, rowObject) {
+                        const alarmLevel = +rowObject?.alarm_lvl_cd;
+                        if (alarmLevel === 1) {
+                            return "관심"
+                        } else if (alarmLevel === 2) {
+                            return "주의"
+                        } else if (alarmLevel === 3) {
+                            return "경계"
+                        } else if (alarmLevel === 4) {
+                            return "심각"
+                        } else {
+                            return "관심"
+                        }
                     }
                 }
             })
