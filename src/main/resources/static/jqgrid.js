@@ -31,12 +31,16 @@ function initGrid($grid, path, $gridWrapper, options = {
             emptyrecords: "조회된 데이터가 없습니다",
             loadComplete: function () {
                 $(window).trigger('loadComplete');
+
                 if (loadCompleteCallback) {
                     loadCompleteCallback();
                 }
             },
             gridComplete: function () {
-                $(window).trigger('resize');
+                const allData = $grid.jqGrid('getRowData');
+                if (!allData.length === 0) {
+                    $(window).trigger('resize');
+                }
             },
             beforeRequest: () => {
                 const currentPage = $grid.getGridParam('page');
