@@ -49,7 +49,7 @@
                         return cellValue + "/" + cellValue;
                     }
                 },
-                standard: {
+                alarm_lvl_cd: {
                     formatter: function (cellValue, options, rowObject) {
                         const alarmLevel = +rowObject?.alarm_lvl_cd;
                         if (alarmLevel === 1) {
@@ -62,6 +62,41 @@
                             return "심각"
                         } else {
                             return "관심"
+                        }
+                    }
+                },
+                maint_sts_cd: {
+                    formatter: (cellValue, _options, _rowObject) => {
+                        let value = '';
+                        if (cellValue === 'MTN001') {
+                            value = '정상';
+                        } else if (cellValue === 'MTN002') {
+                            value = '망실';
+                        } else if (cellValue === 'MTN003') {
+                            value = '점검';
+                        } else if (cellValue === 'MTN004') {
+                            value = '철거';
+                        }
+                        return value
+                    }
+                },
+                standard: {
+                    formatter: function (cellValue, options, rowObject) {
+                        const standard = +rowObject?.alarm_lvl_cd;
+                        if (standard === 1) {
+                            return rowObject.min1 + " ~ " + rowObject.max1
+                        }
+                        else if (standard === 2) {
+                            return rowObject.min2 + " ~ " + rowObject.max2
+                        }
+                        else if (standard === 3) {
+                            return rowObject.min3 + " ~ " + rowObject.max3
+                        }
+                        else if (standard === 4) {
+                            return rowObject.min4 + " ~ " + rowObject.max4
+                        }
+                        else {
+                            return "-"
                         }
                     }
                 }

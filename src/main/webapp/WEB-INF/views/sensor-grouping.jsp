@@ -115,7 +115,7 @@
 
             const currentYear = new Date().getFullYear();
 
-            const startDate = new Date(currentYear, 0, 1); // 0은 1월
+            const startDate = new Date(currentYear, 0, 1, 23, 59); // 0은 1월
             $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
 
             const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
@@ -174,6 +174,7 @@
 
                     const startDateTime = $('#start-date').val();
                     const endDateTime = $('#end-date').val();
+
                     chartDataArray.length = 0; // 배열 초기화
                     const requests = checkedData.map((item) => {
                         return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
@@ -296,11 +297,18 @@
 
                 // 각 센서 데이터에서 최대 레벨 값을 가져와 점선을 추가
                 data.forEach(item => {
-                    const maxLevels = [parseFloat(item[0].lvl_max1), parseFloat(item[0].lvl_max2), parseFloat(item[0].lvl_max3), parseFloat(item[0].lvl_max4)];
+                    console.log(item);
+                    const maxLevels = [
+                        parseFloat(item[0].lvl_max1),
+                        parseFloat(item[0].lvl_max2),
+                        parseFloat(item[0].lvl_max3),
+                        parseFloat(item[0].lvl_max4)
+                    ];
                     const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
 
                     maxLevels.forEach((maxLevel, index) => {
-                        if (!isNaN(maxLevel)) {
+                        if (!isNaN(maxLevel) && maxLevel !== Infinity && maxLevel !== -Infinity) {
+                            // Annotation 추가 (수평선)
                             myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
                                 type: 'line',
                                 yMin: maxLevel,
@@ -310,22 +318,24 @@
                                 borderDash: [5, 4]
                             };
 
-                            // 라벨 이름을 "센서이름 1차 Deg" 형식으로 설정
+                            // 라벨 이름 설정
                             const labelName = item[0].sens_nm + ' ' + (index + 1) + '차 경고';
 
-                            myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + index] = {
-                                type: 'label',
-                                xValue: 0.4, // x 위치를 조정할 수 있습니다.
-                                yValue: maxLevel,
-                                backgroundColor: colors[index],
-                                content: [labelName], // 수정된 라벨 내용
-                                font: {
-                                    size: 8
-                                }
-                            };
+                            // Annotation 라벨 추가
+                            // myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + index] = {
+                            //     type: 'label',
+                            //     xValue: 0.5,
+                            //     yValue: maxLevel,
+                            //     backgroundColor: colors[index],
+                            //     content: [labelName],
+                            //     font: {
+                            //         size: 8
+                            //     }
+                            // };
                         }
                     });
                 });
+
                 myChart.update(); // 차트 업데이트
             }
         });

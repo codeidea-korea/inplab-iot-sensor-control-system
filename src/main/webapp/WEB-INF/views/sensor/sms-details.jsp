@@ -10,7 +10,6 @@
 
 <div id="lay-sensor-message" class="layer-base">
     <div class="layer-base-btns">
-        <a href="javascript:void(0);"><img src="/images/btn_lay_full.png" data-fancybox-full alt="전체화면"></a>
         <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
     </div>
     <div class="layer-base-title">문자 전송 상세내역</div>
@@ -28,7 +27,7 @@
                 <tbody>
                 <tr>
                     <td>
-                        <textarea id="sms-content"></textarea>
+                        <textarea id="sms-content" style="min-width: 555px; min-height: 555px"></textarea>
                     </td>
                 </tr>
                 </tbody>

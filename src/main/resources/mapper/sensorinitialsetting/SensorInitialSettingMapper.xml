@@ -67,6 +67,7 @@
         , tsi.last_apply_dt
         , tsi.emer_status
         , tsi.sens_chnl_id
+        , tsi.sens_chnl_id as og_sens_chnl_id
         , tsi.sens_no
         , tsinfo.sens_nm
         from tb_sensor_init tsi
@@ -111,7 +112,7 @@
         emer_status = #{emer_status}
         , mod_dt = now()
         WHERE sens_no = #{sens_no}
-        and sens_chnl_id = #{sens_chnl_id}
+        and sens_chnl_id = #{og_sens_chnl_id}
     </update>
 
     <insert id="insertSensorInitialSetting" parameterType="java.util.Map">
