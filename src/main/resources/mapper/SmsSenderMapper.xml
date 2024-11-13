@@ -27,7 +27,7 @@
         where tmd.sens_no = #{sens_no}
           and tmd.sens_chnl_id = #{sens_chnl_id}
           and tmd.meas_dt between TO_TIMESTAMP(#{meas_dt_start}, 'yyyy-mm-dd hh24:mi:ss.ff6') and TO_TIMESTAMP(#{meas_dt_end}, 'yyyy-mm-dd hh24:mi:ss.ff6')
-          and tmd.raw_data >= #{raw_data}::double precision
+          and tmd.formul_data >= #{formul_data}::double precision
     </select>
 
     <select id="getSmsTargetList" resultType="com.safeone.dashboard.dto.SmsTargetDto">

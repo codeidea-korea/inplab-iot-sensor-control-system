@@ -39,8 +39,6 @@ public class SmsSenderService {
         map.forEach((districtNo, alertStandardList) -> {
             DistrictInfoDto districtInfo = mapper.getDistrictInfo(Collections.singletonMap("district_no", districtNo));
 
-            System.out.println("districtInfo = " + districtInfo);
-
             alertStandardList.forEach(alertStandard -> {
 
                 // 3. 경보기준으로 경보기준이 넘는 데이터가 있는지 확인한다
@@ -54,7 +52,7 @@ public class SmsSenderService {
             List<SmsTargetDto> candidates = getSmsTargetList(districtNo);
             int maxOver = getMaxOver(alertStandardList);
 
-            // 5. 후보군을 필터링하여 실질적으로 문자를 발송할 대상을 선정한다
+            // 5. 후보군을 필터링하여 문자를 발송할 대상을 선정한다
             List<SmsTargetDto> smsTargets = filterToTarget(candidates, maxOver);
 
             HashMap<String, List<SensInfoDto>> sensInfos = getSensInfos(alertStandardList);
@@ -193,28 +191,28 @@ public class SmsSenderService {
 //        param.put("meas_dt_start", now.withHour(0).withMinute(0).withSecond(0).format(formatter));
 //        param.put("meas_dt_end", now.withHour(23).withMinute(59).withSecond(59).format(formatter));
 
-        param.put("raw_data", alertStandard.getMax4());
+        param.put("formul_data", alertStandard.getMax4());
         MeasureDataDto data = mapper.getMeasuredData(param);
         if (data != null) {
             data.setOver("4");
             return data;
         }
 
-        param.put("raw_data", alertStandard.getMax3());
+        param.put("formul_data", alertStandard.getMax3());
         data = mapper.getMeasuredData(param);
         if (data != null) {
             data.setOver("3");
             return data;
         }
 
-        param.put("raw_data", alertStandard.getMax2());
+        param.put("formul_data", alertStandard.getMax2());
         data = mapper.getMeasuredData(param);
         if (data != null) {
             data.setOver("2");
             return data;
         }
 
-        param.put("raw_data", alertStandard.getMax1());
+        param.put("formul_data", alertStandard.getMax1());
         data = mapper.getMeasuredData(param);
         if (data != null) {
             data.setOver("1");
