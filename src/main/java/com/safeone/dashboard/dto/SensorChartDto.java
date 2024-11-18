@@ -9,6 +9,7 @@ public class SensorChartDto implements Serializable {
 
     private String sens_no;
     private String sens_nm;
+    private String sens_chnl_id;
     private String formul_data;
     private String meas_dt;
     private String lvl_max1;

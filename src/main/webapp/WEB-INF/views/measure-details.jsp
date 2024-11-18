@@ -480,26 +480,32 @@
             $("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
-                const popupSensorNo = $("#sensor-name-select").val();
+                // const popupSensorNo = $("#sensor-name-select").val();
                 chartDataArray.length = 0; // 배열 초기화
 
-                const targetArr = getSelectedCheckData($leftGrid);
+                let targetArr = getSelectedCheckData($leftGrid);
 
+                const case_ = ['', 'X', 'Y', 'Z'];
+
+                targetArr = case_.flatMap((item) => {
+                    return targetArr.map((data) => {
+                        return {
+                            ...data,
+                            sens_chnl_id: item
+                        };
+                    });
+                });
+
+                chartDataArray.length = 0; // 배열 초기화
                 const requests = targetArr.map((item) => {
-                    let sensChnlId = ''
-                    if (item.sens_chnl_nm) {
-                        sensChnlId = item.sens_chnl_nm.slice(-1)
-                    }
-
-                    const targetSensorNo = popupSensorNo || item.sens_no;
-
-                    return getChartData(targetSensorNo, startDateTime, endDateTime, sensChnlId);
+                    return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
                 });
 
                 // 모든 요청이 완료된 후 차트를 그립니다.
                 Promise.all(requests).then(() => {
-                    updateChart(chartDataArray); // 차트 업데이트 함수 호출
+                    updateChart(chartDataArray.filter((item) => item.length > 0));
                 }).catch((e) => {
+                    console.log('error', e);
                     alert('조회할 수 없는 데이터 입니다.');
                 });
             });
@@ -664,7 +670,7 @@
                 }); // 첫 번째 데이터의 시간
 
                 const datasets = data.map((item, index) => ({
-                    label: item[0].sens_nm, // 센서 이름
+                    label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""), // 센서 이름
                     data: item.map(i => i.formul_data), // 센서 데이터
                     borderColor: getRandomHSL(),
                     fill: false,
@@ -679,38 +685,41 @@
                 myBarChart.data.labels = barChartData.labels;
                 myBarChart.data.datasets[0].data = barChartData.ranges;
 
-                data.forEach(item => {
-                    const maxLevels = [parseFloat(item[0].lvl_max1), parseFloat(item[0].lvl_max2), parseFloat(item[0].lvl_max3), parseFloat(item[0].lvl_max4)];
-                    const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
+                data.forEach((item, i) => {
+                    const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED']; // 각 상한선의 색상
+                    const maxLevels = [
+                        parseFloat(item[0].lvl_max1),
+                        parseFloat(item[0].lvl_max2),
+                        parseFloat(item[0].lvl_max3),
+                        parseFloat(item[0].lvl_max4)
+                    ];
 
+                    // 각 상한선에 대해 annotation 추가
                     maxLevels.forEach((maxLevel, index) => {
-                        if (!isNaN(maxLevel)) {
+                        if (!isNaN(maxLevel)) { // 유효한 값만 추가
                             myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
                                 type: 'line',
-                                yMin: maxLevel,
-                                yMax: maxLevel,
+                                yMin: maxLevel, // 상한선 위치
+                                yMax: maxLevel, // 동일한 값으로 상한선 표시
                                 borderColor: colors[index],
                                 borderWidth: 1.5,
-                                borderDash: [5, 4]
+                                borderDash: [5, 4] // 점선 스타일
                             };
 
-                            // 라벨 이름을 "센서이름 1차 Deg" 형식으로 설정
-                            const labelName = item[0].sens_nm + ' ' + (index + 1) + '차 경고';
-
-                            myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + index] = {
+                            // 라벨 추가
+                            myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + item[0].sens_chnl_id + index + i] = {
                                 type: 'label',
-                                xValue: 0.4, // x 위치를 조정할 수 있습니다.
-                                yValue: maxLevel,
+                                xValue: new Date(item[0].meas_dt).getTime(), // x축 시간 값
+                                yValue: maxLevel, // y축 상한선 위치에 표시
                                 backgroundColor: colors[index],
-                                content: [labelName], // 수정된 라벨 내용
+                                content: [item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : "") + ' ' + (Number(index) + 1) + '차 경고'], // 라벨 텍스트
                                 font: {
-                                    size: 8
+                                    size: 8 // 텍스트 크기
                                 }
                             };
                         }
                     });
                 });
-
                 myChart.update(); // 차트 업데이트
                 myBarChart.update();
             }

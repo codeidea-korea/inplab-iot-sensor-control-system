@@ -95,6 +95,7 @@
         select tmd.sens_no,
                tsi.sens_nm,
                tmd.formul_data,
+               tmd.sens_chnl_id,
                tmd.meas_dt,
                tai."1st_lvl_max" as lvl_max1,
                tai."2nd_lvl_max" as lvl_max2,
@@ -107,6 +108,7 @@
           and (#{end_date_time}:: timestamp)
           and tmd.sens_no = #{sens_no}
           and tmd.sens_chnl_id = #{sens_chnl_id}
+          and tai.sens_chnl_id = #{sens_chnl_id}
         order by meas_dt
     </select>
 

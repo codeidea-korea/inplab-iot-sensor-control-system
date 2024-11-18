@@ -48,11 +48,11 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
             if (dto.getCctv_ip() == null || dto.getWeb_port() == null || dto.getCctv_conn_id() == null || dto.getCctv_conn_pwd() == null) {
                 dto.setRtsp_status("N");
             } else {
-                if (getPtzValues(dto.getCctv_ip(), dto.getWeb_port(), dto.getCctv_conn_id(), dto.getCctv_conn_pwd()).equals("FAIL")) {
-                    dto.setRtsp_status("N");
-                } else {
-                    dto.setRtsp_status("Y");
-                }
+//                if (getPtzValues(dto.getCctv_ip(), dto.getWeb_port(), dto.getCctv_conn_id(), dto.getCctv_conn_pwd()).equals("FAIL")) {
+//                    dto.setRtsp_status("N");
+//                } else {
+                dto.setRtsp_status("Y");
+//                }
             }
         }
         int totalCnt = cctvListMapper.selectCctvListTotal(map);
@@ -134,7 +134,6 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
         if (endIndex == -1) endIndex = data.length();
         return Double.parseDouble(data.substring(index + key.length() + 1, endIndex).trim());
     }
-
 
 
     private String getPtzValues(String ipAddress, String port, String id, String password) {
