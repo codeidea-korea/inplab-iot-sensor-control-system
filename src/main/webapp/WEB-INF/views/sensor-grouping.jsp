@@ -283,10 +283,10 @@
                 const datasets = data.map((item, index) => ({
                     label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""), // 센서 이름
                     data: item.map(i => i.formul_data), // 센서 데이터
-                    borderColor: getRandomHSL(), // 랜덤 색상
                     fill: false,
-                    pointRadius: 0, // 꼭지점 원 크기 제거
-                    borderWidth: 1, // 선 두께 줄이기
+                    backgroundColor: getRandomHSL(), // 랜덤 색상
+                    pointRadius: 1, // 꼭지점 원 크기 제거
+                    borderWidth: 0, // 선 두께 줄이기
                 }));
 
                 myChart.data.labels = labels;
