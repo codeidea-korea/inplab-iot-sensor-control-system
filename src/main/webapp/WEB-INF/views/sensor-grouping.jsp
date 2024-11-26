@@ -219,6 +219,7 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false, // 비율을 유지하지 않음 (높이 채우기)
                     plugins: {
                         zoom: {
                             pan: {
@@ -243,7 +244,7 @@
                     },
                     scales: {
                         x: {
-                            type: 'time', // 시간 축 설정
+                            type: 'time',
                             time: {
                                 displayFormats: {
                                     minute: 'YYYY-MM-DD HH:mm' // 분 단위까지 표시
@@ -255,11 +256,15 @@
                             }
                         },
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true, // 0에서 시작
+                            ticks: {
+                                autoSkip: false // 모든 눈금을 표시
+                            }
                         }
                     }
                 }
             });
+
 
             function getRandomHSL() {
                 const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
@@ -378,7 +383,7 @@
                     </div>
                 </div>
                 <div class="contents-in">
-                    <div class="graph-area">
+                    <div class="graph-area" style="height: 100%;">
                         <canvas id="myChart"></canvas>
                     </div>
                 </div>
