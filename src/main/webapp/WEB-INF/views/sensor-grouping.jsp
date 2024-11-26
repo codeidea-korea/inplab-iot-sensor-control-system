@@ -274,35 +274,61 @@
             }
 
             function updateChart(data) {
-                // 차트 업데이트 로직
-                const labels = data[0].map(item => {
-                    const date = new Date(item.meas_dt);
-                    return date.getFullYear() + '-' +
-                        (date.getMonth() + 1).toString().padStart(2, '0') + ' ' + // 월
-                        date.getDate().toString().padStart(2, '0') + ' ' + // 일
-                        date.getHours().toString().padStart(2, '0') + ':' + // 시간
-                        date.getMinutes().toString().padStart(2, '0') + ':' + // 분
-                        date.getSeconds().toString().padStart(2, '0'); // 초
-                }); // 첫 번째 데이터의 시간
+                const allLabels = [];
+                const labelIndexMap = {};
+                const datasets = [];
 
-                const datasets = data.map((item, index) => ({
-                    label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""), // 센서 이름
-                    data: item.map(i => i.formul_data), // 센서 데이터
-                    borderColor: getRandomHSL(), // 랜덤 색상
-                    fill: false,
-                    pointRadius: 0, // 꼭지점 원 크기 제거
-                    borderWidth: 1, // 선 두께 줄이기
-                }));
+                data.forEach((item) => {
+                    item.forEach((subItem) => {
+                        const date = new Date(subItem.meas_dt);
+                        const label = date.getFullYear() + '-' +
+                            (date.getMonth() + 1).toString().padStart(2, '0') + ' ' +
+                            date.getDate().toString().padStart(2, '0') + ' ' +
+                            date.getHours().toString().padStart(2, '0') + ':' +
+                            date.getMinutes().toString().padStart(2, '0') + ':' +
+                            date.getSeconds().toString().padStart(2, '0');
 
-                myChart.data.labels = labels;
+                        if (!labelIndexMap[label]) {
+                            labelIndexMap[label] = allLabels.length; // 인덱스 저장
+                            allLabels.push(label); // 중복 없는 레이블 추가
+                        }
+                    });
+                });
+
+                data.forEach((item, index) => {
+                    const mappedData = Array(allLabels.length).fill(null); // 모든 값을 null로 초기화
+
+                    item.forEach((subItem) => {
+                        const date = new Date(subItem.meas_dt);
+                        const label = date.getFullYear() + '-' +
+                            (date.getMonth() + 1).toString().padStart(2, '0') + ' ' +
+                            date.getDate().toString().padStart(2, '0') + ' ' +
+                            date.getHours().toString().padStart(2, '0') + ':' +
+                            date.getMinutes().toString().padStart(2, '0') + ':' +
+                            date.getSeconds().toString().padStart(2, '0');
+
+                        const labelIndex = labelIndexMap[label];
+                        if (labelIndex !== undefined) {
+                            mappedData[labelIndex] = subItem.formul_data; // 데이터 매핑
+                        }
+                    });
+
+                    datasets.push({
+                        label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""),
+                        data: mappedData,
+                        borderColor: getRandomHSL(),
+                        fill: false,
+                        pointRadius: 0,
+                        borderWidth: 1,
+                    });
+                });
+
+                myChart.data.labels = allLabels;
                 myChart.data.datasets = datasets;
-
-                // 기존의 annotation을 초기화
                 myChart.options.plugins.annotation.annotations = {};
 
-                // 각 센서 데이터에서 최대 레벨 값을 가져와 점선을 추가
-                data.forEach((item, i) => {
-                    const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED']; // 각 상한선의 색상
+                data.forEach((item) => {
+                    const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
                     const maxLevels = [
                         parseFloat(item[0].lvl_max1),
                         parseFloat(item[0].lvl_max2),
@@ -310,34 +336,22 @@
                         parseFloat(item[0].lvl_max4)
                     ];
 
-                    // 각 상한선에 대해 annotation 추가
                     maxLevels.forEach((maxLevel, index) => {
-                        if (!isNaN(maxLevel)) { // 유효한 값만 추가
+                        if (!isNaN(maxLevel)) {
                             myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
                                 type: 'line',
-                                yMin: maxLevel, // 상한선 위치
-                                yMax: maxLevel, // 동일한 값으로 상한선 표시
+                                yMin: maxLevel,
+                                yMax: maxLevel,
                                 borderColor: colors[index],
                                 borderWidth: 1.5,
-                                borderDash: [5, 4] // 점선 스타일
-                            };
-
-                            // 라벨 추가
-                            myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + item[0].sens_chnl_id + index + i] = {
-                                type: 'label',
-                                xValue: new Date(item[0].meas_dt).getTime(), // x축 시간 값
-                                yValue: maxLevel, // y축 상한선 위치에 표시
-                                backgroundColor: colors[index],
-                                content: [item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : "") + ' ' + (Number(index) + 1) + '차 경고'], // 라벨 텍스트
-                                font: {
-                                    size: 8 // 텍스트 크기
-                                }
+                                borderDash: [5, 4]
                             };
                         }
                     });
                 });
-                myChart.update(); // 차트 업데이트
+                myChart.update();
             }
+
         });
     </script>
 </head>
