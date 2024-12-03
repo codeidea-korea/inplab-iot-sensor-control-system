@@ -274,6 +274,8 @@
             }
 
             function updateChart(data) {
+                myChart.resetZoom();
+
                 const allLabels = [];
                 const labelIndexMap = {};
                 const datasets = [];

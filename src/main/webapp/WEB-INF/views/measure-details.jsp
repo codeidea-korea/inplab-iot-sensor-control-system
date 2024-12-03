@@ -654,6 +654,8 @@
             }
 
             function updateChart(data) {
+                myChart.resetZoom();
+
                 const aggregationType = $("#select-condition").val() || "daily";
                 // Preprocess data for bar chart
                 const barChartData = preprocessDataForBarChart(data[0], aggregationType);
