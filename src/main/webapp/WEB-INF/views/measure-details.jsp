@@ -807,6 +807,8 @@
                 const file = e.target.files[0];  // 선택한 파일 가져오기
                 if (!file) return;
 
+                $('#excel-file').val(''); // 파일 입력 값 초기화
+
                 const reader = new FileReader();
                 reader.onload = function (event) {
                     const data = new Uint8Array(event.target.result);
@@ -870,7 +872,7 @@
                             $('#loading').show();
                         },
 
-                        success: function (res) {
+                        success: function (_res) {
                             alert('저장되었습니다.');
                             $("#search-btn").click();
                         },
