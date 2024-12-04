@@ -216,118 +216,38 @@
     </select>
 
     <select id="selectSensorList" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT
-        C.district_no
-        ,G.district_nm
-        ,A.sens_no
-        ,A.logr_no
-        ,D.logr_nm
-        ,A.senstype_no
-        ,B.sens_tp_nm
-        ,A.sens_nm
-        ,C.sens_chnl_nm
-        ,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
-        ,A.sect_no
-        ,A.multi_sens_yn
-        ,A.disp_prior_yn
-        ,A.multi_senstype_no
-        ,A.multi_sens_no
-        ,A.nonrecv_limit_min
-        ,A.alarm_use_yn
-        ,A.sms_snd_yn
-        ,A.sens_disp_yn
-        ,A.maint_sts_cd
-        ,E.code_nm AS maint_sts_nm
-        ,A.sens_lon
-        ,A.sens_lat
-        ,A.sens_maker
-        ,A.model_nm
-        ,D.maint_sts_cd AS logger_maint_sts_cd
-        ,F.net_err_yn
-        ,F.formul_data
-        ,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
-        ,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
-        ,TO_CHAR(F.meas_dt, 'YYYY-MM-DD HH24:MI:SS') AS meas_dt
-        FROM tb_sensor_info A
-        LEFT OUTER JOIN tb_sensor_type B ON A.senstype_no = B.senstype_no
-        LEFT OUTER JOIN (
-        SELECT
-        sbt1.*
-        FROM tb_logr_idx_map sbt1
-        JOIN (
-        SELECT
-        sens_chnl_id, logr_no, MAX(reg_dt) AS max_reg_dt
-        FROM tb_logr_idx_map
-        GROUP BY sens_chnl_id, logr_no
-        ) AS sbt2
-        ON sbt1.sens_chnl_id = sbt2.sens_chnl_id
-        AND sbt1.logr_no = sbt2.logr_no
-        AND sbt1.reg_dt = sbt2.max_reg_dt
-        ) C ON A.sens_no = C.sens_no
-        LEFT OUTER JOIN tb_logger_info D ON C.logr_no = D.logr_no
-        LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') E ON A.maint_sts_cd = E.code_id
-        LEFT OUTER JOIN (
-        SELECT
-        sbt1.*
-        FROM tb_measure_details sbt1
-        JOIN (
-        SELECT
-        sens_no, sens_chnl_id, MAX(meas_dt) AS max_meas_dt
-        FROM tb_measure_details
-        GROUP BY sens_no, sens_chnl_id
-        ) sbt2
-        ON sbt1.sens_no = sbt2.sens_no
-        AND sbt1.sens_chnl_id = sbt2.sens_chnl_id
-        AND sbt1.meas_dt = sbt2.max_meas_dt
-        ) F ON C.sens_no = F.sens_no AND C.sens_chnl_id = F.sens_chnl_id
-        LEFT OUTER JOIN tb_district_info G ON C.district_no = G.district_no
+        select tsdist.district_nm
+        , tstype.sens_tp_nm
+        , tsinfo.sens_nm
+        , tsinit.sens_chnl_id
+        , tsmap.sens_chnl_nm
+        , tslogr.logr_nm
+        , tsinfo.sect_no
+        , tsinfo.maint_sts_cd
+        , (SELECT code_nm FROM tb_common_code where code_id = tsinfo.maint_sts_cd and code_grp_id = 'MTN000') as maint_sts_nm
+        , TO_CHAR((SELECT max(meas_dt) FROM tb_measure_details where sens_no = tsinit.sens_no and sens_chnl_id = tsinit.sens_chnl_id), 'YYYY-MM-DD HH24:MI:SS') as meas_dt
+        , TO_CHAR(TO_DATE(tsinfo.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
+        from tb_sensor_init tsinit
+        left join tb_sensor_info tsinfo on tsinit.sens_no = tsinfo.sens_no
+        left join tb_sensor_type tstype on tsinfo.senstype_no = tstype.senstype_no
+        left join tb_logr_idx_map tsmap on tsinfo.sens_no = tsmap.sens_no and tsinit.sens_chnl_id = tsmap.sens_chnl_id
+        left join tb_logger_info tslogr on tsmap.logr_no = tslogr.logr_no
+        left join tb_district_info tsdist on tsmap.district_no = tsdist.district_no
         WHERE 1=1
         <include refid="rowSearch"/>
-        <!--<include refid="rowOrder"/>-->
-        <!--<if test="page != null and page > 0">
-            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
-        </if>-->
         <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
             LIMIT ${limit} OFFSET ${offset}
         </if>
     </select>
 
     <select id="selectSensorListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT
-        COUNT(1)
-        FROM tb_sensor_info A
-        LEFT OUTER JOIN tb_sensor_type B ON A.senstype_no = B.senstype_no
-        LEFT OUTER JOIN (
-        SELECT
-        sbt1.*
-        FROM tb_logr_idx_map sbt1
-        JOIN (
-        SELECT
-        sens_chnl_id, logr_no, MAX(reg_dt) AS max_reg_dt
-        FROM tb_logr_idx_map
-        GROUP BY sens_chnl_id, logr_no
-        ) AS sbt2
-        ON sbt1.sens_chnl_id = sbt2.sens_chnl_id
-        AND sbt1.logr_no = sbt2.logr_no
-        AND sbt1.reg_dt = sbt2.max_reg_dt
-        ) C ON A.sens_no = C.sens_no
-        LEFT OUTER JOIN tb_logger_info D ON C.logr_no = D.logr_no
-        LEFT OUTER JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') E ON A.maint_sts_cd = E.code_id
-        LEFT OUTER JOIN (
-        SELECT
-        sbt1.*
-        FROM tb_measure_details sbt1
-        JOIN (
-        SELECT
-        sens_no, sens_chnl_id, MAX(meas_dt) AS max_meas_dt
-        FROM tb_measure_details
-        GROUP BY sens_no, sens_chnl_id
-        ) sbt2
-        ON sbt1.sens_no = sbt2.sens_no
-        AND sbt1.sens_chnl_id = sbt2.sens_chnl_id
-        AND sbt1.meas_dt = sbt2.max_meas_dt
-        ) F ON C.sens_no = F.sens_no AND C.sens_chnl_id = F.sens_chnl_id
-        LEFT OUTER JOIN tb_district_info G ON C.district_no = G.district_no
+        select count(tsinit.sens_no)
+        from tb_sensor_init tsinit
+        left join tb_sensor_info tsinfo on tsinit.sens_no = tsinfo.sens_no
+        left join tb_sensor_type tstype on tsinfo.senstype_no = tstype.senstype_no
+        left join tb_logr_idx_map tsmap on tsinfo.sens_no = tsmap.sens_no and tsinit.sens_chnl_id = tsmap.sens_chnl_id
+        left join tb_logger_info tslogr on tsmap.logr_no = tslogr.logr_no
+        left join tb_district_info tsdist on tsmap.district_no = tsdist.district_no
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>
