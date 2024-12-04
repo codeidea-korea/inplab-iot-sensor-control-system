@@ -312,18 +312,6 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, keyArra
             $(`#${gridId}`).jqGrid('setSelection', $(this).val(), true);
         }
     });
-
-    /*$(`#${gridId}`).jqGrid("sortableColumns", true);
-
-    // jQuery UI sortable을 사용하여 헤더 순서 변경 가능하게 설정
-    $(".ui-jqgrid-htable th").sortable({
-        axis: "x", // x축으로만 이동 가능
-        stop: function(event, ui) {
-            const newOrder = $(this).sortable("toArray", { attribute: "id" });
-            console.log("New header order:", newOrder);
-            // 필요시 새로운 순서를 반영하여 데이터 재정렬 로직 추가 가능
-        }
-    });*/
 };
 
 const alert2 = (msg, callbackYes) => {
