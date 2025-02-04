@@ -3,9 +3,6 @@
 
 <mapper namespace="com.safeone.dashboard.dao.displayconnection.DisplayImgManagementMapper">
     <sql id="rowSearch">
-        <if test="send_group_id != null and send_group_id != ''">
-            and MG.send_group_id = #{send_group_id}
-        </if>
         <if test="send_group_name != null and send_group_name != ''">
             and MG.send_group_name ilike '%' || #{send_group_name} || '%'
         </if>
