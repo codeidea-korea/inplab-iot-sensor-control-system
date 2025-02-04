@@ -412,11 +412,19 @@
                     if (!validate())
                         return;
 
-                    $.get('/display-connection/display-img-management/add', getSerialize('#lay-form-write2'), function (res) {
-                        alert('저장되었습니다.', function () {
-                            popFancyClose('#lay-form-write2');
-                        });
-                        reloadJqGrid();
+                    $.ajax({
+                        url: '/display-connection/display-img-management/add-group',
+                        type: 'POST',
+                        data: getSerialize('#lay-form-write2'),
+                        success: function (_res) {
+                            alert('저장되었습니다.', function () {
+                                popFancyClose('#lay-form-write2');
+                            });
+                            reloadJqGrid();
+                        },
+                        error: function (err) {
+                            alert('알 수 없는 오류가 발생했습니다.');
+                        }
                     });
                 });
             });

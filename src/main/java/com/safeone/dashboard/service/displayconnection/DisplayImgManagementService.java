@@ -44,4 +44,8 @@ public class DisplayImgManagementService implements JqGridService<DisplayImgMana
     public int delete(Map param) {
         return mapper.deleteDisplayImgManagement(param);
     }
+
+    public boolean createGroup(Map<String, Object> param) {
+        return mapper.insertGroup(param);
+    }
 }

@@ -94,6 +94,12 @@
                 #{img_file_path}, #{dispbd_autosnd_yn}, #{use_yn}, now(), now())
     </insert>
 
+    <insert id="insertGroup" parameterType="java.util.Map">
+        INSERT INTO tb_send_group (send_group_id, send_group_name, description, use_yn)
+        VALUES ((SELECT COALESCE(MAX(send_group_id::integer), 0) + 1 FROM tb_send_group), #{send_group_name},
+                #{description}, #{use_yn})
+    </insert>
+
     <delete id="deleteDisplayImgManagement" parameterType="java.util.Map">
         DELETE
         FROM tb_send_group

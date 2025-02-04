@@ -13,4 +13,6 @@ public interface DisplayImgManagementMapper {
     boolean insertDisplayImgManagement(Map param);
     int updateDisplayImgManagement(Map param);
     int deleteDisplayImgManagement(Map param);
+
+    boolean insertGroup(Map<String, Object> param);
 }

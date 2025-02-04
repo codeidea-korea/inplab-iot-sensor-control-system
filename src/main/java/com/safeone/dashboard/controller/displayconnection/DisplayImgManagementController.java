@@ -44,6 +44,12 @@ public class DisplayImgManagementController extends JqGridAbstract<DisplayImgMan
 	}
 
 	@ResponseBody
+	@PostMapping("/add-group")
+	public boolean createGroup(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+		return service.createGroup(param);
+	}
+
+	@ResponseBody
 	@GetMapping("/mod")
 	public boolean update(HttpServletRequest request, @RequestParam Map<String, Object> param) {
 		return service.update(param);
