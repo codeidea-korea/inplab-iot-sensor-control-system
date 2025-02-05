@@ -5,6 +5,164 @@
 <head>
     <jsp:include page="common/include_head.jsp" flush="true"/>
     <style>
+        .tab-container {
+            display: flex;
+            justify-content: flex-start; /* Align buttons to the left */
+            margin-left: 10px;
+            overflow: hidden; /* Ensure rounded corners are visible */
+        }
+
+        .tab-button {
+            padding: 10px 40px; /* Increase padding to make buttons longer */
+            cursor: pointer;
+            background-color: #555; /* Slightly lighter dark color for unselected buttons */
+            color: #fff; /* White text color for better contrast */
+            border: none;
+            outline: none;
+            transition: background-color 0.3s;
+            width: 150px; /* Set a fixed width for the buttons */
+            text-align: center; /* Center the text */
+            border-radius: 10px 10px 0 0; /* Round top corners */
+            margin-right: 10px; /* Add spacing between buttons */
+            font-size: 1.4rem; /* Increase font size */
+        }
+
+        .tab-button.active {
+            background-color: #4682B4; /* Slightly darker sky blue color for the active button */
+            color: #000; /* Black text color for better contrast */
+        }
+
+        .tab-button:hover {
+            background-color: #666; /* Slightly lighter dark color for hover effect */
+        }
+
+        .chart-content {
+            display: none;
+            border-radius: 10px; /* Add this line to round the corners */
+        }
+
+        .chart-content.active {
+            display: block;
+            border-radius: 10px; /* Add this line to round the corners */
+        }
+
+        .ui-search-toolbar input {
+            border: 1px solid #ccc; /* 원하는 border 색상 */
+            padding: 2px;
+        }
+
+        .ui-search-toolbar th:first-child {
+            border-left: none !important;
+        }
+
+        .ui-jqgrid tr.ui-search-toolbar th {
+            border: 1px solid #d3d3d3;
+        }
+
+        .ui-jqgrid .ui-jqgrid-htable {
+            table-layout: fixed;
+            margin: 0;
+            border-collapse: collapse;
+        }
+
+        .contents_header {
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-area .select_filter .search-top-label {
+            padding: 0;
+        }
+
+        .modal-header {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+        }
+
+        #chart-district-select,
+        #sensor-name-select,
+        #sensor-type-select,
+        #select-condition {
+            width: 150px;
+            height: 3.6rem;
+            padding: 0 1rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .modal-header input[type="datetime-local"] {
+            width: 100%;
+            height: 3.6rem;
+            padding: 0 2rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            text-align: center;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .contents_header input[type="datetime-local"] {
+            width: 100%;
+            height: 3.6rem;
+            padding: 0 2rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            text-align: center;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .btn-group3 {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            right: 4rem;
+            top: 3.7rem;
+        }
+
+        .btn-group3 > a {
+            height: 2.8rem;
+            margin-left: 1rem;
+            padding: 0 2rem;
+            background-color: #6975ac;
+            font-weight: 500;
+            font-size: 1.4rem;
+            line-height: 1;
+            color: #fff;
+            text-align: center;
+            border-radius: 99px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .filter-area {
+            display: flex;
+        }
+
+        .search-top-label {
+            color: #ffffff76;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+        }
+
         #map {
             width: 100%;
             height: calc(100vh - 7.3rem);
@@ -261,12 +419,12 @@
         });
 
         $(document).on("click", ".right-utill .roadview", function () {           // 로드뷰 열기/닫기
-            // if (window.vworld.map.type != '2D') {
-            //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
-            //     $(this).removeClass("active");
-            //     $(".roadViewContainer").removeClass("open");
-            //     return;
-            // }
+                                                                                  // if (window.vworld.map.type != '2D') {
+                                                                                  //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
+                                                                                  //     $(this).removeClass("active");
+                                                                                  //     $(".roadViewContainer").removeClass("open");
+                                                                                  //     return;
+                                                                                  // }
 
             if (!$(this).hasClass("active")) {
                 $(this).addClass("active");
@@ -317,17 +475,6 @@
 
             clearInterval(window.zoneDetail);
         });
-
-        function getToggleStatus(uid) {
-            let assetId = null;
-            $.each(window.vworld.overlays, function () {
-                if (this.uid === uid) {
-                    assetId = this.asset_id;
-                    return false;
-                }
-            });
-            return $('.site-zone-list li[asset_id=' + assetId + '] p.check-box input').is(':checked');
-        }
 
         $(document).on('map_action_end', debounce(function (e) {
             if ($('.roadview').hasClass('active')) {
@@ -395,13 +542,26 @@
             }
         });
 
+        const currentYear = new Date().getFullYear();
+
+        const startDate = new Date(currentYear, 0, 1, 23, 59); // 0은 1월
+        $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+
+        const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
+        $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+
+        const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
+        let sensNo = ''
+
         $(document).on('overlay_click', function (e, data) {
             if ($("#wrap").hasClass("editMode"))
                 return;
 
-            if (data.type == 'sensor') {                // 센서 선택시
-                openSensorInfo(data);
-            } else if (data.type == 'cctv') {           // cctv 선택시
+            if (data.type === 'sensor') {                // 센서 선택시
+                sensNo = $(data.htmlContent).attr('assetid');
+                $("#graph-search-btn").click();
+                openSensorPopup();
+            } else if (data.type === 'cctv') {           // cctv 선택시
                 openCctvPopup(data);
             } else {
                 if ($(data.htmlContent).hasClass('zone')) {                 // 지구 아이콘 선택시
@@ -412,6 +572,202 @@
                 }
             }
         });
+
+        $("#graph-search-btn").click(() => {
+            const case_ = ['', 'X', 'Y', 'Z'];
+
+            let checkedData = case_.flatMap((item) => {
+                return {
+                    sens_no: sensNo,
+                    sens_chnl_id: item
+                };
+            });
+
+            const startDateTime = $('#start-date').val();
+            const endDateTime = $('#end-date').val();
+            chartDataArray.length = 0; // 배열 초기화
+            const requests = checkedData.map((item) => {
+                return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
+            });
+
+            Promise.all(requests).then((d) => {
+                updateChart(chartDataArray.filter((item) => item.length > 0));
+            }).catch((e) => {
+                console.log('error', e);
+                alert('조회할 수 없는 데이터 입니다.');
+            });
+        });
+
+
+        function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
+                    type: 'GET',
+                    success: function (res) {
+                        if (res) {
+                            if (res[0]) {
+                                res[0].sens_chnl_id = sensChnlId // 채널 ID 추가
+                            }
+                            chartDataArray.push(res); // 데이터 추가
+                        }
+                        resolve();
+                    },
+                    error: function () {
+                        reject();
+                    }
+                });
+            });
+        }
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // 초기 레이블
+                datasets: [] // 초기 데이터셋
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // 비율을 유지하지 않음 (높이 채우기)
+                plugins: {
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy', // x, y축 모두 이동 가능
+                            threshold: 10, // 이동을 시작하는 최소 드래그 거리(px)
+                        },
+                        zoom: {
+                            drag: {
+                                enabled: true,
+                                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                            },
+                            wheel: {
+                                enabled: true, // 마우스 휠로 줌 가능
+                            },
+                            pinch: {
+                                enabled: true // 터치로 줌 가능
+                            },
+                            mode: 'xy', // x, y축 모두 줌 가능
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            displayFormats: {
+                                minute: 'YYYY-MM-DD HH:mm' // 분 단위까지 표시
+                            },
+                            unit: 'minute', // 단위를 분(minute)으로 설정
+                        },
+                        adapters: {
+                            date: {} // 어댑터 설정(필요시 사용)
+                        }
+                    },
+                    y: {
+                        beginAtZero: true, // 0에서 시작
+                        ticks: {
+                            autoSkip: false // 모든 눈금을 표시
+                        }
+                    }
+                }
+            }
+        });
+
+
+        function getRandomHSL() {
+            const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
+            const saturation = 100; // 채도 고정
+            const lightness = 50; // 밝기 고정
+            return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
+        }
+
+        function updateChart(data) {
+            myChart.resetZoom();
+
+            const allLabels = [];
+            const labelIndexMap = {};
+            const datasets = [];
+
+            data.forEach((item) => {
+                item.forEach((subItem) => {
+                    const date = new Date(subItem.meas_dt);
+                    const label = date.getFullYear() + '-' +
+                        (date.getMonth() + 1).toString().padStart(2, '0') + ' ' +
+                        date.getDate().toString().padStart(2, '0') + ' ' +
+                        date.getHours().toString().padStart(2, '0') + ':' +
+                        date.getMinutes().toString().padStart(2, '0') + ':' +
+                        date.getSeconds().toString().padStart(2, '0');
+
+                    if (!labelIndexMap[label]) {
+                        labelIndexMap[label] = allLabels.length; // 인덱스 저장
+                        allLabels.push(label); // 중복 없는 레이블 추가
+                    }
+                });
+            });
+
+            data.forEach((item, index) => {
+                const mappedData = Array(allLabels.length).fill(null); // 모든 값을 null로 초기화
+
+                item.forEach((subItem) => {
+                    const date = new Date(subItem.meas_dt);
+                    const label = date.getFullYear() + '-' +
+                        (date.getMonth() + 1).toString().padStart(2, '0') + ' ' +
+                        date.getDate().toString().padStart(2, '0') + ' ' +
+                        date.getHours().toString().padStart(2, '0') + ':' +
+                        date.getMinutes().toString().padStart(2, '0') + ':' +
+                        date.getSeconds().toString().padStart(2, '0');
+
+                    const labelIndex = labelIndexMap[label];
+                    if (labelIndex !== undefined) {
+                        mappedData[labelIndex] = subItem.formul_data; // 데이터 매핑
+                    }
+                });
+
+                datasets.push({
+                    label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""),
+                    data: mappedData,
+                    borderColor: getRandomHSL(),
+                    fill: false,
+                    pointRadius: 0,
+                    borderWidth: 1,
+                });
+            });
+
+            myChart.data.labels = allLabels;
+            myChart.data.datasets = datasets;
+            myChart.options.plugins.annotation.annotations = {};
+
+            data.forEach((item) => {
+                const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
+                const maxLevels = [
+                    parseFloat(item[0].lvl_max1),
+                    parseFloat(item[0].lvl_max2),
+                    parseFloat(item[0].lvl_max3),
+                    parseFloat(item[0].lvl_max4)
+                ];
+
+                maxLevels.forEach((maxLevel, index) => {
+                    if (!isNaN(maxLevel)) {
+                        myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
+                            type: 'line',
+                            yMin: maxLevel,
+                            yMax: maxLevel,
+                            borderColor: colors[index],
+                            borderWidth: 1.5,
+                            borderDash: [5, 4]
+                        };
+                    }
+                });
+            });
+            myChart.update();
+        }
+
+
+        function openSensorPopup() {
+            popFancy('#chart-popup', {dragToClose: false, touch: false});
+        }
 
         $('#lay-cctv-view .fullscreen').on('click', function () {
             if ($(this).closest('#lay-cctv-view').hasClass('full')) {
@@ -713,17 +1069,22 @@
                             type: 'area',
                             zone_id: district.district_no
                         }));
-                    redrawMarker();
+                    // redrawMarker();
                 });
-                loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
+                // loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
             });
 
             /////
             $('select.selectZone').off().on('change', function () {
+                window.marker.asset = [];
+
                 let $selected = $("option:selected", this);
                 const district_no = $selected.val();
+                $.get("/adminAdd/districtInfo/all", (res) => {
+                    const district = res.filter(r => r.district_no === district_no)[0];
+                    loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
+                })
                 $('.rain-info').hide();
-
                 if ($selected.index() > 0) {
                     $('.rain-info').show();
                     $('.site-status-toggle').addClass('active')
@@ -773,7 +1134,7 @@
 
     function sortAssetsByLength() {
         const $liElements = $('.site-zone-list > li');
-        $liElements.sort(function(a, b) {
+        $liElements.sort(function (a, b) {
             const aCount = $(a).find('.site-zone-conts ul li').length;
             const bCount = $(b).find('.site-zone-conts ul li').length;
             return bCount - aCount;
@@ -1247,6 +1608,33 @@
             <a href="javascript:editMode('save');" blue>저장</a>
             <a href="javascript:editMode('close');">취소</a>
         </p>
+    </div>
+
+    <div id="chart-popup" class="layer-base">
+        <div class="layer-base-btns">
+            <a href="javascript:void(0);"><img src="/images/btn_lay_full.png" data-fancybox-full alt="전체화면"></a>
+            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
+        </div>
+        <div class="modal-header" style="margin-bottom: 10px">
+            <div class="filter-area" style="margin-right: 150px; margin-bottom: 10px">
+                <div style="display:flex;">
+                    <p class="search-top-label">조회기간</p>
+                    <input id="start-date" type="datetime-local"/>
+                </div>
+                <div style="display:flex;">
+                    <p class="search-top-label">~</p>
+                    <input id="end-date" type="datetime-local"/>
+                </div>
+                <div class="btn-group3">
+                    <a id="graph-search-btn" data-fancybox data-src="">조회</a>
+                </div>
+            </div>
+        </div>
+        <div class="layer-base-conts min bTable">
+            <div class="graph-area" style="height: 500px">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
     </div>
 </section>
 </body>
