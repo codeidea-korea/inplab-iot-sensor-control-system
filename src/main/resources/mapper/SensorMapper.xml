@@ -219,6 +219,7 @@
         select tsdist.district_nm
         , tstype.sens_tp_nm
         , tsinfo.sens_nm
+        , tsinfo.sens_no
         , tsinit.sens_chnl_id
         , tsmap.sens_chnl_nm
         , tslogr.logr_nm
