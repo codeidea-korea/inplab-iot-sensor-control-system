@@ -527,8 +527,6 @@
         });
 
         $(document).on('map_click', function (e, data) {
-            // console.log(data);
-
             if (window.isRoadView) {
                 if (typeof window.roadViewMarkerUid != 'undefined') {
                     window.vworld.removeOverlay(window.roadViewMarkerUid);
@@ -556,7 +554,6 @@
         $(document).on('overlay_click', function (e, data) {
             if ($("#wrap").hasClass("editMode"))
                 return;
-
             if (data.type === 'sensor') {                // 센서 선택시
                 sensNo = $(data.htmlContent).attr('assetid');
                 $("#graph-search-btn").click();
@@ -565,31 +562,26 @@
                 openCctvPopup(data);
             } else {
                 if ($(data.htmlContent).hasClass('zone')) {                 // 지구 아이콘 선택시
-                    // console.log(data);
                     $('.site-status-list select.selectZone option[value=' + data.zone_id + ']').prop('selected', true);
                     $('.site-status-list select.selectZone').trigger('change');
-                    //      window.vworld.setPanBy(data.coords, 18);
                 }
             }
         });
 
         $("#graph-search-btn").click(() => {
             const case_ = ['', 'X', 'Y', 'Z'];
-
             let checkedData = case_.flatMap((item) => {
                 return {
                     sens_no: sensNo,
                     sens_chnl_id: item
                 };
             });
-
             const startDateTime = $('#start-date').val();
             const endDateTime = $('#end-date').val();
             chartDataArray.length = 0; // 배열 초기화
             const requests = checkedData.map((item) => {
                 return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
             });
-
             Promise.all(requests).then((d) => {
                 updateChart(chartDataArray.filter((item) => item.length > 0));
             }).catch((e) => {
@@ -597,7 +589,6 @@
                 alert('조회할 수 없는 데이터 입니다.');
             });
         });
-
 
         function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
             return new Promise((resolve, reject) => {
@@ -802,7 +793,6 @@
             });
         });
 
-        // 지구현황 자산 리스트 클릭시
         $(document).on('click', '.zoneSelected > .site-zone-area > ul.site-zone-list div.site-zone-conts li > a', function () {
             $('div[uid] span').css({
                 'color': '#000000'
@@ -828,7 +818,6 @@
             }
         });
 
-        // 알람판 클릭시,
         $(document).on('click', '.right-alarm_re p.icon, .right-alarm_re dl', function () {
             const coords = $(this).closest('div.right-alarm_re').data('coords').split(',');
             const zoneId = $(this).closest('div.right-alarm_re').data('zoneid');
@@ -915,8 +904,6 @@
 
         initDashboard();
     });
-
-    // [e] jquery
 
     function markerVisible(asset_id, visible) {
         $.each(window.vworld.overlays, function () {
@@ -1043,7 +1030,7 @@
     }
 
     function initDashboard() {
-        initZoneSelect();                   // 현장내 지구 리스트
+        initZoneSelect();
         initSiteZone();
         loadAlarm();
     }
@@ -1053,7 +1040,6 @@
             $('select.selectZone').empty();
             $('select.selectZone').append('<option value="">현장 선택</option>');
 
-            // 지구 마커 표시
             $.each(res, (_idx, district) => {
                 $('select.selectZone').append('<option value="' + district.district_no + '" lat="' + district.dist_lat + '" lng="' + district.dist_lon + '">' + district.district_nm + '</option>');
 
@@ -1069,12 +1055,11 @@
                             type: 'area',
                             zone_id: district.district_no
                         }));
-                    // redrawMarker();
+                    redrawMarker();
                 });
-                // loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
+                loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
             });
 
-            /////
             $('select.selectZone').off().on('change', function () {
                 window.marker.asset = [];
 

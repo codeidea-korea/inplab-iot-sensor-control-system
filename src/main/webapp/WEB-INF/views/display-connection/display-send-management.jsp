@@ -388,10 +388,15 @@
                     dispbd_imgfile_nm: 'temp'
                 },
                 success: function (_res) {
+                    alert('이미지가 등록되었습니다.');
                     popFancyClose('#lay-form-write');
                 },
                 error: function (err) {
-                    alert('알 수 없는 오류가 발생했습니다.');
+                    if (err?.responseJSON?.trace?.toString()?.includes('Duplicate')) {
+                        alert('해당 그룹에 이미지가 등록되어 있습니다.');
+                    } else {
+                        alert('알 수 없는 오류가 발생했습니다.');
+                    }
                 }
             });
 

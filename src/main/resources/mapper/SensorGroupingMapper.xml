@@ -29,34 +29,19 @@
     </sql>
 
     <sql id="rowOrder">
-        <!--        <trim prefix="order by">-->
-        <!--            <choose>-->
-        <!--                <when test="'sens_tp_nm' == sidx and sidx != ''">-->
-        <!--                    tst.sens_tp_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'sens_nm' == sidx and sidx != ''">-->
-        <!--                    tsinfo.sens_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'sens_chnl_nm' == sidx and sidx != ''">-->
-        <!--                    tai.sens_chnl_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'formul_data' == sidx and sidx != ''">-->
-        <!--                    tsi.formul_data ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'init_apply_dt' == sidx and sidx != ''">-->
-        <!--                    tsi.init_apply_dt ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'last_apply_dt' == sidx and sidx != ''">-->
-        <!--                    tsi.last_apply_dt ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'emer_status' == sidx and sidx != ''">-->
-        <!--                    tsi.emer_status ${sord}-->
-        <!--                </when>-->
-        <!--                <otherwise>-->
-        <!--                    tsi.reg_dt desc-->
-        <!--                </otherwise>-->
-        <!--            </choose>-->
-        <!--        </trim>-->
+        <trim prefix="order by">
+            <choose>
+                <when test="'sens_nm' == sidx and sidx != ''">
+                    tsinfo.sens_nm ${sord}
+                </when>
+                <when test="'sens_tp_nm' == sidx and sidx != ''">
+                    MAX(tst.sens_tp_nm) ${sord}
+                </when>
+                <otherwise>
+                    tsinfo.reg_dt desc
+                </otherwise>
+            </choose>
+        </trim>
     </sql>
 
     <select id="selectList" parameterType="java.util.Map"
