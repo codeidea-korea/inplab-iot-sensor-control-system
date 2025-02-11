@@ -290,9 +290,6 @@
             <div class="contents-re">
                 <h3 class="txt">센서 관리</h3>
                 <div class="btn-group">
-                    <input class="search_input" type="text" id="search" name="search"
-                           placeholder="센서타입명 / 센서ID / 로거명 / 센서상태"/>
-                    <a class="searchBtn">검색</a>
                     <a class="insertBtn">신규 등록</a>
                     <a class="modifyBtn">상세정보</a>
                     <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>

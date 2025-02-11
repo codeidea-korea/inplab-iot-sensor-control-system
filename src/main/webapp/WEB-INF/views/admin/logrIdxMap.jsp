@@ -218,9 +218,6 @@
             <div class="contents-re">
                 <h3 class="txt">센서-로거인덱스</h3>
                 <div class="btn-group">
-                    <input class="search_input" type="text" id="search" name="search"
-                           placeholder="현장명 / 센서타입명 / 로거명"/>
-                    <a class="searchBtn">검색</a>
 <%--                    <a class="uploadBtn" href="javascript:void(0);" onclick="triggerFileUpload()">업로드</a>--%>
                     <form id="uploadForm" style="display:none;">
                         <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
