@@ -25,7 +25,7 @@ public class SmsManagementDto implements Serializable {
     @FieldLabel(title = "경보단계", type = "selectable")
     private String alarm_lvl_nm;
 
-    @FieldLabel(title = "상태")
+    @FieldLabel(title = "상태", type = "hidden")
     private String sms_status;
 
     @FieldLabel(title = "자동 전송 여부", type = "selectable")

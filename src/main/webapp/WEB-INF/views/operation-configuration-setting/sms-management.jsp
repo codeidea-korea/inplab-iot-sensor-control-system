@@ -48,8 +48,6 @@
             <div class="contents-re">
                 <h3 class="txt">SMS 경보 대상 관리</h3>
                 <div class="btn-group">
-                    <input type="text" class="search_input" id="search" name="search" placeholder="이름/소속기관/휴대폰번호"/>
-                    <a class="searchBtn">검색</a>
                     <a class="save-btn">저장</a>
                 </div>
                 <div id="grid-wrapper" class="contents-in">

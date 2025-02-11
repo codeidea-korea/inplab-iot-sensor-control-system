@@ -3,9 +3,20 @@
 
 <mapper namespace="com.safeone.dashboard.dao.operationconfigurationsetting.SmsManagementMapper">
     <sql id="rowSearch">
-        <if test="searchKeyword != null and searchKeyword != ''">
-            and (tsr.sms_recv_dept ilike '%' || #{searchKeyword} || '%' or tsr.sms_chgr_nm ilike '%' ||
-            #{searchKeyword} || '%' or tsr.sms_recv_ph ilike '%' || #{searchKeyword} || '%')
+        <if test="partner_comp_nm != null and partner_comp_nm != ''">
+            and tmi.partner_comp_nm ilike '%' || #{partner_comp_nm} || '%'
+        </if>
+        <if test="sms_chgr_nm != null and sms_chgr_nm != ''">
+            and tsr.sms_chgr_nm ilike '%' || #{sms_chgr_nm} || '%'
+        </if>
+        <if test="sms_recv_ph != null and sms_recv_ph != ''">
+            and tsr.sms_recv_ph ilike '%' || #{sms_recv_ph} || '%'
+        </if>
+        <if test="alarm_lvl_nm != null and alarm_lvl_nm != ''">
+            and tsr.alarm_lvl_nm ilike '%' || #{alarm_lvl_nm} || '%'
+        </if>
+        <if test="sms_autosnd_yn != null and sms_autosnd_yn != ''">
+            and tsr.sms_autosnd_yn ilike '%' || #{sms_autosnd_yn} || '%'
         </if>
     </sql>
 
@@ -63,7 +74,8 @@
         SELECT count(tsr.mgnt_no)
         FROM tb_sms_receiver tsr
         LEFT OUTER JOIN tb_district_info tdi ON tsr.district_no = tdi.district_no
-        WHERE 1 = 1
+        left join tb_maintcomp_info tmi on tsr.partner_comp_id = tmi.partner_comp_id
+        WHERE 1=1
         <include refid="rowSearch"/>
     </select>
 
