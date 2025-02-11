@@ -83,7 +83,6 @@
 
             function initInsertForm() {
                 $("#form_sub_title").html('신규 등록');
-
                 $("#deleteBtn").hide()
                 $("#form-update-btn").hide();
                 $("#form-submit-btn").show();
@@ -220,8 +219,6 @@
             <div class="contents-re">
                 <h3 class="txt">비상연락망 관리</h3>
                 <div class="btn-group">
-                    <input type="text" class="search_input" id="search" name="search" placeholder="이름/소속기관/휴대폰"/>
-                    <a class="searchBtn">검색</a>
                     <a class="insertBtn">신규등록</a>
                     <a class="modifyBtn">상세정보</a>
                     <a class="excelBtn">다운로드</a>
@@ -232,8 +229,6 @@
             </div>
         </div>
     </div>
-
-    <!-- 팝업 -->
     <div id="lay-form-write" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
@@ -295,8 +290,6 @@
             </div>
         </div>
     </div>
-    <!-- 팝업 -->
-
     </div>
 </section>
 </body>

@@ -3,9 +3,26 @@
 
 <mapper namespace="com.safeone.dashboard.dao.operationconfigurationsetting.EmergencyContactMapper">
     <sql id="rowSearch">
-        <if test="searchKeyword != null and searchKeyword != ''">
-            and (tec.emerg_chgr_nm ilike '%' || #{searchKeyword} || '%' or tec.partner_comp_nm ilike '%' ||
-            #{searchKeyword} || '%' or tec.emerg_recv_ph ilike '%' || #{searchKeyword} || '%')
+        <if test="district_nm != null and district_nm != ''">
+            and tdi.district_nm ilike '%' || #{district_nm} || '%'
+        </if>
+        <if test="partner_comp_nm != null and partner_comp_nm != ''">
+            and tmi.partner_comp_nm ilike '%' || #{partner_comp_nm} || '%'
+        </if>
+        <if test="emerg_chgr_nm != null and emerg_chgr_nm != ''">
+            and tec.emerg_chgr_nm ilike '%' || #{emerg_chgr_nm} || '%'
+        </if>
+        <if test="emerg_chgr_role != null and emerg_chgr_role != ''">
+            and tec.emerg_chgr_role ilike '%' || #{emerg_chgr_role} || '%'
+        </if>
+        <if test="emerg_recv_ph != null and emerg_recv_ph != ''">
+            and tec.emerg_recv_ph ilike '%' || #{emerg_recv_ph} || '%'
+        </if>
+        <if test="emerg_tel != null and emerg_tel != ''">
+            and tec.emerg_tel ilike '%' || #{emerg_tel} || '%'
+        </if>
+        <if test="e_mail != null and e_mail != ''">
+            and tec.e_mail ilike '%' || #{e_mail} || '%'
         </if>
     </sql>
 
@@ -68,7 +85,9 @@
     <select id="selectEmergencyContactListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(tec.mgnt_no)
         FROM tb_emerg_contact tec
-        WHERE 1 = 1
+        LEFT JOIN tb_district_info tdi ON tec.district_no = tdi.district_no
+        left join tb_maintcomp_info tmi on tec.partner_comp_id = tmi.partner_comp_id
+        WHERE 1=1
         <include refid="rowSearch"/>
     </select>
 
