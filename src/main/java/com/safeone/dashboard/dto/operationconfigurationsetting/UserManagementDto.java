@@ -32,7 +32,7 @@ public class UserManagementDto implements Serializable {
     @FieldLabel(title = "이메일")
     private String e_mail;
 
-    @FieldLabel(title = "최종 로그인 시간")
+    @FieldLabel(title = "최종 로그인 시간", type = "hidden")
     private String last_login_dt;
 
     @FieldLabel(title = "사용만료일", type = "hidden")

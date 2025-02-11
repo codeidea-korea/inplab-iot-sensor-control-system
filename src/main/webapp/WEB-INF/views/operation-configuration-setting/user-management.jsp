@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true" />
+    <jsp:include page="../common/include_head.jsp" flush="true"/>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
@@ -104,7 +104,7 @@
                     },
                     success: function (_res) {
                         popFancyClose('#lay-form-write');
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     },
                     error: function (err) {
                         if (err?.responseJSON?.message === "이미 등록된 사용자 ID 입니다.") {
@@ -133,7 +133,7 @@
                     },
                     success: function (_res) {
                         popFancyClose('#lay-form-write');
-                        reloadJqGrid();
+                        reloadJqGrid($grid);
                     },
                     error: function (_err) {
                         alert('수정에 실패했습니다. 다시 시도해 주세요.');
@@ -189,7 +189,7 @@
             });
 
             $('#deleteBtn').on('click', () => {
-                confirm('삭제하시겠습니까?',() => {
+                confirm('삭제하시겠습니까?', () => {
                     $.ajax({
                         url: '/operation-configuration-setting/user-management/del',
                         type: 'POST',
@@ -198,7 +198,7 @@
                         },
                         success: function (_res) {
                             popFancyClose('#lay-form-write');
-                            reloadJqGrid();
+                            reloadJqGrid($grid);
                         },
                         error: function (_err) {
                             alert('삭제에 실패했습니다. 다시 시도해 주세요.');
@@ -212,9 +212,9 @@
 
 <body data-pgcode="0000">
 <section id="wrap">
-    <jsp:include page="../common/include_top.jsp" flush="true" />
+    <jsp:include page="../common/include_top.jsp" flush="true"/>
     <div id="global-menu">
-        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
+        <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
     <div id="container">
         <h2 class="txt">운영환경설정</h2>
@@ -222,8 +222,6 @@
             <div class="contents-re">
                 <h3 class="txt">사용자 관리</h3>
                 <div class="btn-group">
-                    <input type="text" class="search_input" id="search" name="search" placeholder="이름/소속기관/권한/휴대폰번호"/>
-                    <a class="searchBtn">검색</a>
                     <a class="insertBtn">신규등록</a>
                     <a class="modifyBtn">상세정보</a>
                     <a class="excelBtn">다운로드</a>
@@ -234,8 +232,6 @@
             </div>
         </div>
     </div>
-
-    <!-- 팝업 -->
     <div id="lay-form-write" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
@@ -290,7 +286,6 @@
                     </tr>
                     </tbody>
                 </table>
-
                 <table style="margin-top: 20px;">
                     <colgroup>
                         <col width="130"/>
@@ -324,8 +319,6 @@
             </div>
         </div>
     </div>
-    <!-- 팝업 -->
-
     </div>
 </section>
 </body>

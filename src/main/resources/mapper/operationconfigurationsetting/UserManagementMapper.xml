@@ -3,10 +3,26 @@
 
 <mapper namespace="com.safeone.dashboard.dao.operationconfigurationsetting.UserManagementMapper">
     <sql id="rowSearch">
-        <if test="searchKeyword != null and searchKeyword != ''">
-            and (tui.usr_nm ilike '%' || #{searchKeyword} || '%' or tui.usr_flag ilike '%' || #{searchKeyword} || '%' or
-            tui.usr_ph ilike
-            '%' || #{searchKeyword} || '%' or tui.usr_org ilike '%' || #{searchKeyword} || '%')
+        <if test="usr_id != null and usr_id != ''">
+            and tui.usr_id ilike '%' || #{usr_id} || '%'
+        </if>
+        <if test="usr_nm != null and usr_nm != ''">
+            and tui.usr_nm ilike '%' || #{usr_nm} || '%'
+        </if>
+        <if test="usr_org != null and usr_org != ''">
+            and tui.usr_org ilike '%' || #{usr_org} || '%'
+        </if>
+        <if test="usr_flag != null and usr_flag != ''">
+            and tui.usr_flag ilike '%' || #{usr_flag} || '%'
+        </if>
+        <if test="use_yn != null and use_yn != ''">
+            and tui.use_yn ilike '%' || #{use_yn} || '%'
+        </if>
+        <if test="usr_ph != null and usr_ph != ''">
+            and tui.usr_ph ilike '%' || #{usr_ph} || '%'
+        </if>
+        <if test="e_mail != null and e_mail != ''">
+            and tui.e_mail ilike '%' || #{e_mail} || '%'
         </if>
     </sql>
 
