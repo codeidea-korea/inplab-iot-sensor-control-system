@@ -1,13 +1,9 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8" %>
-
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html lang="ko">
     <head>
-	    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
-	
-	    <style></style>
-
+	    <jsp:include page="../common/include_head.jsp" flush="true" />
 		<script type="text/javascript" src="/admin_add.js"></script>
         <script>
 			const limit = 25;
@@ -86,7 +82,6 @@
 						resolve(res);
 					}).fail(function(fail) {
 						reject(fail);
-						console.log('udtCctv fail > ', fail);
 						alert2('CCTV 수정하는데 실패했습니다.', function() {});
 					});
 				});
@@ -107,9 +102,8 @@
 						const search_cctv_nm = $('input[name=search_cctv_nm]').val();
 						offset = 0;
 						getCctv({cctv_nm: search_cctv_nm, limit: limit, offset: offset}).then((res) => {
-							const formattedData = actFormattedData(res.rows, 'cctv_no');
 							$("#jqGrid").jqGrid('clearGridData');
-							$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
+							$("#jqGrid").jqGrid('setGridParam', {data: res.rows}).trigger('reloadGrid');
 						}).catch((fail) => {
 							console.log('setJqGridTable fail > ', fail);
 						});
@@ -278,9 +272,8 @@
 					const cctv_nm = $('input[name=search_cctv_nm]').val();
 					offset = 0;
 					getCctv({cctv_nm : cctv_nm, limit : limit, offset : offset}).then((res) => {
-						const formattedData = actFormattedData(res.rows, 'cctv_no');
 						$("#jqGrid").jqGrid('clearGridData');
-						$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
+						$("#jqGrid").jqGrid('setGridParam', {data: res.rows}).trigger('reloadGrid');
 					}).catch((fail) => {
 						console.log('setJqGridTable fail > ', fail);
 					});
@@ -330,7 +323,6 @@
 					}
 
 					array.push(obj);
-
 					insCctv(array).then((res) => {
 						if (res.count?.pass > 0) {
 							alert2(res?.pass_list[0]?.message, function() {});
@@ -345,9 +337,8 @@
 							const search_cctv_nm = $('input[name=search_cctv_nm]').val();
 							offset = 0;
 							getCctv({cctv_nm : search_cctv_nm, limit : limit, offset : offset}).then((res) => {
-								const formattedData = actFormattedData(res.rows, 'cctv_no');
 								$("#jqGrid").jqGrid('clearGridData');
-								$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
+								$("#jqGrid").jqGrid('setGridParam', {data: res.rows}).trigger('reloadGrid');
 							}).catch((fail) => {
 								console.log('setJqGridTable fail > ', fail);
 							});
@@ -382,9 +373,8 @@
 							const search_cctv_nm = $('input[name=search_cctv_nm]').val();
 							offset = 0;
 							getCctv({cctv_nm : search_cctv_nm, limit : limit, offset : offset}).then((res) => {
-								const formattedData = actFormattedData(res.rows, 'cctv_no');
 								$("#jqGrid").jqGrid('clearGridData');
-								$("#jqGrid").jqGrid('setGridParam', {data: formattedData}).trigger('reloadGrid');
+								$("#jqGrid").jqGrid('setGridParam', {data: res.rows}).trigger('reloadGrid');
 							}).catch((fail) => {
 								console.log('setJqGridTable fail > ', fail);
 							});
