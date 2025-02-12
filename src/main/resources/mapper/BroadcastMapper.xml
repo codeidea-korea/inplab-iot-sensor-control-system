@@ -22,6 +22,7 @@
 			,A.brdcast_svr_port
 			,A.brdcast_conn_id
 			,A.brdcast_conn_pwd
+			,A.iot_no
 			,TO_CHAR(TO_DATE(A.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
 			,A.maint_sts_cd
 		    ,C.code_nm AS maint_sts_nm
@@ -34,6 +35,7 @@
 		FROM tb_broadcast_info A
 		<include refid="getBroadcastList-where"/>
 		AND A.del_yn = 'N'
+		ORDER BY A.reg_dt DESC
 		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
 			LIMIT ${limit} OFFSET ${offset}
 		</if>
