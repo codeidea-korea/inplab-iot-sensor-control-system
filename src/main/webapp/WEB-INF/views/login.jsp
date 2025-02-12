@@ -199,17 +199,17 @@
 
 <body>
 <section id="wrap" class="intro login">
-    <div id="intro-area">
+    <div id="intro-area" style="display:flex; justify-content: center; flex-direction: column; align-items: center;">
         <div class="donutty"></div>
         <dl class="donut-ps">
-            <dt>${site_sys_nm}</dt>
+            <dt style="max-width: 700px">${site_sys_nm}</dt>
             <dd>
                 로딩중입니다.<br/>잠시만 기다려주세요.
             </dd>
         </dl>
     </div>
     <div id="login-area">
-        <h2>
+        <h2 style="max-width: 700px">
             <span data-font="Prompt">Hello,</span><br/>
             <strong>
                 ${site_sys_nm}
