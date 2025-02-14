@@ -2,7 +2,7 @@ package com.safeone.dashboard.controller;
 
 import com.google.gson.Gson;
 import com.safeone.dashboard.service.*;
-import com.safeone.dashboard.util.ExcelUtil;
+import com.safeone.dashboard.util.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -175,7 +175,7 @@ public class DashboardController {
         String[] fields = new String[]{"asset_kind_name", "asset_name", "channel_name", "data_time", "avg_value"};
         String[] headers = new String[]{"센서종류", "센서명", "채널명", "데이터시간", "센서값"};
 
-        ExcelUtil.downloadExcel(request, response, list, fields, headers, fileName + ".xls");
+        ExcelUtils.downloadExcel(request, response, list, fields, headers, fileName + ".xls");
     }
 
     @ResponseBody

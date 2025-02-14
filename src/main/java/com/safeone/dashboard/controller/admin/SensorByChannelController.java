@@ -12,7 +12,7 @@ import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.SensorDto;
 import com.safeone.dashboard.service.CommonCodeService;
 import com.safeone.dashboard.service.SensorByChannelService;
-import com.safeone.dashboard.util.ExcelUtil.FieldDetails;
+import com.safeone.dashboard.util.ExcelUtils.FieldDetails;
 
 @Controller
 @RequestMapping("/admin/sensorByChannelList")

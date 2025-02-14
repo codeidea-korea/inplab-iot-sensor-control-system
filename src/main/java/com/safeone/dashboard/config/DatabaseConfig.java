@@ -82,6 +82,7 @@ public class DatabaseConfig {
         //패키지 기본경로
         sqlSessionFactoryBean.setMapperLocations(applicationContext.getResources("classpath:mapper/**/*.xml"));
         SqlSessionFactory factory = sqlSessionFactoryBean.getObject();
+        assert factory != null;
         factory.getConfiguration().setMapUnderscoreToCamelCase(false);          // DTO CamelCasing 사용여부
         return factory;
     }

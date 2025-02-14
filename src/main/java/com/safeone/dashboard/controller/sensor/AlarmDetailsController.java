@@ -1,12 +1,8 @@
 package com.safeone.dashboard.controller.sensor;
 
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
-import com.safeone.dashboard.dto.AlarmListDto;
 import com.safeone.dashboard.dto.sensor.AlarmDetailsDto;
-import com.safeone.dashboard.service.AlarmListService;
-import com.safeone.dashboard.service.CommonCodeService;
 import com.safeone.dashboard.service.sensor.AlarmDetailsService;
-import com.safeone.dashboard.util.ExcelUtil.FieldDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -15,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

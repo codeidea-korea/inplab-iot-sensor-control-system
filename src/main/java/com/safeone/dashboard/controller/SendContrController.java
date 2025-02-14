@@ -5,7 +5,7 @@ import com.safeone.dashboard.dto.SendContrDto;
 import com.safeone.dashboard.service.CommonCodeService;
 import com.safeone.dashboard.service.SendContrService;
 import com.safeone.dashboard.service.displayconnection.DisplayImgManagementService;
-import com.safeone.dashboard.util.ExcelUtil;
+import com.safeone.dashboard.util.ExcelUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,7 +40,7 @@ public class SendContrController {
 		Map param = new HashMap();
         param.put("use_yn", "Y");
 
-        model.addAttribute("columns", (new Gson()).toJson(ExcelUtil.getPojoFieldNamesAndLabels(SendContrDto.class)));
+        model.addAttribute("columns", (new Gson()).toJson(ExcelUtils.getPojoFieldNamesAndLabels(SendContrDto.class)));
 		model.addAttribute("sendGroups", sendGroupService.getList(param));
 		model.addAttribute("types", getCommonCodeList("표시효과"));
 		model.addAttribute("assetList", service.assetList(param));

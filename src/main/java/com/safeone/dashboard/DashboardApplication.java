@@ -10,9 +10,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @SpringBootApplication
 public class DashboardApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(DashboardApplication.class, args);
-
-		avutil.av_log_set_level(avutil.AV_LOG_QUIET); 
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DashboardApplication.class, args);
+        avutil.av_log_set_level(avutil.AV_LOG_QUIET);
+    }
 }

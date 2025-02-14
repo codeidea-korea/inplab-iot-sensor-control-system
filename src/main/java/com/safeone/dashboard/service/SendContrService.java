@@ -4,7 +4,7 @@ package com.safeone.dashboard.service;
 import com.safeone.dashboard.dao.SendContrMapper;
 import com.safeone.dashboard.dto.AssetListDto;
 import com.safeone.dashboard.dto.SendContrDto;
-import com.safeone.dashboard.util.DisplayUtil;
+import com.safeone.dashboard.util.DisplayUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -98,8 +98,8 @@ public class SendContrService {
         AssetListDto assetDto = assetList.get(0);
 
         // etc1 => ip, etc3 => port
-        DisplayUtil displayUtil = new DisplayUtil(assetDto.getEtc1(), Integer.parseInt(assetDto.getEtc3()));
-        DisplayUtil.ElectronicDisplay ed = new DisplayUtil.ElectronicDisplay();
+        DisplayUtils displayUtil = new DisplayUtils(assetDto.getEtc1(), Integer.parseInt(assetDto.getEtc3()));
+        DisplayUtils.ElectronicDisplay ed = new DisplayUtils.ElectronicDisplay();
         StringBuilder stringBuilder = new StringBuilder();
         byte displayMode = displayUtil.NOR;
 

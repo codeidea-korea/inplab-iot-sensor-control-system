@@ -20,7 +20,7 @@ import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.CalcDto;
 import com.safeone.dashboard.service.CalcService;
 import com.safeone.dashboard.service.CommonCodeService;
-import com.safeone.dashboard.util.ExcelUtil.FieldDetails;
+import com.safeone.dashboard.util.ExcelUtils.FieldDetails;
 
 @Controller
 @RequestMapping("/calc")

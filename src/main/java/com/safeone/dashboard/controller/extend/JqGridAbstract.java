@@ -14,42 +14,31 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.gson.Gson;
 import com.safeone.dashboard.dto.JqGridResponse;
-import com.safeone.dashboard.util.ExcelUtil;
-import com.safeone.dashboard.util.ExcelUtil.FieldDetails;
+import com.safeone.dashboard.util.ExcelUtils;
+import com.safeone.dashboard.util.ExcelUtils.FieldDetails;
 
 @Slf4j
 public abstract class JqGridAbstract<T> {
-    private Class<T> type;
+    private final Class<T> type;
 
     protected JqGridAbstract(Class<T> type) {
         this.type = type;
     }
-    /**
-     * 그리드의 내용을 리턴
-     * 
-     * @param param
-     * @return
-     */
-    protected abstract List<T> getList(Map param);
 
-    /**
-     * 데이터의 총 갯수를 리턴
-     * 
-     * @param param
-     * @return
-     */
-    protected abstract int getTotalRows(Map param);
+    protected abstract List<T> getList(Map<String, Object> param);
+
+    protected abstract int getTotalRows(Map<String, Object> param);
 
     protected abstract String setViewPage();
 
-    @GetMapping(value = { "/", "" })
-    public String main(Model model) {
+    @GetMapping(value = {"/", ""})
+    public String index(Model model) {
         model.addAttribute("columns", (new Gson()).toJson(getColumnDataJson()));
         return setViewPage();
     }
-    //콤보박스 조회에 사용 
+
     public Map<String, FieldDetails> getColumnDataJson() {
-        return ExcelUtil.getPojoFieldNamesAndLabels(type);
+        return ExcelUtils.getPojoFieldNamesAndLabels(type);
     }
 
     @GetMapping(value = "/excel/{fileName}")
@@ -57,31 +46,27 @@ public abstract class JqGridAbstract<T> {
                               @RequestParam Map<String, Object> param, @PathVariable String fileName) {
         param.put("page", "0");
 
-        //20231228 다운로드엑셀리스트 재가공
         Map<String, FieldDetails> result = getColumnDataJson();
-        List<Map> list = ExcelUtil.convertListToMap((List<Object>) getList(param));
+        List<Map<Object, Object>> list = ExcelUtils.convertListToMap((List<Object>) getList(param));
 
-        List<Map> excellist = this.getDownloadExcelDataList(result, list);
-        ExcelUtil.downloadExcel(request, response, excellist, ExcelUtil.getPojoFieldNamesAndLabels(type), fileName + ".xls");
+        List<Map<Object, Object>> excellist = this.getDownloadExcelDataList(result, list);
+        ExcelUtils.downloadExcel(request, response, excellist, ExcelUtils.getPojoFieldNamesAndLabels(type), fileName + ".xls");
     }
 
-    public List<Map> getDownloadExcelDataList(Map<String, FieldDetails> result, List<Map> list){
-        List<Map> excellist = new ArrayList<>();
-        Map dataMap = new HashMap();
+    public List<Map<Object, Object>> getDownloadExcelDataList(Map<String, FieldDetails> result, List<Map<Object, Object>> list) {
+        List<Map<Object, Object>> excellist = new ArrayList<>();
+        Map<Object, Object> dataMap = new HashMap<>();
 
-        for (Map map : list) {
-//            log.info(map.toString());
+        for (Map<Object, Object> map : list) {
             Set<String> keySet = result.keySet();
             for (String key : keySet) {
-                if(map.get(key) != null){
+                if (map.get(key) != null) {
                     dataMap.put(key, map.get(key));
-
                     String[] type = result.get(key).type.split(";");
-                    for (int i = 0; i < type.length; i++) {
-                        if(!":".equals(type[i].trim())){
-                            if(map.get(key).equals(type[i].split(":")[0]) ){
-//                                log.info(type[i].split(":")[0], type[i].split(":")[1]);
-                                dataMap.put(key, type[i].split(":")[1]);
+                    for (String s : type) {
+                        if (!":".equals(s.trim())) {
+                            if (map.get(key).equals(s.split(":")[0])) {
+                                dataMap.put(key, s.split(":")[1]);
                                 break;
                             }
                         }
@@ -89,13 +74,13 @@ public abstract class JqGridAbstract<T> {
                 }
             }
             excellist.add(dataMap);
-            dataMap = new HashMap();
+            dataMap = new HashMap<>();
         }
         return excellist;
     }
 
     @ResponseBody
-    @GetMapping(value="/columns", produces="application/json; charset=utf8")
+    @GetMapping(value = "/columns", produces = "application/json; charset=utf8")
     public Object getColumns() {
         return (new Gson()).toJson(getColumnDataJson());
     }

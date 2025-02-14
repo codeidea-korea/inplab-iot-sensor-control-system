@@ -19,8 +19,8 @@ import com.safeone.dashboard.dto.SensorGroupDto;
 import com.safeone.dashboard.service.CommonCodeService;
 import com.safeone.dashboard.service.DashboardService;
 import com.safeone.dashboard.service.SensorGroupService;
-import com.safeone.dashboard.util.ExcelUtil;
-import com.safeone.dashboard.util.ExcelUtil.FieldDetails;
+import com.safeone.dashboard.util.ExcelUtils;
+import com.safeone.dashboard.util.ExcelUtils.FieldDetails;
 
 @Controller
 @RequestMapping("/sensorGroup")
@@ -87,7 +87,7 @@ public class SensorGroupController extends JqGridAbstract<SensorGroupDto> {
         String[] fields = new String[]{"asset_kind_name", "asset_name", "channel_name", "data_time", "start_value", "end_value", "min_value", "max_value", "avg_value"};
         String[] headers = new String[]{"센서종류", "센서명", "채널명", "데이터시간", "시작값", "종료값", "최소값", "최대값", "센서값(평균)"};
 
-        ExcelUtil.downloadExcel(request, response, list, fields, headers, fileName + ".xls");
+        ExcelUtils.downloadExcel(request, response, list, fields, headers, fileName + ".xls");
     }
 
 	@Override

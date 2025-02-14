@@ -9,29 +9,27 @@ public class VworldGeocoder {
         String url = "http://api.vworld.kr/req/address";
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-            .queryParam("service", "address")
-            .queryParam("request", "getcoord")
-            .queryParam("version", "2.0")
-            .queryParam("address", address)
-            .queryParam("type", "PARCEL")
-            .queryParam("key", API_KEY);
+                .queryParam("service", "address")
+                .queryParam("request", "getcoord")
+                .queryParam("version", "2.0")
+                .queryParam("address", address)
+                .queryParam("type", "PARCEL")
+                .queryParam("key", API_KEY);
 
-        String response = HttpUtils.getRestTemplate().getForObject(builder.toUriString(), String.class);
-        return response; // JSON 형식의 응답 반환
+        return HttpUtils.getRestTemplate().getForObject(builder.toUriString(), String.class);
     }
 
     public static String getCoordToAddress(String lat, String lon) {
         String url = "http://api.vworld.kr/req/address";
-    
+
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-            .queryParam("service", "address")
-            .queryParam("request", "getaddress")
-            .queryParam("version", "2.0")
-            .queryParam("point", lon + "," + lat)
-            .queryParam("type", "PARCEL")
-            .queryParam("key", API_KEY);
-    
-        String response = HttpUtils.getRestTemplate().getForObject(builder.toUriString(), String.class);
-        return response; // JSON 형식의 응답 반환
+                .queryParam("service", "address")
+                .queryParam("request", "getaddress")
+                .queryParam("version", "2.0")
+                .queryParam("point", lon + "," + lat)
+                .queryParam("type", "PARCEL")
+                .queryParam("key", API_KEY);
+
+        return HttpUtils.getRestTemplate().getForObject(builder.toUriString(), String.class);
     }
 }

@@ -1,8 +1,8 @@
 package com.safeone.dashboard.config;
 
-import java.io.File;
 import java.nio.charset.Charset;
 
+import com.safeone.dashboard.util.LocalDateFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,8 +25,7 @@ import org.springframework.web.servlet.resource.EncodedResourceResolver;
 import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import com.safeone.dashboard.interceptor.LoginInterceptor;
-import com.safeone.dashboard.util.fommatter.LocalDateFormatter;
-import com.safeone.dashboard.util.fommatter.LocalDateTimeFormatter;
+import com.safeone.dashboard.util.LocalDateTimeFormatter;
 
 import lombok.extern.slf4j.Slf4j;
 
