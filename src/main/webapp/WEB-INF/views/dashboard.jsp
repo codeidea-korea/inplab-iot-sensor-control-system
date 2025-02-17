@@ -5,49 +5,8 @@
 <head>
     <jsp:include page="common/include_head.jsp" flush="true"/>
     <style>
-        /*.tab-container {*/
-        /*    display: flex;*/
-        /*    justify-content: flex-start; !* Align buttons to the left *!*/
-        /*    margin-left: 10px;*/
-        /*    overflow: hidden; !* Ensure rounded corners are visible *!*/
-        /*}*/
-
-        /*.tab-button {*/
-        /*    padding: 10px 40px; !* Increase padding to make buttons longer *!*/
-        /*    cursor: pointer;*/
-        /*    background-color: #555; !* Slightly lighter dark color for unselected buttons *!*/
-        /*    color: #fff; !* White text color for better contrast *!*/
-        /*    border: none;*/
-        /*    outline: none;*/
-        /*    transition: background-color 0.3s;*/
-        /*    width: 150px; !* Set a fixed width for the buttons *!*/
-        /*    text-align: center; !* Center the text *!*/
-        /*    border-radius: 10px 10px 0 0; !* Round top corners *!*/
-        /*    margin-right: 10px; !* Add spacing between buttons *!*/
-        /*    font-size: 1.4rem; !* Increase font size *!*/
-        /*}*/
-
-        /*.tab-button.active {*/
-        /*    background-color: #4682B4; !* Slightly darker sky blue color for the active button *!*/
-        /*    color: #000; !* Black text color for better contrast *!*/
-        /*}*/
-
-        /*.tab-button:hover {*/
-        /*    background-color: #666; !* Slightly lighter dark color for hover effect *!*/
-        /*}*/
-
-        /*.chart-content {*/
-        /*    display: none;*/
-        /*    border-radius: 10px; !* Add this line to round the corners *!*/
-        /*}*/
-
-        /*.chart-content.active {*/
-        /*    display: block;*/
-        /*    border-radius: 10px; !* Add this line to round the corners *!*/
-        /*}*/
-
         .ui-search-toolbar input {
-            border: 1px solid #ccc; /* 원하는 border 색상 */
+            border: 1px solid #ccc;
             padding: 2px;
         }
 
@@ -59,17 +18,6 @@
             border: 1px solid #d3d3d3;
         }
 
-        .ui-jqgrid .ui-jqgrid-htable {
-            table-layout: fixed;
-            margin: 0;
-            border-collapse: collapse;
-        }
-
-        .contents_header {
-            display: flex;
-            align-items: center;
-        }
-
         .filter-area .select_filter .search-top-label {
             padding: 0;
         }
@@ -78,23 +26,6 @@
             display: flex;
             flex-direction: column;
             align-items: start;
-        }
-
-        #chart-district-select,
-        #sensor-name-select,
-        #sensor-type-select,
-        #select-condition {
-            width: 150px;
-            height: 3.6rem;
-            padding: 0 1rem;
-            background-color: #fff;
-            border: 1px solid rgba(0, 0, 0, 0.2);
-            font-weight: 300;
-            font-size: 1.5rem;
-            line-height: 3.4rem;
-            color: #47474c;
-            display: inline-block;
-            vertical-align: top;
         }
 
         .modal-header input[type="datetime-local"] {
@@ -179,34 +110,11 @@
             background-color: #888;
         }
 
-        .rv_marker {
-            display: none;
-            width: 40px;
-            height: 44px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 44px;
-            pointer-events: none;
-        }
-
-        .marker.weather {
-            font-size: 13px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            color: #000;
-            border: 1px solid #ccc;
-        }
-
         .marker.zone {
             width: 32px;
             height: 50px;
             top: 50px;
             position: relative;
-            /* margin-left: -5px; */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -219,7 +127,6 @@
             height: 50px;
             top: 32px;
             position: relative;
-            /* margin-left: -5px; */
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -256,15 +163,6 @@
 
         .marker.asset span.title {
             top: 5px;
-        }
-
-        .ol-overlay-container.ol-selectable {
-            z-index: 0;
-            -ms-user-select: none;
-            -moz-user-select: -moz-none;
-            -khtml-user-select: none;
-            -webkit-user-select: none;
-            user-select: none;
         }
 
         .marker.zone:hover {
@@ -327,11 +225,11 @@
     </style>
 </head>
 <script>
-    const LATENCY = 60 * 1000; // 1분마다
+    const LATENCY = 60 * 1000;
     const ALARM_EFFECT_TIME = 500;
     const MARKER_CHANGE_LEVEL = 17.5;
     let wsUrl = 'ws://localhost:8080';
-    let cctvWs; // cctv websocket
+    let cctvWs;
 
     if (window.location.href.indexOf('106.245') > -1) { // 테스트서버
         wsUrl = 'ws://106.245.95.116:6099';
@@ -362,13 +260,9 @@
             mapId: "map",
             initPosition: {
                 center: [
-                    // 126.88624657982738, 37.480957215573261
-                    // 129.31891142635524, 35.82755842582624
-                    // 127.449482276989, 36.9317789946793
                     _areaInfo.lng, _areaInfo.lat
                 ],
                 zoom: _areaInfo.zoom,
-                // zoom: 15,
                 rotation: 0.5
             }
         });
@@ -419,12 +313,12 @@
         });
 
         $(document).on("click", ".right-utill .roadview", function () {           // 로드뷰 열기/닫기
-            // if (window.vworld.map.type != '2D') {
-            //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
-            //     $(this).removeClass("active");
-            //     $(".roadViewContainer").removeClass("open");
-            //     return;
-            // }
+                                                                                  // if (window.vworld.map.type != '2D') {
+                                                                                  //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
+                                                                                  //     $(this).removeClass("active");
+                                                                                  //     $(".roadViewContainer").removeClass("open");
+                                                                                  //     return;
+                                                                                  // }
 
             if (!$(this).hasClass("active")) {
                 $(this).addClass("active");
@@ -916,115 +810,99 @@
         });
     }
 
-    function editMode(type) { // editMode 열고 닫기
-        let markers = window.vworld.getMap().getOverlays().getArray();
+    function editMode(type) {
+        const markers = window.vworld.getMap().getOverlays().getArray();
+        const $wrap = $("#wrap");
+        const $editmode = $(".right-utill .editmode");
 
         if (type === "open") {
             popFancyClose();
-            $("#wrap").addClass("editMode");
-            $(".right-utill .editmode").addClass("active");
+            $wrap.addClass("editMode");
+            $editmode.addClass("active");
 
-            $.each(markers, function () {
-                let m = this;
-
-                $(m.getElement()).on('mousedown', function (evt) {
-                    $(m.getElement()).addClass('positionChange');
-
-                    $(m.getElement()).on('dragstart', function (evt) {
-                        evt.preventDefault();  // 기본 dragstart 동작 방지
+            $.each(markers, (_i, maker) => {
+                $(maker.getElement()).on('mousedown', () => {
+                    $(maker.getElement()).addClass('positionChange');
+                    $(maker.getElement()).on('dragstart', (evt) => {
+                        evt.preventDefault();
                     });
-
-                    function move(evt) {
-                        m.setPosition(window.vworld.getMap().getEventCoordinate(evt));
-                    }
-
-                    function end(evt) {
-                        window.removeEventListener('mousemove', move);
-                        window.removeEventListener('mouseup', end);
-
-                        $(m.getElement()).off('dragstart');
-                    }
 
                     window.addEventListener('mousemove', move);
                     window.addEventListener('mouseup', end);
+
+                    function move(evt) {
+                        maker.setPosition(window.vworld.getMap().getEventCoordinate(evt));
+                    }
+
+                    function end() {
+                        window.removeEventListener('mousemove', move);
+                        window.removeEventListener('mouseup', end);
+                        $(maker.getElement()).off('dragstart');
+                    }
                 });
             });
-        } else if (type == "close") {
-            $("#wrap").removeClass("editMode");
-            $(".right-utill .editmode").removeClass("active");
-
-            // 위치의 원복
-            $.each(window.vworld.overlays, function () {
-                let o = this;
-                window.vworld.setPositionOverlay(o.uid, o.coords);
+        } else if (type === "close") {
+            $wrap.removeClass("editMode");
+            $editmode.removeClass("active");
+            $.each(window.vworld.overlays, (_i, overlay) => {
+                window.vworld.setPositionOverlay(overlay.uid, overlay.coords);
             });
-
-            $.each(markers, function () {
-                $(this.getElement()).off('mousedown');
+            $.each(markers, (_i, maker) => {
+                $(maker.getElement()).off('mousedown');
             });
-
             alert("취소 되었습니다.");
-        } else if (type == "save") {
-            $("#wrap").removeClass("editMode");
-            $(".right-utill .editmode").removeClass("active");
+        } else if (type === "save") {
+            $wrap.removeClass("editMode");
+            $editmode.removeClass("active");
+            const changedDistricts = $('div.marker.zone.positionChange');
+            const changedAssets = $('div.marker.asset.positionChange');
 
-            let totalCnt = $('div.positionChange').length;
-            let saveCnt = 0;
-
-            // 위치의 저장
-            // vwutil overlay 의 값을 현재 오버레이들의 위치로 변경하고 DB에 저장
-            $.each($('div.marker.zone.positionChange'), function () {
-                let $m = $(this);
-                let coords = window.vworld.getPositionOverlay($m.attr('uid'));
-
-                $.get('/setZoneLocation', {
-                    zone_id: $m.attr('zoneid'),
-                    lat: coords[1],
-                    lng: coords[0]
-                }, function (res) {
-                    // console.log(res);
-
-                    $.each(window.vworld.overlays, function () {
-                        if (this.uid == $m.attr('uid')) {
-                            this.coords = coords;
-                        }
-                    });
-
-                    saveCnt++;
-
-                    if (saveCnt >= totalCnt) {
-                        alert('저장 되었습니다.');
+            $.each(changedDistricts, (_i, maker) => {
+                const $maker = $(maker);
+                const coords = window.vworld.getPositionOverlay($maker.attr('uid'));
+                $.ajax({
+                    method: 'put',
+                    url: '/api/districts/update-position',
+                    data: JSON.stringify({
+                        districtNo: $maker.attr('zoneid'),
+                        distLat: coords[1],
+                        distLon: coords[0]
+                    }),
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    success: () => {
+                        alert('저장되었습니다.');
+                    },
+                    error: () => {
+                        alert('저장에 실패하였습니다.');
                     }
                 });
             });
 
-            $.each($('div.marker.asset.positionChange'), function () {
-                let $m = $(this);
-                let coords = window.vworld.getPositionOverlay($m.attr('uid'));
-
-                $.get('/setAssetLocation', {
-                    asset_id: $m.attr('assetid'),
-                    lat: coords[1],
-                    lng: coords[0]
-                }, function (res) {
-                    // console.log(res);
-
-                    $.each(window.vworld.overlays, function () {
-                        if (this.uid == $m.attr('uid')) {
-                            this.coords = coords;
-                        }
-                    });
-
-                    saveCnt++;
-
-                    if (saveCnt >= totalCnt) {
-                        alert('저장 되었습니다.');
+            $.each(changedAssets, (_i, maker) => {
+                const $maker = $(maker);
+                const coords = window.vworld.getPositionOverlay($maker.attr('uid'));
+                $.ajax({
+                    method: 'put',
+                    url: '/api/sensors/update-position',
+                    data: JSON.stringify({
+                        sensNo: $maker.attr('assetid'),
+                        sensLat: coords[1],
+                        sensLon: coords[0]
+                    }),
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    success: () => {
+                        alert('저장되었습니다.');
+                    },
+                    error: () => {
+                        alert('저장에 실패하였습니다.');
                     }
                 });
             });
 
-            $.each(markers, function () {
-                $(this.getElement()).off('mousedown');
+            $.each(markers, (_i, maker) => {
+                $(maker.getElement()).off('mousedown');
             });
         }
     }
@@ -1289,15 +1167,12 @@
                 if (!!status?.risk_level) {
                     $(ele).attr('fc_step' + status.risk_level, '');
                 }
-
-                // console.log(ele, status);
             });
         }
 
     }
 
     let redrawMarker = debounce(() => {
-        console.log('redrawMarker');
         $.get('/getAssetAlarm', {reg_date: window.lastAlarmDate}, function (res) {
             window.marker.risk = res;
 
@@ -1432,7 +1307,6 @@
         popFancy('#lay-cctv-view', {dragToClose: false, touch: false, backdropClick: false});
     }
 </script>
-
 <body data-pgcode="0000">
 <section id="wrap">
     <jsp:include page="common/include_top.jsp" flush="true"/>

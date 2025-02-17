@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.domain.sensor.repository.NewSensorMapper">
+    <update id="updatePosition" parameterType="com.safeone.dashboard.domain.sensor.dto.UpdatePosition">
+        update tb_sensor_info
+        set sens_lat = #{sensLat}::double precision,
+            sens_lon = #{sensLon}::double precision
+        where sens_no = #{sensNo}
+    </update>
+</mapper>

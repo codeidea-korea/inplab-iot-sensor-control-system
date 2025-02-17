@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 
 
 @Configuration
-@MapperScan(value = "com.safeone.dashboard.dao.**", sqlSessionFactoryRef = "sqlSessionFactory")
+@MapperScan(value = {"com.safeone.dashboard.dao.**", "com.safeone.dashboard.domain.**.repository"}, sqlSessionFactoryRef = "sqlSessionFactory")
 public class DatabaseConfig {
     @Value("${datasource.driverClassName}")
     private String DRIVER_CLASS_NAME;

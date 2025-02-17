@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.domain.district.repository.DistrictMapper">
+    <update id="updatePosition" parameterType="com.safeone.dashboard.domain.district.dto.UpdatePosition">
+        update tb_district_info
+        set dist_lat = #{distLat}::double precision,
+            dist_lon = #{distLon}::double precision
+        where district_no = #{districtNo}
+    </update>
+</mapper>
