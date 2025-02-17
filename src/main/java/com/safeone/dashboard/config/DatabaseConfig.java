@@ -20,10 +20,6 @@ import javax.sql.DataSource;
 @Configuration
 @MapperScan(value = "com.safeone.dashboard.dao.**", sqlSessionFactoryRef = "sqlSessionFactory")
 public class DatabaseConfig {
-    private final static String ALIAS = "safeone";
-
-    // @Resource
-    // Environment env;
     @Value("${datasource.driverClassName}")
     private String DRIVER_CLASS_NAME;
 
@@ -47,7 +43,7 @@ public class DatabaseConfig {
 
     public static StringEncryptor encryptor() {
         StandardPBEStringEncryptor enc = new StandardPBEStringEncryptor();
-        enc.setPassword("smartbusiness");        // 데이터접속 설정의 복호화키값
+        enc.setPassword("smartbusiness");
         return enc;
     }
 

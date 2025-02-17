@@ -618,7 +618,7 @@
     function editMode(type) { // editMode 열고 닫기
         let markers = window.vworld.getMap().getOverlays().getArray();
 
-        if (type == "open") {
+        if (type === "open") {
             popFancyClose();
             $("#wrap").addClass("editMode");
             $(".right-utill .editmode").addClass("active");

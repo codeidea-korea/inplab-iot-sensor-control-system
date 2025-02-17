@@ -1,11 +1,10 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=1440, user-scalable=no,viewport-fit=cover" />
 <meta name="HandheldFriendly" content="true" />
 <meta http-equiv="imagetoolbar" content="no" />
 <meta name="format-detection" content="telephone=no, address=no, email=no, date=no" />
-<!-- <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" /> -->
 <link rel="canonical" href="http://goldencity.iceserver.co.kr" />
 <meta name="title" content="${sessionScope.site_sys_nm}" />
 <meta name="keywords" content="" />
@@ -21,9 +20,8 @@
 <meta name="twitter:image" content="/images/og_images.jpg" />
 <meta name="twitter:description" content="" />
 <title>${sessionScope.site_sys_nm}</title>
-<%--<script type="text/javascript" src="http://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=935413DC-CBE2-382F-B307-933501B0DC45"></script>--%>
+
 <script type="text/javascript" src="https://map.vworld.kr/js/webglMapInit.js.do?version=2.0&apiKey=935413DC-CBE2-382F-B307-933501B0DC45"></script>
-<!-- <script type="text/javascript" src="/Cesium/Cesium.js"></script> -->
 <script type="text/javascript" src="https://cesium.com/downloads/cesiumjs/releases/1.82/Build/Cesium/Cesium.js"></script>
 <link href="https://fonts.cdnfonts.com/css/source-code-pro" rel="stylesheet">
 
@@ -44,13 +42,9 @@
 
 <script type="text/javascript" src="/common/js/prefixfree.min.js"></script>
 
-<%--    <link rel="stylesheet" type="text/css" href="/common/css/slick.css" />--%>
-<%--    <script type="text/javascript" src="/common/js/slick.js"></script>--%>
-
 <link rel="stylesheet" href="/common/css/jquery.fancybox.5.0.css" />
 <script type="text/javascript" src="/common/js/jquery.fancybox.5.0.js"></script>
 
-<!-- chart api -->
 <script type="text/javascript" src="/build/donutty-jquery.js"></script>
 <link rel="stylesheet" type="text/css" href="/build/morris/morris.css" />
 <script type="text/javascript" src="/build/morris/raphael-min.js"></script>
@@ -61,13 +55,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0"></script>
 <script src="/Guriddo_jqGrid_JS_5.4.0/plugins/chartjs-plugin-annotation.min.js"></script>
-<!-- highchart -->
+
 <script src="/Highcharts-11.2.0/highcharts.js"></script>
 <script src="/Highcharts-11.2.0/modules/stock.js"></script>
 <script src="/Highcharts-11.2.0/modules/exporting.js"></script>
 <script src="/Highcharts-11.2.0/modules/accessibility.js"></script>
 
-<!-- Datepicker -->
 <link rel="stylesheet" href="/build/flatpickr/dist/flatpickr.css" />
 <link rel="stylesheet" href="/build/flatpickr/dist/plugins/confirmDate/confirmDate.css" />
 <link rel="stylesheet" href="/build/flatpickr/dist/plugins/monthSelect/style.css" />
@@ -85,16 +78,11 @@
 <script src="https://kit.fontawesome.com/81a554dc3a.js" crossorigin="anonymous"></script>
 
 <link rel="stylesheet" type="text/css" media="screen" href="/Guriddo_jqGrid_JS_5.4.0/css/ui.jqgrid.css" />
-<link rel="stylesheet" type="text/css" href="/common/css/contents_modify.css" />
 
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?libraries=services,panorama&appkey=6d88fb6f38348431a123101209102872"></script>
 <script type="text/javascript" src="/moment.js"></script>
-<!-- 가장 밑으로 -->
 
-<!-- range 피커 -->
 <script type="text/javascript" src="/common/js/daterangepicker.min.js"></script>
-<!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script> -->
-<!-- <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" /> -->
 <link rel="stylesheet" type="text/css" href="/common/css/daterangepicker.css" />
 
 <script type="text/javascript" src="/html2canvas.min.js"></script>
@@ -102,9 +90,7 @@
 <script type="text/javascript" src="/jqgrid_util.js"></script>
 <script type="text/javascript" src="/common.js"></script>
 
-<%-- 검증 --%>
 <script type="text/javascript" src="/validate.js"></script>
-<%-- 주소 검색 --%>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <style>

@@ -5,46 +5,46 @@
 <head>
     <jsp:include page="common/include_head.jsp" flush="true"/>
     <style>
-        .tab-container {
-            display: flex;
-            justify-content: flex-start; /* Align buttons to the left */
-            margin-left: 10px;
-            overflow: hidden; /* Ensure rounded corners are visible */
-        }
+        /*.tab-container {*/
+        /*    display: flex;*/
+        /*    justify-content: flex-start; !* Align buttons to the left *!*/
+        /*    margin-left: 10px;*/
+        /*    overflow: hidden; !* Ensure rounded corners are visible *!*/
+        /*}*/
 
-        .tab-button {
-            padding: 10px 40px; /* Increase padding to make buttons longer */
-            cursor: pointer;
-            background-color: #555; /* Slightly lighter dark color for unselected buttons */
-            color: #fff; /* White text color for better contrast */
-            border: none;
-            outline: none;
-            transition: background-color 0.3s;
-            width: 150px; /* Set a fixed width for the buttons */
-            text-align: center; /* Center the text */
-            border-radius: 10px 10px 0 0; /* Round top corners */
-            margin-right: 10px; /* Add spacing between buttons */
-            font-size: 1.4rem; /* Increase font size */
-        }
+        /*.tab-button {*/
+        /*    padding: 10px 40px; !* Increase padding to make buttons longer *!*/
+        /*    cursor: pointer;*/
+        /*    background-color: #555; !* Slightly lighter dark color for unselected buttons *!*/
+        /*    color: #fff; !* White text color for better contrast *!*/
+        /*    border: none;*/
+        /*    outline: none;*/
+        /*    transition: background-color 0.3s;*/
+        /*    width: 150px; !* Set a fixed width for the buttons *!*/
+        /*    text-align: center; !* Center the text *!*/
+        /*    border-radius: 10px 10px 0 0; !* Round top corners *!*/
+        /*    margin-right: 10px; !* Add spacing between buttons *!*/
+        /*    font-size: 1.4rem; !* Increase font size *!*/
+        /*}*/
 
-        .tab-button.active {
-            background-color: #4682B4; /* Slightly darker sky blue color for the active button */
-            color: #000; /* Black text color for better contrast */
-        }
+        /*.tab-button.active {*/
+        /*    background-color: #4682B4; !* Slightly darker sky blue color for the active button *!*/
+        /*    color: #000; !* Black text color for better contrast *!*/
+        /*}*/
 
-        .tab-button:hover {
-            background-color: #666; /* Slightly lighter dark color for hover effect */
-        }
+        /*.tab-button:hover {*/
+        /*    background-color: #666; !* Slightly lighter dark color for hover effect *!*/
+        /*}*/
 
-        .chart-content {
-            display: none;
-            border-radius: 10px; /* Add this line to round the corners */
-        }
+        /*.chart-content {*/
+        /*    display: none;*/
+        /*    border-radius: 10px; !* Add this line to round the corners *!*/
+        /*}*/
 
-        .chart-content.active {
-            display: block;
-            border-radius: 10px; /* Add this line to round the corners */
-        }
+        /*.chart-content.active {*/
+        /*    display: block;*/
+        /*    border-radius: 10px; !* Add this line to round the corners *!*/
+        /*}*/
 
         .ui-search-toolbar input {
             border: 1px solid #ccc; /* 원하는 border 색상 */
@@ -419,12 +419,12 @@
         });
 
         $(document).on("click", ".right-utill .roadview", function () {           // 로드뷰 열기/닫기
-                                                                                  // if (window.vworld.map.type != '2D') {
-                                                                                  //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
-                                                                                  //     $(this).removeClass("active");
-                                                                                  //     $(".roadViewContainer").removeClass("open");
-                                                                                  //     return;
-                                                                                  // }
+            // if (window.vworld.map.type != '2D') {
+            //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
+            //     $(this).removeClass("active");
+            //     $(".roadViewContainer").removeClass("open");
+            //     return;
+            // }
 
             if (!$(this).hasClass("active")) {
                 $(this).addClass("active");
@@ -919,7 +919,7 @@
     function editMode(type) { // editMode 열고 닫기
         let markers = window.vworld.getMap().getOverlays().getArray();
 
-        if (type == "open") {
+        if (type === "open") {
             popFancyClose();
             $("#wrap").addClass("editMode");
             $(".right-utill .editmode").addClass("active");
@@ -1447,7 +1447,6 @@
                     </div>
                     <div class="rain-info" style="display: none">
                         <img src="images/weather/rain_ic.png"/>
-                        <span></span>
                     </div>
                 </div>
                 <select class="selectZone">
@@ -1471,6 +1470,7 @@
     </div>
     <div id="right-alarm" class="alarmContainer">
     </div>
+
     <div id="map"></div>
     <div class="map_typecontrol">
                 <span id="btnSatmap" class="btn map-sat-btn"><img src="/images/map_sky.jpg" alt=""/><i>항공 지도</i>
@@ -1480,12 +1480,14 @@
         <span id="btnSkyview" class="btn map-3d-btn"><img src="/images/map_3d.jpg" alt=""/><i>3D 지도</i>
                 </span>
     </div>
+
     <div class="roadViewContainer" id="road-map">
         <button type="button" class="road-map-close">
             <img src="/images/btn_lay_close.png" alt="닫기"/>
         </button>
         <div class="roadView"></div>
     </div>
+
     <div id="lay-weather-area" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
@@ -1497,6 +1499,7 @@
             </iframe>
         </div>
     </div>
+
     <div id="lay-weather-area2" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
@@ -1508,6 +1511,7 @@
             </iframe>
         </div>
     </div>
+
     <div id="lay-sensor-info" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
@@ -1516,20 +1520,7 @@
             센서정보
         </div>
     </div>
-    <div id="lay-cctv-view" class="layer-base">
-        <div class="layer-base-btns">
-            <a href="javascript:void(0);" class="fullscreen"><img src="/images/btn_lay_full.png" data-fancybox-full
-                                                                  alt="전체화면"/></a>
-            <a href="javascript:void(0);" class="closeCctv"><img src="/images/btn_lay_close.png" data-fancybox-close
-        </div>
-        <div class="layer-base-title icon cctv"></div>
-        <div class="layer-base-conts nosignal">
-            <div class="container">
-                <div class="title" data-text="No Signal">No Signal</div>
-            </div>
-            <img src="" alt="CCTV" style="position:relative; z-index: 10;"/>
-        </div>
-    </div>
+
     <div id="lay-disaster-broadcast" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
@@ -1572,28 +1563,6 @@
             </div>
         </div>
     </div>
-    <div id="lay-edit-mode" class="layer-alarm">
-        <div class="layer-alarm-btns">
-            <a href="javascript:popFancyClose();"><img src="/images/btn_lay_close.png" alt="닫기"/></a>
-        </div>
-        <div class="layer-alarm-conts">
-            <p class="tit">센서 위치관리</p>
-            <p class="txt">
-                <strong point>EDIT MODE</strong>로 변환 하시겠습니까?
-            </p>
-            <p class="btn">
-                <a href="javascript:editMode('open');" blue>예</a>
-                <a href="javascript:popFancyClose();">아니오</a>
-            </p>
-        </div>
-    </div>
-    <div class="edit-mode-use">
-        <p class="tit">Edit Mode를 사용중입니다.</p>
-        <p class="btn">
-            <a href="javascript:editMode('save');" blue>저장</a>
-            <a href="javascript:editMode('close');">취소</a>
-        </p>
-    </div>
 
     <div id="chart-popup" class="layer-base">
         <div class="layer-base-btns">
@@ -1621,7 +1590,31 @@
             </div>
         </div>
     </div>
+
+    <div id="lay-edit-mode" class="layer-alarm">
+        <div class="layer-alarm-btns">
+            <a href="javascript:popFancyClose();"><img src="/images/btn_lay_close.png" alt="닫기"/></a>
+        </div>
+        <div class="layer-alarm-conts">
+            <p class="tit">센서 위치관리</p>
+            <p class="txt">
+                <strong point>EDIT MODE</strong>로 변환 하시겠습니까?
+            </p>
+            <p class="btn">
+                <a href="javascript:editMode('open');" blue>예</a>
+                <a href="javascript:popFancyClose();">아니오</a>
+            </p>
+        </div>
+    </div>
+
+    <div class="edit-mode-use">
+        <p class="tit">Edit Mode를 사용중입니다.</p>
+        <p class="btn">
+            <a href="javascript:editMode('save');" blue>저장</a>
+            <a href="javascript:editMode('close');">취소</a>
+        </p>
+    </div>
+
 </section>
 </body>
-
 </html>
