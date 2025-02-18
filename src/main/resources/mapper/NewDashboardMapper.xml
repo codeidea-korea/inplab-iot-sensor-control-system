@@ -15,6 +15,18 @@
         order by tsi.senstype_no, tsi.sens_nm;
     </select>
 
+    <select id="getSensorsCount" parameterType="java.util.Map" resultType="int">
+        select count(*)
+        from tb_sensor_info tsi
+                 left join tb_sensor_type tst on tsi.senstype_no = tst.senstype_no
+        where tsi.sens_no in (select tlim.sens_no
+                              from tb_logr_idx_map tlim
+                              where logr_no in (select tli.logr_no
+                                                from tb_district_info tdi
+                                                         left outer join tb_logger_info tli on tli.district_no = tdi.district_no
+                                                where tdi.district_no = #{district_no}));
+    </select>
+
     <select id="getSensorTypes" resultType="java.util.Map">
         select *
         from tb_sensor_type

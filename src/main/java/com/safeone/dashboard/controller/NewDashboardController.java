@@ -18,8 +18,10 @@ public class NewDashboardController {
     private final NewDashboardService newDashboardService;
 
     @GetMapping("/asset/count")
-    public int getAssetCount(Map<String, Object> map) {
-        return 0;
+    public int getAssetCount(@RequestParam Map<String, Object> map) {
+        int count = 0;
+        count += newDashboardService.getSensorsCount(map);
+        return count;
     }
 
     @GetMapping("/asset/all")

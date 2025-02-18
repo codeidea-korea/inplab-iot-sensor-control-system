@@ -230,27 +230,120 @@
     const MARKER_CHANGE_LEVEL = 17.5;
     let wsUrl = 'ws://localhost:8080';
     let cctvWs;
-
-    if (window.location.href.indexOf('106.245') > -1) { // 테스트서버
-        wsUrl = 'ws://106.245.95.116:6099';
-    } else if (window.location.href.indexOf('121.159') > -1) { // 진천서버
-        wsUrl = 'ws://121.159.33.107:9090';
-    }
-
-    try {
-        var _sensorTypes = ${sensorTypes};
-        var _areaInfo = ${areaInfo};
-    } catch (e) {
-    }
-
+    const _sensorTypes = ${sensorTypes};
+    const _areaInfo = ${areaInfo};
     window.isRoadView = false;
-    window.marker = {};
-    window.marker.zone = [];
-    window.marker.asset = [];
-    window.marker.risk = [];
-    window.zoneDetail = {};
+    window.markers = {};
+    window.markers.districts = [];
+    window.markers.assets = [];
+    window.markers.risks = [];
+
+    function editMode(type) {
+        const markers = window.vworld.getMap().getOverlays().getArray();
+        const $wrap = $("#wrap");
+        const $editmode = $(".right-utill .editmode");
+
+        if (type === "open") {
+            popFancyClose();
+            $wrap.addClass("editMode");
+            $editmode.addClass("active");
+
+            $.each(markers, (_i, maker) => {
+                $(maker.getElement()).on('mousedown', () => {
+                    $(maker.getElement()).addClass('positionChange');
+                    $(maker.getElement()).on('dragstart', (evt) => {
+                        evt.preventDefault();
+                    });
+
+                    window.addEventListener('mousemove', move);
+                    window.addEventListener('mouseup', end);
+
+                    function move(evt) {
+                        maker.setPosition(window.vworld.getMap().getEventCoordinate(evt));
+                    }
+
+                    function end() {
+                        window.removeEventListener('mousemove', move);
+                        window.removeEventListener('mouseup', end);
+                        $(maker.getElement()).off('dragstart');
+                    }
+                });
+            });
+        } else if (type === "close") {
+            $wrap.removeClass("editMode");
+            $editmode.removeClass("active");
+            $.each(window.vworld.overlays, (_i, overlay) => {
+                window.vworld.setPositionOverlay(overlay.uid, overlay.coords);
+            });
+            $.each(markers, (_i, maker) => {
+                $(maker.getElement()).off('mousedown');
+            });
+            alert("취소 되었습니다.");
+        } else if (type === "save") {
+            $wrap.removeClass("editMode");
+            $editmode.removeClass("active");
+            const changedDistricts = $('div.marker.zone.positionChange');
+            const changedAssets = $('div.marker.asset.positionChange');
+
+            $.each(changedDistricts, (_i, maker) => {
+                const $maker = $(maker);
+                const coords = window.vworld.getPositionOverlay($maker.attr('uid'));
+                $.ajax({
+                    method: 'put',
+                    url: '/api/districts/update-position',
+                    data: JSON.stringify({
+                        districtNo: $maker.attr('zoneid'),
+                        distLat: coords[1],
+                        distLon: coords[0]
+                    }),
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    success: () => {
+                        alert('저장되었습니다.');
+                    },
+                    error: () => {
+                        alert('저장에 실패하였습니다.');
+                    }
+                });
+            });
+
+            $.each(changedAssets, (_i, maker) => {
+                const $maker = $(maker);
+                const coords = window.vworld.getPositionOverlay($maker.attr('uid'));
+                $.ajax({
+                    method: 'put',
+                    url: '/api/sensors/update-position',
+                    data: JSON.stringify({
+                        sensNo: $maker.attr('assetid'),
+                        sensLat: coords[1],
+                        sensLon: coords[0]
+                    }),
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    success: () => {
+                        alert('저장되었습니다.');
+                    },
+                    error: () => {
+                        alert('저장에 실패하였습니다.');
+                    }
+                });
+            });
+
+            $.each(markers, (_i, maker) => {
+                $(maker.getElement()).off('mousedown');
+            });
+        }
+    }
 
     $(function () {
+        init();
+
+        if (window.location.href.indexOf('106.245') > -1) { // 테스트서버
+            wsUrl = 'ws://106.245.95.116:6099';
+        } else if (window.location.href.indexOf('121.159') > -1) { // 진천서버
+            wsUrl = 'ws://121.159.33.107:9090';
+        }
+
         const autoLogin = JSON.parse(localStorage.getItem('autoLogin'));
 
         if (autoLogin) {
@@ -266,7 +359,6 @@
                 rotation: 0.5
             }
         });
-
         window.vworld.vwmap2d();
 
         $(document).on('click', '.map-2d-btn', function () {
@@ -282,13 +374,11 @@
         $(document).on('click', '.map-3d-btn', function () {
             $("#wrap").removeClass("editMode");
             $(".right-utill .editmode").removeClass("active");
-
             window.vworld.vwmap3d();
         });
 
         $(document).on('click', '.map-sat-btn', function () {
             window.vworld.vwmap2d();
-
             window.vworld.getMap().getLayers().clear();
             window.vworld.getMap().addLayer(Satellite);
             window.vworld.getMap().addLayer(Hybrid);
@@ -312,14 +402,7 @@
             }
         });
 
-        $(document).on("click", ".right-utill .roadview", function () {           // 로드뷰 열기/닫기
-                                                                                  // if (window.vworld.map.type != '2D') {
-                                                                                  //     alert('로드뷰 기능은 2D 맵에서만 사용하실 수 있습니다.');
-                                                                                  //     $(this).removeClass("active");
-                                                                                  //     $(".roadViewContainer").removeClass("open");
-                                                                                  //     return;
-                                                                                  // }
-
+        $(document).on("click", ".right-utill .roadview", function () {
             if (!$(this).hasClass("active")) {
                 $(this).addClass("active");
                 window.isRoadView = true;
@@ -366,8 +449,6 @@
             setTimeout(function () {
                 $('.site-status-details').hide();
             }, 300);
-
-            clearInterval(window.zoneDetail);
         });
 
         $(document).on('map_action_end', debounce(function (e) {
@@ -376,28 +457,28 @@
             }
 
             if ($('.site-status-list select.selectZone option:selected').val() === '') {
-                $.each(window.marker.zone, function () {
+                $.each(window.markers.districts, function () {
                     window.vworld.visibleOverlay(this, true);
                 });
 
-                $.each(window.marker.asset, function () {
+                $.each(window.markers.assets, function () {
                     window.vworld.visibleOverlay(this, false);
                 });
             } else {
                 if (window.vworld.getZoom() >= MARKER_CHANGE_LEVEL) {
-                    $.each(window.marker.zone, function () {
+                    $.each(window.markers.districts, function () {
                         window.vworld.visibleOverlay(this, false);
                     });
-                    $.each(window.marker.asset, function () {
+                    $.each(window.markers.assets, function () {
                         // if (getToggleStatus(this)) {
                         window.vworld.visibleOverlay(this, true);
                         // }
                     });
                 } else {
-                    $.each(window.marker.zone, function () {
+                    $.each(window.markers.districts, function () {
                         window.vworld.visibleOverlay(this, true);
                     });
-                    $.each(window.marker.asset, (_index, item) => {
+                    $.each(window.markers.assets, (_index, item) => {
                         window.vworld.visibleOverlay(item, false);
                     });
                 }
@@ -592,7 +673,7 @@
                 });
             });
 
-            data.forEach((item, index) => {
+            data.forEach((item) => {
                 const mappedData = Array(allLabels.length).fill(null); // 모든 값을 null로 초기화
 
                 item.forEach((subItem) => {
@@ -777,7 +858,6 @@
         $(document).on('click', '.site-zone-list li .site-zone-conts p.check-box span', function (e) {
             const selectAssetId = $(this).closest('li').attr('asset_id');
             const checked = !$(this).closest('p.check-box').find('input').is(':checked');
-
             if (window.vworld.getZoom() < MARKER_CHANGE_LEVEL) {
                 window.vworld.setPanBy(window.vworld.getCenter(), 18, function () {
                     markerVisible(selectAssetId, checked);
@@ -790,227 +870,119 @@
         $(document).on('click', 'i.fa-eye', function (e) {
             const selectAssetId = $(this).closest('li').attr('asset_id');
             const data = window.vworld.overlays.find(d => d.asset_id === selectAssetId);
-
             $(document).trigger('overlay_click', data);
         });
 
         $('.site-zone-list p.check-box input').prop('checked', true);
 
-        initDashboard();
-    });
-
-    function markerVisible(asset_id, visible) {
-        $.each(window.vworld.overlays, function () {
-            if (typeof this['asset_id'] != 'undefined') {
-                if (this.asset_id === asset_id) {
-                    window.vworld.visibleOverlay(this.uid, visible);
-                    return false;
+        function markerVisible(asset_id, visible) {
+            $.each(window.vworld.overlays, function () {
+                if (typeof this['asset_id'] != 'undefined') {
+                    if (this.asset_id === asset_id) {
+                        window.vworld.visibleOverlay(this.uid, visible);
+                        return false;
+                    }
                 }
-            }
-        });
-    }
-
-    function editMode(type) {
-        const markers = window.vworld.getMap().getOverlays().getArray();
-        const $wrap = $("#wrap");
-        const $editmode = $(".right-utill .editmode");
-
-        if (type === "open") {
-            popFancyClose();
-            $wrap.addClass("editMode");
-            $editmode.addClass("active");
-
-            $.each(markers, (_i, maker) => {
-                $(maker.getElement()).on('mousedown', () => {
-                    $(maker.getElement()).addClass('positionChange');
-                    $(maker.getElement()).on('dragstart', (evt) => {
-                        evt.preventDefault();
-                    });
-
-                    window.addEventListener('mousemove', move);
-                    window.addEventListener('mouseup', end);
-
-                    function move(evt) {
-                        maker.setPosition(window.vworld.getMap().getEventCoordinate(evt));
-                    }
-
-                    function end() {
-                        window.removeEventListener('mousemove', move);
-                        window.removeEventListener('mouseup', end);
-                        $(maker.getElement()).off('dragstart');
-                    }
-                });
-            });
-        } else if (type === "close") {
-            $wrap.removeClass("editMode");
-            $editmode.removeClass("active");
-            $.each(window.vworld.overlays, (_i, overlay) => {
-                window.vworld.setPositionOverlay(overlay.uid, overlay.coords);
-            });
-            $.each(markers, (_i, maker) => {
-                $(maker.getElement()).off('mousedown');
-            });
-            alert("취소 되었습니다.");
-        } else if (type === "save") {
-            $wrap.removeClass("editMode");
-            $editmode.removeClass("active");
-            const changedDistricts = $('div.marker.zone.positionChange');
-            const changedAssets = $('div.marker.asset.positionChange');
-
-            $.each(changedDistricts, (_i, maker) => {
-                const $maker = $(maker);
-                const coords = window.vworld.getPositionOverlay($maker.attr('uid'));
-                $.ajax({
-                    method: 'put',
-                    url: '/api/districts/update-position',
-                    data: JSON.stringify({
-                        districtNo: $maker.attr('zoneid'),
-                        distLat: coords[1],
-                        distLon: coords[0]
-                    }),
-                    dataType: 'json',
-                    contentType: 'application/json; charset=utf-8',
-                    success: () => {
-                        alert('저장되었습니다.');
-                    },
-                    error: () => {
-                        alert('저장에 실패하였습니다.');
-                    }
-                });
-            });
-
-            $.each(changedAssets, (_i, maker) => {
-                const $maker = $(maker);
-                const coords = window.vworld.getPositionOverlay($maker.attr('uid'));
-                $.ajax({
-                    method: 'put',
-                    url: '/api/sensors/update-position',
-                    data: JSON.stringify({
-                        sensNo: $maker.attr('assetid'),
-                        sensLat: coords[1],
-                        sensLon: coords[0]
-                    }),
-                    dataType: 'json',
-                    contentType: 'application/json; charset=utf-8',
-                    success: () => {
-                        alert('저장되었습니다.');
-                    },
-                    error: () => {
-                        alert('저장에 실패하였습니다.');
-                    }
-                });
-            });
-
-            $.each(markers, (_i, maker) => {
-                $(maker.getElement()).off('mousedown');
             });
         }
-    }
 
-    function initDashboard() {
-        initZoneSelect();
-        initSiteZone();
-        loadAlarm();
-    }
+        function init() {
+            initDistrictSelectZone();
+            initAssetList();
+        }
 
-    function initZoneSelect() {
-        $.get("/adminAdd/districtInfo/all", (res) => {
-            $('select.selectZone').empty();
-            $('select.selectZone').append('<option value="">현장 선택</option>');
-
-            $.each(res, (_idx, district) => {
-                $('select.selectZone').append('<option value="' + district.district_no + '" lat="' + district.dist_lat + '" lng="' + district.dist_lon + '">' + district.district_nm + '</option>');
-
-                $.get('/new-dashboard/asset/count', {district_no: district.district_no}, (res) => {
-                    window.marker.zone.push(window.vworld.addOverlay(
-                        '<div class="marker zone" zoneid="' + district.district_no + '">' +
-                        '    <img src="/images/icon_area1.png"/>' +
-                        '    <span class="count">' + res + '</span>' +
-                        '    <span class="title">' + district.district_nm + '</span>' +
-                        '</div>'
-                        , [district.dist_lon, district.dist_lat]
-                        , '/images/icon_area1.png', district.district_nm, res, {
-                            type: 'area',
-                            zone_id: district.district_no
-                        }));
-                    redrawMarker();
-                });
-                loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
-            });
-
-            $('select.selectZone').off().on('change', function () {
-                window.marker.asset = [];
-
-                let $selected = $("option:selected", this);
-                const district_no = $selected.val();
-                $.get("/adminAdd/districtInfo/all", (res) => {
-                    const district = res.filter(r => r.district_no === district_no)[0];
-                    loadMarker(district.district_no, [district.dist_lon, district.dist_lat]);
-                })
-                $('.rain-info').hide();
-                if ($selected.index() > 0) {
-                    $('.rain-info').show();
-                    $('.site-status-toggle').addClass('active')
-
-                    $.get('/new-dashboard/asset/all', {district_no: district_no}, (res) => {
-                        $('.zoneSelected').data('zoneid', district_no);
-                        $('.site-zone-list li .site-zone-conts ul').empty();
-
-                        $.each(res.sensors, (_idx, sensor) => {
-                            let status = window.marker.risk.find(r => r.zone_id === district_no && r.asset_id === sensor.sens_no);
-                            let fc_step = !!status?.risk_level ? 'fc_step' + status.risk_level : '';
-
-                            const html =
-                                '<li ' + fc_step + ' asset_id="' + sensor.sens_no + '">' +
-                                '    <a href="javascript:void(0);" data-coords="' + sensor.sens_lon + ',' + sensor.sens_lat + '">' + sensor.sens_nm + '</a>' +
-                                '    <div>' +
-                                '        <i class="fa-regular fa-eye"></i>　' +
-                                '        <p class="check-box" notxt="" small="">' +
-                                '            <input type="checkbox" id="check_conts01_' + _idx + '" name="check_conts01_' + _idx + '" value="" checked>' +
-                                '            <label for="check_conts01_' + _idx + '">' +
-                                '                <span class="graphic"></span>' +
-                                '            </label>' +
-                                '        </p>' +
-                                '    </div>' +
-                                '</li>';
-                            $('.site-zone-list li[kind=' + sensor.senstype_no + '] .site-zone-conts ul').append(html);
-                        });
-                        sortAssetsByLength()
-                        $(document).trigger('map_action_end');
+        function initDistrictSelectZone() {
+            const $districtSelectZone = $('select.selectZone');
+            $.get("/adminAdd/districtInfo/all", (res) => {
+                res = res.sort((a, b) => a.district_nm.localeCompare(b.district_nm));
+                $districtSelectZone.append('<option value="">현장 선택</option>');
+                $.each(res, (_idx, district) => {
+                    $districtSelectZone.append('<option value="' + district.district_no + '" lat="' + district.dist_lat + '" lng="' + district.dist_lon + '">' + district.district_nm + '</option>');
+                    $.get('/new-dashboard/asset/count', {district_no: district.district_no}, (res) => {
+                        window.markers.districts.push(window.vworld.addOverlay(
+                            '<div class="marker zone" zoneid="' + district.district_no + '">' +
+                            '    <img src="/images/icon_area1.png"/>' +
+                            '    <span class="count">' + res + '</span>' +
+                            '    <span class="title">' + district.district_nm + '</span>' +
+                            '</div>'
+                            , [district.dist_lon, district.dist_lat]
+                            , '/images/icon_area1.png', district.district_nm, res, {
+                                type: 'area',
+                                zone_id: district.district_no
+                            }))
                     });
-
-                    $('.zoneSelected').show();
-                    window.vworld.setPanBy([parseFloat($selected.attr('lng')), parseFloat($selected.attr('lat'))], 18);
-                } else {
-                    $('.zoneSelected').hide();
-                    $('.site-status-toggle').removeClass('active');
-                    $('.site-status-details .close-btns').trigger('click');
-                    $(document).trigger('map_action_end');
-                }
-
-                if ($('div.site-status-toggle.active > button').hasClass("show") && $selected.val() > 0) {
-                    getZoneDetail();
-                }
+                });
             });
-        });
-    }
+        }
 
-    function sortAssetsByLength() {
-        const $liElements = $('.site-zone-list > li');
-        $liElements.sort(function (a, b) {
-            const aCount = $(a).find('.site-zone-conts ul li').length;
-            const bCount = $(b).find('.site-zone-conts ul li').length;
-            return bCount - aCount;
-        });
-        $('.site-zone-list').append($liElements);
-    }
+        $('select.selectZone').change(function () {
+            let $selected = $("option:selected", this);
+            const districtNo = $selected.val();
+            if ($selected.index() > 0) {
+                initDistrictSelectChange(districtNo)
 
-    function loadMarker(district_no, default_coords) {
-        $.get('/new-dashboard/asset/all', {district_no: district_no}, (res) => {
-            $.each(res.sensors, (_idx, sensor) => {
-                let img = '';
+                $.get('/new-dashboard/asset/all', {district_no: districtNo}, (res) => {
+                    window.markers.assets.forEach((uid) => {
+                        window.vworld.removeOverlay(uid);
+                    });
+                    window.markers.assets = [];
+                    loadSensorMakers(districtNo, res.sensors);
+
+                    $.each(res.sensors, (_idx, sensor) => {
+                        const status = window.markers.risks.find(r => r.zone_id === districtNo && r.asset_id === sensor.sens_no);
+                        const fcStep = !!status?.risk_level ? 'fc_step' + status.risk_level : '';
+                        const html =
+                            '<li ' + fcStep + ' asset_id="' + sensor.sens_no + '">' +
+                            '    <a href="javascript:void(0);" data-coords="' + sensor.sens_lon + ',' + sensor.sens_lat + '">' + sensor.sens_nm + '</a>' +
+                            '    <div>' +
+                            '        <i class="fa-regular fa-eye"></i>　' +
+                            '        <p class="check-box" notxt="" small="">' +
+                            '            <input type="checkbox" id="check_conts01_' + _idx + '" name="check_conts01_' + _idx + '" value="" checked>' +
+                            '            <label for="check_conts01_' + _idx + '">' +
+                            '                <span class="graphic"></span>' +
+                            '            </label>' +
+                            '        </p>' +
+                            '    </div>' +
+                            '</li>';
+                        $('.site-zone-list li[kind=' + sensor.senstype_no + '] .site-zone-conts ul').append(html);
+                    });
+                    $('.site-zone-list li input[type="checkbox"]').prop('checked', true);
+                    sortAssetsByLength()
+                    $(document).trigger('map_action_end');
+                });
+                $('.zoneSelected').show();
+                window.vworld.setPanBy([parseFloat($selected.attr('lng')), parseFloat($selected.attr('lat'))], 18);
+            } else {
+                $('.zoneSelected').hide();
+                $('.site-status-toggle').removeClass('active');
+                $('.site-status-details .close-btns').trigger('click');
+                $(document).trigger('map_action_end');
+            }
+            if ($('div.site-status-toggle.active > button').hasClass("show") && $selected.val() > 0) {
+                getZoneDetail();
+            }
+        });
+
+        function initDistrictSelectChange(districtNo) {
+            $('.site-status-toggle').addClass('active')
+            $('.zoneSelected').data('zoneid', districtNo);
+            $('.site-zone-list li .site-zone-conts ul').empty();
+        }
+
+        function sortAssetsByLength() {
+            const $liElements = $('.site-zone-list > li');
+            $liElements.sort(function (a, b) {
+                const aCount = $(a).find('.site-zone-conts ul li').length;
+                const bCount = $(b).find('.site-zone-conts ul li').length;
+                return bCount - aCount;
+            });
+            $('.site-zone-list').append($liElements);
+        }
+
+        function loadSensorMakers(districtNo, sensors) {
+            $.each(sensors, (_idx, sensor) => {
+                let img;
                 let type = 'sensor';
-
                 if (sensor.sens_tp_nm === '구조물경사계') {
                     img = 'icon_sensor_tm.png';
                 } else if (sensor.sens_tp_nm === '강우량계') {
@@ -1030,282 +1002,102 @@
                 } else {
                     img = 'icon_sensor_tm.png';
                 }
-
-                let coords;
-                if (sensor.sens_lon === null && sensor.sens_lat === null) {
-                    coords = default_coords;
-                } else {
-                    coords = [sensor.sens_lon, sensor.sens_lat];
-                }
-                const uid = window.vworld.addOverlay(
-                    '<div class="marker asset" zoneid="' + district_no + '" assetid="' + sensor.sens_no + '">' +
+                const position = [sensor.sens_lon, sensor.sens_lat];
+                const sensorMaker = window.vworld.addOverlay(
+                    '<div class="marker asset" zoneid="' + districtNo + '" assetid="' + sensor.sens_no + '">' +
                     '    <img src="/images/' + img + '"/>' +
                     '    <span class="title">' + sensor.sens_nm + '</span>' +
                     '</div>'
-                    , coords,
+                    , position,
                     '/images/' + img, sensor.sens_nm, null, {
                         type: type,
                         asset_id: sensor.sens_no,
-                        zone_id: district_no,
-                        // etc1: this.etc1
+                        zone_id: districtNo,
                     });
-                window.marker.asset.push(uid);
-                window.vworld.visibleOverlay(uid, false);
+                window.markers.assets.push(sensorMaker);
             });
-        });
-    }
-
-    // 자산 종류 출력
-    function initSiteZone() {
-        $('.site-zone-area ul.site-zone-list').empty();
-        $.each(_sensorTypes, (idx, item) => {
-            const html =
-                '  <li kind="' + item.senstype_no + '">'
-                + '    <div class="site-zone-title">'
-                + '        <strong>'
-                + '            <i id="arrow-up" class="fa-solid fa-arrow-up fa-xl arrow-up" style="color: #ffffff; margin-right: 10px; cursor: pointer;"></i>'
-                + item.sens_tp_nm
-                + '        </strong>'
-                + '        <p class="check-box" notxt="" small="">'
-                + '            <input type="checkbox" checked id="check_tit01_' + idx + '" name="check_tit01_' + idx + '" value="">'
-                + '            <label for="check_tit01_' + idx + '">'
-                + '                <span class="graphic"></span>'
-                + '            </label>'
-                + '        </p>'
-                + '    </div>'
-                + '    <div class="site-zone-conts">'
-                + '        <ul></ul>'
-                + '    </div>'
-                + '</li>';
-            $('.site-zone-area ul.site-zone-list').append(html);
-        });
-    }
-
-    $(document).on('click', '.arrow-up', function () {
-        $(this).toggleClass('fa-arrow-up fa-arrow-down');
-        const $ul = $(this).closest('.site-zone-title').next('.site-zone-conts').find('ul');
-        var $li = $ul.children('li').get().reverse();
-        $ul.empty().append($li);
-    });
-
-    function loadRoadView(lat, lng) {
-        window.isRoadView = true;
-
-        // let center = ol.proj.transform(window.vworld.getMap().getView().getCenter(), "EPSG:3857", "EPSG:4326");
-        initRoadView($('.roadView'), lat, lng, function (rv) {
-            // console.log(rv);
-            if (rv.getPanoId() == null) {
-                $(".roadViewContainer").removeClass("open");
-                alert('로드뷰를 제공하지 않는 지역입니다');
-            } else {
-                $(".roadViewContainer").addClass("open");
-            }
-        });
-    }
-
-    function getAlarmCard(item) {
-        // 0: 안전, 1: 관심, 2: 주의, 3: 경계, 4: 심각
-        let html = '<div class="right-alarm_re" step' + item.risk_level + '="" data-zoneid="' + item.zone_id + '" data-coords="' + item.x + ',' + item.y + '" data-assetid="' + item.asset_id + '">';
-        html += '<button type="button" class="close-alarm"><img src="/images/close-alarm.png" alt="close"></button>';
-
-        let icon_name = '';
-
-        // sensor, alarm, cctv, warning, disaster, maintenance, admin, dashboard
-        if (item.alarm_type == '통신이상') {
-            icon_name = 'disaster';
-        } else {
-            icon_name = 'alarm';
         }
 
-        html += '<p class="icon"><span data-type="' + icon_name + '"></span></p><dl>';
-        html += '<dt>' + item.alarm_type + '<br/>' + item.zone_name + '</dt><dd>' + item.asset_kind_name + ' ' + item.asset_name + '<br/><span point="">' + item.alarm_desc + '</span>';
-        html += '<p class="small">' + formatTimestamp(item.reg_date) + '</p></dd></dl></div>';
-        return html;
-    }
-
-    function loadAlarm() {
-        if (typeof window.lastAlarmDate == 'undefined') {
-            window.lastAlarmDate = ((new Date()).getTime()) - LATENCY;
+        function initAssetList() {
+            $('.site-zone-area ul.site-zone-list').empty();
+            $.each(_sensorTypes, (idx, item) => {
+                const asset =
+                    '  <li kind="' + item.senstype_no + '">'
+                    + '    <div class="site-zone-title">'
+                    + '        <strong>'
+                    + '            <i id="arrow-up" class="fa-solid fa-arrow-up fa-xl arrow-up" style="color: #ffffff; margin-right: 10px; cursor: pointer;"></i>'
+                    + item.sens_tp_nm
+                    + '        </strong>'
+                    + '        <p class="check-box" notxt="" small="">'
+                    + '            <input type="checkbox" checked id="check_tit01_' + idx + '" name="check_tit01_' + idx + '" value="">'
+                    + '            <label for="check_tit01_' + idx + '">'
+                    + '                <span class="graphic"></span>'
+                    + '            </label>'
+                    + '        </p>'
+                    + '    </div>'
+                    + '    <div class="site-zone-conts">'
+                    + '        <ul></ul>'
+                    + '    </div>'
+                    + '</li>';
+                $('.site-zone-area ul.site-zone-list').append(asset);
+            });
         }
 
-        $.get('/getAlarm', {
-            reg_date: window.lastAlarmDate
-        }, function (res) {
-            // console.log(res);
-
-            if (res.length > 0) {
-                window.lastAlarmDate = res[0].reg_date;
-                $.each(res, function () {
-                    let $card = $(getAlarmCard(this)).hide();
-                    $('.alarmContainer').prepend($card);
-                    $card.fadeIn(ALARM_EFFECT_TIME);
-                    $card.timer = setTimeout(function () {
-                        $card.find('button.close-alarm').trigger('click');
-                    }, LATENCY);      // 1분후
-                });
-
-                removeAlarmCard();
-            }
-
-            redrawMarker();
-        }).always(function () {
-            window.lastAlarmDate = (new Date()).getTime();
-            setTimeout(loadAlarm, LATENCY); // 60 초마다
+        $(document).on('click', '.arrow-up', function () {
+            $(this).toggleClass('fa-arrow-up fa-arrow-down');
+            const $ul = $(this).closest('.site-zone-title').next('.site-zone-conts').find('ul');
+            var $li = $ul.children('li').get().reverse();
+            $ul.empty().append($li);
         });
-    }
 
-    // 지구 현황에 리스트 컬러 변경
-    function redrawAssetRiskLevelList() {
-        if ($('.zoneSelected').is(":visible") && window.marker.risk.length > 0) {
-            const zoneId = $('.zoneSelected').data('zoneid');
-            $.each($('.zoneSelected > .site-zone-area > ul.site-zone-list div.site-zone-conts li'), function (idx, ele) {
-                $ele = $(ele);
-                $ele.removeAttr('fc_step1 fc_step2 fc_step3 fc_step4');
+        function loadRoadView(lat, lng) {
+            window.isRoadView = true;
 
-                let status = window.marker.risk.find(r => r.zone_id == zoneId && r.asset_id == $ele.attr('asset_id'));
-
-                if (!!status?.risk_level) {
-                    $(ele).attr('fc_step' + status.risk_level, '');
+            // let center = ol.proj.transform(window.vworld.getMap().getView().getCenter(), "EPSG:3857", "EPSG:4326");
+            initRoadView($('.roadView'), lat, lng, function (rv) {
+                // console.log(rv);
+                if (rv.getPanoId() == null) {
+                    $(".roadViewContainer").removeClass("open");
+                    alert('로드뷰를 제공하지 않는 지역입니다');
+                } else {
+                    $(".roadViewContainer").addClass("open");
                 }
             });
         }
 
-    }
+        function openCctvPopup(data) {
+            $('#lay-cctv-view .layer-base-conts img').hide();
+            $('#lay-cctv-view .layer-base-title').html(data.label);
 
-    let redrawMarker = debounce(() => {
-        $.get('/getAssetAlarm', {reg_date: window.lastAlarmDate}, function (res) {
-            window.marker.risk = res;
+            cctvWs = new WebSocket(wsUrl + '/video/stream?url=' + data.etc1);
+            // console.log(cctvWs);
+            cctvWs.onerror = function (event) {
+                $('#lay-cctv-view .layer-base-conts img.nosignal').show();
 
-            let zoneArea = {};
-
-            function updateLabelStyle(target, riskLevel) {
-                const color = riskLevel !== undefined ? getRiskColor(riskLevel) : {fc: '#000000', bg: '#ffffff'};
-                window.vworld.setLabelStyle(target.uid, color.fc, color.bg, 1.0);
-            }
-
-            $.each(res, function () {
-                let alarm = this;
-                $.each(window.vworld.overlays, function () {
-                    if (this.asset_id === alarm.asset_id) {
-                        updateLabelStyle(this, alarm.risk_level);
-                    } else if (alarm.zone_id === this.zone_id && this.type === 'area') {
-                        if (alarm.risk_level !== undefined) {
-                            const currentRiskLevel = parseInt(zoneArea['area_' + alarm.zone_id]?.risk_level || 0);
-                            const alarmRiskLevel = parseInt(alarm.risk_level);
-                            if (alarmRiskLevel > currentRiskLevel) {
-                                zoneArea['area_' + alarm.zone_id] = {
-                                    zone_id: alarm.zone_id,
-                                    risk_level: alarm.risk_level
-                                };
-                            }
-                        } else {
-                            updateLabelStyle(this, undefined); // 정상일때
-                        }
-                    }
-                });
-            });
-
-            $.each(window.vworld.overlays, function () {
-                if (this.type === 'area') {
-                    let zoneKey = 'area_' + this.zone_id;
-                    if (zoneArea[zoneKey] && 'risk_level' in zoneArea[zoneKey]) {
-                        updateLabelStyle(this, zoneArea[zoneKey].risk_level);
-                    } else {
-                        updateLabelStyle(this, undefined); // 정상일때
-                    }
-                }
-            });
-
-            redrawAssetRiskLevelList();
-        });
-    }, 250);
-
-    function getRiskColor(risk_level) {
-        let bgcolor = '#ffffff';
-        let fontColor = '#000000';
-        if (risk_level == '1') {
-            bgcolor = '#90da00';
-        } else if (risk_level == '2') {
-            bgcolor = '#ffd200';
-        } else if (risk_level == '3') {
-            bgcolor = '#ff9600';
-        } else if (risk_level == '4') {
-            bgcolor = '#ff0000';
-            fontColor = '#ffffff';
-        } else {
-            bgcolor = '#ffffff';
-            fontColor = '#000000';
-        }
-
-        return {bg: bgcolor, fc: fontColor};
-    }
-
-    function removeAlarmCard() {
-        if ($('.alarmContainer div').length > 5) {
-            let $lastCard = $('.alarmContainer div:last');
-            $lastCard.fadeOut(ALARM_EFFECT_TIME, function () {
-                $lastCard.remove();
-
-                removeAlarmCard();
-            });
-        }
-    }
-
-    function getZoneDetail() {
-        // 상세 보기 에서 시간 맞추기 위해 초기화
-        clearInterval($setInterval1);
-        clearInterval(window.zoneDetail);
-        $setInterval1 = setInterval(startInterval, LATENCY); // 60초마다
-
-        $.get('/popup/zoneDetail', {
-            zone_id: 1
-        }, function (html) {
-            console.log(html);
-            $('.site-status-details').html(html);
-            $('.site-status-details').show();
-            setTimeout(function () {
-                if (!$("#site-status").hasClass("view")) {
-                    $("#site-status").addClass("view");
-                }
-            }, 50);
-        });
-    }
-
-    // cctv 팝업
-    function openCctvPopup(data) {
-        $('#lay-cctv-view .layer-base-conts img').hide();
-        $('#lay-cctv-view .layer-base-title').html(data.label);
-
-        cctvWs = new WebSocket(wsUrl + '/video/stream?url=' + data.etc1);
-        // console.log(cctvWs);
-        cctvWs.onerror = function (event) {
-            $('#lay-cctv-view .layer-base-conts img.nosignal').show();
-
-        };
-        cctvWs.onmessage = function (event) {
-            let blob = new Blob([event.data], {type: "image/jpeg"});
-            let url = URL.createObjectURL(blob);
-            let video = $('#lay-cctv-view .layer-base-conts img')[0];
-            video.src = url;
-
-            if (!$('#lay-cctv-view .layer-base-conts img').is(':visible')) {
-                $('#lay-cctv-view .layer-base-conts img').show();
-            }
-
-            try {
+            };
+            cctvWs.onmessage = function (event) {
+                let blob = new Blob([event.data], {type: "image/jpeg"});
+                let url = URL.createObjectURL(blob);
+                let video = $('#lay-cctv-view .layer-base-conts img')[0];
                 video.src = url;
-                // 객체 URL을 해제하여 메모리 누수 방지
-                setTimeout(() => {
-                    URL.revokeObjectURL(url);
-                }, 100);
-            } catch (e) {
-                console.log('socket close');
-            }
-        };
 
-        // backdropClick 배경을 눌렀을 때 발생하는 event
-        popFancy('#lay-cctv-view', {dragToClose: false, touch: false, backdropClick: false});
-    }
+                if (!$('#lay-cctv-view .layer-base-conts img').is(':visible')) {
+                    $('#lay-cctv-view .layer-base-conts img').show();
+                }
+
+                try {
+                    video.src = url;
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                } catch (e) {
+                    console.log('socket close');
+                }
+            };
+
+            popFancy('#lay-cctv-view', {dragToClose: false, touch: false, backdropClick: false});
+        }
+    });
 </script>
 <body data-pgcode="0000">
 <section id="wrap">

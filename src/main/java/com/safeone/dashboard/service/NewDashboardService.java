@@ -23,4 +23,7 @@ public class NewDashboardService {
         return mapper.getSensorTypes();
     }
 
+    public int getSensorsCount(Map<String, Object> map) {
+        return mapper.getSensorsCount(map);
+    }
 }
