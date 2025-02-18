@@ -78,6 +78,7 @@
 <script src="https://kit.fontawesome.com/81a554dc3a.js" crossorigin="anonymous"></script>
 
 <link rel="stylesheet" type="text/css" media="screen" href="/Guriddo_jqGrid_JS_5.4.0/css/ui.jqgrid.css" />
+<link rel="stylesheet" type="text/css" href="/common/css/grid.css" />
 
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?libraries=services,panorama&appkey=6d88fb6f38348431a123101209102872"></script>
 <script type="text/javascript" src="/moment.js"></script>
