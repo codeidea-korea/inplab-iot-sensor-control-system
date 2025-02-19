@@ -80,7 +80,7 @@
 <link rel="stylesheet" type="text/css" media="screen" href="/Guriddo_jqGrid_JS_5.4.0/css/ui.jqgrid.css" />
 <link rel="stylesheet" type="text/css" href="/common/css/grid.css" />
 
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?libraries=services,panorama&appkey=6d88fb6f38348431a123101209102872"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?libraries=services,panorama&appkey=afbf8c33dbc9da541f59a1fa8dc9a442"></script>
 <script type="text/javascript" src="/moment.js"></script>
 
 <script type="text/javascript" src="/common/js/daterangepicker.min.js"></script>

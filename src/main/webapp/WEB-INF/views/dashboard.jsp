@@ -110,6 +110,16 @@
             background-color: #888;
         }
 
+        #road-map {
+            width: 50vw;
+            height: calc(100vh - 7.3rem);
+            position: fixed;
+            right: -50vw;
+            top: 7.3rem;
+            z-index: 6;
+            box-shadow: -2rem 0 2rem rgba(0, 0, 0, 0.2);
+        }
+
         .marker.zone {
             width: 32px;
             height: 50px;
