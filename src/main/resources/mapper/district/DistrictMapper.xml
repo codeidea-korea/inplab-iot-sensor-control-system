@@ -5,7 +5,13 @@
     <update id="updatePosition" parameterType="com.safeone.dashboard.domain.district.dto.UpdatePosition">
         update tb_district_info
         set dist_lat = #{distLat}::double precision,
-            dist_lon = #{distLon}::double precision
+            dist_lon = #{distLon}:: double precision
         where district_no = #{districtNo}
     </update>
+
+    <select id="getAll" resultType="com.safeone.dashboard.domain.district.dto.District">
+        select district_no as districtNo
+             , district_nm as districtNm
+        from tb_district_info
+    </select>
 </mapper>

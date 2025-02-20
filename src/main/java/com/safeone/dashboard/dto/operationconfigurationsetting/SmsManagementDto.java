@@ -16,6 +16,9 @@ public class SmsManagementDto implements Serializable {
     @FieldLabel(title = "소속 기관")
     private String partner_comp_nm;
 
+    @FieldLabel(title = "소속 기관", type = "hidden")
+    private String partner_comp_id;
+
     @FieldLabel(title = "이름")
     private String sms_chgr_nm;
 

@@ -232,6 +232,7 @@
             </div>
         </div>
     </div>
+
     <div id="lay-form-write" class="layer-base">
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>

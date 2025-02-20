@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.safeone.dashboard.domain.smsreceiver.repository.SmsReceiverMapper">
+    <insert id="create" parameterType="com.safeone.dashboard.domain.smsreceiver.dto.SmsReceiverCreate">
+        insert into tb_sms_receiver( mgnt_no
+                                   , district_no
+                                   , sms_recv_dept
+                                   , sms_chgr_nm
+                                   , sms_recv_ph
+                                   , alarm_lvl_nm
+                                   , sms_autosnd_yn
+                                   , reg_dt
+                                   , partner_comp_id)
+        values ( (SELECT COALESCE(max(mgnt_no::integer), 0) + 1 from tb_sms_receiver)
+               , #{districtNo}
+               , #{smsRecvDept}
+               , #{smsChgrNm}
+               , #{smsRecvPh}
+               , #{alarmLvlNm}
+               , #{smsAutosndYn}
+               , now()
+               , #{partnerCompId})
+    </insert>
+
+    <update id="update" parameterType="com.safeone.dashboard.domain.smsreceiver.dto.SmsReceiverUpdate">
+        update tb_sms_receiver
+        set partner_comp_id = #{partnerCompId}
+          , sms_recv_dept   = #{smsRecvDept}
+          , sms_recv_ph     = #{smsRecvPh}
+          , district_no     = #{districtNo}
+          , sms_chgr_nm     = #{smsChgrNm}
+          , alarm_lvl_nm    = #{alarmLvlNm}
+          , sms_autosnd_yn  = #{smsAutosndYn}
+          , mod_dt          = now()
+        where mgnt_no = #{mgntNo}::integer
+    </update>
+
+    <delete id="delete" parameterType="String">
+        delete from tb_sms_receiver
+        where mgnt_no = #{mgntNo}::integer
+    </delete>
+</mapper>
