@@ -111,7 +111,23 @@
                 multiselect: true,
                 multiboxonly: false,
                 useFilterToolbar: true,
-            })
+            }, null, {
+                maint_sts_cd: {
+                    formatter: (cellValue, _options, _rowObject) => {
+                        let value = '';
+                        if (cellValue === 'MTN001') {
+                            value = '정상';
+                        } else if (cellValue === 'MTN002') {
+                            value = '망실';
+                        } else if (cellValue === 'MTN003') {
+                            value = '점검';
+                        } else if (cellValue === 'MTN004') {
+                            value = '철거';
+                        }
+                        return value
+                    }
+                },
+            }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"});
 
             const currentYear = new Date().getFullYear();
 

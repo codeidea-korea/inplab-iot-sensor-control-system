@@ -10,7 +10,8 @@ jQuery.fn.serializeObject = function () {
         }
     } catch (e) {
         alert(e.message);
-    } finally {}
+    } finally {
+    }
 
     return obj;
 };
@@ -100,15 +101,12 @@ function setRangePicker($el, applyCallback) {
         opens: 'right',
         autoUpdateInput: false
     });
-    $el.on('show.daterangepicker', function(ev, picker) {
+    $el.on('show.daterangepicker', function (ev, picker) {
         $el.val('');
     });
-    $el.on('apply.daterangepicker', function(ev, picker) {
+    $el.on('apply.daterangepicker', function (ev, picker) {
         $el.val(picker.startDate.format('YYYY-MM-DD') + ' ~ ' + picker.endDate.format('YYYY-MM-DD'));
-
-        try {
-            applyCallback();
-        } catch(e) { }
+        applyCallback($el.val());
     });
 }
 
@@ -122,9 +120,9 @@ function setTimeRangePicker($el, applyCallback) {
             '지난 6개월': [moment().subtract(6, 'month').startOf('day'), moment()],
             '1년': [moment().subtract(1, 'year').startOf('year').startOf('day'), moment().subtract(1, 'year').endOf('year')]
         },
-        startDate : moment(),
+        startDate: moment(),
         // endDate : moment().add(14, 'days').add(2,'hours'),
-        endDate : moment().add(1, 'days').endOf('day'),
+        endDate: moment().add(1, 'days').endOf('day'),
         timePicker: true,
         timePicker24Hour: true,
         timePickerSeconds: true,
@@ -165,15 +163,16 @@ function setTimeRangePicker($el, applyCallback) {
         opens: 'right',
         autoUpdateInput: false
     });
-    $el.on('show.daterangepicker', function(ev, picker) {
+    $el.on('show.daterangepicker', function (ev, picker) {
         $el.val('');
     });
-    $el.on('apply.daterangepicker', function(ev, picker) {
+    $el.on('apply.daterangepicker', function (ev, picker) {
         $el.val(picker.startDate.format('YYYY-MM-DD HH:mm:ss') + ' ~ ' + picker.endDate.format('YYYY-MM-DD HH:mm:ss'));
 
         try {
             applyCallback();
-        } catch(e) { }
+        } catch (e) {
+        }
     });
 }
 
@@ -248,7 +247,7 @@ $(function () {
         },
         alwaysShowCalendars: true,
         opens: 'right'
-    }, function(start, end, label) {
+    }, function (start, end, label) {
         // 날짜 선택 후 실행될 함수
         // $(".datetimepickerOne").val(start.format('YYYY-MM-DD'));
         $(this).val(start.format('YYYY-MM-DD'));
@@ -258,7 +257,7 @@ $(function () {
 
 function popFancy(name) {
     // 팝업 열기
-    new Fancybox([{ src: name, type: "inline" }], {
+    new Fancybox([{src: name, type: "inline"}], {
         on: {
             "*": (event, fancybox, slide) => {
                 //console.log(`event: ${event}`);
@@ -269,7 +268,7 @@ function popFancy(name) {
 
 function popFancy(name, param) {
     // 팝업 열기
-    new Fancybox([{ src: name, type: "inline" }], Object.assign({
+    new Fancybox([{src: name, type: "inline"}], Object.assign({
         on: {
             "*": (event, fancybox, slide) => {
                 //console.log(`event: ${event}`);
@@ -300,7 +299,8 @@ function alert(msg, callbackYes) {
     $("#alert .confirm").on("click", function () {
         try {
             callbackYes();
-        } catch (e) {}
+        } catch (e) {
+        }
     });
 }
 
@@ -316,7 +316,8 @@ function confirm(msg, callbackYes) {
     $("#alert .confirm").on("click", function () {
         try {
             callbackYes();
-        } catch (e) {}
+        } catch (e) {
+        }
 
         $(this).closest(".btn").find("a.close").trigger("click");
     });
@@ -325,7 +326,7 @@ function confirm(msg, callbackYes) {
 // form 의 serialize 와 같은 역할을 일반 태그에서 하기위한 함수
 function getSerialize(el) {
     var data = {};
-    $(el).find('input, select, textarea').each(function() {
+    $(el).find('input, select, textarea').each(function () {
         data[$(this).attr('name')] = $(this).val();
     });
 
@@ -334,8 +335,8 @@ function getSerialize(el) {
 
 // serialize 의 반대
 function setSerialize(el, dataObj) {
-    $.each(dataObj, function(key, value) {
-        $(el).find('input, select, textarea').each(function() {
+    $.each(dataObj, function (key, value) {
+        $(el).find('input, select, textarea').each(function () {
             // console.log(value);
             // todo : select 인 경우 option을 선택하는 로직 추가해야함
             if ($(this).attr('name') == key) {
@@ -398,7 +399,7 @@ function initRoadView($el, lat, lng, callback) { // 로드뷰 객체를 생성
 
         try {
             callback(roadview);
-        } catch(e) {
+        } catch (e) {
         }
     });
 
@@ -443,7 +444,7 @@ function drawLineChart($el, seriesData, guideLine, xAxisFormat) {
     const data = seriesData.flatMap(d => d?.data.map(dt => parseFloat(dt[1])));
     // 중복값 제거한 list 만들기
     const uniqueData = [...new Set(data)];
-    const guide = guideLine.map(d => parseFloat(d.value)).sort((a,b) => a-b);
+    const guide = guideLine.map(d => parseFloat(d.value)).sort((a, b) => a - b);
 
     // 전체 값 중에 max, min 값을 구한다.
     let max = Math.max(...uniqueData) || 0;
@@ -453,21 +454,21 @@ function drawLineChart($el, seriesData, guideLine, xAxisFormat) {
     const minClosest = findClosest(guide, min);
 
     // 비교 해서 더 큰 수
-    if(max < maxClosest){
+    if (max < maxClosest) {
         max = maxClosest;
-    }else{
-        if(guide.findIndex(d => d == maxClosest) != -1) {
+    } else {
+        if (guide.findIndex(d => d == maxClosest) != -1) {
             max = guide[guide.findIndex(d => d == maxClosest) + 1] || max;
-        }else{
+        } else {
             max = Math.max(...uniqueData, guide[guide.length - 1]);
         }
     }
 
     // 비교 해서 더 작은 수
-    if(min > minClosest) {
+    if (min > minClosest) {
         min = minClosest;
     } else {
-        if(guide.findIndex(d => d == minClosest) != -1) {
+        if (guide.findIndex(d => d == minClosest) != -1) {
             min = guide[guide.findIndex(d => d == minClosest) - 1] || min;
         } else {
             min = Math.min(...uniqueData, guide[0]);
@@ -546,8 +547,8 @@ function drawLineChart($el, seriesData, guideLine, xAxisFormat) {
             },
             tickInterval: "auto",
             plotLines: guideLine,
-            min : min*1.3,
-            max : max*1.3
+            min: min * 1.3,
+            max: max * 1.3
         },
         series: seriesData
     });
@@ -556,10 +557,10 @@ function drawLineChart($el, seriesData, guideLine, xAxisFormat) {
 function drawCandleChart($el, seriesData, guideLine, xAxisFormat) {
 
     // 값을 추출한다.
-    const data = seriesData.flatMap(d => d?.data.flatMap(dt => dt?.filter((dtt, idx) => idx !== 0).map(dtt=>dtt)));
+    const data = seriesData.flatMap(d => d?.data.flatMap(dt => dt?.filter((dtt, idx) => idx !== 0).map(dtt => dtt)));
     // 중복값 제거한 list 만들기
     const uniqueData = [...new Set(data)];
-    const guide = guideLine.map(d => parseFloat(d.value)).sort((a,b) => a-b);
+    const guide = guideLine.map(d => parseFloat(d.value)).sort((a, b) => a - b);
 
     // 전체 값 중에 max, min 값을 구한다.
     let max = Math.max(...uniqueData) || 0;
@@ -570,21 +571,21 @@ function drawCandleChart($el, seriesData, guideLine, xAxisFormat) {
     const minClosest = findClosest(guide, min);
 
     // 비교 해서 더 큰 수
-    if(max < maxClosest){
+    if (max < maxClosest) {
         max = maxClosest;
-    }else{
-        if(guide.findIndex(d => d === maxClosest) !== -1) {
+    } else {
+        if (guide.findIndex(d => d === maxClosest) !== -1) {
             max = guide[guide.findIndex(d => d === maxClosest) + 1] || max;
-        }else{
+        } else {
             max = Math.max(...uniqueData, guide[guide.length - 1]);
         }
     }
 
     // 비교 해서 더 작은 수
-    if(min > minClosest) {
+    if (min > minClosest) {
         min = minClosest;
     } else {
-        if(guide.findIndex(d => d === minClosest) !== -1) {
+        if (guide.findIndex(d => d === minClosest) !== -1) {
             min = guide[guide.findIndex(d => d === minClosest) - 1] || min;
         } else {
             min = Math.min(...uniqueData, guide[0]);
@@ -615,8 +616,8 @@ function drawCandleChart($el, seriesData, guideLine, xAxisFormat) {
 
         yAxis = Object.assign(yAxis, {
             plotLines: guideLine,
-            min : min*1.3,
-            max : max*1.3
+            min: min * 1.3,
+            max: max * 1.3
         });
     } else {
         yAxis = Object.assign(yAxis, {
@@ -664,7 +665,7 @@ function drawCandleChart($el, seriesData, guideLine, xAxisFormat) {
             useHTML: true,
             formatter: function () {
                 let tooltipHtml = '<b>' + Highcharts.dateFormat('%Y-%m-%d %H:%M', this.x) + '</b><br/>';
-                this.points.forEach(function(point) {
+                this.points.forEach(function (point) {
                     const pointData = point.point;
                     tooltipHtml += '<div style="margin-top: 5px;"><span style="color:' + point.series.color + '">●</span> <strong>' + point.series.name +
                         '</strong></div>&nbsp;&nbsp;시작: <b>' + pointData.open + '</b>, ' +
@@ -710,7 +711,7 @@ function excelDownload(filePathName, params) {
 }
 
 function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
@@ -725,7 +726,7 @@ function findClosest(arr, target) {
 
 function debounce(func, wait) {
     let timeout;
-    return function() {
+    return function () {
         const context = this, args = arguments;
         clearTimeout(timeout);
         timeout = setTimeout(() => {

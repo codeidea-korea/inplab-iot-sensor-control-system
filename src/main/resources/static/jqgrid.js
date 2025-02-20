@@ -1,14 +1,14 @@
 function initGrid($grid, path, $gridWrapper, options = {
     autowidth: true,
     shrinkToFit: true
-}, loadCompleteCallback, formatters, selectables) {
+}, loadCompleteCallback, formatters, selectableRows) {
     getColumns(path, (columns) => {
         const columnData = {
             model: []
         };
 
         $.each(columns, (index) => {
-            columnData.model.push(setColumn(columns[index], formatters, selectables));
+            columnData.model.push(setColumn($grid, columns[index], formatters, selectableRows));
         });
 
         $(window).trigger('beforeLoadGrid', columnData)
@@ -103,7 +103,7 @@ function getColumns(path, callback) {
     })
 }
 
-function setColumn(column, formatters, selectables) {
+function setColumn($grid, column, formatters, selectableRows) {
     const _column = {
         name: column['columnName'],
         label: column['title'],
@@ -123,8 +123,10 @@ function setColumn(column, formatters, selectables) {
             newformat: 'Y-m-d'
         };
         _column.searchoptions = {
-            dataInit: (element) => {
-                setRangePicker($(element), () => {
+            dataInit: function (element) {
+                setRangePicker($(element), function (rangeValue) {
+                    const postData = $grid.jqGrid('getGridParam', 'postData');
+                    postData[_column.name] = rangeValue
                     reloadJqGrid($grid);
                 });
             }
@@ -146,9 +148,28 @@ function setColumn(column, formatters, selectables) {
     if (column['type'] === 'selectable') {
         _column.editable = true;
         _column.edittype = 'select';
-        _column.editoptions = { value: selectables[column['columnName']] };
-    }
+        _column.editoptions = {value: selectableRows[column['columnName']]};
+        _column.searchoptions = {
+            dataInit: function (element) {
+                const $select = $("<select></select>")
+                    .attr("id", _column.name)
+                    .on("change", (event) => {
+                        const postData = $grid.jqGrid('getGridParam', 'postData');
+                        postData[_column.name] = $(event.target).val()
+                        reloadJqGrid($grid);
+                    });
+                $select.append($("<option></option>").attr("value", "").text("전체"));
 
+                selectableRows[_column.name].split(";").forEach(item => {
+                    const [value, label] = item.split(":");
+                    $select.append($("<option></option>").attr("value", value).text(label));
+                });
+
+                $(element).replaceWith($select);
+                $select.parent().next().remove() // remove 'x' button
+            }
+        }
+    }
     return _column;
 }
 

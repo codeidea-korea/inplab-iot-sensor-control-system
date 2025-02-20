@@ -17,31 +17,47 @@ import java.util.Map;
 @Controller
 @RequestMapping("/sensor-grouping")
 public class SensorGroupingController extends JqGridAbstract<SensorGroupingDto> {
-	@Autowired
-	private SensorGroupingService sensorGroupingService;
 
-	protected SensorGroupingController() {
-		super(SensorGroupingDto.class);
-	}
+    @Autowired
+    private SensorGroupingService sensorGroupingService;
 
-	@Override
-	protected List getList(Map param) {
-		return sensorGroupingService.getList(param);
-	}
+    protected SensorGroupingController() {
+        super(SensorGroupingDto.class);
+    }
 
-	@GetMapping("/chart")
-	@ResponseBody
-	public List<SensorChartDto> getChartData(@RequestParam Map<String, Object> param) {
-		return sensorGroupingService.getSensorChartData(param);
-	}
+    @Override
+    protected List<SensorGroupingDto> getList(Map<String, Object> param) {
+        setParam(param);
+        return sensorGroupingService.getList(param);
+    }
 
-	@Override
-	protected int getTotalRows(Map param) {
-		return sensorGroupingService.getTotalCount(param);
-	}
+    @Override
+    protected int getTotalRows(Map<String, Object> param) {
+        setParam(param);
+        return sensorGroupingService.getTotalCount(param);
+    }
 
-	@Override
-	protected String setViewPage() {
-		return "sensor-grouping";
-	}
+    private void setParam(Map<String, Object> param) {
+        if (param.containsKey("last_apply_dt")) {
+            String[] dates = ((String) param.get("last_apply_dt")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("last_apply_dt_start", dates[0]);
+                param.put("last_apply_dt_end", dates[1]);
+            } else {
+                param.put("last_apply_dt_start", dates[0]);
+                param.put("last_apply_dt_end", dates[0]);
+            }
+        }
+    }
+
+    @GetMapping("/chart")
+    @ResponseBody
+    public List<SensorChartDto> getChartData(@RequestParam Map<String, Object> param) {
+        return sensorGroupingService.getSensorChartData(param);
+    }
+
+    @Override
+    protected String setViewPage() {
+        return "sensor-grouping";
+    }
 }
