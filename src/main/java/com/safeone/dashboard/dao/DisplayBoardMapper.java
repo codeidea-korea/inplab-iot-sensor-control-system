@@ -44,4 +44,8 @@ public class DisplayBoardMapper {
     public int sendHistory(Map<String, Object> param) {
         return sqlSession.insert("sendHistory", param);
     }
+
+    public String getMaxDispbdNo() {
+        return sqlSession.selectOne("getMaxDispbdNo");
+    }
 }

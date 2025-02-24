@@ -35,7 +35,7 @@
 		FROM tb_broadcast_info A
 		<include refid="getBroadcastList-where"/>
 		AND A.del_yn = 'N'
-		ORDER BY A.reg_dt DESC
+		ORDER BY A.brdcast_no DESC
 		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
 			LIMIT ${limit} OFFSET ${offset}
 		</if>

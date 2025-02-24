@@ -227,7 +227,6 @@
             });
 
             getDisplayBoard({limit: limit, offset: offset}).then((res) => {
-                console.log('res > ', res);
                 setJqGridTable(res.rows, column, header, function () {
                 }, onSelectRow, ['dispbd_no'], 'jqGrid', limit, offset, getDisplayBoard);
             }).catch((fail) => {
@@ -245,7 +244,30 @@
                 });
             });
 
+            const getMaxNo = () => {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        type: 'GET',
+                        url: '/adminAdd/displayBoard/max-dispbd-no',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        async: true,
+                    }).done(function (res) {
+                        resolve(res);
+                    }).fail(function (fail) {
+                        console.log('getMaxNo fail > ', fail);
+                        reject(fail);
+                    });
+                });
+            };
+
             $('.insertBtn').on('click', function () {
+                getMaxNo().then((res) => {
+                    const prefix = res.substring(0, 1); // 'P'
+                    const number = parseInt(res.substring(1), 10) + 1;
+                    const dispbd_no = prefix + number.toString().padStart(2, '0');
+                    $('input[name=dispbd_no]').val(dispbd_no);
+                })
                 initForm();
                 getDistrictInfo().then((res2) => {
                     let district_nm = $('select[name=district_no]');
@@ -258,7 +280,6 @@
                     $('#ins_displayBoard').show();
                     $('#udt_displayBoard').hide();
                     $('#del_displayBoard').hide();
-                    $('#tr_dispbd_no').hide();
                     popFancy('#lay-form-write08');
                 }).catch((fail) => {
                     console.log('fail > ', fail);
@@ -287,7 +308,6 @@
                         return;
                     }
                     alert2('전광판 정보가 등록되었습니다.', function () {
-                        popFancyClose('#lay-form-write08');
                         const search_text = $('input[name=search_text]').val();
                         offset = 0;
                         getDisplayBoard({search_text: search_text, limit: limit, offset: offset}).then((res) => {
@@ -326,7 +346,6 @@
                         return;
                     }
                     alert2('전광판 정보가 수정되었습니다.', function () {
-                        popFancyClose('#lay-form-write08');
                         const search_text = $('input[name=search_text]').val();
                         offset = 0;
                         getDisplayBoard({search_text: search_text, limit: limit, offset: offset}).then((res) => {

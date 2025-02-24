@@ -42,6 +42,11 @@ public class AddDisplayBoardController {
         return ResponseEntity.ok(displayBoardService.delDisplayBoard(delAdminAddDisplayBoardDtoList));
     }
 
+    @GetMapping(value = "/max-dispbd-no", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> getMaxDispbdNo() {
+        return ResponseEntity.ok(displayBoardService.getMaxDispbdNo());
+    }
+
     @GetMapping(value = "/all-by-district")
     public List<DisplayBoardDto> all(@RequestParam Map<String, Object> param) {
         return displayBoardService.all(param);

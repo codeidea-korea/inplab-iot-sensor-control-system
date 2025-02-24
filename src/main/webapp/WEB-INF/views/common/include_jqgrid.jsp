@@ -368,13 +368,18 @@
                 });
                 $(window).trigger('afterSaveCell', retVal);
             },
-            onSelectRow: function (rowId) {
-                // 모든 체크박스를 먼저 해제합니다.
-                $('input[type="checkbox"]').prop('checked', false);
-
-                // 클릭된 row의 첫 번째 체크박스를 체크합니다.
-                let $checkbox = $('#' + rowId).find('input[type="checkbox"]').first();
-                $checkbox.prop('checked', true);
+            onSelectRow: function (rowId, status, _e) {
+                if (rowId === lastSel) {
+                    $(this).jqGrid("resetSelection");
+                    lastSel = undefined;
+                    status = false;
+                } else {
+                    lastSel = rowId;
+                }
+            },
+            beforeSelectRow: function (_rowId, _e) {
+                $(this).jqGrid("resetSelection");
+                return true;
             },
             loadonce: false,
             viewrecords: true,

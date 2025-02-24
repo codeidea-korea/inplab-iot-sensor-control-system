@@ -2,6 +2,11 @@ function initGrid($grid, path, $gridWrapper, options = {
     autowidth: true,
     shrinkToFit: true
 }, loadCompleteCallback, formatters, selectableRows) {
+    // multi select 제거
+    $grid.on('jqGridInitGrid', function () {
+        $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
+    });
+
     getColumns(path, (columns) => {
         const columnData = {
             model: []
@@ -50,8 +55,18 @@ function initGrid($grid, path, $gridWrapper, options = {
             ondblClickRow: function (rowId) {
                 $(window).trigger('gridDblClick', {rowId, ...$grid.jqGrid('getRowData', rowId)});
             },
-            onSelectRow: (rowId) => {
-                // $(window).trigger('onSelectRow', {rowId, ...$grid.jqGrid('getRowData', rowId)});
+            onSelectRow: function (rowId, status, _e) {
+                if (rowId === lastSel) {
+                    $(this).jqGrid("resetSelection");
+                    lastSel = undefined;
+                    status = false;
+                } else {
+                    lastSel = rowId;
+                }
+            },
+            beforeSelectRow: function (_rowId, _e) {
+                $(this).jqGrid("resetSelection");
+                return true;
             },
             afterEditCell: function (rowid, cellname, value, iRow, iCol) {
                 $(window).trigger('afterEditCell', Object.assign($grid.jqGrid('getRowData', rowid), {

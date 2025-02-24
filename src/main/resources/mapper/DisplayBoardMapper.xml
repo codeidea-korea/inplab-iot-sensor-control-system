@@ -34,12 +34,14 @@
         FROM tb_dispboard_info A
         <include refid="getDisplayBoardList-where"/>
         AND A.del_yn = 'N'
+        order by A.dispbd_no desc
         <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
             LIMIT ${limit} OFFSET ${offset}
         </if>
     </select>
 
-    <select id="all" parameterType="java.util.HashMap" resultType="com.safeone.dashboard.dto.displayconnection.DisplayBoardDto">
+    <select id="all" parameterType="java.util.HashMap"
+            resultType="com.safeone.dashboard.dto.displayconnection.DisplayBoardDto">
         SELECT A.dispbd_no
              , A.dispbd_nm
              , A.district_no
@@ -140,4 +142,9 @@
         WHERE 1 = 1
           AND dispbd_no = #{dispbd_no}
     </delete>
+
+    <select id="getMaxDispbdNo" resultType="String">
+        SELECT MAX(dispbd_no)
+        FROM tb_dispboard_info
+    </select>
 </mapper>

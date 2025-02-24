@@ -23,4 +23,6 @@ public interface DisplayBoardService {
   List<DisplayBoardDto> all(Map<String, Object> param);
 
   int sendHistory(Map<String, Object> param);
+
+  String getMaxDispbdNo();
 }

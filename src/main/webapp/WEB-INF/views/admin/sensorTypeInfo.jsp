@@ -9,7 +9,7 @@
         window.jqgridOption = {
             columnAutoWidth: true,
             multiselect: true,
-            multiboxonly: false
+            multiboxonly: true
         };
         var _popupClearData;
         let firstCode = '';

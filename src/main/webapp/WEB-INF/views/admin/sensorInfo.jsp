@@ -22,7 +22,7 @@
         $(function () {
             initGrid($("#jq-grid"), "/adminAdd/sensorInfo", $('#grid-wrapper'), {
                 multiselect: true,
-                multiboxonly: false,
+                multiboxonly: true,
             })
         });
     </script>

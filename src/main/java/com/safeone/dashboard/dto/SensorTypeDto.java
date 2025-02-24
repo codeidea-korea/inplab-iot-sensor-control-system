@@ -8,7 +8,7 @@ import java.io.Serializable;
 @Data
 public class SensorTypeDto implements Serializable {
 
-    @FieldLabel(title="센서")
+    @FieldLabel(title="센서타입ID")
     String senstype_no;
 
     @FieldLabel(title="사이트_no", type="hidden")

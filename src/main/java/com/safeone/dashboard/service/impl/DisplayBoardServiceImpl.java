@@ -152,4 +152,9 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
         }
         return displayBoardMapper.sendHistory(param);
     }
+
+    @Override
+    public String getMaxDispbdNo() {
+        return displayBoardMapper.getMaxDispbdNo();
+    }
 }
