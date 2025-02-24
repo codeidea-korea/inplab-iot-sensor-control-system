@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <table class="jqGrid"></table>
 <div class="gridSpacer"></div>
 <div class="paginate"></div>
@@ -8,7 +8,7 @@
 
 <script>
     var _columns = ${columns};
-    $(function() {
+    $(function () {
         var _labels = [];
         var _names = [];
         var _widths = [];
@@ -20,7 +20,7 @@
 
         var $grid = $(".jqGrid");
 
-        $grid.on('jqGridInitGrid', function() {
+        $grid.on('jqGridInitGrid', function () {
             $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
         });
 
@@ -130,7 +130,7 @@
                 };
                 column.searchoptions = {
                     dataInit: function (element) {
-                        setRangePicker($(element), function() {
+                        setRangePicker($(element), function () {
                             reloadJqGrid($grid);
                         });
                     }
@@ -191,10 +191,10 @@
                             opens: 'right',
                             autoUpdateInput: false
                         });
-                        $(element).on('show.daterangepicker', function(ev, picker) {
+                        $(element).on('show.daterangepicker', function (ev, picker) {
                             $(element).val('');
                         });
-                        $(element).on('apply.daterangepicker', function(ev, picker) {
+                        $(element).on('apply.daterangepicker', function (ev, picker) {
                             // todo : 시간 검색 양식?
                             $(element).val(picker.startDate.format('YYYY-MM-DD') + ' ~ ' + picker.endDate.format('YYYY-MM-DD'));
                             reloadJqGrid($grid);
@@ -215,7 +215,7 @@
                         $(element).flatpickr({
                             "locale": "ko",
                             dateFormat: "Y-m-d",
-                            onClose: function(selectedDates, dateStr, instance){
+                            onClose: function (selectedDates, dateStr, instance) {
                                 reloadJqGrid();
                             }
                         });
@@ -279,7 +279,7 @@
             loadComplete: function (response) {
 
                 var rows = response.rows.map(function (row) {
-                    Object.keys(row).forEach(function(key) {
+                    Object.keys(row).forEach(function (key) {
                         if (row[key] === null) {
                             row[key] = '';  // null 값을 빈 문자열로 변환
                         }
@@ -326,7 +326,7 @@
 
                 $grid.closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
             },
-            gridComplete: function() {
+            gridComplete: function () {
                 $(window).trigger('gridComplete');
                 if (window.jqgridOption.columnAutoWidth) {
                     $(window).trigger('resize');
@@ -368,12 +368,13 @@
                 });
                 $(window).trigger('afterSaveCell', retVal);
             },
-            onSelectRow: function (rowId) { // add 2019.08.19
-                $('.ui-jqgrid-btable tr').removeClass('custom_selected');
-                $('.ui-jqgrid-btable tr[aria-selected=true]').addClass('custom_selected');
+            onSelectRow: function (rowId) {
+                // 모든 체크박스를 먼저 해제합니다.
+                $('input[type="checkbox"]').prop('checked', false);
 
-                var rowData = {rowId, ...jQuery(this).getRowData(rowId)} ;
-                $(window).trigger('onSelectRow', rowData);
+                // 클릭된 row의 첫 번째 체크박스를 체크합니다.
+                let $checkbox = $('#' + rowId).find('input[type="checkbox"]').first();
+                $checkbox.prop('checked', true);
             },
             loadonce: false,
             viewrecords: true,
@@ -391,7 +392,7 @@
                 items: ".ui-th-column",
 
                 update: function (event, ui) {
-                    var newOrder = $(this).sortable("toArray", { attribute: "id" });
+                    var newOrder = $(this).sortable("toArray", {attribute: "id"});
                     var newColModel = [];
                     var newRowData = [];
 
@@ -460,7 +461,7 @@
         $grid.jqGrid(jqGridOption);
 
 
-        $(document).on('keydown', '#search', function(e) {
+        $(document).on('keydown', '#search', function (e) {
             if (e.keyCode === 13) {  // Enter 키 감지
                 var searchValue = $('#search').val();  // 검색어 가져오기
                 $(".jqGrid").jqGrid('setGridParam', {
@@ -472,7 +473,7 @@
             }
         });
 
-        $(document).on('click', '.searchBtn', function() {
+        $(document).on('click', '.searchBtn', function () {
             var searchValue = $('#search').val();  // 검색어 가져오기
             $(".jqGrid").jqGrid('setGridParam', {
                 postData: {
@@ -513,7 +514,7 @@
         $(window).trigger('afterLoadGrid', columnData);
 
         if (window.jqgridOption.columnAutoWidth) {
-            $(window).resize(function() {
+            $(window).resize(function () {
                 // 그리드의 너비 조정
                 var gridWidth = $(".contents-in").width();
                 $grid.jqGrid('setGridWidth', gridWidth, true);  // shrinkToFit를 true로 설정하여 조정
