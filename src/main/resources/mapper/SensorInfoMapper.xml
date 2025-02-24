@@ -12,14 +12,42 @@
         <if test="senstype_no != null and senstype_no != ''">
             and MG.senstype_no ilike '%' || #{senstype_no} || '%'
         </if>
+        <if test="senstype_nm != null and senstype_nm != ''">
+            and MG.senstype_nm ilike '%' || #{senstype_nm} || '%'
+        </if>
         <if test="sens_nm != null and sens_nm != ''">
             and MG.sens_nm ilike '%' || #{sens_nm} || '%'
         </if>
-
+        <if test="logr_nm != null and logr_nm != ''">
+            and MG.logr_nm ilike '%' || #{logr_nm} || '%'
+        </if>
+        <if test="sens_no != null and sens_no != ''">
+            and MG.sens_no ilike '%' || #{sens_no} || '%'
+        </if>
+        <if test="sect_no != null">
+            and MG.sect_no = #{sect_no}::integer
+        </if>
+        <if test="maint_sts_nm != null and maint_sts_nm != ''">
+            and MG.maint_sts_nm ilike '%' || #{maint_sts_nm} || '%'
+        </if>
+        <if test="nonrecv_limit_min != null">
+            and MG.nonrecv_limit_min = #{nonrecv_limit_min}::integer
+        </if>
+        <if test="alarm_use_yn != null and alarm_use_yn != ''">
+            and MG.alarm_use_yn ilike '%' || #{alarm_use_yn} || '%'
+        </if>
+        <if test="sms_snd_yn != null and sms_snd_yn != ''">
+            and MG.sms_snd_yn ilike '%' || #{sms_snd_yn} || '%'
+        </if>
+        <if test="sens_disp_yn != null and sens_disp_yn != ''">
+            and MG.sens_disp_yn ilike '%' || #{sens_disp_yn} || '%'
+        </if>
         <if test="mod_dt_start != null and mod_dt_start != '' and mod_dt_end != null and mod_dt_end != ''">
             and MG.mod_dt::timestamp between (#{mod_dt_start}::timestamp) and (#{mod_dt_end}::timestamp)
         </if>
-
+        <if test="inst_ymd_start != null and inst_ymd_start != '' and inst_ymd_end != null and inst_ymd_end != ''">
+            and MG.inst_ymd::timestamp between (#{inst_ymd_start}::timestamp) and (#{inst_ymd_end}::timestamp)
+        </if>
         <if test="searchKeyword  != null and searchKeyword  != ''">
             and (select B.sens_tp_nm from tb_sensor_type B where B.senstype_no = MG.senstype_no) LIKE '%' ||
             #{searchKeyword} || '%' OR

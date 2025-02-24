@@ -42,7 +42,7 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
     }
 
     @Override
-    protected List getList(Map param) {
+    protected List<SensorInfoDto> getList(Map<String, Object> param) {
         if (param.containsKey("mod_dt")) {
             String[] dates = ((String) param.get("mod_dt")).split(" ~ ");
             if (dates.length > 1) {
@@ -51,6 +51,16 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
             } else {
                 param.put("mod_dt_start", dates[0]);
                 param.put("mod_dt_end", dates[0]);
+            }
+        }
+        if (param.containsKey("inst_ymd")) {
+            String[] dates = ((String) param.get("inst_ymd")).split(" ~ ");
+            if (dates.length > 1) {
+                param.put("inst_ymd_start", dates[0]);
+                param.put("inst_ymd_end", dates[1]);
+            } else {
+                param.put("inst_ymd_start", dates[0]);
+                param.put("inst_ymd_end", dates[0]);
             }
         }
 

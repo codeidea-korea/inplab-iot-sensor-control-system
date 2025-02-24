@@ -23,6 +23,7 @@
             initGrid($("#jq-grid"), "/adminAdd/sensorInfo", $('#grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: true,
+                useFilterToolbar: true
             })
         });
     </script>

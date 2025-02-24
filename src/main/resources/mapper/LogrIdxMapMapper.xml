@@ -3,9 +3,6 @@
     
 <mapper namespace="com.safeone.dashboard.dao.LogrIdxMapMapper">
     <sql id="rowSearch">
-        <if test="mapping_no != null and mapping_no != ''">
-            and MG.mapping_no = #{mapping_no}
-        </if>
         <if test="sens_no != null and sens_no != ''">
             and MG.sens_no = #{sens_no}
         </if>
@@ -74,7 +71,7 @@
                     MG.mod_dt ${sord}
                 </when>
                 <otherwise>
-                    MG.mapping_no
+                    MG.reg_dt
                 </otherwise>
             </choose>
         </trim>
@@ -84,8 +81,7 @@
         SELECT MG.*
         FROM (
             SELECT
-                A.mapping_no
-                , A.sens_no
+                A.sens_no
                 , (SELECT C.sens_tp_nm
                     FROM tb_sensor_type C
                     WHERE C.senstype_no = (SELECT B.senstype_no
@@ -120,8 +116,7 @@
         SELECT count(*)
         FROM (
         SELECT
-            A.mapping_no
-            , A.sens_no
+            A.sens_no
             , (SELECT C.sens_tp_nm
                     FROM tb_sensor_type C
                     WHERE C.senstype_no = (SELECT B.senstype_no

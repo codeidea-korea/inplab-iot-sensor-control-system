@@ -56,7 +56,7 @@ public class SensorInfoDto implements Serializable {
     @FieldLabel(title="화면표시대상여부")
     String sens_disp_yn;
 
-    @FieldLabel(title="설치일자")
+    @FieldLabel(title="설치일자", type = "range")
     String inst_ymd;
 
     @FieldLabel(title="유지보수상태", type="hidden")
