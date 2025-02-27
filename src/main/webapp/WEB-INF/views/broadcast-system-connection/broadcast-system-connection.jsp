@@ -22,7 +22,9 @@
             initGrid($leftGrid, leftPath, $('#left-grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
-                useFilterToolbar: true,
+                custom: {
+                    useFilterToolbar: true,
+                }
             })
 
             const $rightGrid = $("#right-jq-grid");
@@ -30,7 +32,9 @@
             initGrid($rightGrid, rightPath, $('#right-grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
-                useFilterToolbar: true,
+                custom: {
+                    useFilterToolbar: true,
+                }
             })
 
 

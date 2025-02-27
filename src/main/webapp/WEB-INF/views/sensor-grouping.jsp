@@ -110,7 +110,10 @@
             initGrid($grid, path, $('#grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
-                useFilterToolbar: true,
+                custom: {
+                    useFilterToolbar: true,
+                    multiSelect: true,
+                }
             }, null, {
                 maint_sts_cd: {
                     formatter: (cellValue, _options, _rowObject) => {

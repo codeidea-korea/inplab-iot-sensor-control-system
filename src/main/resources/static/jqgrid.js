@@ -100,8 +100,15 @@ function initGrid($grid, path, $gridWrapper, options = {
 
         $grid.jqGrid(setting);
 
-        if (options.useFilterToolbar) {
+        if (options?.custom?.useFilterToolbar) {
             $grid.jqGrid('filterToolbar');
+        }
+
+        if (options?.custom?.multiSelect) {
+            $grid.jqGrid('setGridParam', {
+                beforeSelectRow: null,
+                onSelectRow: null
+            });
         }
 
         setAdditionalFunc($grid, $gridWrapper);

@@ -81,7 +81,9 @@
             initGrid($grid, path, $('#grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
-                useFilterToolbar: true,
+                custom: {
+                    useFilterToolbar: true,
+                }
             })
 
             initDistrict();

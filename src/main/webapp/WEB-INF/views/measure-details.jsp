@@ -287,7 +287,9 @@
             initGrid($leftGrid, leftPath, $('#left-grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
-                useFilterToolbar: true,
+                custom: {
+                    useFilterToolbar: true,
+                }
             }, () => {
                 const allRowIds = $leftGrid.jqGrid('getDataIDs');
                 allRowIds.forEach(rowId => {
@@ -300,7 +302,9 @@
             initGrid($rightGrid, rightPath, $('#right-grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
-                useFilterToolbar: true,
+                custom: {
+                    useFilterToolbar: true,
+                }
             })
 
             $.ajax({

@@ -42,7 +42,9 @@
             initGrid($grid, path, $('#grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: true,
-                useFilterToolbar: true,
+                custom: {
+                    useFilterToolbar: true,
+                }
             }, null, {
                 sms_cnt: {
                     formatter: function (cellValue) {

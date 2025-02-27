@@ -12,7 +12,9 @@
             initGrid($grid, path, $('#grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
-                useFilterToolbar: true,
+                custom: {
+                    useFilterToolbar: true,
+                }
             }, null, null, {alarm_lvl_nm: "1:1차 초과 이상;2:2차 초과 이상;3:3차 초과 이상;4:4차 초과 이상", sms_autosnd_yn: "Y:Y;N:N"});
 
             const $partnerSelect = $('#partner_comp_select');
