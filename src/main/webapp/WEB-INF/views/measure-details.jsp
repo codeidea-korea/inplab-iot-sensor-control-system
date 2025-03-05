@@ -369,6 +369,8 @@
             function popFancy(name) {
                 // 팝업 열기
                 new Fancybox([{src: name, type: "inline"}], Object.assign({
+                    backdropClick: false, // 배경 클릭 시 닫힘 방지
+                    clickOutside: false,  // Fancybox 영역 바깥 클릭 시 닫힘 방지
                     dragToClose: false,  // 드래그로 닫기 비활성화
                     animated: false,     // 애니메이션 제거 (선택적)
                     on: {

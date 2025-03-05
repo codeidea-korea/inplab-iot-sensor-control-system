@@ -95,6 +95,7 @@
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <style>
+    /* 팝업(모달)관련 css */
     .fancybox__backdrop {
         position: fixed;
         top: 0;
@@ -102,7 +103,8 @@
         bottom: 0;
         right: 0;
         z-index: -1;
-        background: initial;
+        background: rgba(0, 0, 0, 0.7); /* 블랙(70% 투명) */
+        backdrop-filter: blur(10px); /* 블러 10px */
         opacity: var(--fancybox-opacity, 1);
         will-change: opacity
     }

@@ -256,24 +256,18 @@ $(function () {
 });
 
 function popFancy(name) {
-    // 팝업 열기
-    new Fancybox([{src: name, type: "inline"}], {
-        on: {
-            "*": (event, fancybox, slide) => {
-                //console.log(`event: ${event}`);
-            },
-        },
+    Fancybox.show([{ src: name, type: "inline" }], {
+        backdropClick: false, // 배경 클릭 시 닫힘 방지
+        clickOutside: false,  // Fancybox 영역 바깥 클릭 시 닫힘 방지
     });
 }
 
+
+
 function popFancy(name, param) {
-    // 팝업 열기
-    new Fancybox([{src: name, type: "inline"}], Object.assign({
-        on: {
-            "*": (event, fancybox, slide) => {
-                //console.log(`event: ${event}`);
-            },
-        },
+    Fancybox.show([{src: name, type: "inline"}], Object.assign({
+        backdropClick: false, // 배경 클릭 시 닫힘 방지
+        clickOutside: false,  // Fancybox 영역 바깥 클릭 시 닫힘 방지
     }, param));
 }
 
