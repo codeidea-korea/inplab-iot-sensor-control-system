@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true" />
+    <jsp:include page="../common/include_head.jsp" flush="true"/>
     <style>
         #map {
             width: 100%;
@@ -71,36 +71,50 @@
                 $('#dist_type_cd').html(option);
             });
 
-            $.get('/adminAdd/common/code/maintcompInfoList', {partner_type_flag: "0"}, function (res) {
-                let option = '<option value="">선택</option>';
-                $.each(res, function (idx) {
-                    option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
-                });
-                $('#inst_comp_id1').html(option);
-                $('#inst_comp_id2').html(option);
+            $.ajax({
+                method: 'post',
+                url: '/adminAdd/common/code/maintcompInfoList',
+                data: JSON.stringify({partner_type_flag: [0, 2]}),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (res) {
+                    let option = '<option value="">선택</option>';
+                    $.each(res, function (idx) {
+                        option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
+                    });
+                    $('#inst_comp_id1').html(option);
+                    $('#inst_comp_id2').html(option);
+                }
             });
 
-            $.get('/adminAdd/common/code/maintcompInfoList', {partner_type_flag: "1"}, function (res) {
-                let option = '<option value="">선택</option>';
-                $.each(res, function (idx) {
-                    option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
-                });
-                $('#meas_comp_id1').html(option);
-                $('#meas_comp_id2').html(option);
+            $.ajax({
+                method: 'post',
+                url: '/adminAdd/common/code/maintcompInfoList',
+                data: JSON.stringify({partner_type_flag: [1, 2]}),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (res) {
+                    let option = '<option value="">선택</option>';
+                    $.each(res, function (idx) {
+                        option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
+                    });
+                    $('#meas_comp_id1').html(option);
+                    $('#meas_comp_id2').html(option);
+                }
             });
 
-                _popupClearData = getSerialize('#lay-form-write');       // 초기화할 데이터값
+            _popupClearData = getSerialize('#lay-form-write');       // 초기화할 데이터값
 
             // 팝업에서 삭제 버튼 클릭 시
-            $('#lay-form-write .deleteBtn').on('click', function() {
+            $('#lay-form-write .deleteBtn').on('click', function () {
                 var districtNo = $('#district_no').val();
 
                 if (!districtNo) {
                     alert('삭제할 현장이 선택되지 않았습니다.');
                     return;
                 }
-                confirm('삭제하시겠습니까?', function() {
-                    $.get('/adminAdd/districtInfo/del', {district_no: districtNo}, function(res) {
+                confirm('삭제하시겠습니까?', function () {
+                    $.get('/adminAdd/districtInfo/del', {district_no: districtNo}, function (res) {
                         if (res === 1) {  // 성공 시
                             alert('삭제되었습니다.');
                             popFancyClose('#lay-form-write');
@@ -136,7 +150,7 @@
 
                     e.preventDefault();
 
-                    if (!validate()){
+                    if (!validate()) {
                         return;
                     }
                     const form = $('#lay-form-write')[0]; // 폼 요소 선택
@@ -197,7 +211,7 @@
 
                 $('#lay-form-write input[type=submit]').off().on('click', function (e) {
                     e.preventDefault();
-                    if (!validate()){
+                    if (!validate()) {
                         return;
                     }
                     const form = $('#lay-form-write')[0];
@@ -332,9 +346,9 @@
 
 <body data-pgcode="0000">
 <section id="wrap">
-    <jsp:include page="../common/include_top.jsp" flush="true" />
+    <jsp:include page="../common/include_top.jsp" flush="true"/>
     <div id="global-menu">
-        <jsp:include page="../common/include_sidebar.jsp" flush="true" />
+        <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
     <div id="container">
         <h2 class="txt">
@@ -345,14 +359,14 @@
             <div class="contents-re">
                 <h3 class="txt">현장 정보 관리</h3>
                 <div class="btn-group">
-                    <input type="text" class="search_input"  id="search" name="search" placeholder="현장명/주소/시공사/계측사"/>
+                    <input type="text" class="search_input" id="search" name="search" placeholder="현장명/주소/시공사/계측사"/>
                     <a class="searchBtn">검색</a>
                     <a class="insertBtn">신규 등록</a>
                     <a class="modifyBtn">상세정보</a>
                     <a class="excelBtn">다운로드</a>
                 </div>
                 <div class="contents-in" style="width: 100%">
-                    <jsp:include page="../common/include_jqgrid.jsp" flush="true" />
+                    <jsp:include page="../common/include_jqgrid.jsp" flush="true"/>
                 </div>
             </div>
         </div>
@@ -378,7 +392,7 @@
                             <td colspan=""><input type="text" name="site_no" value="S01" readonly/></td>
 
                             <th>현장ID</th>
-                            <td colspan=""><input type="text" id="district_no" name="district_no"  readonly/></td>
+                            <td colspan=""><input type="text" id="district_no" name="district_no" readonly/></td>
                         </tr>
                         <tr>
                             <th class="required_th" style="vertical-align: middle;">우편번호</th>

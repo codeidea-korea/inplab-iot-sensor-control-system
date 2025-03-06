@@ -46,8 +46,8 @@ public class CommonEditController {
     }
 
     @ResponseBody
-    @GetMapping("/code/maintcompInfoList")
-    public List maintcompInfoList(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+    @PostMapping("/code/maintcompInfoList")
+    public List maintcompInfoList(@RequestBody Map<String, Object> param) {
         return commonCodeEditService.getMaintcompInfoList(param);
     }
 
