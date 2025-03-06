@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
+import com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastInfoDto;
 import com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastTextDto;
 import com.safeone.dashboard.service.broadcastsystemconnection.BroadcastTextService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,12 @@ public class BroadcastTextController extends JqGridAbstract<BroadcastTextDto> {
 
     protected BroadcastTextController() {
         super(BroadcastTextDto.class);
+    }
+
+    @ResponseBody
+    @GetMapping("/broadcast-info")
+    public List<BroadcastInfoDto> getAllBroadCastInfo() {
+        return broadcastTextService.getAllBroadCastInfo();
     }
 
     @Override

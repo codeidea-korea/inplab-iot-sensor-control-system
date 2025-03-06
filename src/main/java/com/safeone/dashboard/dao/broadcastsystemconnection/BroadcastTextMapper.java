@@ -1,5 +1,6 @@
 package com.safeone.dashboard.dao.broadcastsystemconnection;
 
+import com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastInfoDto;
 import com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastTextDto;
 import org.springframework.stereotype.Repository;
 
@@ -17,5 +18,7 @@ public interface BroadcastTextMapper {
     int updateBroadcastText(Map param);
 
     int deleteBroadcastText(Map param);
+
+    List<BroadcastInfoDto> selectBroadcastInfoList();
 }
     

@@ -1,9 +1,8 @@
 package com.safeone.dashboard.service.broadcastsystemconnection;
 
 import com.safeone.dashboard.dao.broadcastsystemconnection.BroadcastTextMapper;
-import com.safeone.dashboard.dao.operationconfigurationsetting.UserManagementMapper;
+import com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastInfoDto;
 import com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastTextDto;
-import com.safeone.dashboard.dto.operationconfigurationsetting.UserManagementDto;
 import com.safeone.dashboard.service.JqGridService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,5 +49,9 @@ public class BroadcastTextService implements JqGridService<BroadcastTextDto> {
     public int delete(Map param) {
         param.put("mgnt_no", Integer.parseInt(param.get("mgnt_no").toString()));
         return mapper.deleteBroadcastText(param);
+    }
+
+    public List<BroadcastInfoDto> getAllBroadCastInfo() {
+        return mapper.selectBroadcastInfoList();
     }
 }

@@ -33,6 +33,13 @@
         </trim>
     </sql>
 
+    <select id="selectBroadcastInfoList"
+            resultType="com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastInfoDto">
+        SELECT tbi.brdcast_no
+             , tbi.brdcast_nm
+        FROM tb_broadcast_info tbi
+    </select>
+
     <select id="selectBroadcastTextList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastTextDto">
         SELECT tbd.mgnt_no
@@ -89,6 +96,7 @@
         UPDATE tb_broadcast_details
         SET brdcast_msg_dtls = #{brdcast_msg_dtls}
           , brdcast_title    = #{brdcast_title}
+          , brdcast_no       = #{brdcast_no}
           , mod_dt           = now()
         WHERE mgnt_no = #{mgnt_no}
     </update>

@@ -17,6 +17,19 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
+            const brdcastInfo = []
+            let brdcastNoSelections = ''
+
+            $.ajax({
+                url: '/broadcast-text/broadcast-info',
+                type: 'GET',
+                async: false,
+                success: function (res) {
+                    brdcastInfo.push(...res)
+                    brdcastNoSelections = res.map((item) => item.brdcast_no + ':' + item.brdcast_nm + "(" + item.brdcast_no + ")").join(';');
+                }
+            });
+
             const $leftGrid = $("#left-jq-grid");
             const leftPath = "/broadcast-text"
             initGrid($leftGrid, leftPath, $('#left-grid-wrapper'), {
@@ -25,7 +38,14 @@
                 custom: {
                     useFilterToolbar: true,
                 }
-            })
+            }, null, {
+                brdcast_no: {
+                    formatter: (cellValue, _options, _rowObject) => {
+                        const item = brdcastInfo.find((item) => item.brdcast_no === cellValue)
+                        return item.brdcast_nm + "(" + item.brdcast_no + ")";
+                    }
+                },
+            }, {brdcast_no: brdcastNoSelections})
 
             const $rightGrid = $("#right-jq-grid");
             const rightPath = "/broadcast-history"
@@ -57,7 +77,7 @@
                 );
                 // TODO 수정해야 됨
                 filteredData.map((item) => {
-                    item.brdcast_no = 'B01'
+                    item.brdcast_no = item.brdcast_no.split("(")[1].split(")")[0];
                     item.brdcast_dt = new Date().toISOString().slice(0, 10).replace(/-/g, '');
                     item.brdcast_rslt_yn = 'N';
                     item.brdcast_contnts = 'test';

@@ -10,8 +10,6 @@ public class BroadcastTextDto implements Serializable {
     @FieldLabel(title = "No", width = 150)
     private int mgnt_no;
 
-    @FieldLabel(title = "방송장비 No", type = "hidden")
-    private String brdcast_no;
 
     @FieldLabel(title = "방송일시", type = "hidden")
     private String brdcast_dt;
@@ -21,6 +19,9 @@ public class BroadcastTextDto implements Serializable {
 
     @FieldLabel(title = "안내 문구", width = 500, type = "editable")
     private String brdcast_msg_dtls;
+
+    @FieldLabel(title = "방송장비명", type = "selectable")
+    private String brdcast_no;
 
     @FieldLabel(title = "전송 성공 여부", type = "hidden")
     private String brdcast_rslt_yn;
