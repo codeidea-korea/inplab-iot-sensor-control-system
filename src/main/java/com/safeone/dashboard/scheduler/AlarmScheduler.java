@@ -42,7 +42,7 @@ public class AlarmScheduler {
      * 장애시, 해당 자산의 상태값은 비정상(2)으로 update
      * 구조물 경사계인 경우, 센서가 2개이므로, 한개라도 장애 있을시, 비정상
      */
-    @Scheduled(fixedDelay = DELAY_MS)
+//    @Scheduled(fixedDelay = DELAY_MS)
     public void insertCommDelayScheduler() {
         if (env.getProperty("dev").equalsIgnoreCase("true"))   // 개발모드이면 실행안함
             return;
@@ -73,7 +73,7 @@ public class AlarmScheduler {
      * 장애시, 해당 자산의 상태값은 비정상(2)으로 update
      * url 잘못된 경우 또한 비정상 처리
      */
-    @Scheduled(fixedDelay = DELAY_MS)
+//    @Scheduled(fixedDelay = DELAY_MS)
     public void insertCCTVDelayScheduler() {
         if (env.getProperty("dev").equalsIgnoreCase("true"))   // 개발모드이면 실행안함
             return;
@@ -171,7 +171,7 @@ public class AlarmScheduler {
         }
     }
 
-    @Scheduled(fixedDelay = DELAY_MS)
+//    @Scheduled(fixedDelay = DELAY_MS)
     public void insertThresholdAlarmScheduler() {
         if (env.getProperty("dev").equalsIgnoreCase("true"))   // 개발모드이면 실행안함
             return;
