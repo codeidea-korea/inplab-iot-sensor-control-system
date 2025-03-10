@@ -238,7 +238,7 @@
             });
 
             $('#mapSearchBtn').on('click', function () {
-                if ($('#lay-form-write input[name=dist_lat]').val() != '' && $('#lay-form-write input[name=dist_lon]').val() != '') {
+                if ($('#lay-form-write input[name=dist_lat]').val() !== '' && $('#lay-form-write input[name=dist_lon]').val() !== '') {
                     try {
                         window.vworld.setPanBy([
                             parseFloat($('#lay-form-write input[name=dist_lon]').val()),
@@ -247,7 +247,6 @@
                     } catch (e) {
                     }
                 }
-
                 popFancy('#lay-form-address', {dragToClose: false, touch: false});
             });
 
@@ -275,6 +274,19 @@
                 downloadExcel('현장관리');
             });
         });
+
+        function afterSetAddress(data) {
+            const geocoder = new kakao.maps.services.Geocoder();
+            geocoder.addressSearch(data.address, function (result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+                    const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                    $('#lay-form-write input[name=dist_lat]').val(coords.getLat());
+                    $('#lay-form-write input[name=dist_lon]').val(coords.getLng());
+                    $('#lay-form-write input[name=dist_zoom]').val(18);
+                    window.vworld.setPanBy([coords.getLng(), coords.getLat()], 18);
+                }
+            });
+        }
 
         function initForm() {
 
@@ -403,7 +415,7 @@
                                     <div class="btn-btm" style="width: auto; margin-top: 0px;">
                                         <button type="button" id="addrSearchBtn"
                                                 style="margin-left: 10px; padding: 5px 10px;"
-                                                onclick="openDaumPostcode('dist_zip', 'dist_addr', 'dist_road_addr')">
+                                                onclick="openDaumPostcode('dist_zip', 'dist_addr', 'dist_road_addr', afterSetAddress)">
                                             주소 검색
                                         </button>
                                     </div>

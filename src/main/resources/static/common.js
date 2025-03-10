@@ -729,13 +729,15 @@ function debounce(func, wait) {
     };
 }
 
-function openDaumPostcode(zonecode_col, jibunAddress_col, roadAddress_col) {
-    console.log(zonecode_col);
+function openDaumPostcode(zonecode_col, jibunAddress_col, roadAddress_col, callback) {
     new daum.Postcode({
         oncomplete: function (data) {
             $('input[name="' + zonecode_col + '"]').val(data.zonecode);
             $('input[name="' + jibunAddress_col + '"]').val(data.jibunAddress);
             $('input[name="' + roadAddress_col + '"]').val(data.roadAddress);
+            if (typeof callback === 'function') {
+                callback(data);
+            }
         }
     }).open();
 }
