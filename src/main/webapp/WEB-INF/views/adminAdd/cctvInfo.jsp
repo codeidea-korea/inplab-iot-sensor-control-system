@@ -4,6 +4,18 @@
 <html lang="ko">
 <head>
     <jsp:include page="../common/include_head.jsp" flush="true"/>
+    <style>
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+
+        .centerMarker {
+            position: absolute;
+            left: calc(50% - 15px);
+            top: calc(50% - 27px);
+        }
+    </style>
     <script type="text/javascript" src="/admin_add.js"></script>
     <script>
         const limit = 25;
@@ -275,6 +287,37 @@
         };
 
         $(function () {
+            window.vworld = new vwutil({
+                mapId: "map",
+                initPosition: {
+                    center: [
+                        127.449482276989, 36.9317789946793
+                    ],
+                    zoom: 18,
+                    rotation: 0.5
+                }
+            });
+
+            window.vworld.vwmap2d();
+
+            $('.mapSearchBtn').on('click', function () {
+                if ($('#lay-form-write08 input[name=cctv_lat]').val() !== '' && $('#lay-form-write08 input[name=cctv_lon]').val() !== '') {
+                    window.vworld.setPanBy([
+                        parseFloat($('#lay-form-write08 input[name=cctv_lon]').val()),
+                        parseFloat($('#lay-form-write08 input[name=cctv_lat]').val())], parseFloat($('#lay-form-write08 input[name=cctv_zoom]').val())
+                    );
+                }
+                popFancy('#lay-form-address', {dragToClose: false, touch: false});
+            });
+
+            $('.locationApply').on('click', function () {
+                const coords = window.vworld.getCenter();
+                $('#lay-form-write08 input[name=cctv_lat]').val(coords[1]);
+                $('#lay-form-write08 input[name=cctv_lon]').val(coords[0]);
+                popFancyClose('#lay-form-address');
+            });
+
+
             $("[datepicker]").flatpickr({
                 locale: "ko",
                 dateFormat: "Y-m-d",
@@ -595,11 +638,11 @@
                     <tr>
                         <th>위도 <span style="color: red">*</span></th>
                         <td>
-                            <input type="text" name="cctv_lat"/>
+                            <input type="text" name="cctv_lat" class="mapSearchBtn"/>
                         </td>
                         <th>경도 <span style="color: red">*</span></th>
                         <td>
-                            <input type="text" name="cctv_lon"/>
+                            <input type="text" name="cctv_lon" class="mapSearchBtn"/>
                         </td>
                     </tr>
                     <tr>
@@ -647,6 +690,21 @@
         </div>
     </div>
     <!--[e] 사용자 등록 팝업 -->
+
+    <div id="lay-form-address" class="layer-base">
+        <div class="layer-base-btns">
+            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
+        </div>
+        <div class="layer-base-title">위치 찾기</div>
+        <div class="layer-base-conts">
+            <div class="map" id="map" style="min-height: 400px;"></div>
+            <img src="/images/rv_marker.png" width="30px" class="centerMarker"/>
+            <div class="btn-btm">
+                <input type="button" class="locationApply" blue value="확인"/>
+                <button type="button" data-fancybox-close>취소</button>
+            </div>
+        </div>
+    </div>
 </section>
 </body>
 </html>
