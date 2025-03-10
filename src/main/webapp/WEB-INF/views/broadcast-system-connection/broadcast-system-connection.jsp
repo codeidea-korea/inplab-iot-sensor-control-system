@@ -144,7 +144,8 @@
                         url: '/broadcast-history/add',
                         type: 'POST',
                         data: {
-                            brdcast_msg_dtls: selectedRowData[0].brdcast_msg_dtls
+                            brdcast_msg_dtls: selectedRowData[0].brdcast_msg_dtls,
+                            brdcast_no: selectedRowData[0].brdcast_no.split("(")[1].split(")")[0]
                         },
                         success: function (_res) {
                             $rightGrid.trigger('reloadGrid');
