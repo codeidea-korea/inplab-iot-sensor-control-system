@@ -303,7 +303,7 @@
                 multiselect: true,
                 multiboxonly: false,
                 custom: {
-                    useFilterToolbar: true,
+                    useFilterToolbar: false,
                 }
             })
 

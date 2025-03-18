@@ -29,34 +29,40 @@
     </sql>
 
     <sql id="rowOrder">
-        <!--        <trim prefix="order by">-->
-        <!--            <choose>-->
-        <!--                <when test="'sens_tp_nm' == sidx and sidx != ''">-->
-        <!--                    tst.sens_tp_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'sens_nm' == sidx and sidx != ''">-->
-        <!--                    tsinfo.sens_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'sens_chnl_nm' == sidx and sidx != ''">-->
-        <!--                    tai.sens_chnl_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'formul_data' == sidx and sidx != ''">-->
-        <!--                    tsi.formul_data ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'init_apply_dt' == sidx and sidx != ''">-->
-        <!--                    tsi.init_apply_dt ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'last_apply_dt' == sidx and sidx != ''">-->
-        <!--                    tsi.last_apply_dt ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'emer_status' == sidx and sidx != ''">-->
-        <!--                    tsi.emer_status ${sord}-->
-        <!--                </when>-->
-        <!--                <otherwise>-->
-        <!--                    tsi.reg_dt desc-->
-        <!--                </otherwise>-->
-        <!--            </choose>-->
-        <!--        </trim>-->
+        <trim prefix="order by">
+            <choose>
+                <when test="'meas_dt' == sidx and sidx != ''">
+                    A.meas_dt ${sord}
+                </when>
+                <when test="'raw_data' == sidx and sidx != ''">
+                    A.raw_data ${sord}
+                </when>
+                <when test="'formul_data' == sidx and sidx != ''">
+                    A.formul_data ${sord}
+                </when>
+                <when test="'raw_data_x' == sidx and sidx != ''">
+                    A.raw_data_x ${sord}
+                </when>
+                <when test="'formul_data_x' == sidx and sidx != ''">
+                    A.formul_data_x ${sord}
+                </when>
+                <when test="'raw_data_y' == sidx and sidx != ''">
+                    A.raw_data_y ${sord}
+                </when>
+                <when test="'formul_data_y' == sidx and sidx != ''">
+                    A.formul_data_y ${sord}
+                </when>
+                <when test="'raw_data_z' == sidx and sidx != ''">
+                    A.raw_data_z ${sord}
+                </when>
+                <when test="'formul_data_z' == sidx and sidx != ''">
+                    A.formul_data_z ${sord}
+                </when>
+                <otherwise>
+                    A.latest_reg_dt desc
+                </otherwise>
+            </choose>
+        </trim>
     </sql>
 
     <insert id="insert" parameterType="java.util.Map">
@@ -87,14 +93,16 @@
     </update>
 
     <delete id="delete" parameterType="java.util.Map">
-        DELETE FROM tb_measure_details
+        DELETE
+        FROM tb_measure_details
         WHERE sens_no = #{sens_no}
           AND meas_dt = #{meas_dt}:: timestamp
           and sens_chnl_id = #{sens_chnl_id}
     </delete>
 
     <delete id="deleteRow" parameterType="java.util.Map">
-        DELETE FROM tb_measure_details
+        DELETE
+        FROM tb_measure_details
         WHERE sens_no = #{sens_no}
           AND meas_dt = #{meas_dt}:: timestamp
     </delete>
@@ -117,6 +125,7 @@
 
     <select id="selectList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.MeasureDetailsDataDto">
+        select * from (
         SELECT
         sens_no,
         meas_dt,
@@ -137,10 +146,11 @@
         and sens_no = #{sens_no}
         <include refid="rowSearch"/>
         GROUP BY sens_no, meas_dt
-        <include refid="rowOrder"/>
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
         </if>
+        ) A
+        <include refid="rowOrder"/>
     </select>
 
     <select id="selectListTotal" parameterType="java.util.Map" resultType="int">
@@ -162,7 +172,8 @@
     </select>
 
     <delete id="deleteAll" parameterType="java.util.Map">
-        DELETE FROM tb_measure_details
+        DELETE
+        FROM tb_measure_details
         WHERE sens_no = #{sens_no}
     </delete>
 </mapper>

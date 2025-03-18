@@ -17,8 +17,8 @@ public class MeasureDetailsDto implements Serializable {
     @FieldLabel(title = "센서명", width = 150)
     private String sens_nm;
 
-    @FieldLabel(title = "최종계측일시", type = "range", width = 250)
-    private String last_apply_dt;
+    @FieldLabel(title = "최종계측일시", width = 300)
+    private String init_apply_dt;
 
     @FieldLabel(title = "단면")
     private String sect_no;
@@ -38,8 +38,8 @@ public class MeasureDetailsDto implements Serializable {
     @FieldLabel(title = "경보상태", type = "hidden")
     private String emer_status;
 
-    @FieldLabel(title = "초기치설정일시", type = "hidden")
-    private String init_apply_dt;
+//    @FieldLabel(title = "초기치설정일시", type = "hidden")
+//    private String init_apply_dt;
 
     @FieldLabel(title = "센서_no", type = "hidden")
     private String sens_no;

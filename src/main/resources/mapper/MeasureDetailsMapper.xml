@@ -3,64 +3,51 @@
 
 <mapper namespace="com.safeone.dashboard.dao.MeasureDetailsMapper">
     <sql id="rowSearch">
-        <!--        <if test="sens_tp_nm != null and sens_tp_nm != ''">-->
-        <!--            and tst.sens_tp_nm ilike '%' || #{sens_tp_nm} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="sens_nm != null and sens_nm != ''">-->
-        <!--            and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="sens_chnl_nm != null and sens_chnl_nm != ''">-->
-        <!--            and tai.sens_chnl_nm ilike '%' || #{sens_chnl_nm} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="formul_data != null and formul_data != ''">-->
-        <!--            and tsi.formul_data ilike '%' || #{formul_data} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="init_apply_dt_start != null and init_apply_dt_start != '' and init_apply_dt_end != null and init_apply_dt_end != ''">-->
-        <!--            and tsi.init_apply_dt::timestamp between concat(#{init_apply_dt_start},' 00:00:00')::timestamp and-->
-        <!--            concat(#{init_apply_dt_end},' 23:59:59')::timestamp-->
-        <!--        </if>-->
-        <!--        <if test="last_apply_dt_start != null and last_apply_dt_start != '' and last_apply_dt_end != null and last_apply_dt_end != ''">-->
-        <!--            and tsi.last_apply_dt::timestamp between concat(#{last_apply_dt_start},' 00:00:00')::timestamp and-->
-        <!--            concat(#{last_apply_dt_end},' 23:59:59')::timestamp-->
-        <!--        </if>-->
-        <!--        <if test="emer_status != null and emer_status != ''">-->
-        <!--            and tsi.emer_status ilike '%' || #{emer_status} || '%'-->
-        <!--        </if>-->
+        <if test="sens_tp_nm != null and sens_tp_nm != ''">
+            and A.sens_tp_nm ilike '%' || #{sens_tp_nm} || '%'
+        </if>
+        <if test="sens_nm != null and sens_nm != ''">
+            and A.sens_nm ilike '%' || #{sens_nm} || '%'
+        </if>
+        <if test="init_apply_dt != null and init_apply_dt != ''">
+            and A.init_apply_dt::varchar ilike '%' || #{init_apply_dt} || '%'
+        </if>
+        <if test="sect_no != null and sect_no != ''">
+            and A.sect_no::varchar ilike '%' || #{sect_no} || '%'
+        </if>
+        <if test="maint_sts_cd != null and maint_sts_cd != ''">
+            and A.maint_sts_cd ilike '%' || #{maint_sts_cd} || '%'
+        </if>
     </sql>
 
     <sql id="rowOrder">
-        <!--        <trim prefix="order by">-->
-        <!--            <choose>-->
-        <!--                <when test="'sens_tp_nm' == sidx and sidx != ''">-->
-        <!--                    tst.sens_tp_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'sens_nm' == sidx and sidx != ''">-->
-        <!--                    tsinfo.sens_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'sens_chnl_nm' == sidx and sidx != ''">-->
-        <!--                    tai.sens_chnl_nm ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'formul_data' == sidx and sidx != ''">-->
-        <!--                    tsi.formul_data ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'init_apply_dt' == sidx and sidx != ''">-->
-        <!--                    tsi.init_apply_dt ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'last_apply_dt' == sidx and sidx != ''">-->
-        <!--                    tsi.last_apply_dt ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'emer_status' == sidx and sidx != ''">-->
-        <!--                    tsi.emer_status ${sord}-->
-        <!--                </when>-->
-        <!--                <otherwise>-->
-        <!--                    tsi.reg_dt desc-->
-        <!--                </otherwise>-->
-        <!--            </choose>-->
-        <!--        </trim>-->
+        <trim prefix="order by">
+            <choose>
+                <when test="'sens_tp_nm' == sidx and sidx != ''">
+                    A.sens_tp_nm ${sord}
+                </when>
+                <when test="'sens_nm' == sidx and sidx != ''">
+                    A.sens_nm ${sord}
+                </when>
+                <when test="'init_apply_dt' == sidx and sidx != ''">
+                    A.init_apply_dt ${sord}
+                </when>
+                <when test="'sect_no' == sidx and sidx != ''">
+                    A.sect_no ${sord}
+                </when>
+                <when test="'maint_sts_cd' == sidx and sidx != ''">
+                    A.maint_sts_cd ${sord}
+                </when>
+                <otherwise>
+                    A.sens_nm
+                </otherwise>
+            </choose>
+        </trim>
     </sql>
 
     <select id="selectList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.MeasureDetailsDto">
+        select * from (
         SELECT tsinfo.sens_nm,
         tsinfo.sect_no,
         tsinfo.maint_sts_cd,
@@ -86,11 +73,43 @@
         ON tli.district_no = tdi.district_no
         WHERE tdi.district_no = #{district_no}))
         GROUP BY tsinfo.sens_nm, tsinfo.sens_no
-        <include refid="rowSearch"/>
-        <include refid="rowOrder"/>
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
         </if>
+        ) A
+        WHERE 1=1
+        <include refid="rowSearch"/>
+        <include refid="rowOrder"/>
+    </select>
+
+    <select id="selectListTotal" parameterType="java.util.Map" resultType="int">
+        select count(A.*) from (SELECT tsinfo.sens_nm,
+        tsinfo.sect_no,
+        tsinfo.maint_sts_cd,
+        MAX(tst.sens_tp_nm) AS sens_tp_nm,
+        MAX(tst.senstype_no) AS senstype_no,
+        MAX(tsi.formul_data) AS formul_data,
+        MIN(tsi.init_apply_dt) AS init_apply_dt,
+        MAX(tsi.last_apply_dt) AS last_apply_dt,
+        MAX(tsi.emer_status) AS emer_status,
+        tsinfo.sens_no,
+        MAX(tsi.sens_chnl_id) AS sens_chnl_id
+        FROM tb_sensor_info tsinfo
+        LEFT JOIN tb_sensor_init tsi
+        ON tsinfo.sens_no = tsi.sens_no
+        LEFT JOIN tb_sensor_type tst
+        ON tsinfo.senstype_no = tst.senstype_no
+        WHERE 1 = 1
+        and tsinfo.sens_no IN (SELECT tlim.sens_no
+        FROM tb_logr_idx_map tlim
+        WHERE tlim.logr_no IN (SELECT tli.logr_no
+        FROM tb_district_info tdi
+        LEFT JOIN tb_logger_info tli
+        ON tli.district_no = tdi.district_no
+        WHERE tdi.district_no = #{district_no}))
+        GROUP BY tsinfo.sens_nm, tsinfo.sens_no) as A
+        WHERE 1=1
+        <include refid="rowSearch"/>
     </select>
 
     <select id="selectSensorChartData" parameterType="java.util.Map"
@@ -112,22 +131,4 @@
         order by meas_dt
     </select>
 
-    <select id="selectListTotal" parameterType="java.util.Map" resultType="int">
-        select count(c.*) from (select tsinfo.*
-        FROM tb_sensor_info tsinfo
-        LEFT JOIN tb_sensor_init tsi
-        ON tsinfo.sens_no = tsi.sens_no
-        LEFT JOIN tb_sensor_type tst
-        ON tsinfo.senstype_no = tst.senstype_no
-        WHERE 1 = 1
-        and tsinfo.sens_no IN (SELECT tlim.sens_no
-        FROM tb_logr_idx_map tlim
-        WHERE tlim.logr_no IN (SELECT tli.logr_no
-        FROM tb_district_info tdi
-        LEFT JOIN tb_logger_info tli
-        ON tli.district_no = tdi.district_no
-        WHERE tdi.district_no = #{district_no}))
-        GROUP BY tsinfo.sens_nm, tsinfo.sens_no) as c
-        <include refid="rowSearch"/>
-    </select>
 </mapper>
