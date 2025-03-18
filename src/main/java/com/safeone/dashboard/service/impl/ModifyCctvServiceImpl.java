@@ -40,19 +40,16 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
     public ObjectNode getCctv(GetModifyCctvDto getModifyCctvDto) {
         ObjectMapper om = new ObjectMapper();
         ObjectNode on = om.createObjectNode();
-        ArrayNode an = om.createArrayNode();
+        ArrayNode an;
 
         Map<String, Object> map = CommonUtils.dtoToMap(getModifyCctvDto);
+        map.put("del_yn", "N");
         List<CctvListDto> list = cctvListMapper.selectCctvList(map);
         for (CctvListDto dto : list) {
             if (dto.getCctv_ip() == null || dto.getWeb_port() == null || dto.getCctv_conn_id() == null || dto.getCctv_conn_pwd() == null) {
                 dto.setRtsp_status("N");
             } else {
-//                if (getPtzValues(dto.getCctv_ip(), dto.getWeb_port(), dto.getCctv_conn_id(), dto.getCctv_conn_pwd()).equals("FAIL")) {
-//                    dto.setRtsp_status("N");
-//                } else {
                 dto.setRtsp_status("Y");
-//                }
             }
         }
         int totalCnt = cctvListMapper.selectCctvListTotal(map);
