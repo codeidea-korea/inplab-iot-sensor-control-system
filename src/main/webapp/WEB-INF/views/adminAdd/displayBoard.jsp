@@ -364,10 +364,15 @@
 
             // 수정 팝업
             $('.modifyBtn').on('click', function () {
-                const dispbd_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+                const selectedDispbdNos = [];
+                $("#jqGrid tbody").find(".row-checkbox:checked").each(function () {
+                    const dispbdNo = $(this).closest("tr").find("td[aria-describedby='jqGrid_dispbd_no']").text().trim();
+                    selectedDispbdNos.push(dispbdNo);
+                });
+                const dispbd_no = selectedDispbdNos[0]
 
                 if (dispbd_no === null) {
-                    alert2('전광판를 선택해주세요.', function () {
+                    alert2('전광판을 선택해주세요.', function () {
                     });
                     return;
                 }

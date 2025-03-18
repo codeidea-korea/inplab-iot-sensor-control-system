@@ -326,7 +326,6 @@
             });
 
             getCctv({limit: limit, offset: offset}).then((res) => {
-                console.log('res > ', res);
                 setJqGridTable(res.rows, column, header, function () {
                 }, onSelectRow, ['cctv_no'], 'jqGrid', limit, offset, getCctv);
             }).catch((fail) => {
@@ -456,7 +455,12 @@
 
             // 수정 팝업
             $('.modifyBtn').on('click', function () {
-                const cctv_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+                const selectedDispbdNos = [];
+                $("#jqGrid tbody").find(".row-checkbox:checked").each(function () {
+                    const cctv_no = $(this).closest("tr").find("td[aria-describedby='jqGrid_cctv_no']").text().trim();
+                    selectedDispbdNos.push(cctv_no);
+                });
+                const cctv_no = selectedDispbdNos[0]
 
                 if (cctv_no === null) {
                     alert2('CCTV를 선택해주세요.', function () {
