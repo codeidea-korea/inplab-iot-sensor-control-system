@@ -42,7 +42,7 @@ public class DashboardController {
     
     @GetMapping(value = "dashboard")
     public String main(Model model) {
-        model.addAttribute("sensorTypes", (new Gson()).toJson(newDashboardService.getSensorTypes()));
+        model.addAttribute("assetTypes", (new Gson()).toJson(newDashboardService.getAssetTypes()));
         model.addAttribute("assetKind", (new Gson()).toJson(commonCodeService.getAssetKindList()));
         model.addAttribute("areaInfo", (new Gson()).toJson(areaService.getList(null).get(0)));
         return "dashboard";

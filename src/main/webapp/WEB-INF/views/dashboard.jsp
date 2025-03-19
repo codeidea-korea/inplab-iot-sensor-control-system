@@ -240,7 +240,7 @@
     const MARKER_CHANGE_LEVEL = 17.5;
     let wsUrl = 'ws://localhost:8080';
     let cctvWs;
-    const _sensorTypes = ${sensorTypes};
+    const _assetTypes = ${assetTypes};
     const _areaInfo = ${areaInfo};
     window.isRoadView = false;
     window.markers = {};
@@ -347,7 +347,6 @@
 
     $(function () {
         init();
-
         if (window.location.href.indexOf('106.245') > -1) { // 테스트서버
             wsUrl = 'ws://106.245.95.116:6099';
         } else if (window.location.href.indexOf('121.159') > -1) { // 진천서버
@@ -745,6 +744,37 @@
             popFancy('#chart-popup', {dragToClose: false, touch: false});
         }
 
+        function openCctvPopup(data) {
+            $('#lay-cctv-view .layer-base-conts img').hide();
+            $('#lay-cctv-view .layer-base-title').html(data.label);
+
+            cctvWs = new WebSocket(wsUrl + '/video/stream?url=' + data.etc1);
+            cctvWs.onerror = function () {
+                $('#lay-cctv-view .layer-base-conts img.nosignal').show();
+
+            };
+            cctvWs.onmessage = function (event) {
+                const blob = new Blob([event.data], {type: "image/jpeg"});
+                const url = URL.createObjectURL(blob);
+                const video = $('#lay-cctv-view .layer-base-conts img')[0];
+                video.src = url;
+
+                if (!$('#lay-cctv-view .layer-base-conts img').is(':visible')) {
+                    $('#lay-cctv-view .layer-base-conts img').show();
+                }
+
+                try {
+                    video.src = url;
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                } catch (e) {
+                    console.log('socket close');
+                }
+            };
+            popFancy('#lay-cctv-view', {dragToClose: false, touch: false, backdropClick: false});
+        }
+
         $('#lay-cctv-view .fullscreen').on('click', function () {
             if ($(this).closest('#lay-cctv-view').hasClass('full')) {
                 $(this).closest('#lay-cctv-view').removeClass('full');
@@ -936,7 +966,9 @@
                         window.vworld.removeOverlay(uid);
                     });
                     window.markers.assets = [];
+
                     loadSensorMakers(districtNo, res.sensors);
+                    loadCctvMakers(districtNo, res.cctvs);
 
                     $.each(res.sensors, (_idx, sensor) => {
                         const status = window.markers.risks.find(r => r.zone_id === districtNo && r.asset_id === sensor.sens_no);
@@ -956,6 +988,25 @@
                             '</li>';
                         $('.site-zone-list li[kind=' + sensor.senstype_no + '] .site-zone-conts ul').append(html);
                     });
+
+                    $.each(res.cctvs, (_idx, cctv) => {
+                        const fcStep = ''
+                        const html =
+                            '<li ' + fcStep + ' asset_id="' + cctv.cctv_no + '">' +
+                            '    <a href="javascript:void(0);" data-coords="' + cctv.cctv_lon + ',' + cctv.cctv_lat + '">' + cctv.cctv_nm + '</a>' +
+                            '    <div>' +
+                            '        <i class="fa-regular fa-eye"></i>　' +
+                            '        <p class="check-box" notxt="" small="">' +
+                            '            <input type="checkbox" id="check_conts01_' + _idx + '" name="check_conts01_' + _idx + '" value="" checked>' +
+                            '            <label for="check_conts01_' + _idx + '">' +
+                            '                <span class="graphic"></span>' +
+                            '            </label>' +
+                            '        </p>' +
+                            '    </div>' +
+                            '</li>';
+                        $('.site-zone-list li[kind="cctv"] .site-zone-conts ul').append(html);
+                    });
+
                     $('.site-zone-list li input[type="checkbox"]').prop('checked', true);
                     sortAssetsByLength()
                     $(document).trigger('map_action_end');
@@ -1028,9 +1079,30 @@
             });
         }
 
+        function loadCctvMakers(districtNo, cctvs) {
+            $.each(cctvs, (_idx, cctv) => {
+                const img = 'icon_cctv.png';
+                const type = 'cctv';
+                const position = [cctv.cctv_lon, cctv.cctv_lat];
+                const cctvMaker = window.vworld.addOverlay(
+                    '<div class="marker asset" zoneid="' + districtNo + '" assetid="' + cctv.cctv_no + '">' +
+                    '    <img src="/images/' + img + '"/>' +
+                    '    <span class="title">' + cctv.cctv_nm + '</span>' +
+                    '</div>'
+                    , position,
+                    '/images/' + img, cctv.cctv_nm, null, {
+                        type: type,
+                        asset_id: cctv.cctv_no,
+                        zone_id: districtNo,
+                    });
+                window.markers.assets.push(cctvMaker);
+            });
+        }
+
         function initAssetList() {
             $('.site-zone-area ul.site-zone-list').empty();
-            $.each(_sensorTypes, (idx, item) => {
+            let index = 0;
+            $.each(_assetTypes, (idx, item) => {
                 const asset =
                     '  <li kind="' + item.senstype_no + '">'
                     + '    <div class="site-zone-title">'
@@ -1050,7 +1122,28 @@
                     + '    </div>'
                     + '</li>';
                 $('.site-zone-area ul.site-zone-list').append(asset);
+                index += 1;
             });
+
+            $('.site-zone-area ul.site-zone-list').append(
+                '  <li kind="cctv">'
+                + '    <div class="site-zone-title">'
+                + '        <strong>'
+                + '            <i id="arrow-up" class="fa-solid fa-arrow-up fa-xl arrow-up" style="color: #ffffff; margin-right: 10px; cursor: pointer;"></i>'
+                + 'CCTV'
+                + '        </strong>'
+                + '        <p class="check-box" notxt="" small="">'
+                + '            <input type="checkbox" checked id="check_tit01_' + index + '" name="check_tit01_' + index + '" value="">'
+                + '            <label for="check_tit01_' + index + '">'
+                + '                <span class="graphic"></span>'
+                + '            </label>'
+                + '        </p>'
+                + '    </div>'
+                + '    <div class="site-zone-conts">'
+                + '        <ul></ul>'
+                + '    </div>'
+                + '</li>'
+            );
         }
 
         $(document).on('click', '.arrow-up', function () {
@@ -1073,39 +1166,6 @@
                     $(".roadViewContainer").addClass("open");
                 }
             });
-        }
-
-        function openCctvPopup(data) {
-            $('#lay-cctv-view .layer-base-conts img').hide();
-            $('#lay-cctv-view .layer-base-title').html(data.label);
-
-            cctvWs = new WebSocket(wsUrl + '/video/stream?url=' + data.etc1);
-            // console.log(cctvWs);
-            cctvWs.onerror = function (event) {
-                $('#lay-cctv-view .layer-base-conts img.nosignal').show();
-
-            };
-            cctvWs.onmessage = function (event) {
-                let blob = new Blob([event.data], {type: "image/jpeg"});
-                let url = URL.createObjectURL(blob);
-                let video = $('#lay-cctv-view .layer-base-conts img')[0];
-                video.src = url;
-
-                if (!$('#lay-cctv-view .layer-base-conts img').is(':visible')) {
-                    $('#lay-cctv-view .layer-base-conts img').show();
-                }
-
-                try {
-                    video.src = url;
-                    setTimeout(() => {
-                        URL.revokeObjectURL(url);
-                    }, 100);
-                } catch (e) {
-                    console.log('socket close');
-                }
-            };
-
-            popFancy('#lay-cctv-view', {dragToClose: false, touch: false, backdropClick: false});
         }
     });
 </script>
@@ -1264,6 +1324,22 @@
             <div class="graph-area" style="height: 500px">
                 <canvas id="myChart"></canvas>
             </div>
+        </div>
+    </div>
+
+    <div id="lay-cctv-view" class="layer-base">
+        <div class="layer-base-btns">
+            <a href="javascript:void(0);" class="fullscreen"><img src="/images/btn_lay_full.png" data-fancybox-full
+                                                                  alt="전체화면"/></a>
+            <a href="javascript:void(0);" class="closeCctv"><img src="/images/btn_lay_close.png" data-fancybox-close
+                                                                 alt="닫기"/></a>
+        </div>
+        <div class="layer-base-title icon cctv"></div>
+        <div class="layer-base-conts nosignal">
+            <div class="container">
+                <div class="title" data-text="No Signal">No Signal</div>
+            </div>
+            <img src="" alt="CCTV" style="position:relative; z-index: 10;"/>
         </div>
     </div>
 

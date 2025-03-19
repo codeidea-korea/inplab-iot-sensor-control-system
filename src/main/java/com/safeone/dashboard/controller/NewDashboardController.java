@@ -21,6 +21,7 @@ public class NewDashboardController {
     public int getAssetCount(@RequestParam Map<String, Object> map) {
         int count = 0;
         count += newDashboardService.getSensorsCount(map);
+        count += newDashboardService.getCctvsCount(map);
         return count;
     }
 
@@ -28,6 +29,7 @@ public class NewDashboardController {
     public Map<String, Object> getAssetAll(@RequestParam Map<String, Object> map) {
         Map<String, Object> result = new HashMap<>();
         result.put("sensors", newDashboardService.getSensors(map));
+        result.put("cctvs", newDashboardService.getCctvs(map));
         return result;
     }
 

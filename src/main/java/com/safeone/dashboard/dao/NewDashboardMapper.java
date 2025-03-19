@@ -13,4 +13,9 @@ public interface NewDashboardMapper {
     int getSensorsCount(Map<String, Object> map);
 
     List<Map<String, Object>> getSensorTypes();
+
+    int getCctvsCount(Map<String, Object> map);
+
+    List<Map<String, Object>> getCctvs(Map<String, Object> map);
+
 }
