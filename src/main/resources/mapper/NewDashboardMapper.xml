@@ -30,13 +30,15 @@
     <select id="getCctvsCount" parameterType="java.util.Map" resultType="int">
         select count(*)
         from tb_cctv_info
-        where district_no = #{district_no};
+        where district_no = #{district_no}
+          and del_yn = 'N';
     </select>
 
     <select id="getCctvs" parameterType="java.util.Map" resultType="java.util.Map">
         select *
         from tb_cctv_info
         where district_no = #{district_no}
+          and del_yn = 'N';
     </select>
 
     <select id="getSensorTypes" resultType="java.util.Map">
