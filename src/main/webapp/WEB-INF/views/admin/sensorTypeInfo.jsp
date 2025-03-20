@@ -99,7 +99,7 @@
                             reloadJqGrid();
                         },
                         error: function (e) {
-                            alert(e?.responseJSON?.message ?? '저장 실패');
+                            alert(e?.responseJSON?.message ?? '값이 중복되거나 허용되지 않는 범위입니다.');
                         }
                     });
                 });
