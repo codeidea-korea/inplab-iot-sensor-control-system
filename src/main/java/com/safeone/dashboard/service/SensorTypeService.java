@@ -37,6 +37,26 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
 
     @Override
     public boolean create(Map param) {
+        int start = Integer.parseInt((String) param.get("logr_idx_str"));
+        int end = Integer.parseInt((String) param.get("logr_idx_end"));
+
+        if (start < 0 || end < 0 || start > 256 || end > 256) {
+            throw new IllegalArgumentException("범위는 0 ~ 256 사이여야 합니다.");
+        }
+
+        if (start > end) {
+            throw new IllegalArgumentException("logr_idx_str 값은 logr_idx_end 값보다 클 수 없습니다.");
+        }
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("start", start);
+        map.put("end", end);
+
+        int count = mapper.checkOverlap(map);
+        if (count > 0) {
+            throw new IllegalArgumentException("값이 중복되었습니다.");
+        }
+
         return mapper.insertSensorType(param) > 0;
     }
 

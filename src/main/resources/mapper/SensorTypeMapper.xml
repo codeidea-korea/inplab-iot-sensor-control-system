@@ -212,4 +212,14 @@
         select max(senstype_no) as senstype_no
         from tb_sensor_type
     </select>
+
+    <select id="checkOverlap" resultType="int" parameterType="java.util.Map">
+        SELECT COUNT(*)
+        FROM tb_sensor_type
+        WHERE
+            (#{start}::int BETWEEN logr_idx_str::int AND logr_idx_end::int)
+           OR (#{end}::int BETWEEN logr_idx_str::int AND logr_idx_end::int)
+           OR (logr_idx_str::int BETWEEN #{start}::int AND #{end}::int)
+           OR (logr_idx_end::int BETWEEN #{start}::int AND #{end}::int)
+    </select>
 </mapper>

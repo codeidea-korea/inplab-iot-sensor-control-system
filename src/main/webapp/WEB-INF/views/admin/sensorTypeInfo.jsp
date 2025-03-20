@@ -88,11 +88,19 @@
                     if (!validate())
                         return;
 
-                    $.get('/adminAdd/sensorType/add', getSerialize('#lay-form-write'), function (res) {
-                        alert('저장되었습니다.', function () {
-                            popFancyClose('#lay-form-write');
-                        });
-                        reloadJqGrid();
+                    $.ajax({
+                        url: '/adminAdd/sensorType/add',
+                        type: 'GET',
+                        data: getSerialize('#lay-form-write'),
+                        success: function () {
+                            alert('저장되었습니다.', function () {
+                                popFancyClose('#lay-form-write');
+                            });
+                            reloadJqGrid();
+                        },
+                        error: function (e) {
+                            alert(e?.responseJSON?.message ?? '저장 실패');
+                        }
                     });
                 });
             });

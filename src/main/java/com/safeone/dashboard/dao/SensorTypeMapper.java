@@ -19,5 +19,7 @@ public interface SensorTypeMapper {
     List<SensorTypeDto> getAll();
 
     String getMaxNo();
+
+    int checkOverlap(Map<String, Object> param);
 }
     
