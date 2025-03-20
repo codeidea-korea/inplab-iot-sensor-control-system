@@ -1,5 +1,6 @@
 package com.safeone.dashboard.domain.sensor;
 
+import com.safeone.dashboard.domain.sensor.dto.UpdateCctvPosition;
 import com.safeone.dashboard.domain.sensor.dto.UpdatePosition;
 import com.safeone.dashboard.domain.sensor.service.NewSensorService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,11 @@ public class NewSensorController {
     @PutMapping("/update-position")
     public int updatePosition(@RequestBody UpdatePosition updatePosition) {
         return newSensorService.updatePosition(updatePosition);
+    }
+
+    @PutMapping("/cctv/update-position")
+    public int updateCctvPosition(@RequestBody UpdateCctvPosition updatePosition) {
+        return newSensorService.updateCctvPosition(updatePosition);
     }
 
 }

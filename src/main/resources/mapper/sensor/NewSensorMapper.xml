@@ -8,4 +8,11 @@
             sens_lon = #{sensLon}::double precision
         where sens_no = #{sensNo}
     </update>
+
+    <update id="updateCctvPosition" parameterType="com.safeone.dashboard.domain.sensor.dto.UpdateCctvPosition">
+        update tb_cctv_info
+        set cctv_lat = #{cctvLat}::double precision,
+            cctv_lon = #{cctvLon}::double precision
+        where cctv_no = #{cctvNo}
+    </update>
 </mapper>

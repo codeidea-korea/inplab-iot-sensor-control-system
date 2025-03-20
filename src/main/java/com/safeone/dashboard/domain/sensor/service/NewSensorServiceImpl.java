@@ -1,5 +1,6 @@
 package com.safeone.dashboard.domain.sensor.service;
 
+import com.safeone.dashboard.domain.sensor.dto.UpdateCctvPosition;
 import com.safeone.dashboard.domain.sensor.dto.UpdatePosition;
 import com.safeone.dashboard.domain.sensor.repository.NewSensorMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,11 @@ public class NewSensorServiceImpl implements NewSensorService {
     @Override
     public int updatePosition(UpdatePosition updatePosition) {
         return newSensorMapper.updatePosition(updatePosition);
+    }
+
+    @Override
+    public int updateCctvPosition(UpdateCctvPosition updatePosition) {
+        return newSensorMapper.updateCctvPosition(updatePosition);
     }
 
 }

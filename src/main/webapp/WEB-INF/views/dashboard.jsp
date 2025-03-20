@@ -318,25 +318,47 @@
             });
 
             $.each(changedAssets, (_i, maker) => {
+                const isCCTV = $(maker).data('is-cctv');
                 const $maker = $(maker);
                 const coords = window.vworld.getPositionOverlay($maker.attr('uid'));
-                $.ajax({
-                    method: 'put',
-                    url: '/api/sensors/update-position',
-                    data: JSON.stringify({
-                        sensNo: $maker.attr('assetid'),
-                        sensLat: coords[1],
-                        sensLon: coords[0]
-                    }),
-                    dataType: 'json',
-                    contentType: 'application/json; charset=utf-8',
-                    success: () => {
-                        alert('저장되었습니다.');
-                    },
-                    error: () => {
-                        alert('저장에 실패하였습니다.');
-                    }
-                });
+
+                if (isCCTV) {
+                    $.ajax({
+                        method: 'put',
+                        url: '/api/sensors/cctv/update-position',
+                        data: JSON.stringify({
+                            cctvNo: $maker.attr('assetid'),
+                            cctvLat: coords[1],
+                            cctvLon: coords[0]
+                        }),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        success: () => {
+                            alert('저장되었습니다.');
+                        },
+                        error: () => {
+                            alert('저장에 실패하였습니다.');
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        method: 'put',
+                        url: '/api/sensors/update-position',
+                        data: JSON.stringify({
+                            sensNo: $maker.attr('assetid'),
+                            sensLat: coords[1],
+                            sensLon: coords[0]
+                        }),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        success: () => {
+                            alert('저장되었습니다.');
+                        },
+                        error: () => {
+                            alert('저장에 실패하였습니다.');
+                        }
+                    });
+                }
             });
 
             $.each(markers, (_i, maker) => {
@@ -1085,7 +1107,7 @@
                 const type = 'cctv';
                 const position = [cctv.cctv_lon, cctv.cctv_lat];
                 const cctvMaker = window.vworld.addOverlay(
-                    '<div class="marker asset" zoneid="' + districtNo + '" assetid="' + cctv.cctv_no + '">' +
+                    '<div data-is-cctv="true" class="marker asset" zoneid="' + districtNo + '" assetid="' + cctv.cctv_no + '">' +
                     '    <img src="/images/' + img + '"/>' +
                     '    <span class="title">' + cctv.cctv_nm + '</span>' +
                     '</div>'
