@@ -157,7 +157,6 @@ public class ExcelUtils {
         int iSheetNum = 0;
 
         File excelFile;
-
         excelFile = new File(sFileName);
         workbook = Workbook.createWorkbook(excelFile);
 
@@ -179,14 +178,17 @@ public class ExcelUtils {
             }
         }
 
+        // 열 너비 자동 조정을 위한 배열
+        int[] columnWidths = new int[fieldset.length];
+
         for (int row = 0; row < _list.size(); row++) {
             if (row % 65535 == 0) {
                 workbook.createSheet("Sheet" + iSheetNum, iSheetNum);
                 sheet = workbook.getSheet(iSheetNum);
                 iSheetNum++;
 
+                // Adding headers
                 for (int cols = 0; cols < fieldset.length; cols++) {
-
                     if (headerset[cols] == null) {
                         continue;
                     }
@@ -203,13 +205,15 @@ public class ExcelUtils {
                         if (bGroupHeader)
                             sheet.mergeCells(cols, 0, cols, 1);
                     }
+
+                    // 열 너비 초기화
+                    columnWidths[cols] = headerset[cols].length();
                 }
 
                 int mergeStart = -1;
                 String mergeLabel = "";
 
                 for (int cols = 0; cols < headerset.length; cols++) {
-
                     if (headerset[cols] == null) {
                         continue;
                     }
@@ -242,6 +246,7 @@ public class ExcelUtils {
                     row++;
             }
 
+            // Writing data to cells
             try {
                 HashMap<?, ?> data;
                 if (_list.get(0) instanceof Map)
@@ -250,8 +255,12 @@ public class ExcelUtils {
                     data = (HashMap<?, ?>) BeanUtils.describe(_list.get(row));
 
                 for (int cols = 0; cols < fieldset.length; cols++) {
-                    Label label = new Label(cols, (row % 65535) + 1, NVL(data.get(fieldset[cols])).toString(), defaultCellFormat);
+                    String cellValue = NVL(data.get(fieldset[cols])).toString();
+                    Label label = new Label(cols, (row % 65535) + 1, cellValue, defaultCellFormat);
                     sheet.addCell(label);
+
+                    // 열 너비를 자동으로 설정하기 위해 최대 길이를 계산
+                    columnWidths[cols] = Math.max(columnWidths[cols], cellValue.length());
                 }
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -259,11 +268,17 @@ public class ExcelUtils {
             }
         }
 
+        // 열 너비 설정
+        for (int i = 0; i < columnWidths.length; i++) {
+            sheet.setColumnView(i, columnWidths[i] + 5);  // +5는 여유를 두기 위한 부분
+        }
+
         workbook.write();
         workbook.close();
-
         return excelFile;
     }
+
+
 
     public static File write(String sFileName, List _List) throws Exception {
         if (_List == null) return null;

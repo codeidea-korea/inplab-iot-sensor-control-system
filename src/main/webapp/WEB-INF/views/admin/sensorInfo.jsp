@@ -220,7 +220,7 @@
             });
 
             $('.excelBtn').on('click', function () {
-                downloadExcel('로거관리');
+                downloadExcel('sensors', $("#jq-grid"), '/adminAdd/sensorInfo');
             });
 
 
