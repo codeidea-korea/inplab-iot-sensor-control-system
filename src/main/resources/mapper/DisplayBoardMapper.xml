@@ -60,6 +60,7 @@
              , A.mod_dt
         FROM tb_dispboard_info A
         WHERE A.district_no = #{district_no}
+          AND A.del_yn = 'N'
     </select>
 
     <sql id="getDisplayBoardList-where">

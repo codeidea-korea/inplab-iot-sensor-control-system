@@ -8,14 +8,14 @@ import java.io.Serializable;
 @Data
 public class DisplayImgManagementDto implements Serializable {
 	
-	@FieldLabel(title="전송그룹 ID", type="hidden")
-    String send_group_id;
+	@FieldLabel(title="ID", type="hidden")
+    String mgnt_no;
 
     @FieldLabel(title="전송그룹", width=460)
-    String send_group_name;
+    String img_grp_nm;
 
     @FieldLabel(title="설명", width=460)
-    String description;
+    String img_grp_comment;
 
     @FieldLabel(title="사용여부", width=460, type=":;Y:사용;N:사용중지")
     String use_yn;

@@ -4,8 +4,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
-    <script type="text/javascript" src="/colorpicker/jquery.colorpicker.bygiro.min.js"></script>
+    <jsp:include page="../common/include_head.jsp" flush="true" />
+    <script type="text/javascript" src="/colorpicker/jquery.colorpicker.bygiro.min.js" />
     <link rel="stylesheet" type="text/css" href="/colorpicker/jquery.colorpicker.bygiro.min.css"/>
     <style>
         #footer {
@@ -135,7 +135,6 @@
             cursor: pointer;
         }
     </style>
-
     <script>
         let canvas, ctx;
         let texts = [];
@@ -372,11 +371,10 @@
 
         $(function () {
             _popupClearData = getSerialize('#lay-form-write2');
-            // 초기화할 데이터값
 
             // 삭제
             $('.deleteBtn').on('click', function () {
-                var targetArr = getSelectedCheckData();
+                const targetArr = getSelectedCheckData();
 
                 if (!targetArr) {
                     return false;
@@ -385,12 +383,12 @@
                 if (targetArr.length > 0) {
                     confirm(targetArr.length + '건의 데이터를 삭제하시겠습니까?', function () {
                         $.each(targetArr, function (idx) {
-                            $.get('/display-connection/display-img-management/del', this, function (res) { // todo : 1이 아닌 경우 삭제가 실패된것을 알릴것인지?
-
-                                if ((idx + 1) === targetArr.length) reloadJqGrid();
+                            $.get('/display-connection/display-img-management/del', this, function () {
+                                if ((idx + 1) === targetArr.length) {
+                                    reloadJqGrid();
+                                }
                             });
                         });
-//                             reloadJqGrid();
                     });
                 } else {
                     alert('삭제하실 그룹를 선택해주세요.');
@@ -431,10 +429,8 @@
 
             // 수정 팝업
             $('.modifyBtn').on('click', function () {
-
                 $("#form_sub_title").html('수정');
-
-                var targetArr = getSelectedCheckData();
+                const targetArr = getSelectedCheckData();
 
                 if (!targetArr) {
                     return false;
@@ -443,7 +439,7 @@
                 if (targetArr.length > 1) {
                     alert('수정 할 데이터를 1건만 선택해주세요.');
                     return;
-                } else if (targetArr.length == 0) {
+                } else if (targetArr.length === 0) {
                     alert('수정할 데이터를 선택해주세요.');
                     return;
                 }
@@ -468,8 +464,8 @@
         });
 
         function validate() {
-            if ($('#lay-form-write2 input[name=send_group_name]').val().trim() == '') {
-                $('#lay-form-write2 input[name=send_group_name]').focus();
+            if ($('#lay-form-write2 input[name=img_grp_nm]').val().trim() === '') {
+                $('#lay-form-write2 input[name=img_grp_nm]').focus();
                 alert('전송그룹을 입력해주세요.');
                 return false;
             }
@@ -482,23 +478,14 @@
 
 <body data-pgCode="0000">
 <section id="wrap">
-    <!--[s] 상단 -->
-    <jsp:include page="../common/include_top.jsp" flush="true"></jsp:include>
-    <!--[e] 상단 -->
-
-    <!--[s] 왼쪽 메뉴 -->
+    <jsp:include page="../common/include_top.jsp" flush="true"/>
     <div id="global-menu">
-        <!--[s] 주 메뉴 -->
-        <jsp:include page="../common/include_sidebar.jsp" flush="true"></jsp:include>
-        <!--[e] 주 메뉴 -->
+        <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
-    <!--[e] 왼쪽 메뉴 -->
-
     <div id="container">
         <h2 class="txt">전광판 연계
             <span class="arr">전광판 이미지 관리</span>
         </h2>
-
         <div id="contents">
             <div class="contents-re" style="flex: .5">
                 <div class="setupCanvas">
@@ -526,7 +513,6 @@
                         <button type="button" class="btnCreateCanvas">영역 생성</button>
                     </div>
                 </div>
-
                 <div class="setupText">
                     <h3 class="txt">이미지 문구 설정</h3>
                     <div class="btn-group asd canvasBtn" style="background: none">
@@ -563,15 +549,9 @@
                     <button type="button" class="btnCancel" style="margin: 0">취소</button>
                 </div>
                 <div class="contents-in auto canvasContainer">
-
                 </div>
-
-                <!-- <h3 class="txt">텍스트 수정 (생성 이미지에 표시된 텍스트를 더블 클릭 후 편집이 가능 합니다.)</h3>
-                <div class="contents-in auto">
-                </div> -->
             </div>
         </div>
-
         <div id="footer">
             <div class="footerItem">
                 <div class="btn-group2">
@@ -581,18 +561,13 @@
                     <a class="deleteBtn">삭제</a>
                 </div>
                 <div class="contents-in">
-                    <jsp:include page="../common/include_jqgrid_old.jsp" flush="true"></jsp:include>
+                    <jsp:include page="../common/include_jqgrid_old.jsp" flush="true"/>
                 </div>
             </div>
         </div>
     </div>
-    <!--[e] 컨텐츠 영역 -->
-
-    <!--[s] 알람 설정 수정 팝업 -->
     <div id="lay-form-write" class="layer-base">
-
         <input type="hidden" name="alarm_kind_id"/>
-
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
@@ -618,11 +593,8 @@
             </div>
         </div>
     </div>
-
     <div id="lay-form-write2" class="layer-base">
-
-        <input type="hidden" id="send_group_id" name="send_group_id"/>
-
+        <input type="hidden" id="mgnt_no" name="mgnt_no"/>
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
         </div>
@@ -638,19 +610,19 @@
                     <tr>
                         <th>전송그룹</th>
                         <td>
-                            <input type="text" name="send_group_name"/>
+                            <input type="text" name="img_grp_nm"/>
                         </td>
                     </tr>
                     <tr>
                         <th>설명</th>
                         <td>
-                            <textarea name="description"></textarea>
+                            <textarea name="img_grp_comment"></textarea>
                         </td>
                     </tr>
                     <tr>
                         <th>사용 여부</th>
                         <td>
-                            <select name="use_flag">
+                            <select name="use_yn">
                                 <option value="Y">사용</option>
                                 <option value="N">사용중지</option>
                             </select>
@@ -665,8 +637,6 @@
             </div>
         </div>
     </div>
-    <!--[e] 알람 설정 수정 팝업 -->
-
-    </section>
+</section>
 </body>
 </html>

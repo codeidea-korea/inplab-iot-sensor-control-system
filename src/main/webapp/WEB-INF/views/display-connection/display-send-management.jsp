@@ -230,11 +230,11 @@
         });
 
         $("#district-no").on('change', () => {
+            $('#dispbd_nm').empty()
+            $('#dispbd_nm').append(
+                "<option value=''>선택</option>"
+            );
             if ($("#district-no").val() === '') {
-                $('#dispbd_nm').empty()
-                $('#dispbd_nm').append(
-                    "<option value=''>선택</option>"
-                );
                 return;
             } else {
                 $.ajax({
@@ -282,7 +282,7 @@
                     dispbd_no: $("#dispbd_nm").val(),
                     district_no: $("#district-no").val(),
                     dispbd_evnt_flag: $("#event-select").val(),
-                    dispbd_rslt_yn: 'N'
+                    dispbd_rslt_yn: 'Y'
                 }),
                 success: function (_res) {
                     alert('전송이 완료되었습니다.');
@@ -329,7 +329,7 @@
             });
         }
 
-        $("#form-submit-btn").click( async () => {
+        $("#form-submit-btn").click(async () => {
             let eventFlagCode = $("#event_flag").val();
             let eventFlag;
             let base64Image;
@@ -556,7 +556,7 @@
                     </tr>
                     <tr>
                         <th>이미지 파일</th>
-                        <td><input type="file" id="image_file" accept="image/*" /></td>
+                        <td><input type="file" id="image_file" accept="image/*"/></td>
                     </tr>
                     <tr>
                         <th>전송그룹명</th>

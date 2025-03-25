@@ -30,7 +30,7 @@
                     MG.use_yn ${sord}
                 </when>
                 <otherwise>
-                    MG.send_group_id, MG.send_group_name
+                    MG.reg_dt
                 </otherwise>
             </choose>
         </trim>
@@ -38,15 +38,8 @@
 
     <select id="selectDisplayImgManagementList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.displayconnection.DisplayImgManagementDto">
-        SELECT MG.*
-        FROM (
-        SELECT send_group_id
-        , send_group_name
-        , description
-        , use_yn
-        from tb_send_group tsg
-        ) MG
-        WHERE 1=1
+        SELECT *
+        FROM tb_dispbd_group MG
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
@@ -56,31 +49,17 @@
 
     <select id="selectDisplayImgManagementListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(*)
-        FROM (
-        SELECT send_group_id
-        , send_group_name
-        , description
-        , use_yn
-        from tb_send_group tsg
-        ) MG
-        WHERE 1=1
+        FROM tb_dispbd_group MG
         <include refid="rowSearch"/>
     </select>
 
     <update id="updateDisplayImgManagement" parameterType="java.util.Map">
-        update tb_send_group
-        <set>
-            <if test="send_group_name != null">
-                , send_group_name = #{send_group_name}
-            </if>
-            <if test="description != null">
-                , description = #{description}
-            </if>
-            <if test="use_yn != null">
-                , use_yn = #{use_yn}
-            </if>
-        </set>
-        where send_group_id = #{send_group_id}
+        update tb_dispbd_group
+        set img_grp_nm      = #{img_grp_nm},
+            img_grp_comment = #{img_grp_comment},
+            use_yn          = #{use_yn},
+            mod_dt          = now()
+        where mgnt_no = #{mgnt_no}::integer
     </update>
 
     <insert id="insertDisplayImgManagement" parameterType="java.util.Map">
@@ -92,15 +71,15 @@
     </insert>
 
     <insert id="insertGroup" parameterType="java.util.Map">
-        INSERT INTO tb_send_group (send_group_id, send_group_name, description, use_yn)
-        VALUES ((SELECT COALESCE(MAX(send_group_id::integer), 0) + 1 FROM tb_send_group), #{send_group_name},
-                #{description}, #{use_yn})
+        INSERT INTO tb_dispbd_group (mgnt_no, img_grp_nm, img_grp_comment, use_yn, reg_dt, mod_dt)
+        VALUES ((SELECT COALESCE(MAX(mgnt_no::integer), 0) + 1 FROM tb_dispbd_group), #{img_grp_nm},
+                #{img_grp_comment}, #{use_yn}, now(), now())
     </insert>
 
     <delete id="deleteDisplayImgManagement" parameterType="java.util.Map">
         DELETE
-        FROM tb_send_group
-        WHERE send_group_id = #{send_group_id}
+        FROM tb_dispbd_group
+        WHERE mgnt_no = #{mgnt_no}::integer
     </delete>
 
 </mapper>
