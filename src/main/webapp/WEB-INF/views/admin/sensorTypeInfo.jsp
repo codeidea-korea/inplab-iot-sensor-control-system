@@ -155,7 +155,7 @@
             });
 
             $('.excelBtn').on('click', function () {
-                downloadExcel('센서 타입관리');
+                downloadExcel('sensor-types');
             });
 
         });
