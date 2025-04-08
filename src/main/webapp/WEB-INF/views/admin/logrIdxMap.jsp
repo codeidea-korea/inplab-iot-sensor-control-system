@@ -198,7 +198,11 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
-            initGrid($("#jq-grid"), "/adminAdd/logrIdxMap", $('#grid-wrapper'))
+            initGrid($("#jq-grid"), "/adminAdd/logrIdxMap", $('#grid-wrapper'), {
+                custom: {
+                    useFilterToolbar: true,
+                }
+            })
         });
     </script>
 </head>

@@ -3,33 +3,33 @@
     
 <mapper namespace="com.safeone.dashboard.dao.LogrIdxMapMapper">
     <sql id="rowSearch">
-        <if test="sens_no != null and sens_no != ''">
-            and MG.sens_no = #{sens_no}
+        <if test="district_nm != null and district_nm != ''">
+            and MG.district_nm ilike '%' || #{district_nm} || '%'
         </if>
-        <if test="sens_chnl_id != null and sens_chnl_id != ''">
-            and MG.sens_chnl_id ilike '%' || #{sens_chnl_id} || '%'
+        <if test="senstype_nm != null and senstype_nm != ''">
+            and MG.senstype_nm ilike '%' || #{senstype_nm} || '%'
         </if>
-
-        <if test="mod_dt_start != null and mod_dt_start != '' and mod_dt_end != null and mod_dt_end != ''">
-            and MG.mod_dt::timestamp between (#{mod_dt_start}::timestamp) and (#{mod_dt_end}::timestamp)
+        <if test="sens_nm != null and sens_nm != ''">
+            and MG.sens_nm ilike '%' || #{sens_nm} || '%'
         </if>
-
-        <if test="searchKeyword  != null and searchKeyword  != ''">
-            AND (SELECT B.sens_tp_nm
-                FROM tb_sensor_type B
-                WHERE B.senstype_no = ( SELECT B.senstype_no
-                                        FROM tb_sensor_info B
-                                        WHERE B.sens_no = MG.sens_no)) LIKE '%' || #{searchKeyword} || '%' OR
-                (SELECT C.district_nm
-                 FROM tb_district_info C
-                 WHERE C.district_no = (SELECT B.district_no
-                                        FROM tb_logger_info B
-                                        WHERE B.logr_no = MG.logr_no)) LIKE '%' || #{searchKeyword} || '%' or
-                (SELECT C.logr_nm
-                 FROM tb_logger_info C
-                 WHERE C.logr_no = MG.logr_no) LIKE '%' || #{searchKeyword} || '%'
+        <if test="logr_nm != null and logr_nm != ''">
+            and MG.logr_nm ilike '%' || #{logr_nm} || '%'
         </if>
-
+        <if test="sens_chnl_nm != null and sens_chnl_nm != ''">
+            and MG.sens_chnl_nm ilike '%' || #{sens_chnl_nm} || '%'
+        </if>
+        <if test="logr_chnl_seq != null and logr_chnl_seq != ''">
+            and MG.logr_chnl_seq::varchar ilike '%' || #{logr_chnl_seq} || '%'
+        </if>
+        <if test="logr_idx_no != null and logr_idx_no != ''">
+            and MG.logr_idx_no ilike '%' || #{logr_idx_no} || '%'
+        </if>
+        <if test="sect_no != null and sect_no != ''">
+            and MG.sect_no::varchar ilike '%' || #{sect_no} || '%'
+        </if>
+        <if test="reg_dt != null and reg_dt != ''">
+            and MG.reg_dt ilike '%' || #{reg_dt} || '%'
+        </if>
     </sql>
 
     <sql id="rowOrder">
