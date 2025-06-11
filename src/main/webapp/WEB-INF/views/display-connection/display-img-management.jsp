@@ -4,8 +4,8 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="../common/include_head.jsp" flush="true" />
-    <script type="text/javascript" src="/colorpicker/jquery.colorpicker.bygiro.min.js" />
+    <jsp:include page="../common/include_head.jsp" flush="true"></jsp:include>
+    <script type="text/javascript" src="/colorpicker/jquery.colorpicker.bygiro.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/colorpicker/jquery.colorpicker.bygiro.min.css"/>
     <style>
         #footer {
