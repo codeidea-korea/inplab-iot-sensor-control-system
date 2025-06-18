@@ -459,6 +459,7 @@
                 Promise.all(requests).then(() => {
                     updateChart(chartDataArray); // 차트 업데이트 함수 호출
                 }).catch((e) => {
+                    console.log('eeee', e)
                     alert('조회할 수 없는 데이터 입니다.');
                 });
             });
@@ -643,39 +644,76 @@
             }
 
             function updateChart(data) {
-                myChart.resetZoom();
+                myChart.resetZoom(); // 차트 줌 초기화
 
+                // '일별' 또는 '시간별' 표시 조건 (바 차트에 사용)
                 const aggregationType = $("#select-condition").val() || "daily";
-                // Preprocess data for bar chart
+
+                // --- X축 시간 단위 동적 결정 로직 시작 ---
+                let xUnit = 'hour'; // 기본값은 '시(hour)'
+                let displayFormats = {
+                    minute: 'YYYY-MM-DD HH:mm', // 분 단위 표시 형식
+                    hour: 'YYYY-MM-DD HH:00',   // 시 단위 표시 형식
+                    day: 'YYYY-MM-DD',          // 일 단위 표시 형식
+                };
+
+                if (data && data.length > 0 && data[0].length > 1) {
+                    const firstDataPoint = data[0][0];
+                    const lastDataPoint = data[0][data[0].length - 1];
+
+                    // 데이터가 없는 경우를 대비하여 meas_dt 속성 확인
+                    if (firstDataPoint && lastDataPoint && firstDataPoint.meas_dt && lastDataPoint.meas_dt) {
+                        const firstDate = new Date(firstDataPoint.meas_dt);
+                        const lastDate = new Date(lastDataPoint.meas_dt);
+                        const diffDays = Math.abs(lastDate - firstDate) / (1000 * 60 * 60 * 24); // 일수 차이 계산
+
+                        if (diffDays > 90) { // 3개월 이상이면 '월' 단위로
+                            xUnit = 'month';
+                            displayFormats.month = 'YYYY-MM';
+                        } else if (diffDays > 30) { // 한 달 이상이면 '일' 단위로
+                            xUnit = 'day';
+                        } else if (diffDays > 1) { // 하루 이상이면 '시' 단위로
+                            xUnit = 'hour';
+                        } else { // 그 외 (하루 이내)는 '분' 단위로
+                            xUnit = 'minute';
+                        }
+                    }
+                }
+
+                // 차트의 X축 시간 단위를 업데이트합니다.
+                myChart.options.scales.x.time.unit = xUnit;
+                myChart.options.scales.x.time.displayFormats = displayFormats;
+                // 어댑터 설정 (필요시)
+                if (!myChart.options.scales.x.adapters) {
+                    myChart.options.scales.x.adapters = {};
+                }
+                if (!myChart.options.scales.x.adapters.date) {
+                    myChart.options.scales.x.adapters.date = {};
+                }
+                // --- X축 시간 단위 동적 결정 로직 끝 ---
+
+
+                // 바 차트를 위한 데이터 전처리
                 const barChartData = preprocessDataForBarChart(data[0], aggregationType);
 
-                // 차트 업데이트 로직
-                const labels = data[0].map(item => {
-                    const date = new Date(item.meas_dt);
-                    return date.getFullYear() + '-' +
-                        (date.getMonth() + 1).toString().padStart(2, '0') + ' ' + // 월
-                        date.getDate().toString().padStart(2, '0') + ' ' + // 일
-                        date.getHours().toString().padStart(2, '0') + ':' + // 시간
-                        date.getMinutes().toString().padStart(2, '0') + ':' + // 분
-                        date.getSeconds().toString().padStart(2, '0'); // 초
-                }); // 첫 번째 데이터의 시간
+                // 라인 차트를 위한 레이블 및 데이터셋 구성
+                // Chart.js의 time 스케일은 labels 배열이 필수는 아니며, datasets 내부의 x 값을 통해 처리합니다.
+                const labels = data[0].map(item => new Date(item.meas_dt)); // Date 객체를 직접 넘겨줍니다.
 
                 const datasets = data.map((item, index) => ({
                     label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""), // 센서 이름
-                    data: item.map(i => i.formul_data), // 센서 데이터
-                    borderColor: getRandomHSL(),
-                    fill: false,
-                    pointRadius: 0, // 꼭지점 원 크기 제거
+                    data: item.map(i => ({ x: new Date(i.meas_dt), y: i.formul_data })), // {x, y} 형식으로 데이터 전달
+                    borderColor: getRandomHSL(), // 랜덤 색상
+                    fill: false, // 선 아래를 채우지 않음
+                    pointRadius: 0, // 꼭짓점 원 크기 제거
                     borderWidth: 1, // 선 두께 줄이기
                 }));
 
                 myChart.data.labels = labels;
                 myChart.data.datasets = datasets;
-                myChart.options.plugins.annotation.annotations = {};
+                myChart.options.plugins.annotation.annotations = {}; // 기존 annotation 초기화
 
-                myBarChart.data.labels = barChartData.labels;
-                myBarChart.data.datasets[0].data = barChartData.ranges;
-
+                // --- 상한선(annotation) 추가 로직 시작 ---
                 data.forEach((item, i) => {
                     const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED']; // 각 상한선의 색상
                     const maxLevels = [
@@ -687,8 +725,9 @@
 
                     // 각 상한선에 대해 annotation 추가
                     maxLevels.forEach((maxLevel, index) => {
-                        if (!isNaN(maxLevel)) { // 유효한 값만 추가
-                            myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
+                        if (!isNaN(maxLevel)) { // 유효한 값(숫자)만 추가
+                            // 라인 annotation
+                            myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index + '_' + i] = {
                                 type: 'line',
                                 yMin: maxLevel, // 상한선 위치
                                 yMax: maxLevel, // 동일한 값으로 상한선 표시
@@ -697,9 +736,10 @@
                                 borderDash: [5, 4] // 점선 스타일
                             };
 
-                            // 라벨 추가
-                            myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + item[0].sens_chnl_id + index + i] = {
+                            // 라벨 annotation
+                            myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + item[0].sens_chnl_id + index + '_' + i] = {
                                 type: 'label',
+                                // xValue는 Date 객체 또는 타임스탬프여야 합니다.
                                 xValue: new Date(item[0].meas_dt).getTime(), // x축 시간 값
                                 yValue: maxLevel, // y축 상한선 위치에 표시
                                 backgroundColor: colors[index],
@@ -711,11 +751,16 @@
                         }
                     });
                 });
+                // --- 상한선(annotation) 추가 로직 끝 ---
 
-                myChart.update(); // 차트 업데이트
+                // 바 차트 데이터 업데이트
+                myBarChart.data.labels = barChartData.labels;
+                myBarChart.data.datasets[0].data = barChartData.ranges;
+
+                // 차트 업데이트
+                myChart.update();
                 myBarChart.update();
-            }
-        });
+            }        });
     </script>
 </head>
 <body data-pgcode="0000">

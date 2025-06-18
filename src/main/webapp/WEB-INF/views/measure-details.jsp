@@ -662,73 +662,123 @@
             function updateChart(data) {
                 myChart.resetZoom();
 
-                const aggregationType = $("#select-condition").val() || "daily";
-                // Preprocess data for bar chart
-                const barChartData = preprocessDataForBarChart(data[0], aggregationType);
+                let xUnit = 'hour';
+                let displayFormats = {
+                    minute: 'YYYY-MM-DD HH:mm',
+                    hour: 'YYYY-MM-DD HH:00',
+                    day: 'YYYY-MM-DD',
+                    month: 'YYYY-MM'
+                };
 
-                // 차트 업데이트 로직
-                const labels = data[0].map(item => {
-                    const date = new Date(item.meas_dt);
-                    return date.getFullYear() + '-' +
-                        (date.getMonth() + 1).toString().padStart(2, '0') + ' ' + // 월
-                        date.getDate().toString().padStart(2, '0') + ' ' + // 일
-                        date.getHours().toString().padStart(2, '0') + ':' + // 시간
-                        date.getMinutes().toString().padStart(2, '0') + ':' + // 분
-                        date.getSeconds().toString().padStart(2, '0'); // 초
-                }); // 첫 번째 데이터의 시간
+                let minDate = Infinity;
+                let maxDate = -Infinity;
 
-                const datasets = data.map((item, index) => ({
-                    label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""), // 센서 이름
-                    data: item.map(i => i.formul_data), // 센서 데이터
-                    borderColor: getRandomHSL(),
-                    fill: false,
-                    pointRadius: 0, // 꼭지점 원 크기 제거
-                    borderWidth: 1, // 선 두께 줄이기
-                }));
+                data.forEach(sensorData => {
+                    if (sensorData && sensorData.length > 0) {
+                        sensorData.forEach(point => {
+                            if (point.meas_dt) {
+                                const date = new Date(point.meas_dt).getTime();
+                                if (date < minDate) minDate = date;
+                                if (date > maxDate) maxDate = date;
+                            }
+                        });
+                    }
+                });
 
-                myChart.data.labels = labels;
+                if (minDate !== Infinity && maxDate !== -Infinity) {
+                    const firstDate = new Date(minDate);
+                    const lastDate = new Date(maxDate);
+                    const diffDays = Math.abs(lastDate - firstDate) / (1000 * 60 * 60 * 24);
+
+                    if (diffDays > 90) {
+                        xUnit = 'month';
+                    } else if (diffDays > 30) {
+                        xUnit = 'day';
+                    } else if (diffDays > 1) {
+                        xUnit = 'hour';
+                    } else {
+                        xUnit = 'minute';
+                    }
+                }
+
+                myChart.options.scales.x.time.unit = xUnit;
+                myChart.options.scales.x.time.displayFormats = displayFormats;
+                if (!myChart.options.scales.x.adapters) {
+                    myChart.options.scales.x.adapters = {};
+                }
+                if (!myChart.options.scales.x.adapters.date) {
+                    myChart.options.scales.x.adapters.date = {};
+                }
+
+                const datasets = data.map(sensorItem => {
+                    const formattedData = sensorItem.map(point => ({
+                        x: new Date(point.meas_dt),
+                        y: point.formul_data
+                    }));
+
+                    return {
+                        label: sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? "-" + sensorItem[0].sens_chnl_id : ""),
+                        data: formattedData,
+                        borderColor: getRandomHSL(),
+                        fill: false,
+                        pointRadius: 0,
+                        borderWidth: 1,
+                    };
+                });
+
+                myChart.data.labels = [];
                 myChart.data.datasets = datasets;
                 myChart.options.plugins.annotation.annotations = {};
 
-                myBarChart.data.labels = barChartData.labels;
-                myBarChart.data.datasets[0].data = barChartData.ranges;
-
-                data.forEach((item, i) => {
-                    const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED']; // 각 상한선의 색상
+                data.forEach(sensorItem => {
+                    const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
                     const maxLevels = [
-                        parseFloat(item[0].lvl_max1),
-                        parseFloat(item[0].lvl_max2),
-                        parseFloat(item[0].lvl_max3),
-                        parseFloat(item[0].lvl_max4)
+                        parseFloat(sensorItem[0].lvl_max1),
+                        parseFloat(sensorItem[0].lvl_max2),
+                        parseFloat(sensorItem[0].lvl_max3),
+                        parseFloat(sensorItem[0].lvl_max4)
                     ];
 
-                    // 각 상한선에 대해 annotation 추가
                     maxLevels.forEach((maxLevel, index) => {
-                        if (!isNaN(maxLevel)) { // 유효한 값만 추가
-                            myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
+                        if (!isNaN(maxLevel)) {
+                            // 백틱 제거: annotationId 문자열
+                            const annotationId = 'line-' + sensorItem[0].sens_no + '-' + (sensorItem[0].sens_chnl_id || 'none') + '-' + index;
+                            myChart.options.plugins.annotation.annotations[annotationId] = {
                                 type: 'line',
-                                yMin: maxLevel, // 상한선 위치
-                                yMax: maxLevel, // 동일한 값으로 상한선 표시
+                                yMin: maxLevel,
+                                yMax: maxLevel,
                                 borderColor: colors[index],
                                 borderWidth: 1.5,
-                                borderDash: [5, 4] // 점선 스타일
+                                borderDash: [5, 4]
                             };
 
-                            // 라벨 추가
-                            myChart.options.plugins.annotation.annotations['label' + item[0].sens_no + '_' + item[0].sens_chnl_id + index + i] = {
+                            // 백틱 제거: labelAnnotationId 문자열 및 content 문자열
+                            const labelAnnotationId = 'label-' + sensorItem[0].sens_no + '-' + (sensorItem[0].sens_chnl_id || 'none') + '-' + index;
+                            const labelXValue = sensorItem[0].meas_dt ? new Date(sensorItem[0].meas_dt).getTime() : minDate;
+
+                            myChart.options.plugins.annotation.annotations[labelAnnotationId] = {
                                 type: 'label',
-                                xValue: new Date(item[0].meas_dt).getTime(), // x축 시간 값
-                                yValue: maxLevel, // y축 상한선 위치에 표시
+                                xValue: labelXValue,
+                                yValue: maxLevel,
                                 backgroundColor: colors[index],
-                                content: [item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : "") + ' ' + (Number(index) + 1) + '차 경고'], // 라벨 텍스트
+                                content: [sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? "-" + sensorItem[0].sens_chnl_id : "") + ' ' + (Number(index) + 1) + '차 경고'],
                                 font: {
-                                    size: 8 // 텍스트 크기
+                                    size: 8
                                 }
                             };
                         }
                     });
                 });
-                myChart.update(); // 차트 업데이트
+
+                // 바 차트 데이터 전처리 (line chart의 첫 번째 데이터셋 기준으로)
+                const aggregationType = $("#select-condition").val() || "daily";
+                const barChartData = preprocessDataForBarChart(data[0], aggregationType);
+
+                // 바 차트 업데이트
+                myBarChart.data.labels = barChartData.labels;
+                myBarChart.data.datasets[0].data = barChartData.ranges;
+
+                myChart.update();
                 myBarChart.update();
             }
         });
