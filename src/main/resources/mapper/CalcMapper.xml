@@ -73,7 +73,7 @@
         FROM (
 			SELECT ak.name as asset_kind_name
 					, ass.name asset_name
-					, ch.name channel_name
+					, ch.name as channel_name
 					, cal.calc_id
 					, cal.initial_value
 					, cal.factor_value
@@ -100,8 +100,8 @@
         SELECT count(*)
         FROM (
 			SELECT ak.name as asset_kind_name
-					, ass.name asset_name
-					, ch.name channel_name
+					, ass.name as asset_name
+					, ch.name as channel_name
 					, cal.calc_id
 					, cal.initial_value
 					, cal.factor_value

@@ -7,20 +7,20 @@
             alarm_uid,
             ta.reg_date,
             ta.risk_level,
-            fn_common(ta.risk_level::integer, '위험레벨') risk_name, 
-            fn_common(ta.alarm_type::integer, '알람종류타입') alarm_type,
+            fn_common(ta.risk_level::integer, '위험레벨') as risk_name,
+            fn_common(ta.alarm_type::integer, '알람종류타입') as alarm_type,
             ta.alarm_desc,
             ta.alarm_title,
-            fn_common(tak2.status::integer, '센서상태') asset_status,
+            fn_common(tak2.status::integer, '센서상태') as asset_status,
             tak2.asset_id,
-            tak2."name" asset_name,
-            tak3."name" asset_kind_name,
+            tak2."name" as asset_name,
+            tak3."name" as asset_kind_name,
             tak2.etc1,
             tak2.x,
             tak2.y,
             tz.zone_id,
-            tz."name" zone_name,
-            tz.etc1 zone_etc1,
+            tz."name" as zone_name,
+            tz.etc1 as zone_etc1,
             tz.lat,
             tz.lng,
             tz.file1,
@@ -42,9 +42,9 @@
         select
             tz.zone_id,
             ta.area_id,
-            ta.name area_name,
-            ta.etc2 area_fullname,
-            ta.file1 area_img,
+            ta.name as area_name,
+            ta.etc2 as area_fullname,
+            ta.file1 as area_img,
             ta."constructor" ,
             CASE
                 WHEN ta.measure2 IS NOT NULL THEN ta.measure1 || ', ' || ta.measure2
@@ -52,7 +52,7 @@
             END as measures,
             ta."type" ,
             tz.zone_id ,
-            tz."name" zone_name,
+            tz."name" as zone_name,
             tz.lat,
             tz.lng,
             tz.file1,
@@ -91,7 +91,7 @@
             ta.asset_id,
             ta.area_id,
             ta.zone_id,	
-            max(ta2.risk_level) risk_level
+            max(ta2.risk_level) as risk_level
         <![CDATA[
             from tb_asset ta left outer join (select * from tb_alarm where reg_date::timestamp >= now() - interval '1 minutes') ta2 on ta.asset_id = ta2.asset_id 
         ]]>
@@ -99,7 +99,17 @@
     </select>
 
     <select id="selectMarkerList" parameterType="java.util.Map" resultType="java.util.Map">
-        select ta.asset_id, ta.name asset_name, ta.etc1, ta.area_id, ta.zone_id, ta.status, tak.name, tak.description, ta.x, ta.y 
+        select
+            ta.asset_id
+             , ta.name as asset_name
+             , ta.etc1
+             , ta.area_id
+             , ta.zone_id
+             , ta.status
+             , tak.name
+             , tak.description
+             , ta.x
+             , ta.y
         from tb_asset ta, tb_asset_kind tak 
         where ta.asset_kind_id = tak.asset_kind_id 
         <if test="zone_id != null and zone_id != ''">
@@ -160,10 +170,10 @@
                 mng.sensor_id,
                 mng.zone_id,
                 ch.channel_id,
-                ch."name" channel_name,
+                ch."name" as channel_name,
                 ch.asset_id,
                 ass.asset_kind_id,
-                tak.name asset_kind_name,
+                tak.name as asset_kind_name,
                 ass."name" AS asset_name,
                 ass.etc1,
                 ass.etc2,
@@ -260,10 +270,10 @@
                 mng.sensor_id,
                 mng.zone_id,
                 ch.channel_id,
-                ch."name" channel_name,
+                ch."name" as channel_name,
                 ch.asset_id,
                 ass.asset_kind_id,
-                tak.name asset_kind_name,
+                tak.name as asset_kind_name,
                 ass."name" AS asset_name,
                 ass.etc1,
                 ass.etc2,

@@ -59,7 +59,7 @@
         FROM (
 			select 
                 tak.asset_kind_id,
-                tak.name asset_kind_name,
+                tak.name as asset_kind_name,
                 tar.*
             from tb_asset_kind tak left outer join tb_alarm_range tar on tak.asset_kind_id = tar.asset_kind_id
             where tak.asset_kind_id IN ('2','3','4','6','7')
@@ -77,7 +77,7 @@
         FROM (
 			select
                 tak.asset_kind_id,
-                tak.name asset_kind_name,
+                tak.name as asset_kind_name,
                 tar.*
             from tb_asset_kind tak left outer join tb_alarm_range tar on tak.asset_kind_id = tar.asset_kind_id
             where tak.asset_kind_id IN ('2','3','4','6','7')

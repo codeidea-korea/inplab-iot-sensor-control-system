@@ -98,19 +98,19 @@
         FROM (
 			SELECT ass.asset_id 
 				 , ass.asset_kind_id
-				 , ass.asset_kind_id asset_kind_id_hid
+				 , ass.asset_kind_id as asset_kind_id_hid
 				 , ass.area_id
-				 , ass.area_id area_id_hid
+				 , ass.area_id as area_id_hid
 				 , ass.zone_id
-				 , ass.zone_id zone_id_hid
+				 , ass.zone_id as zone_id_hid
 				 , ass.status
-				 , ass.status status_hid
+				 , ass.status as status_hid
 				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date				 
 				 -- 센서
 				 , ass.name				-- 센서명
-				 , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id ORDER BY ch.seq),',') sensor_id
+				 , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id ORDER BY ch.seq),',') as sensor_id
                  , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
-				 , MAX(dbc.real_value) real_value 	-- 센서값
+				 , MAX(dbc.real_value) as real_value 	-- 센서값
 				-- 센서 외
 				 , ass.device_id 		-- 장비 ID
 			--	 , ass.description 
@@ -157,21 +157,21 @@
         FROM (
 			SELECT ass.asset_id 
 				 , ass.asset_kind_id
-				 , ass.asset_kind_id asset_kind_id_hid
+				 , ass.asset_kind_id as asset_kind_id_hid
 				 , ass.area_id
-				 , ass.area_id area_id_hid
+				 , ass.area_id as area_id_hid
 				 , ass.zone_id
-				 , ass.zone_id zone_id_hid
+				 , ass.zone_id as zone_id_hid
 				 , ass.status
-				 , ass.status status_hid
+				 , ass.status as status_hid
 				 , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
 				 
 				 -- 센서
 				 , ass.name				-- 센서명
-				 , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id ORDER BY ch.seq),',') sensor_id
+				 , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id ORDER BY ch.seq),',') as sensor_id
 
 				 , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
-				 , MAX(dbc.real_value) real_value 	-- 센서값
+				 , MAX(dbc.real_value) as real_value 	-- 센서값
 				 
 				-- 센서 외
 				 , ass.device_id 		-- 장비 ID
@@ -373,30 +373,30 @@
             ta.etc1,
             ta.etc2,
             ta.etc3,
-            to_char(ta.install_date, 'YYYY-MM-DD') install_date,
+            to_char(ta.install_date, 'YYYY-MM-DD') as install_date,
             ta.area_id,
             ta.zone_id,
             ta.x,
             ta.y,
             ta.z,
             ta.status,
-            tak.name asset_kind_name,
-            tak.description asset_kind_desc,
-            tak.etc1 asset_kind_etc1,
-            taa.name area_name,
-            taa.etc1 area_etc1,
-            taa.etc2 area_etc2,
-            taa.file1 area_file1,
+            tak.name as asset_kind_name,
+            tak.description as asset_kind_desc,
+            tak.etc1 as asset_kind_etc1,
+            taa.name as area_name,
+            taa.etc1 as area_etc1,
+            taa.etc2 as area_etc2,
+            taa.file1 as area_file1,
             taa.constructor,
             taa.measure1,
             taa.measure2,
-            taa.type area_type,
-            tz.name zone_name,
-            tz.etc1 zone_etc1,
-            tz.lat zone_lat,
-            tz.lng zone_lng,
-            tz.file1 zone_file1,
-            tz.file2 zone_file2
+            taa.type as area_type,
+            tz.name as zone_name,
+            tz.etc1 as zone_etc1,
+            tz.lat as zone_lat,
+            tz.lng as zone_lng,
+            tz.file1 as zone_file1,
+            tz.file2 as zone_file2
         from tb_asset ta 
             left outer join tb_asset_kind tak on ta.asset_kind_id = tak.asset_kind_id  
             left outer join tb_area taa on ta.area_id = taa.area_id 

@@ -50,10 +50,10 @@ public class DatabaseConfig {
     @Bean(name = "dataSource", destroyMethod = "postDeregister")
     @Primary
     public DataSource dataSource() {
-//        System.out.println("====================================== db");
-//        System.out.println(DB_NAME);
-//        System.out.println(encryptor().decrypt(DB_URL));
-//        System.out.println("====================================== db");
+        System.out.println("====================================== db");
+        System.out.println(DB_NAME);
+        System.out.println(encryptor().decrypt(DB_URL));
+        System.out.println("====================================== db");
 
         BasicDataSource ds = new BasicDataSource();
 

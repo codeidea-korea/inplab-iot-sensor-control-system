@@ -54,15 +54,15 @@
         select 
             ass.asset_id,
             ass.asset_kind_id,
-            ass."name" asset_name,
-            ass.etc1 asset_etc1,
+            ass."name" as asset_name,
+            ass.etc1 as asset_etc1,
             ass.area_id,
             ass.zone_id,
-            ass.x lng,
-            ass.y lat,
+            ass.x as lng,
+            ass.y as lat,
             ass.status,
             ch.channel_id,
-            ch."name" channel_name,
+            ch."name" as channel_name,
             ch.sensor_id,
             dbc.real_value,
             TO_TIMESTAMP(dbc.collect_date , 'YYYY/MM/DD HH24:MI:SS') as collect_date,
@@ -72,7 +72,7 @@
             tar.range_value3,
             tar.range_value4,
             tar.range_value5,
-            tak.name asset_kind_name,
+            tak.name as asset_kind_name,
         <![CDATA[
             CASE
                 WHEN dbc.real_value::numeric >= range_value2::numeric AND dbc.real_value::numeric < range_value3::numeric THEN 1

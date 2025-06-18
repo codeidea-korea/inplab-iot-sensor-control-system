@@ -63,11 +63,11 @@
 		            , A.risk_level
 		            , A.category
 		            , A.type     
-		            , A.risk_level risk_level_hid
-		            , A.category category_hid
-		            , A.type type_hid
+		            , A.risk_level as risk_level_hid
+		            , A.category as category_hid
+		            , A.type as type_hid
 		            , A.asset_kind_id
-		            , A.asset_kind_id asset_kind_id_hid
+		            , A.asset_kind_id as asset_kind_id_hid
 		            , A.use_flag
 		            , A.dupe_check_min
 		            , TO_CHAR(A.mod_date`::timestamp`, 'YYYY-MM-DD') AS mod_date
@@ -93,11 +93,11 @@
 		            , A.risk_level
 		            , A.category
 		            , A.type     
-		            , A.risk_level risk_level_hid
-		            , A.category category_hid
-		            , A.type type_hid
+		            , A.risk_level as risk_level_hid
+		            , A.category as category_hid
+		            , A.type as type_hid
 		            , A.asset_kind_id
-		            , A.asset_kind_id asset_kind_id_hid
+		            , A.asset_kind_id as asset_kind_id_hid
 		            , A.use_flag
 		            , A.dupe_check_min
 		            , TO_CHAR(A.mod_date::timestamp, 'YYYY-MM-DD') AS mod_date

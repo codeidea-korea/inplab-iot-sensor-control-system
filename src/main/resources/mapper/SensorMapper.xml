@@ -140,7 +140,7 @@
         , zo.name as zone_name
         FROM (
         select
-        tak.name asset_kind_name,
+        tak.name as asset_kind_name,
         tak.asset_kind_id,
         ta.asset_id,
         ta."name",
@@ -185,7 +185,7 @@
         , zo.name as zone_name
         FROM (
         select
-        tak.name asset_kind_name,
+        tak.name as asset_kind_name,
         tak.asset_kind_id,
         ta.asset_id,
         ta."name",
@@ -258,11 +258,11 @@
         FROM (
         SELECT ass.asset_id
         , ass.asset_kind_id
-        , ass.asset_kind_id asset_kind_id_hid
+        , ass.asset_kind_id as asset_kind_id_hid
         , ass.name
         -- , '' ch_name
         -- , '' sensor_id
-        , ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') ch_name_sensor_keys
+        , ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') as ch_name_sensor_keys
         -- , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id),',') sensor_ids
         , ass.zone_id
         , ass.status
@@ -270,7 +270,7 @@
         , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as
         ch_collect_date
         , MAX(dbc.real_value) real_value
-        , (select name from tb_zone WHERE zone_id = ass.zone_id) zone_name
+        , (select name from tb_zone WHERE zone_id = ass.zone_id) as zone_name
         FROM tb_asset ass
         LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
         LEFT JOIN (SELECT *
@@ -298,19 +298,19 @@
         SELECT count(1)
         FROM (
         SELECT ass.asset_kind_id
-        , ass.asset_kind_id asset_kind_id_hid
+        , ass.asset_kind_id as asset_kind_id_hid
         , ass.name
         -- , '' ch_name
         -- , '' sensor_id
-        , ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') ch_name_sensor_keys
+        , ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') as ch_name_sensor_keys
         -- , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id),',') sensor_ids
         , ass.zone_id
         , ass.status
         , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
         , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as
         ch_collect_date
-        , MAX(dbc.real_value) real_value
-        , (select name from tb_zone WHERE zone_id = ass.zone_id) zone_name
+        , MAX(dbc.real_value) as real_value
+        , (select name from tb_zone WHERE zone_id = ass.zone_id) as zone_name
         FROM tb_asset ass
         LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
         LEFT JOIN (SELECT *

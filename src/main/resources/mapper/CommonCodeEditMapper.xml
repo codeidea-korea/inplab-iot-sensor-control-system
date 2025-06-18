@@ -55,8 +55,8 @@
 
 
     <select id="selectCommonCodeEditList" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT cc.code_id code
-        , cc.code_nm name
+        SELECT cc.code_id as code
+        , cc.code_nm as name
         FROM tb_common_code cc
         WHERE cc.code_grp_nm = #{code_grp_nm}
         <if test="code_nm != null">
@@ -66,8 +66,8 @@
     </select>
 
     <select id="selectMaintcompInfoList" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT ak.partner_comp_id code
-        , ak.partner_comp_nm name
+        SELECT ak.partner_comp_id as code
+        , ak.partner_comp_nm as name
         FROM tb_maintcomp_info ak
         <where>
             <if test="partner_type_flag != null and partner_type_flag.size() > 0">
@@ -81,15 +81,15 @@
     </select>
 
     <select id="selectDistrictInfoList" resultType="java.util.Map">
-        SELECT cc.district_no code
-             , cc.district_nm name
+        SELECT cc.district_no as code
+             , cc.district_nm as name
         FROM tb_district_info cc
         ORDER BY cc.district_no
     </select>
 
     <select id="selectLoggerInfo" resultType="java.util.Map">
-        SELECT logr_no code
-             , logr_nm name
+        SELECT logr_no as code
+             , logr_nm as name
         FROM tb_logger_info
         ORDER BY logr_no
     </select>
@@ -107,8 +107,8 @@
     </select>
 
     <select id="selectSensorType" resultType="java.util.Map">
-        SELECT senstype_no code
-             , sens_tp_nm  name
+        SELECT senstype_no as code
+             , sens_tp_nm  as name
         FROM tb_sensor_type
         ORDER BY senstype_no
     </select>
@@ -149,8 +149,8 @@
     </select>
 
     <select id="selectSiteInfo" resultType="java.util.Map">
-        SELECT site_no code
-             , site_nm name
+        SELECT site_no as code
+             , site_nm as name
         FROM tb_site_info
         WHERE site_no = 'S01'
     </select>

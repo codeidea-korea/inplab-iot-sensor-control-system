@@ -82,13 +82,13 @@
         , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
         , A.reg_date
         , asset.zone_id
-        , asset.zone_id zone_id_hid
+        , asset.zone_id as zone_id_hid
         , TO_CHAR(A.mt_date, 'YYYY-MM-DD') AS mt_date
         , A.asset_id
-        , A.asset_id asset_id_hid
+        , A.asset_id as asset_id_hid
         , A.area_id
         , A.type
-        , A.type type_hid
+        , A.type as type_hid
         , A.file1
         FROM tb_maintenance A
         JOIN tb_asset asset ON A.asset_id = asset.asset_id
@@ -112,13 +112,13 @@
         , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
         , A.reg_date
         , asset.zone_id
-        , asset.zone_id zone_id_hid
+        , asset.zone_id as zone_id_hid
         , TO_CHAR(A.mt_date, 'YYYY-MM-DD') AS mt_date
         , A.asset_id
-        , A.asset_id asset_id_hid
+        , A.asset_id as asset_id_hid
         , A.area_id
         , A.type
-        , A.type type_hid
+        , A.type as type_hid
         , A.file1
         FROM tb_maintenance A
         JOIN tb_asset asset ON A.asset_id = asset.asset_id

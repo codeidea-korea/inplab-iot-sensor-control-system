@@ -55,7 +55,7 @@
 					, ch.name
 					, ch.seq
 					, ch.asset_id 
-					, ass.name asset_name
+					, ass.name as asset_name
                     , ak.name as asset_kind_name
                     , ch.sensor_id
                     , ch.zone_id
@@ -81,7 +81,7 @@
 					, ch.name
 					, ch.seq
 					, ch.asset_id 
-					, ass.name asset_name
+					, ass.name as asset_name
                     , ak.name as asset_kind_name
                     , ch.sensor_id
                     , ch.zone_id

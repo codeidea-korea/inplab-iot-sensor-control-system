@@ -77,10 +77,10 @@
         FROM (
 			SELECT z.zone_id
 				 , z.area_id
-				 , z.area_id area_id_hid
+				 , z.area_id as area_id_hid
 				 , z.name
 				 , z.etc1
-				 , z.etc1 etc1_hid
+				 , z.etc1 as etc1_hid
 				 , z.etc2
 				 , z.etc3
 				 , z.lat
@@ -105,10 +105,10 @@
         FROM (
 			SELECT z.zone_id
 				 , z.area_id
-				 , z.area_id area_id_hid
+				 , z.area_id as area_id_hid
 				 , z.name
 				 , z.etc1
-				 , z.etc1 etc1_hid
+				 , z.etc1 as etc1_hid
 				 , z.etc2
 				 , z.etc3
 				 , z.lat

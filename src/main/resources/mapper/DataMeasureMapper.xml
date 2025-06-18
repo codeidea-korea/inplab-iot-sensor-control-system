@@ -50,10 +50,10 @@
         FROM (
 				SELECT TO_CHAR(TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
 					 , EXTRACT(epoch FROM TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
-					 , MAX(a.x_raw_data) x_raw_data
-					 , MAX(a.x_deg) x_deg
-					 , MAX(a.y_raw_data) y_raw_data
-					 , MAX(a.y_deg) y_deg
+					 , MAX(a.x_raw_data) as x_raw_data
+					 , MAX(a.x_deg) as x_deg
+					 , MAX(a.y_raw_data) as y_raw_data
+					 , MAX(a.y_deg) as y_deg
 			FROM (
 				(
 			    SELECT bc.collect_date
@@ -92,26 +92,26 @@
 		SELECT COUNT(*)
 		FROM (SELECT TO_CHAR(TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
 					 , EXTRACT(epoch FROM TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
-					 , MAX(a.x_raw_data) x_raw_data
-					 , MAX(a.x_deg) x_deg
-					 , MAX(a.y_raw_data) y_raw_data
-					 , MAX(a.y_deg) y_deg
+					 , MAX(a.x_raw_data) as x_raw_data
+					 , MAX(a.x_deg) as x_deg
+					 , MAX(a.y_raw_data) as y_raw_data
+					 , MAX(a.y_deg) as y_deg
 			FROM (
 				(SELECT bc.collect_date
-						, bc.raw_value x_raw_data
-						, bc.real_value x_deg
-						, '0' y_raw_data
-						, '0' y_deg
+						, bc.raw_value as x_raw_data
+						, bc.real_value as x_deg
+						, '0' as y_raw_data
+						, '0' as y_deg
 				FROM tb_dps_basecollection bc
 				WHERE bc.sensor_id = #{x_sensor_id}
 				AND bc.zone_id = #{x_zone_id}
 				ORDER BY bc.collect_date DESC)
 				UNION ALL 
 				(SELECT bc.collect_date
-						, '0' x_raw_data
-						, '0' x_deg
-						, bc.raw_value y_raw_data
-						, bc.real_value y_deg
+						, '0' as x_raw_data
+						, '0' as x_deg
+						, bc.raw_value as y_raw_data
+						, bc.real_value as y_deg
 				FROM tb_dps_basecollection bc
 				WHERE bc.sensor_id = #{y_sensor_id}
 				AND bc.zone_id = #{y_zone_id}
@@ -160,8 +160,8 @@
         FROM (
 				SELECT TO_CHAR(TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
 						, EXTRACT(epoch FROM TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
-						, bc.raw_value raw_data
-						, bc.real_value deg
+						, bc.raw_value as raw_data
+						, bc.real_value as deg
 				FROM tb_dps_basecollection bc
 				WHERE 1=1
 				AND bc.sensor_id = #{sensor_id}
@@ -181,8 +181,8 @@
 		FROM (
 				SELECT TO_CHAR(TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
 						, EXTRACT(epoch FROM TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
-						, bc.raw_value raw_data
-						, bc.real_value deg
+						, bc.raw_value as raw_data
+						, bc.real_value as deg
 				FROM tb_dps_basecollection bc
 				WHERE bc.sensor_id = #{sensor_id}
 				AND bc.zone_id = #{zone_id}

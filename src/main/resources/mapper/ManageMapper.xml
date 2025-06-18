@@ -112,8 +112,8 @@
 					, mng.etc
 					, ass.asset_id
 			        , ak.name as asset_kind_name
-					, ass.name asset_name
-					, ch.name channel_name
+					, ass.name as asset_name
+					, ch.name as channel_name
 			        , ch.sensor_id
 			        , ch.zone_id
                     , zo.name as zone_name
@@ -148,8 +148,8 @@
 					, mng.etc
 					, ass.asset_id
                     , ak.name as asset_kind_name
-					, ass.name asset_name
-					, ch.name channel_name
+					, ass.name as asset_name
+					, ch.name as channel_name
                     , ch.sensor_id
                     , ch.zone_id
                     , zo.name as zone_name

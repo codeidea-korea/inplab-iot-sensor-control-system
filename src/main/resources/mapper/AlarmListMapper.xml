@@ -73,9 +73,9 @@
         , A.description
         , ak.risk_level
         , ak.name as alarm_kind_name
-        , (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) asset_kind_name
-        , asset.name asset_name
-        , ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) area_name
+        , (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) as asset_kind_name
+        , asset.name as asset_name
+        , ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) as area_name
         , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
         , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
         FROM tb_alarm A
@@ -113,13 +113,13 @@
 		            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD HH24:MI:SS') AS reg_date
 		            , A.description
 		            , ak.risk_level
-					, (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) asset_kind_name
-					, asset.name asset_name
-					, ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) area_name
+					, (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) as asset_kind_name
+					, asset.name as asset_name
+					, ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) as area_name
 					, TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
 					, TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
                     , A.view_flag
-                    , zo.name zone_name
+                    , zo.name as zone_name
                     , A.reg_date AS reg
             FROM tb_alarm A
 				LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
@@ -145,14 +145,14 @@
 		            , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_date
 		            , A.description
 		            , ak.risk_level
-					, (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) asset_kind_name
-					, asset.name asset_name
+					, (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) as asset_kind_name
+					, asset.name as asset_name
 <!-- 					, ( SELECT NAME FROM tb_zone WHERE zone_id = asset.zone_id ) zone_name -->
-					, ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) area_name
+					, ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) as area_name
 					, TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
 					, TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
                     , A.view_flag
-                    , zo.name zone_name
+                    , zo.name as zone_name
             FROM tb_alarm A
             	LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
 				LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id

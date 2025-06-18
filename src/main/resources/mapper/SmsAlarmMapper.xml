@@ -95,19 +95,19 @@
         select 
             ta.asset_id,
             ta.asset_kind_id,
-            tak2."name" asset_kind_name,
-            ta.name asset_name,
-            tz.name zone_name,
-            ta2.name area_name,
-            ta2.etc2 address,
+            tak2."name" as asset_kind_name,
+            ta.name as asset_name,
+            tz.name as zone_name,
+            ta2.name as area_name,
+            ta2.etc2 as address,
             ta2.constructor,
             ta2.measure1,
             ta2.measure2,
             ta2.type,
             tak.risk_level,
-            fn_common(tak.risk_level::integer, '위험레벨') risk_name,
+            fn_common(tak.risk_level::integer, '위험레벨') as risk_name,
             tak.description,
-            tak.name alarm_name
+            tak.name as alarm_name
         from tb_asset ta , tb_asset_kind tak2, tb_zone tz, tb_area ta2, tb_alarm_kind tak
         where ta.asset_id = #{asset_id}
             and ta.zone_id = tz.zone_id 

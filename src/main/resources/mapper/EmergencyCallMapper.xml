@@ -68,7 +68,7 @@
         FROM (
 	        SELECT A.emergency_call_id
 		            , A.area_id
-		            , A.area_id area_id_hid
+		            , A.area_id as area_id_hid
 		            , A.role
 		            , A.company_name
 		            , A.name
@@ -93,7 +93,7 @@
         FROM (
 	        SELECT A.emergency_call_id
 		            , A.area_id
-		            , A.area_id area_id_hid
+		            , A.area_id as area_id_hid
 		            , A.role
 		            , A.company_name
 		            , A.name

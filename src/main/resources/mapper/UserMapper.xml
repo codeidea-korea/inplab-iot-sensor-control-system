@@ -71,7 +71,7 @@
 	            , TO_CHAR(A.mod_dt::timestamp, 'YYYY-MM-DD') AS mod_dt
                 , fn_common(usr_flag ,'회원구분') as usr_flag
 -- 	            , A.usr_flag
-	            , A.usr_flag usr_flag_hid
+	            , A.usr_flag as usr_flag_hid
 	            , TO_CHAR(A.reg_dt::timestamp, 'YYYY-MM-DD') AS reg_dt
 	            , A.e_mail
 	            , A.usr_exp_ymd
@@ -97,7 +97,7 @@
 	            , TO_CHAR(A.mod_dt::timestamp, 'YYYY-MM-DD') AS mod_dt
                 , fn_common(usr_flag ,'회원구분') as usr_flag
 -- 	            , A.usr_flag
-	            , A.usr_flag usr_flag_hid
+	            , A.usr_flag as usr_flag_hid
 	            , TO_CHAR(A.reg_dt::timestamp, 'YYYY-MM-DD') AS reg_dt
 	            , A.e_mail
 	            , A.usr_exp_ymd
