@@ -187,14 +187,14 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, keyArra
         width: '100%',
         autowidth: true,
         shrinkToFit: true,
-        scroll: true,
+        scroll: false,
+        rowNum: 10000,
         loadtext: "로딩중...",
         colNames : header,
         colModel:column,
         gridComplete: gridComplete,
         onSelectRow: onSelectRow,
         loadComplete: loadComplete,
-        rows: 10000,
     };
 
     if (gridId !== 'jqGrid-2') {

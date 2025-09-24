@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <jsp:include page="./common/include_head.jsp" flush="true" />
+    <jsp:include page="./common/include_head.jsp" flush="true"/>
     <style>
         .tab-container {
             display: flex;
@@ -171,19 +171,35 @@
         };
 
         let $grid;
-        const limit = 25;
+        const limit = 50;
         let offset = 0;
         let selectArrary = [];
 
         const checkboxFormatter = (cellValue, options, rowObject) => {
-            return '<input type="checkbox" class="row-checkbox" value="' + rowObject.id + '">';
+            return '<input type="checkbox" class="row-checkbox" value="' + rowObject.district_nm + "_" + rowObject.sens_chnl_nm + '">';
         };
 
-        const netErrorYnFormatter = (cellValue, options, rowObject) => {
-            if (cellValue === 'Y') {
-                return '<span style="color: red;">오류</span>';
+        const formatSensStatus = (cellValue) => {
+            if (cellValue === 'MTN001') {
+                return '<span>정상</span>';
+            } else if (cellValue === 'MTN002') {
+                return '<span>망실</span>';
+            } else if (cellValue === 'MTN003') {
+                return '<span>점검</span>';
+            } else if (cellValue === 'MTN004') {
+                return '<span>철거</span>';
             } else {
-                return '<span style="color: green;">수신</span>';
+                return '<span>-</span>';
+            }
+        }
+
+        const formatDateTime = (cellValue) => {
+            if (cellValue) {
+                return moment(cellValue)
+                    .subtract(9, "hours")   // 9시간 빼기
+                    .format("YYYY-MM-DD HH:mm:ss");
+            } else {
+                return "";
             }
         };
 
@@ -197,7 +213,6 @@
                 hidden: false,
                 formatter: checkboxFormatter
             },
-            //{ name: 'cb', index: 'cb', width: 50, sortable: false, formatter: 'checkbox', formatoptions: { disabled: false }, align: 'center', title: false },
             {name: 'district_nm', index: 'district_nm', width: 100, align: 'center', hidden: false},
             {name: 'sens_tp_nm', index: 'sens_tp_nm', width: 100, align: 'center', hidden: false},
             {name: 'sens_nm', index: 'sens_nm', width: 100, align: 'center', hidden: false},
@@ -205,18 +220,24 @@
             {name: 'logr_nm', index: 'logr_nm', width: 100, align: 'center', hidden: false},
             {name: 'sect_no', index: 'sect_no', width: 50, align: 'center', hidden: false},
             {name: 'inst_ymd', index: 'inst_ymd', width: 100, align: 'center', hidden: false},
-            {name: 'meas_dt', index: 'meas_dt', width: 120, align: 'center', hidden: false},
-            {name: 'maint_sts_nm', index: 'maint_sts_nm', width: 70, align: 'center', hidden: false},
             {
-                name: 'net_err_yn',
-                index: 'net_err_yn',
+                name: 'latest_meas_dt',
+                index: 'latest_meas_dt',
+                width: 120,
+                align: 'center',
+                hidden: false,
+                formatter: formatDateTime
+            },
+            {
+                name: 'sens_status',
+                index: 'sens_status',
                 width: 70,
                 align: 'center',
                 hidden: false,
-                formatter: netErrorYnFormatter
+                formatter: formatSensStatus
             },
-            {name: '', index: '', width: 70, align: 'center', hidden: false},
-
+            {name: 'comm_status', index: 'comm_status', width: 70, align: 'center', hidden: false},
+            {name: 'formul_data', index: 'formul_data', width: 70, align: 'center', hidden: false},
             {name: 'senstype_no', index: 'senstype_no', width: 100, align: 'center', hidden: true},
             {name: 'sens_no', index: 'sens_no', width: 100, align: 'center', hidden: true},
             {name: 'logr_no', index: 'logr_no', width: 100, align: 'center', hidden: true},
@@ -277,22 +298,22 @@
 
         const onSelectRow2 = (rowId, status, e) => {
             const data = $("#jqGrid").jqGrid('getRowData', rowId);
-            let isExist = false;
+            let isExist;
 
-            selectArrary.some(select => select.sens_no + '_' + select.sens_chnl_nm === rowId) ? isExist = true : isExist = false;
-            selectArrary = selectArrary.filter((select) => select.sens_no + '_' + select.sens_chnl_nm !== data.sens_no + '_' + data.sens_chnl_nm);
+            selectArrary.some(select => select.district_nm + '_' + select.sens_chnl_nm === rowId) ? isExist = true : isExist = false;
+            selectArrary = selectArrary.filter((select) => select.district_nm + '_' + select.sens_chnl_nm !== data.district_nm + '_' + data.sens_chnl_nm);
 
             if (isExist) {
-                $('tr[id=' + rowId + '] input[type=checkbox]').prop("checked", false);
+                $('tr[id="' + rowId + '"] input[type=checkbox]').prop("checked", false);
             } else {
                 selectArrary.push(data);
-                $('tr[id=' + rowId + '] input[type=checkbox]').prop("checked", true);
+                $('tr[id="' + rowId + '"] input[type=checkbox]').prop("checked", true);
             }
         };
 
         const loadComplete2 = () => {
             selectArrary.map((select) => {
-                $('tr[id=' + select.sens_no + '_' + select.sens_chnl_nm + '] input[type=checkbox]').prop("checked", true);
+                $('tr[id="' + select.district_nm + '_' + select.sens_chnl_nm + '"] input[type=checkbox]').prop("checked", true);
             });
         };
 
@@ -319,8 +340,7 @@
         $(function () {
 
             getSensor({limit: limit, offset: offset}).then((res) => {
-                console.log('res > ', res);
-                setJqGridTable(res.rows, column, header, gridComplete2, onSelectRow2, ['sens_no', 'sens_chnl_nm'], 'jqGrid', limit, offset, getSensor, null, loadComplete2);
+                setJqGridTable(res.rows, column, header, gridComplete2, onSelectRow2, ['district_nm', 'sens_chnl_nm'], 'jqGrid', limit, offset, getSensor, null, loadComplete2);
             }).catch((fail) => {
                 console.log('setJqGridTable fail > ', fail);
             });
@@ -368,13 +388,30 @@
                 }));
             }
 
-            const currentYear = new Date().getFullYear();
+            function formatLocalDateTime(date) {
+                const pad = (n) => n.toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const month = pad(date.getMonth() + 1);
+                const day = pad(date.getDate());
+                const hours = pad(date.getHours());
+                const minutes = pad(date.getMinutes());
+                return year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
+            }
 
-            const startDate = new Date(currentYear, 0, 1, 23, 59); // 0은 1월
-            $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+            const today = new Date();
 
-            const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
-            $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+            // 종료일 = 오늘 23:59 (한국시간 기준)
+            const endDate = new Date(today);
+            endDate.setHours(23, 59, 0, 0);
+
+            // 시작일 = 한 달 전 00:00 (한국시간 기준)
+            const startDate = new Date(today);
+            startDate.setMonth(startDate.getMonth() - 1);
+            startDate.setHours(0, 0, 0, 0);
+
+            $('#start-date').val(formatLocalDateTime(startDate));
+            $('#end-date').val(formatLocalDateTime(endDate));
+
 
             $("#view-chart").click(() => {
                 if (selectArrary.length > 1) {
@@ -386,6 +423,7 @@
                 }
                 popFancy('#chart-popup')
                 setChartModal(selectArrary[0].district_nm, selectArrary[0].senstype_no, selectArrary[0].sens_no)
+                $("#sensor-name-select").val(selectArrary[0].sens_no).trigger('change');
                 $("#graph-search-btn").trigger('click');
             });
 
@@ -441,25 +479,24 @@
             $("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
-                const popupSensorNo = $("#sensor-name-select").val();
                 chartDataArray.length = 0; // 배열 초기화
 
                 const requests = selectArrary.map((item) => {
                     let sensChnlId = ''
                     if (item.sens_chnl_nm) {
-                        sensChnlId = item.sens_chnl_nm.slice(-1)
+                        const tempSensChnlId = item.sens_chnl_nm.split("-").pop()
+                        if (tempSensChnlId.length === 1) {
+                            sensChnlId = tempSensChnlId
+                        }
                     }
-
-                    const targetSensorNo = popupSensorNo || item.sens_no;
-
-                    return getChartData(targetSensorNo, startDateTime, endDateTime, sensChnlId);
+                    return getChartData(item.sens_no, startDateTime, endDateTime, sensChnlId);
                 });
 
                 // 모든 요청이 완료된 후 차트를 그립니다.
                 Promise.all(requests).then(() => {
                     updateChart(chartDataArray); // 차트 업데이트 함수 호출
                 }).catch((e) => {
-                    console.log('eeee', e)
+                    console.log('error', e)
                     alert('조회할 수 없는 데이터 입니다.');
                 });
             });
@@ -644,6 +681,11 @@
             }
 
             function updateChart(data) {
+                if (data.length === 1 && data[0].length === 0) {
+                    alert('조회 결과가 존재하지 않습니다.');
+                    return;
+                }
+
                 myChart.resetZoom(); // 차트 줌 초기화
 
                 // '일별' 또는 '시간별' 표시 조건 (바 차트에 사용)
@@ -702,7 +744,7 @@
 
                 const datasets = data.map((item, index) => ({
                     label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""), // 센서 이름
-                    data: item.map(i => ({ x: new Date(i.meas_dt), y: i.formul_data })), // {x, y} 형식으로 데이터 전달
+                    data: item.map(i => ({x: new Date(i.meas_dt), y: i.formul_data})), // {x, y} 형식으로 데이터 전달
                     borderColor: getRandomHSL(), // 랜덤 색상
                     fill: false, // 선 아래를 채우지 않음
                     pointRadius: 0, // 꼭짓점 원 크기 제거
@@ -760,14 +802,15 @@
                 // 차트 업데이트
                 myChart.update();
                 myBarChart.update();
-            }        });
+            }
+        });
     </script>
 </head>
 <body data-pgcode="0000">
 <section id="wrap">
-    <jsp:include page="common/include_top.jsp" flush="true" />
+    <jsp:include page="common/include_top.jsp" flush="true"/>
     <div id="global-menu">
-        <jsp:include page="common/include_sidebar.jsp" flush="true" />
+        <jsp:include page="common/include_sidebar.jsp" flush="true"/>
     </div>
     <div id="container">
         <h2 class="txt">센서모니터링</h2>

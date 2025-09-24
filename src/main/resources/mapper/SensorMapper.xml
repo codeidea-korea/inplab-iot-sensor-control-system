@@ -216,41 +216,178 @@
     </select>
 
     <select id="selectSensorList" parameterType="java.util.Map" resultType="java.util.Map">
-        select tsdist.district_nm
-        , tstype.sens_tp_nm
-        , tsinfo.sens_nm
-        , tsinfo.sens_no
-        , tsinit.sens_chnl_id
-        , tsmap.sens_chnl_nm
-        , tslogr.logr_nm
-        , tsinfo.sect_no
-        , tsinfo.maint_sts_cd
-        , (SELECT code_nm FROM tb_common_code where code_id = tsinfo.maint_sts_cd and code_grp_id = 'MTN000') as maint_sts_nm
-        , TO_CHAR((SELECT max(meas_dt) FROM tb_measure_details where sens_no = tsinit.sens_no and sens_chnl_id = tsinit.sens_chnl_id), 'YYYY-MM-DD HH24:MI:SS') as meas_dt
-        , TO_CHAR(TO_DATE(tsinfo.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
-        from tb_sensor_init tsinit
-        left join tb_sensor_info tsinfo on tsinit.sens_no = tsinfo.sens_no
-        left join tb_sensor_type tstype on tsinfo.senstype_no = tstype.senstype_no
-        left join tb_logr_idx_map tsmap on tsinfo.sens_no = tsmap.sens_no and tsinit.sens_chnl_id = tsmap.sens_chnl_id
-        left join tb_logger_info tslogr on tsmap.logr_no = tslogr.logr_no
-        left join tb_district_info tsdist on tsmap.district_no = tsdist.district_no
+        select *
+        from (WITH lag_rank_data AS (SELECT sens_no,
+        sens_chnl_id,
+        meas_dt,
+        formul_data,
+        LAG(meas_dt, 1)
+        OVER (PARTITION BY sens_no, sens_chnl_id ORDER BY meas_dt)      AS prev_meas_dt, -- 이전 행의 meas_dt
+        ROW_NUMBER()
+        OVER (PARTITION BY sens_no, sens_chnl_id ORDER BY meas_dt DESC) AS rn            -- 각 그룹에서 가장 최신 데이터에 순위 1을 부여
+        FROM (SELECT * FROM tb_measure_details ORDER BY meas_dt desc LIMIT 1000) a -- LIMIT는  전체센서수(채널수)를 충분히 넘게 설정
+        ),
+        latest_meas_details AS (SELECT sens_no,
+        sens_chnl_id,
+        meas_dt,
+        prev_meas_dt,
+        formul_data,
+        EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60     AS diff_min, -- -- 최신 데이터와 직전 데이터의 시간 차이를 분 단위로 계산
+        EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60 - 1 AS err_cnt
+        FROM lag_rank_data
+        WHERE rn = 1
+        AND prev_meas_dt IS NOT NULL -- 이전 데이터가 있는 경우만 계산
+        )
+
+        select
+        --   c.district_no
+        a.district_nm
+        , a.sens_no
+        , a.senstype_no
+        , a.sens_tp_nm
+        , a.sens_nm
+        , a.sens_chnl_nm
+        , a.logr_nm
+        , a.sect_no
+        , a.inst_ymd
+        , a.latest_meas_dt
+        , coalesce(c.maint_rslt_cd, 'MTN001') AS sens_status -- 센서상태
+        , a.comm_status                       AS comm_status -- 통신상태
+        , a.formul_data
+        , CASE
+        WHEN a.formul_data &lt;= b."1st_lvl_min" OR a.formul_data >= b."1st_lvl_max" THEN b."1st_lvl_nm"
+        WHEN a.formul_data &lt;= b."2nd_lvl_min" OR a.formul_data >= b."2nd_lvl_max" THEN b."2nd_lvl_nm"
+        WHEN a.formul_data &lt;= b."3rd_lvl_min" OR a.formul_data >= b."3rd_lvl_max" THEN b."3rd_lvl_nm"
+        WHEN a.formul_data &lt;= b."4th_lvl_min" OR a.formul_data >= b."4th_lvl_max" THEN b."4th_lvl_nm"
+        ELSE '정상' END                   as alram_lvl
+        from (SELECT a.sens_no
+        , a.senstype_no
+        , e.sens_chnl_id
+        , c.district_no
+        , c.district_nm
+        , d.sens_tp_nm
+        , a.sens_nm
+        , e.sens_chnl_nm
+        , b.logr_nm
+        , a.sect_no
+        , TO_CHAR(TO_DATE(a.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
+        , lmd.meas_dt                                                           as latest_meas_dt
+        -- ,    case when lmd.diff_min = 1 then '통신정상' else '통신이상' end as net_staus  -- 통신상태
+        --    ,   coalesce(sst.maint_rslt_cd, 'MTN001') as sens_status  -- 센서상태 (유지보수테이블에서 센서상태를 체크)
+        -- ,    lmd.err_cnt as delay_min  -- 지연시간(분)
+        , case when lmd.err_cnt >= a.nonrecv_limit_min then '미수신' else '수신' end as comm_status -- 통신상태 (센서정보의 미수신시간을 체크)
+        , lmd.formul_data
+        FROM tb_sensor_info a,
+        tb_logger_info b,
+        tb_district_info c,
+        tb_sensor_type d,
+        tb_sensor_chnl e,
+        latest_meas_details lmd
+        WHERE a.logr_no = b.logr_no
+        AND b.district_no = c.district_no
+        AND a.senstype_no = d.senstype_no
+        AND a.sens_no = e.sens_no
+        AND e.sens_no = lmd.sens_no
+        AND e.sens_chnl_id = lmd.sens_chnl_id) a
+        LEFT OUTER JOIN
+        (SELECT *
+        from tb_alarm_info
+        WHERE "1st_lvl_min" != 0) b
+        ON a.sens_no = b.sens_no
+        AND a.sens_chnl_id = b.sens_chnl_id
+        left outer join
+        (SELECT sens_no, maint_rslt_cd
+        FROM tb_maint_details
+        WHERE (sens_no, maint_accpt_ymd) IN
+        (SELECT sens_no, MAX(maint_accpt_ymd) max_accpt_ymd FROM tb_maint_details GROUP BY sens_no)) c
+        on a.sens_no = c.sens_no) as final_result
         WHERE 1=1
-        <include refid="rowSearch"/>
         <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
             LIMIT ${limit} OFFSET ${offset}
         </if>
     </select>
 
     <select id="selectSensorListTotal" parameterType="java.util.Map" resultType="int">
-        select count(tsinit.sens_no)
-        from tb_sensor_init tsinit
-        left join tb_sensor_info tsinfo on tsinit.sens_no = tsinfo.sens_no
-        left join tb_sensor_type tstype on tsinfo.senstype_no = tstype.senstype_no
-        left join tb_logr_idx_map tsmap on tsinfo.sens_no = tsmap.sens_no and tsinit.sens_chnl_id = tsmap.sens_chnl_id
-        left join tb_logger_info tslogr on tsmap.logr_no = tslogr.logr_no
-        left join tb_district_info tsdist on tsmap.district_no = tsdist.district_no
+        select count(*)
+        from (WITH lag_rank_data AS (SELECT sens_no,
+        sens_chnl_id,
+        meas_dt,
+        formul_data,
+        LAG(meas_dt, 1)
+        OVER (PARTITION BY sens_no, sens_chnl_id ORDER BY meas_dt)      AS prev_meas_dt, -- 이전 행의 meas_dt
+        ROW_NUMBER()
+        OVER (PARTITION BY sens_no, sens_chnl_id ORDER BY meas_dt DESC) AS rn            -- 각 그룹에서 가장 최신 데이터에 순위 1을 부여
+        FROM (SELECT * FROM tb_measure_details ORDER BY meas_dt desc LIMIT 1000) a -- LIMIT는  전체센서수(채널수)를 충분히 넘게 설정
+        ),
+        latest_meas_details AS (SELECT sens_no,
+        sens_chnl_id,
+        meas_dt,
+        prev_meas_dt,
+        formul_data,
+        EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60     AS diff_min, -- -- 최신 데이터와 직전 데이터의 시간 차이를 분 단위로 계산
+        EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60 - 1 AS err_cnt
+        FROM lag_rank_data
+        WHERE rn = 1
+        AND prev_meas_dt IS NOT NULL -- 이전 데이터가 있는 경우만 계산
+        )
+        select
+        --   c.district_no
+        a.district_nm
+        , a.sens_tp_nm
+        , a.sens_nm
+        , a.sens_chnl_nm
+        , a.logr_nm                                          --   , a.sect_no, a.inst_ymd
+        , a.latest_meas_dt
+        , coalesce(c.maint_rslt_cd, 'MTN001') AS sens_status -- 센서상태
+        , a.comm_status                       AS comm_status -- 통신상태
+        , a.formul_data
+        , CASE
+        WHEN a.formul_data &lt;= b."1st_lvl_min" OR a.formul_data >= b."1st_lvl_max" THEN b."1st_lvl_nm"
+        WHEN a.formul_data &lt;= b."2nd_lvl_min" OR a.formul_data >= b."2nd_lvl_max" THEN b."2nd_lvl_nm"
+        WHEN a.formul_data &lt;= b."3rd_lvl_min" OR a.formul_data >= b."3rd_lvl_max" THEN b."3rd_lvl_nm"
+        WHEN a.formul_data &lt;= b."4th_lvl_min" OR a.formul_data >= b."4th_lvl_max" THEN b."4th_lvl_nm"
+        ELSE '정상' END                   as alram_lvl
+        from (SELECT a.sens_no
+        , e.sens_chnl_id
+        , c.district_no
+        , c.district_nm
+        , d.sens_tp_nm
+        , a.sens_nm
+        , e.sens_chnl_nm
+        , b.logr_nm
+        , a.sect_no
+        , a.inst_ymd
+        , lmd.meas_dt                                                           as latest_meas_dt
+        -- ,    case when lmd.diff_min = 1 then '통신정상' else '통신이상' end as net_staus  -- 통신상태
+        --    ,   coalesce(sst.maint_rslt_cd, 'MTN001') as sens_status  -- 센서상태 (유지보수테이블에서 센서상태를 체크)
+        -- ,    lmd.err_cnt as delay_min  -- 지연시간(분)
+        , case when lmd.err_cnt >= a.nonrecv_limit_min then '미수신' else '수신' end as comm_status -- 통신상태 (센서정보의 미수신시간을 체크)
+        , lmd.formul_data
+        FROM tb_sensor_info a,
+        tb_logger_info b,
+        tb_district_info c,
+        tb_sensor_type d,
+        tb_sensor_chnl e,
+        latest_meas_details lmd
+        WHERE a.logr_no = b.logr_no
+        AND b.district_no = c.district_no
+        AND a.senstype_no = d.senstype_no
+        AND a.sens_no = e.sens_no
+        AND e.sens_no = lmd.sens_no
+        AND e.sens_chnl_id = lmd.sens_chnl_id) a
+        LEFT OUTER JOIN
+        (SELECT *
+        from tb_alarm_info
+        WHERE "1st_lvl_min" != 0) b
+        ON a.sens_no = b.sens_no
+        AND a.sens_chnl_id = b.sens_chnl_id
+        left outer join
+        (SELECT sens_no, maint_rslt_cd
+        FROM tb_maint_details
+        WHERE (sens_no, maint_accpt_ymd) IN
+        (SELECT sens_no, MAX(maint_accpt_ymd) max_accpt_ymd FROM tb_maint_details GROUP BY sens_no)) c
+        on a.sens_no = c.sens_no) as final_result
         WHERE 1=1
-        <include refid="rowSearch"/>
     </select>
 
     <select id="selectSensorByChannelList" parameterType="java.util.Map" resultType="java.util.Map">
