@@ -196,7 +196,7 @@
         const formatDateTime = (cellValue) => {
             if (cellValue) {
                 return moment(cellValue)
-                    .subtract(9, "hours")   // 9시간 빼기
+                    //.subtract(9, "hours")   // 9시간 빼기
                     .format("YYYY-MM-DD HH:mm:ss");
             } else {
                 return "";
