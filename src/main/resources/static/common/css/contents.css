@@ -984,6 +984,71 @@ select:-ms-expand {
     border-radius: 0.3rem;
 }
 
+.search-top_ {
+    right: 5rem;
+    top: 8.4rem;
+    display: flex;
+    margin-bottom: 2.2rem;
+}
+
+.search-top_ input[type="text"],
+.search-top_ select {
+    width: auto;
+    height: 3.6rem;
+    margin-right: 0.6rem;
+    padding: 0 2rem;
+    background-color: transparent;
+    border: 1px solid #bbb;
+    font-weight: 300;
+    font-size: 1.5rem;
+    line-height: 3.4rem;
+    color: #fff;
+    text-align: center;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.search-top_ select {
+    padding: 0 5rem 0 2rem;
+    background: transparent url('../../images/bg_select_arr_m.png') no-repeat 110% center/2.3rem;
+    line-height: 3.6rem;
+    text-align: left;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.search-top_ select option {
+    color: #000;
+}
+
+.search-top_ input::-ms-input-placeholder {
+    color: #fff;
+}
+
+.search-top_ input::-webkit-input-placeholder {
+    color: #fff;
+}
+
+.search-top_ input::-moz-placeholder {
+    color: #fff;
+}
+
+.search-top_ .btns {
+    width: 7.5rem;
+    height: 3.6rem;
+    margin-left: 1rem;
+    background-color: #2e5fc3;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.3rem;
+}
+
 /* Tab Menu Style */
 .tab-three {
     width: 100%;
