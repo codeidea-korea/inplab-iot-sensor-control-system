@@ -688,6 +688,8 @@
             }
 
             function updateChart(data) {
+                const startDateTime = $('#start-date').val();
+                const endDateTime = $('#end-date').val();
                 if (data.length === 1 && data[0].length === 0) {
                     alert('조회 결과가 존재하지 않습니다.');
                     return;
@@ -727,6 +729,13 @@
                             xUnit = 'minute';
                         }
                     }
+
+                    if(aggregationType === "hourly"){
+                        xUnit = 'hour';
+                    }else if(aggregationType === "daily"){
+                        xUnit = 'day';
+                    }
+
                 }
 
                 // 차트의 X축 시간 단위를 업데이트합니다.
