@@ -17,7 +17,7 @@ public class SmsDetailsDto implements Serializable {
     @FieldLabel(title = "전화번호", width = 150)
     private String sms_recv_ph;
 
-    @FieldLabel(title = "기관명", width = 150)
+    @FieldLabel(title = "현장명", width = 150)
     private String district_nm;
 
     @FieldLabel(title = "전송결과", width = 150)

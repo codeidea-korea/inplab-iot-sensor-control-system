@@ -33,6 +33,12 @@
         #cb_sms-details-grid {
             display: none;
         }
+
+        .contents_header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
@@ -104,10 +110,26 @@
                 }
             })
 
-            const currentYear = new Date().getFullYear();
-            const startDate = currentYear + "-01-01";
-            const endDate = currentYear + "-12-31";
-            $('#history-date-range').val(startDate + " ~ " + endDate);
+            // const currentYear = new Date().getFullYear();
+            // const startDate = currentYear + "-01-01";
+            // const endDate = currentYear + "-12-31";
+
+            function formatDate(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return year + "-" + month + "-" + day;
+            }
+
+            const today = new Date();
+
+            // 종료일
+            const endDate = new Date(today);
+            // 시작일
+            const startDate = new Date(today);
+            startDate.setMonth(startDate.getMonth() - 1);
+
+            $('#history-date-range').val(formatDate(startDate) + " ~ " + formatDate(endDate));
 
             $('#history-date-range').change(() => {
                 setGridData();
@@ -156,16 +178,18 @@
     </div>
     <div id="container">
         <h2 class="txt">센서모니터링</h2>
-        <div class="search-top">
-            <p class="search-top-label">조회기간</p>
-            <input type="text" id="history-date-range" datetimepicker/>
-            <a id="open-modal" class="pop-modaㅣ btns btn_large">문자 전송
-                상세내역</a>
-            <a class="excelBtn btns">다운로드</a>
-        </div>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">알람이력조회</h3>
+                <div class="contents_header">
+                    <h3 class="txt">알람이력조회</h3>
+                    <div class="search-top_">
+                        <p class="search-top-label">조회기간</p>
+                        <input type="text" id="history-date-range" datetimepicker/>
+                        <a id="open-modal" class="pop-modaㅣ btns btn_large">문자 전송
+                            상세내역</a>
+                        <a class="excelBtn btns">다운로드</a>
+                    </div>
+                </div>
                 <div id="grid-wrapper" class="contents-in">
                     <table id="jq-grid"></table>
                 </div>

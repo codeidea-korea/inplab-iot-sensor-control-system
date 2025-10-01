@@ -479,6 +479,8 @@
             $("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
+                const selectedSensorNo = $('#sensor-name-select').val();
+
                 chartDataArray.length = 0; // 배열 초기화
 
                 const requests = selectArrary.map((item) => {
@@ -489,7 +491,12 @@
                             sensChnlId = tempSensChnlId
                         }
                     }
-                    return getChartData(item.sens_no, startDateTime, endDateTime, sensChnlId);
+
+                    const sensorNo = selectedSensorNo && selectedSensorNo !== ""
+                        ? selectedSensorNo
+                        : item.sens_no;
+
+                    return getChartData(sensorNo, startDateTime, endDateTime, sensChnlId);
                 });
 
                 // 모든 요청이 완료된 후 차트를 그립니다.

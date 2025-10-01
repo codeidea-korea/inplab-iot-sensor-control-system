@@ -132,13 +132,37 @@
                 },
             }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"});
 
-            const currentYear = new Date().getFullYear();
+            // const currentYear = new Date().getFullYear();
+            //
+            // const startDate = new Date(currentYear, 0, 1, 23, 59); // 0은 1월
+            // $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+            //
+            // const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
+            // $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
 
-            const startDate = new Date(currentYear, 0, 1, 23, 59); // 0은 1월
-            $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+            function formatLocalDateTime(date) {
+                const pad = (n) => n.toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const month = pad(date.getMonth() + 1);
+                const day = pad(date.getDate());
+                const hours = pad(date.getHours());
+                const minutes = pad(date.getMinutes());
+                return year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
+            }
 
-            const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
-            $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+            const today = new Date();
+
+            // 종료일 = 오늘 23:59 (한국시간 기준)
+            const endDate = new Date(today);
+            endDate.setHours(23, 59, 0, 0);
+
+            // 시작일 = 한 달 전 00:00 (한국시간 기준)
+            const startDate = new Date(today);
+            startDate.setMonth(startDate.getMonth() - 1);
+            startDate.setHours(0, 0, 0, 0);
+
+            $('#start-date').val(formatLocalDateTime(startDate));
+            $('#end-date').val(formatLocalDateTime(endDate));
 
             const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
 

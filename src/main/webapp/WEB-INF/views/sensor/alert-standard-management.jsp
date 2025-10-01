@@ -14,15 +14,25 @@
                 multiboxonly: false,
                 custom: {
                     useFilterToolbar: true,
+                    multiSelect: true,
                 }
             })
 
             $('.save-btn').on('click', function () {
+                const selectedIds = $grid.jqGrid("getGridParam", "selarrrow");
+
+                if (selectedIds.length === 0) {
+                    alert("선택된 데이터가 없습니다.");
+                    return;
+                }
+
+                // 선택한 row 만 업데이트
+                const selectedData = selectedIds.map(id => $grid.jqGrid("getRowData", id));
                 $.ajax({
                     method: 'post',
                     url: '/sensor/alert-standard-management/mod',
                     traditional: true,
-                    data: {jsonData: JSON.stringify($grid.jqGrid("getRowData"))},
+                    data: {jsonData: JSON.stringify(selectedData)},
                     dataType: 'json',
                     success: function (_res) {
                         alert('저장되었습니다.')

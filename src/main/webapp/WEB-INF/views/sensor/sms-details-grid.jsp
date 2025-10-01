@@ -18,6 +18,22 @@
 
         let _columns = [];
 
+        function phoneFormatter(cellValue) {
+            if (!cellValue) return "";
+
+            // 숫자만 추출
+            const digits = cellValue.replace(/\D/g, "");
+
+            if (digits.length === 11) {
+                // 01012345678 → 010-1234-5678
+                return digits.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+            } else if (digits.length === 10) {
+                // 02 같은 지역번호 포함 10자리 처리 → 02-1234-5678
+                return digits.replace(/(\d{2,3})(\d{3,4})(\d{4})/, "$1-$2-$3");
+            }
+            return cellValue; // fallback
+        }
+
         $.get(path + "/columns", function (res) {
             _columns = res;
 
@@ -88,7 +104,6 @@
                     title: false,
                     fixed: true
                 };
-
                 delete column.width;
                 delete column.fixed;
 
@@ -250,6 +265,9 @@
                 if (_types[idx].indexOf('editable') > -1) {
                     column.editable = true;
                     flagCellEdit = true;
+                }
+                if (this.toString() === "sms_recv_ph") {
+                    column.formatter = phoneFormatter;
                 }
                 columnData.model.push(column);
             });

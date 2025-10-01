@@ -9,7 +9,14 @@
         $(function () {
             const $grid = $("#jq-grid");
             const $districtSelect = $('#district-select');
-            initGrid($grid, "/sensor-initial-setting", $('#grid-wrapper'), {}, () => {
+            initGrid($grid, "/sensor-initial-setting", $('#grid-wrapper'), {
+                    multiselect: true,
+                    multiboxonly: false,
+                custom: {
+                    useFilterToolbar: true,
+                    multiSelect: true,
+                }
+                }, () => {
                 const allRowIds = $grid.jqGrid('getDataIDs');
                 allRowIds.forEach(rowId => {
                     $grid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
@@ -49,12 +56,22 @@
             });
 
             $('.save-btn').on('click', function () {
-                const allRowData = $grid.jqGrid("getRowData");
+                // const allRowData = $grid.jqGrid("getRowData");
+                const selectedIds = $grid.jqGrid("getGridParam", "selarrrow");
+
+                if (selectedIds.length === 0) {
+                    alert("선택된 데이터가 없습니다.");
+                    return;
+                }
+
+                // 선택한 row 만 업데이트
+                const selectedData = selectedIds.map(id => $grid.jqGrid("getRowData", id));
+
                 $.ajax({
                     method: 'POST',
                     url: '/sensor-initial-setting/mod',
                     traditional: true,
-                    data: {jsonData: JSON.stringify(allRowData)},
+                    data: {jsonData: JSON.stringify(selectedData)},
                     dataType: 'json',
                     success: (_res) => {
                         alert('저장되었습니다.')
