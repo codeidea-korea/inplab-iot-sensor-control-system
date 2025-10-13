@@ -119,6 +119,12 @@
         WHERE senstype_no = #{senstype_no} LIMIT 1
     </select>
 
+    <select id="selectSensorTypeInfo" parameterType="string" resultType="com.safeone.dashboard.dto.SensorTypeDto">
+        SELECT *
+        FROM tb_sensor_type
+        WHERE senstype_no = #{senstype_no} LIMIT 1
+    </select>
+
     <select id="selectDistrictInfoDistAbbr" parameterType="java.util.Map" resultType="java.util.Map">
         SELECT dist_abbr
         FROM tb_district_info

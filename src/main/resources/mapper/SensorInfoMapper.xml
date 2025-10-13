@@ -295,4 +295,13 @@
         FROM tb_sensor_info
         WHERE sens_no = #{sens_no}
     </delete>
+
+    <select id="getMaxLogrIdxNo" parameterType="string" resultType="Integer">
+        SELECT
+            MAX(logr_idx_no)
+        FROM
+            tb_logr_idx_map
+        WHERE
+            senstype_no = #{senstypeNo}
+    </select>
 </mapper>

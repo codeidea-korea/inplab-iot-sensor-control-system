@@ -3,6 +3,7 @@ package com.safeone.dashboard.service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dao.SensorInfoMapper;
 import com.safeone.dashboard.dto.SensorInfoDto;
+import com.safeone.dashboard.dto.SensorTypeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -11,10 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +23,9 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
 
     @Autowired
     private CommonCodeEditService commonCodeEditService;
+
+    @Autowired
+    private LogrIdxMapService logrIdxMapService;
 
     @Override
     public List<SensorInfoDto> getList(Map param) {
@@ -118,8 +119,58 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
         return message;
     }
 
-
     public List<SensorInfoDto> getAllSensorInfo(Map<String, Object> param) {
         return mapper.getAllSensorInfo(param);
+    }
+
+    public void logrInfoInsert(Map<String, Object> param) {
+        /* send_chnl_id > cnt가 1이면 X, 2면 Y, 3이면 Z */
+        /* logr_chnl_seq > cnt가 1이면 0, 2면 1, 3이면 2 */
+        /* logr_idx_no > tb_logr_idx_map에서 동일한 senstype_no의 logr_idx_no max 값 + 1 */
+
+        SensorTypeDto sensorTypeDto = commonCodeEditService.selectSensorTypeInfo(param.get("senstype_no").toString());
+        int channelCnt = Integer.parseInt(sensorTypeDto.getSens_chnl_cnt());
+        String senstypeNo = param.get("senstype_no").toString();
+
+        for (int i = 1; i <= channelCnt; i++) {
+
+            /* map 복사 */
+            Map<String, Object> newMap = new HashMap<>(param);
+
+            // 현재 DB에서 max(logr_idx_no) 조회
+            Integer maxIdx = mapper.getMaxLogrIdxNo(senstypeNo);
+            if (maxIdx == null) {
+                try {
+                    maxIdx = Integer.parseInt(sensorTypeDto.getLogr_idx_str());
+                    newMap.put("logr_idx_no", maxIdx);
+                } catch (NumberFormatException e) {
+                    break;
+                }
+            }else{
+                newMap.put("logr_idx_no", ++maxIdx);
+            }
+
+            // send_chnl_id 매핑
+            String sendChnlId;
+            switch (i) {
+                case 1:
+                    sendChnlId = "X";
+                    break;
+                case 2:
+                    sendChnlId = "Y";
+                    break;
+                case 3:
+                    sendChnlId = "Z";
+                    break;
+                default:
+                    sendChnlId = "";
+            }
+
+            newMap.put("sens_chnl_id", sendChnlId);
+            newMap.put("logr_chnl_seq", i - 1);
+            newMap.put("senstype_no", senstypeNo);
+
+            logrIdxMapService.create(newMap);
+        }
     }
 }

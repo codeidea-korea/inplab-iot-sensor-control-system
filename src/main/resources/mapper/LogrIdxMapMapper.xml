@@ -146,8 +146,7 @@
 
     <insert id="insertLogrIdxMap" parameterType="java.util.Map">
         INSERT INTO tb_logr_idx_map (
-            mapping_no
-            <if test="sens_no != null">, sens_no</if>
+            <if test="sens_no != null">sens_no</if>
             <if test="sens_chnl_id != null">, sens_chnl_id</if>
             <if test="logr_no != null">, logr_no</if>
             <if test="logr_idx_no != null">, logr_idx_no</if>
@@ -155,16 +154,19 @@
             <if test="logr_chnl_seq != null">, logr_chnl_seq</if>
             <if test="sect_no != null">, sect_no</if>
             <if test="district_no != null">, district_no</if>
+            <if test="senstype_no != null">, senstype_no</if>
+            , reg_dt
         ) VALUES (
-            #{mapping_no}::int
-            <if test="sens_no != null">, #{sens_no}</if>
+            <if test="sens_no != null">#{sens_no}</if>
             <if test="sens_chnl_id != null">, #{sens_chnl_id}</if>
             <if test="logr_no != null">, #{logr_no}</if>
-            <if test="logr_idx_no != null">, #{logr_idx_no}</if>
+            <if test="logr_idx_no != null">, LPAD(#{logr_idx_no}::text, 3, '0')</if>
             <if test="sens_chnl_nm != null">, #{sens_chnl_nm}</if>
             <if test="logr_chnl_seq != null">, #{logr_chnl_seq}::int</if>
             <if test="sect_no != null">, #{sect_no}::int</if>
             <if test="district_no != null">, #{district_no}</if>
+            <if test="senstype_no != null">, #{senstype_no}</if>
+            , current_timestamp
         )
     </insert>
 

@@ -1,5 +1,6 @@
 package com.safeone.dashboard.dao;
 
+import com.safeone.dashboard.dto.SensorTypeDto;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public interface CommonCodeEditMapper {
     List<Map> selectDistrictInfoNmAbbr(String district_nm);
 
     List<Map> selectSensorAbbr(Map param);
+
+    SensorTypeDto selectSensorTypeInfo(String param);
 
     List<Map> selectNewSensorSeq(Map param);
 

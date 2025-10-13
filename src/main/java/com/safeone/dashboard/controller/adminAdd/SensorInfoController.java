@@ -133,9 +133,12 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
         ObjectNode generationKeyOn2 = commonCodeEditService.newGenerationKey(newMap2);
         param.put("mapping_no", generationKeyOn2.get("newId").asText());
         String district_no = districtInfoService.getDistrictInfoIdByEtc1(param.get("logr_no").toString());
+        param.put("sens_chnl_nm", param.get("sens_nm"));
         param.put("district_no", district_no);
 
-        logrIdxMapService.create(param);
+        sensorInfoService.logrInfoInsert(param);
+
+//        logrIdxMapService.create(param);
 
         alertStandardManagementService.create(param);
         sensorInitialSettingService.create(param);

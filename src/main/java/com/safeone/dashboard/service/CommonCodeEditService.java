@@ -3,6 +3,7 @@ package com.safeone.dashboard.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dao.CommonCodeEditMapper;
+import com.safeone.dashboard.dto.SensorTypeDto;
 import com.safeone.dashboard.util.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,10 @@ public class CommonCodeEditService {
 
     public List<Map> getSensorAbbr(Map param) {
         return mapper.selectSensorAbbr(param);
+    }
+
+    public SensorTypeDto selectSensorTypeInfo(String param) {
+        return mapper.selectSensorTypeInfo(param);
     }
 
     public List<Map> getNewSensorSeq(Map param) {
