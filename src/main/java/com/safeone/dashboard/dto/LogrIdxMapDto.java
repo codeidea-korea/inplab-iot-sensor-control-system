@@ -44,4 +44,7 @@ public class LogrIdxMapDto implements Serializable {
     @FieldLabel(title="설치일자")
     String reg_dt;
 
+    @FieldLabel(title="현장 TYPE no", type="hidden")
+    String senstype_no;
+
 }

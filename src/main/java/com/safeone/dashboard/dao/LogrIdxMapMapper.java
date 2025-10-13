@@ -13,5 +13,7 @@ public interface LogrIdxMapMapper {
     int insertLogrIdxMap(Map param);
     int updateLogrIdxMap(Map param);
     int deleteLogrIdxMap(Map param);
+
+    void updateLogrIdx(LogrIdxMapDto dto);
 }
     

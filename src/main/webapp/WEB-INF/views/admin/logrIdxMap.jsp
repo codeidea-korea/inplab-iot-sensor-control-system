@@ -5,6 +5,40 @@
 <html lang="ko">
 <head>
     <jsp:include page="../common/include_head.jsp" flush="true"/>
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* 다른 요소들 위에 표시되도록 설정 */
+        }
+
+        /* 로딩 스피너 스타일 */
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 6px solid #ccc;
+            border-top: 6px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* 로딩 애니메이션 */
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
     <script>
         var _popupClearData;
 
@@ -77,6 +111,30 @@
                             popFancyClose('#lay-form-write');
                         });
                         reloadJqGrid();
+                    });
+                });
+            });
+
+            // 매핑
+            $('.mappingBtn').on('click', function (e) {
+                confirm('등록된 센서별로 센서 타입에 해당하는 로거 인덱스가 순차적으로 부여됩니다.<br>기존에 등록되있던 로거 인덱스는 복구가 불가합니다.<br>매핑하시겠습니까?', function () {
+                    $.ajax({
+                        url: '/adminAdd/logrIdxMap/mapping',
+                        type: 'GET',
+                        beforeSend: function () {
+                            $('#loading').show();
+                        },
+                        complete: function () {
+                            $('#loading').hide();
+                        },
+                        success: function (_res) {
+                            alert("매핑되었습니다.");
+                            reloadJqGrid();
+                        },
+                        error: function (_err) {
+                            alert('매핑에 실패했습니다. 다시 시도해 주세요.');
+                        }
+
                     });
                 });
             });
@@ -213,6 +271,9 @@
     <div id="global-menu">
         <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
+    <div id="loading" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
     <div id="container">
         <h2 class="txt">
             관리자 전용
@@ -226,6 +287,7 @@
                     <form id="uploadForm" style="display:none;">
                         <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
                     </form>
+                    <a class="mappingBtn">매핑</a>
                 </div>
                 <div id="grid-wrapper" class="contents-in">
                     <table id="jq-grid"></table>

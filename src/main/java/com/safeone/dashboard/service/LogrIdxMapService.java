@@ -3,18 +3,17 @@ package com.safeone.dashboard.service;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dao.LogrIdxMapMapper;
 import com.safeone.dashboard.dto.LogrIdxMapDto;
+import com.safeone.dashboard.dto.SensorTypeDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.jasper.tagplugins.jstl.core.ForEach;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +24,9 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
 
     @Autowired
     private CommonCodeEditService commonCodeEditService;
+
+    @Autowired
+    private SensorTypeService sensorTypeService;
 
     @Override
     public List<LogrIdxMapDto> getList(Map param) {
@@ -118,5 +120,78 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
         return message;
     }
 
+    public void mapping() throws Exception {
+        List<LogrIdxMapDto> logrList = mapper.selectLogrIdxMapList(null);
+        List<SensorTypeDto> sensorTypeList = sensorTypeService.getList(null);
 
+        // 1) 타입별 range/채널/약어 맵 구성
+        class Range {
+            int start; int end; int ch; String abbr;
+            Range(int s, int e, int ch, String abbr) { this.start = s; this.end = e; this.ch = ch; this.abbr = abbr; }
+        }
+        Map<String, Range> typeRange = new HashMap<>(); // senstype_no -> range
+
+        for (SensorTypeDto st : sensorTypeList) {
+            String typeNo = st.getSenstype_no();
+            String sStr = nullToEmpty(st.getLogr_idx_str());
+            String eStr = nullToEmpty(st.getLogr_idx_end());
+            int ch = parseIntOr(st.getSens_chnl_cnt(), 0);
+            String abbr = nullToEmpty(st.getSens_abbr());
+
+            Integer start = sStr.isEmpty() ? null : parseIntOr(sStr, 0);
+            Integer end   = eStr.isEmpty() ? null : parseIntOr(eStr, 0);
+            if (start != null && end != null) {
+                typeRange.put(typeNo, new Range(start, end, ch, abbr));
+            }
+        }
+
+        // 2) 정렬: 센서 타입 → 센서 번호 → 채널 순서
+        logrList.sort(Comparator
+                .comparing(LogrIdxMapDto::getSenstype_no, Comparator.nullsLast(String::compareTo))
+                .thenComparing(LogrIdxMapDto::getSens_no, Comparator.nullsLast(String::compareTo))
+                .thenComparing(d -> parseIntOr(String.valueOf(d.getLogr_chnl_seq()), 0))
+        );
+
+        // ★ 3) used 제거, 타입별 커서로 초기화에서부터 부여
+        Map<String, Integer> nextIdxByType = new HashMap<>();
+
+        for (LogrIdxMapDto logr : logrList) {
+            String typeNo = logr.getSenstype_no();
+            if (isEmpty(typeNo) || !typeRange.containsKey(typeNo)) {
+                // 타입 범위가 없으면 스킵(또는 예외)
+                continue;
+            }
+
+            Range r = typeRange.get(typeNo);
+            // 타입별 커서를 range.start에서 시작
+            int next = nextIdxByType.getOrDefault(typeNo, r.start);
+
+            if (next > r.end) {
+                throw new IllegalStateException(String.format(
+                        "타입 %s(%s)의 인덱스 범위를 초과했습니다. start=%03d end=%03d",
+                        typeNo, r.abbr, r.start, r.end
+                ));
+            }
+
+            // 3자리 0패딩 저장
+            logr.setLogr_idx_no(zpad3(next));
+
+            // 다음 커서로 이동
+            nextIdxByType.put(typeNo, next + 1);
+
+            // TODO: DB 반영
+             mapper.updateLogrIdx(logr);
+        }
+    }
+
+    /* mapping helper */
+    private static String nullToEmpty(String s) { return s == null ? "" : s.trim(); }
+    private static boolean isEmpty(String s) { return s == null || s.trim().isEmpty(); }
+    private static int parseIntOr(String s, int def) {
+        try { return Integer.parseInt(nullToEmpty(s)); } catch (Exception e) { return def; }
+    }
+    private static String zpad3(int n) { return String.format("%03d", n); }
+    private static Integer parseIntSafe(String s) {
+        try { return Integer.valueOf(nullToEmpty(s)); } catch (Exception e) { return null; }
+    }
 }

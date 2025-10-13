@@ -102,6 +102,7 @@
                 , A.district_no
                 , A.sens_chnl_id
                 , to_char(A.reg_dt, 'YYYY-MM-DD') AS reg_dt
+                , A.senstype_no
             FROM tb_logr_idx_map A
         ) MG
         WHERE 1=1
@@ -205,4 +206,12 @@
         DELETE FROM tb_logr_idx_map
          WHERE sens_no = #{sens_no}
     </delete>
+
+    <update id="updateLogrIdx" parameterType="com.safeone.dashboard.dto.LogrIdxMapDto">
+        update tb_logr_idx_map set
+            mod_dt = now()
+            , logr_idx_no = #{logr_idx_no}
+        where sens_no = #{sens_no}
+            and logr_chnl_seq = CAST (#{logr_chnl_seq} AS INTEGER);
+    </update>
 </mapper>
