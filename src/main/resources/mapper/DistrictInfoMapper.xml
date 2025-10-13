@@ -5,6 +5,7 @@
     <select id="selectAll" resultType="com.safeone.dashboard.dto.DistrictInfoDto">
         SELECT *
         FROM tb_district_info
+        ORDER BY DISTRICT_NO
     </select>
 
     <sql id="rowSearch">
