@@ -232,10 +232,12 @@
         meas_dt,
         prev_meas_dt,
         formul_data,
+        -- 기존내용
 --         EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60     AS diff_min, -- -- 최신 데이터와 직전 데이터의 시간 차이를 분 단위로 계산
 --         EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60 - 1 AS err_cnt
-        EXTRACT(EPOCH FROM (now() - meas_dt)) / 60     AS diff_min, -- test
-        EXTRACT(EPOCH FROM (now() - meas_dt)) / 60 - 1 AS err_cnt -- test
+        -- 수정내용 ( 현재시간과 최신 데이터의 시간 차 를 계산 )
+        EXTRACT(EPOCH FROM (now() - meas_dt)) / 60     AS diff_min,
+        EXTRACT(EPOCH FROM (now() - meas_dt)) / 60 - 1 AS err_cnt
         FROM lag_rank_data
         WHERE rn = 1
         AND prev_meas_dt IS NOT NULL -- 이전 데이터가 있는 경우만 계산
