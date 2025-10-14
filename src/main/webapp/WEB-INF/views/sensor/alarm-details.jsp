@@ -59,14 +59,14 @@
                 },
                 alarm_lvl_cd: {
                     formatter: function (cellValue, options, rowObject) {
-                        const alarmLevel = +rowObject?.alarm_lvl_cd;
-                        if (alarmLevel === 1) {
+                        // const alarmLevel = +rowObject?.alarm_lvl_cd;
+                        if (cellValue === 'ARM001') {
                             return "관심"
-                        } else if (alarmLevel === 2) {
+                        } else if (cellValue === 'ARM002') {
                             return "주의"
-                        } else if (alarmLevel === 3) {
+                        } else if (cellValue === 'ARM003') {
                             return "경계"
-                        } else if (alarmLevel === 4) {
+                        } else if (cellValue === 'ARM004') {
                             return "심각"
                         } else {
                             return "관심"
@@ -90,22 +90,28 @@
                 },
                 standard: {
                     formatter: function (cellValue, options, rowObject) {
-                        const standard = +rowObject?.alarm_lvl_cd;
-                        if (standard === 1) {
+                        const standard = rowObject?.alarm_lvl_cd;
+                        if (standard === 'ARM001') {
                             return rowObject.min1 + " ~ " + rowObject.max1
                         }
-                        else if (standard === 2) {
+                        else if (standard === 'ARM002') {
                             return rowObject.min2 + " ~ " + rowObject.max2
                         }
-                        else if (standard === 3) {
+                        else if (standard === 'ARM003') {
                             return rowObject.min3 + " ~ " + rowObject.max3
                         }
-                        else if (standard === 4) {
+                        else if (standard === 'ARM004') {
                             return rowObject.min4 + " ~ " + rowObject.max4
                         }
                         else {
                             return "-"
                         }
+                    }
+                },
+                /* 알람이력이 남는 시점 자체가 데이터 수신이 기본이라서 아래와 같이 고정 처리 */
+                net_err_yn: {
+                    formatter: function (cellValue, options, rowObject) {
+                        return '수신';
                     }
                 }
             })
