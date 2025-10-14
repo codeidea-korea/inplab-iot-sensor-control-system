@@ -308,7 +308,6 @@
                 }
             });
 
-
             function getRandomHSL() {
                 const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
                 const saturation = 100; // 채도 고정
@@ -316,89 +315,278 @@
                 return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
             }
 
-            function updateChart(data) {
-                myChart.resetZoom(); // 차트 줌 초기화
+            // function updateChart(data) {
+            //     myChart.resetZoom(); // 차트 줌 초기화
+            //
+            //     // --- X축 시간 단위 동적 결정 로직 시작 ---
+            //     let xUnit = 'hour'; // 기본값은 '시(hour)'
+            //     let displayFormats = {
+            //         minute: 'YYYY-MM-DD HH:mm', // 분 단위 표시 형식
+            //         hour: 'YYYY-MM-DD HH:00',   // 시 단위 표시 형식
+            //         day: 'YYYY-MM-DD',          // 일 단위 표시 형식
+            //         month: 'YYYY-MM'            // 월 단위 표시 형식 추가
+            //     };
+            //
+            //     // 모든 센서 데이터 중 가장 빠른 날짜와 가장 늦은 날짜를 찾아 전체 데이터 기간을 계산
+            //     let minDate = Infinity;
+            //     let maxDate = -Infinity;
+            //
+            //     data.forEach(sensorData => {
+            //         if (sensorData && sensorData.length > 0) {
+            //             sensorData.forEach(point => {
+            //                 if (point.meas_dt) {
+            //                     const date = new Date(point.meas_dt).getTime();
+            //                     if (date < minDate) minDate = date;
+            //                     if (date > maxDate) maxDate = date;
+            //                 }
+            //             });
+            //         }
+            //     });
+            //
+            //     if (minDate !== Infinity && maxDate !== -Infinity) {
+            //         const firstDate = new Date(minDate);
+            //         const lastDate = new Date(maxDate);
+            //         const diffDays = Math.abs(lastDate - firstDate) / (1000 * 60 * 60 * 24); // 일수 차이 계산
+            //
+            //         if (diffDays > 90) { // 3개월 이상이면 '월' 단위로
+            //             xUnit = 'month';
+            //         } else if (diffDays > 30) { // 한 달 이상이면 '일' 단위로
+            //             xUnit = 'day';
+            //         } else if (diffDays > 1) { // 하루 이상이면 '시' 단위로
+            //             xUnit = 'hour';
+            //         } else { // 그 외 (하루 이내)는 '분' 단위로
+            //             xUnit = 'minute';
+            //         }
+            //     }
+            //
+            //     // 차트의 X축 시간 단위를 업데이트합니다.
+            //     myChart.options.scales.x.time.unit = xUnit;
+            //     myChart.options.scales.x.time.displayFormats = displayFormats;
+            //     // 어댑터 설정 (필요시)
+            //     if (!myChart.options.scales.x.adapters) {
+            //         myChart.options.scales.x.adapters = {};
+            //     }
+            //     if (!myChart.options.scales.x.adapters.date) {
+            //         myChart.options.scales.x.adapters.date = {};
+            //     }
+            //     // --- X축 시간 단위 동적 결정 로직 끝 ---
+            //
+            //     // 데이터셋 구성
+            //     const datasets = data.map(function(sensorItem) { // 화살표 함수 대신 function 키워드 사용
+            //         // 각 센서의 데이터를 {x: Date객체, y: 값} 형태로 변환
+            //         const formattedData = sensorItem.map(function(point) { // 화살표 함수 대신 function 키워드 사용
+            //             return {
+            //                 x: new Date(point.meas_dt), // X축은 Date 객체
+            //                 y: point.formul_data // Y축은 계측 값
+            //             };
+            //         });
+            //
+            //         return {
+            //             label: sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? "-" + sensorItem[0].sens_chnl_id : ""),
+            //             data: formattedData,
+            //             borderColor: getRandomHSL(),
+            //             fill: false,
+            //             pointRadius: 0,
+            //             borderWidth: 1,
+            //         };
+            //     });
+            //
+            //     // Chart.js의 time 스케일은 labels 배열이 필수는 아니므로 빈 배열로 둡니다.
+            //     myChart.data.labels = [];
+            //     myChart.data.datasets = datasets;
+            //     myChart.options.plugins.annotation.annotations = {}; // 기존 annotation 초기화
+            //
+            //     // --- 상한선(annotation) 추가 로직 시작 ---
+            //     data.forEach(function(sensorItem) { // 화살표 함수 대신 function 키워드 사용
+            //         const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
+            //         const maxLevels = [
+            //             parseFloat(sensorItem[0].lvl_max1),
+            //             parseFloat(sensorItem[0].lvl_max2),
+            //             parseFloat(sensorItem[0].lvl_max3),
+            //             parseFloat(sensorItem[0].lvl_max4)
+            //         ];
+            //
+            //         maxLevels.forEach(function(maxLevel, index) { // 화살표 함수 대신 function 키워드 사용
+            //             if (!isNaN(maxLevel)) {
+            //                 // 라인 annotation (각 센서 및 채널별 고유 ID 부여)
+            //                 // ID는 각 annotation이 고유하게 식별되도록 충분히 상세하게 만듭니다.
+            //                 const annotationId = 'line-' + sensorItem[0].sens_no + '-' + (sensorItem[0].sens_chnl_id || 'none') + '-' + index;
+            //                 myChart.options.plugins.annotation.annotations[annotationId] = {
+            //                     type: 'line',
+            //                     yMin: maxLevel,
+            //                     yMax: maxLevel,
+            //                     borderColor: colors[index],
+            //                     borderWidth: 1.5,
+            //                     borderDash: [5, 4]
+            //                 };
+            //
+            //                 // 라벨 annotation (각 센서 및 채널별 고유 ID 부여)
+            //                 const labelAnnotationId = 'label-' + sensorItem[0].sens_no + '-' + (sensorItem[0].sens_chnl_id || 'none') + '-' + index;
+            //                 // 라벨 위치는 해당 센서 데이터의 첫 번째 측정 시간을 기준으로 하거나, 전체 데이터의 최소 시간을 기준으로 합니다.
+            //                 const labelXValue = sensorItem[0].meas_dt ? new Date(sensorItem[0].meas_dt).getTime() : minDate;
+            //
+            //                 myChart.options.plugins.annotation.annotations[labelAnnotationId] = {
+            //                     type: 'label',
+            //                     xValue: labelXValue,
+            //                     yValue: maxLevel,
+            //                     backgroundColor: colors[index],
+            //                     content: [sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? "-" + sensorItem[0].sens_chnl_id : "") + ' ' + (Number(index) + 1) + '차 경고'],
+            //                     font: {
+            //                         size: 8
+            //                     },
+            //                     // 여러 라벨이 겹치지 않도록 Y축 위치를 약간 조정할 수 있습니다 (필요시 활성화)
+            //                     // yAdjust: (index * 5)
+            //                 };
+            //             }
+            //         });
+            //     });
+            //     // --- 상한선(annotation) 추가 로직 끝 ---
+            //
+            //     myChart.update(); // 차트 업데이트
+            // }
 
-                // --- X축 시간 단위 동적 결정 로직 시작 ---
-                let xUnit = 'hour'; // 기본값은 '시(hour)'
-                let displayFormats = {
-                    minute: 'YYYY-MM-DD HH:mm', // 분 단위 표시 형식
-                    hour: 'YYYY-MM-DD HH:00',   // 시 단위 표시 형식
-                    day: 'YYYY-MM-DD',          // 일 단위 표시 형식
-                    month: 'YYYY-MM'            // 월 단위 표시 형식 추가
-                };
+            let chartInstance = null;
+            let isUpdating = false;
 
-                // 모든 센서 데이터 중 가장 빠른 날짜와 가장 늦은 날짜를 찾아 전체 데이터 기간을 계산
-                let minDate = Infinity;
-                let maxDate = -Infinity;
+            async function updateChart(data) {
+                if (isUpdating) return;
+                isUpdating = true;
 
-                data.forEach(sensorData => {
-                    if (sensorData && sensorData.length > 0) {
-                        sensorData.forEach(point => {
-                            if (point.meas_dt) {
-                                const date = new Date(point.meas_dt).getTime();
-                                if (date < minDate) minDate = date;
-                                if (date > maxDate) maxDate = date;
-                            }
-                        });
+                try {
+                    const existing = Chart.getChart("myChart");
+                    if (existing) {
+                        existing.destroy();
+                        await Promise.resolve();
                     }
-                });
 
-                if (minDate !== Infinity && maxDate !== -Infinity) {
-                    const firstDate = new Date(minDate);
-                    const lastDate = new Date(maxDate);
-                    const diffDays = Math.abs(lastDate - firstDate) / (1000 * 60 * 60 * 24); // 일수 차이 계산
+                    let xUnit = 'hour';
+                    const displayFormats = {
+                        minute: 'YYYY-MM-DD HH:mm',
+                        hour:   'YYYY-MM-DD HH:00',
+                        day:    'YYYY-MM-DD',
+                        month:  'YYYY-MM'
+                    };
 
-                    if (diffDays > 90) { // 3개월 이상이면 '월' 단위로
-                        xUnit = 'month';
-                    } else if (diffDays > 30) { // 한 달 이상이면 '일' 단위로
-                        xUnit = 'day';
-                    } else if (diffDays > 1) { // 하루 이상이면 '시' 단위로
-                        xUnit = 'hour';
-                    } else { // 그 외 (하루 이내)는 '분' 단위로
-                        xUnit = 'minute';
-                    }
-                }
-
-                // 차트의 X축 시간 단위를 업데이트합니다.
-                myChart.options.scales.x.time.unit = xUnit;
-                myChart.options.scales.x.time.displayFormats = displayFormats;
-                // 어댑터 설정 (필요시)
-                if (!myChart.options.scales.x.adapters) {
-                    myChart.options.scales.x.adapters = {};
-                }
-                if (!myChart.options.scales.x.adapters.date) {
-                    myChart.options.scales.x.adapters.date = {};
-                }
-                // --- X축 시간 단위 동적 결정 로직 끝 ---
-
-                // 데이터셋 구성
-                const datasets = data.map(function(sensorItem) { // 화살표 함수 대신 function 키워드 사용
-                    // 각 센서의 데이터를 {x: Date객체, y: 값} 형태로 변환
-                    const formattedData = sensorItem.map(function(point) { // 화살표 함수 대신 function 키워드 사용
-                        return {
-                            x: new Date(point.meas_dt), // X축은 Date 객체
-                            y: point.formul_data // Y축은 계측 값
-                        };
+                    let minDate = Infinity, maxDate = -Infinity;
+                    data.forEach(sensorData => {
+                        if (sensorData && sensorData.length > 0) {
+                            sensorData.forEach(point => {
+                                if (point.meas_dt) {
+                                    const t = new Date(point.meas_dt).getTime();
+                                    if (t < minDate) minDate = t;
+                                    if (t > maxDate) maxDate = t;
+                                }
+                            });
+                        }
                     });
 
-                    return {
-                        label: sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? "-" + sensorItem[0].sens_chnl_id : ""),
-                        data: formattedData,
-                        borderColor: getRandomHSL(),
-                        fill: false,
-                        pointRadius: 0,
-                        borderWidth: 1,
+                    if (minDate !== Infinity && maxDate !== -Infinity) {
+                        const diffDays = (maxDate - minDate) / (1000 * 60 * 60 * 24);
+                        if (diffDays > 90) xUnit = 'month';
+                        else if (diffDays > 30) xUnit = 'day';
+                        else if (diffDays > 1) xUnit = 'hour';
+                        else xUnit = 'minute';
+                    }
+
+                    const scales = {
+                        x: {
+                            type: 'time',
+                            time: { unit: xUnit, displayFormats },
+                            grid: { display: true },
+                            ticks: { display: true },
+                            title: { display: true, text: 'Time' }
+                        }
                     };
-                });
 
-                // Chart.js의 time 스케일은 labels 배열이 필수는 아니므로 빈 배열로 둡니다.
-                myChart.data.labels = [];
-                myChart.data.datasets = datasets;
-                myChart.options.plugins.annotation.annotations = {}; // 기존 annotation 초기화
+                    const datasets = [];
 
-                // --- 상한선(annotation) 추가 로직 시작 ---
-                data.forEach(function(sensorItem) { // 화살표 함수 대신 function 키워드 사용
+                    data.forEach((sensorItem, i) => {
+                        const yId = 'y' + i;
+                        const color = getRandomHSL();
+                        const labelText = sensorItem[0].sens_nm +
+                            (sensorItem[0].sens_chnl_id ? '-' + sensorItem[0].sens_chnl_id : '');
+
+                        scales[yId] = {
+                            id: yId,
+                            type: 'linear',
+                            position: 'left',
+                            beginAtZero: true,
+                            display: true,
+                            grid: {
+                                drawOnChartArea: i === 0,
+                                color: 'rgba(0,0,0,0.05)',
+                            },
+                            border: { color, width: 1 },
+                            ticks: {
+                                color,
+                                font: { size: 10 },
+                                callback: v => Number(v.toFixed(1))
+                            },
+                            title: {
+                                display: true,
+                                text: labelText,
+                                color,
+                                font: { size: 10 }
+                            },
+                            afterFit: scale => {
+                                const baseLeft = 10;
+                                const spacing = 50;
+                                scale.left = baseLeft + (i * spacing);
+                                scale.width = 40;
+                            }
+                        };
+
+                        /* 강우량계는 막대그래프로 표현 */
+                        const isRain = sensorItem[0].sens_nm.includes('RAIN');
+
+                        datasets.push({
+                            label: labelText,
+                            type: isRain ? 'bar' : 'line',
+                            data: sensorItem.map(p => ({
+                                x: new Date(p.meas_dt),
+                                y: p.formul_data
+                            })),
+                            borderColor: color,
+                            backgroundColor: color,
+                            fill: false,
+                            pointRadius: 0,
+                            borderWidth: isRain ? 0 : 1,
+                            barThickness: isRain ? 8 : undefined,
+                            xAxisID: 'x',
+                            yAxisID: yId
+                        });
+                    });
+
+                    const ctx = document.getElementById('myChart').getContext('2d');
+                    chartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: { datasets },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales,
+                            plugins: {
+                                legend: { display: true },
+                                zoom: {
+                                    pan: { enabled: true, mode: 'xy' },
+                                    zoom: { wheel: { enabled: true }, mode: 'xy' }
+                                },
+                                annotation: { annotations: buildAnnotations(data, minDate) }
+                            }
+                        }
+                    });
+
+                } catch (err) {
+                    console.error("Chart update failed:", err);
+                } finally {
+                    isUpdating = false;
+                }
+            }
+            
+            // --- 별도 함수로 분리: annotation 생성 ---
+            function buildAnnotations(data, minDate) {
+                const annotations = {};
+                data.forEach((sensorItem, i) => {
                     const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
                     const maxLevels = [
                         parseFloat(sensorItem[0].lvl_max1),
@@ -406,46 +594,43 @@
                         parseFloat(sensorItem[0].lvl_max3),
                         parseFloat(sensorItem[0].lvl_max4)
                     ];
+                    const firstTs = sensorItem[0]?.meas_dt
+                        ? new Date(sensorItem[0].meas_dt).getTime()
+                        : minDate;
 
-                    maxLevels.forEach(function(maxLevel, index) { // 화살표 함수 대신 function 키워드 사용
-                        if (!isNaN(maxLevel)) {
-                            // 라인 annotation (각 센서 및 채널별 고유 ID 부여)
-                            // ID는 각 annotation이 고유하게 식별되도록 충분히 상세하게 만듭니다.
-                            const annotationId = 'line-' + sensorItem[0].sens_no + '-' + (sensorItem[0].sens_chnl_id || 'none') + '-' + index;
-                            myChart.options.plugins.annotation.annotations[annotationId] = {
-                                type: 'line',
-                                yMin: maxLevel,
-                                yMax: maxLevel,
-                                borderColor: colors[index],
-                                borderWidth: 1.5,
-                                borderDash: [5, 4]
-                            };
+                    maxLevels.forEach((maxLevel, idx) => {
+                        if (isNaN(maxLevel)) return;
 
-                            // 라벨 annotation (각 센서 및 채널별 고유 ID 부여)
-                            const labelAnnotationId = 'label-' + sensorItem[0].sens_no + '-' + (sensorItem[0].sens_chnl_id || 'none') + '-' + index;
-                            // 라벨 위치는 해당 센서 데이터의 첫 번째 측정 시간을 기준으로 하거나, 전체 데이터의 최소 시간을 기준으로 합니다.
-                            const labelXValue = sensorItem[0].meas_dt ? new Date(sensorItem[0].meas_dt).getTime() : minDate;
+                        const lineId = `line-${sensorItem[0].sens_no}-${sensorItem[0].sens_chnl_id || 'none'}-${idx}`;
+                        annotations[lineId] = {
+                            type: 'line',
+                            yMin: maxLevel,
+                            yMax: maxLevel,
+                            borderColor: colors[idx],
+                            borderWidth: 1.5,
+                            borderDash: [5, 4],
+                            yScaleID: 'y' + i
+                        };
 
-                            myChart.options.plugins.annotation.annotations[labelAnnotationId] = {
-                                type: 'label',
-                                xValue: labelXValue,
-                                yValue: maxLevel,
-                                backgroundColor: colors[index],
-                                content: [sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? "-" + sensorItem[0].sens_chnl_id : "") + ' ' + (Number(index) + 1) + '차 경고'],
-                                font: {
-                                    size: 8
-                                },
-                                // 여러 라벨이 겹치지 않도록 Y축 위치를 약간 조정할 수 있습니다 (필요시 활성화)
-                                // yAdjust: (index * 5)
-                            };
-                        }
+                        const labelId = `label-${sensorItem[0].sens_no}-${sensorItem[0].sens_chnl_id || 'none'}-${idx}`;
+                        annotations[labelId] = {
+                            type: 'label',
+                            xValue: firstTs,
+                            yValue: maxLevel,
+                            backgroundColor: colors[idx],
+                            content: [
+                                sensorItem[0].sens_nm +
+                                (sensorItem[0].sens_chnl_id ? '-' + sensorItem[0].sens_chnl_id : '') +
+                                ' ' + (idx + 1) + '차 경고'
+                            ],
+                            font: { size: 8 },
+                            xScaleID: 'x',
+                            yScaleID: 'y' + i
+                        };
                     });
                 });
-                // --- 상한선(annotation) 추가 로직 끝 ---
-
-                myChart.update(); // 차트 업데이트
+                return annotations;
             }
-
         });
     </script>
 </head>
