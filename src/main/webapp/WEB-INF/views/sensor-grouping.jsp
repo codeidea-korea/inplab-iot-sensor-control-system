@@ -253,61 +253,6 @@
                 });
             }
 
-            const ctx = document.getElementById('myChart').getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [], // 초기 레이블
-                    datasets: [] // 초기 데이터셋
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // 비율을 유지하지 않음 (높이 채우기)
-                    plugins: {
-                        zoom: {
-                            pan: {
-                                enabled: true,
-                                mode: 'xy', // x, y축 모두 이동 가능
-                                threshold: 10, // 이동을 시작하는 최소 드래그 거리(px)
-                            },
-                            zoom: {
-                                drag: {
-                                    enabled: true,
-                                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                                },
-                                wheel: {
-                                    enabled: true, // 마우스 휠로 줌 가능
-                                },
-                                pinch: {
-                                    enabled: true // 터치로 줌 가능
-                                },
-                                mode: 'xy', // x, y축 모두 줌 가능
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                displayFormats: {
-                                    minute: 'YYYY-MM-DD HH:mm' // 분 단위까지 표시
-                                },
-                                unit: 'minute', // 단위를 분(minute)으로 설정
-                            },
-                            adapters: {
-                                date: {} // 어댑터 설정(필요시 사용)
-                            }
-                        },
-                        y: {
-                            beginAtZero: true, // 0에서 시작
-                            ticks: {
-                                autoSkip: false // 모든 눈금을 표시
-                            }
-                        }
-                    }
-                }
-            });
-
             function getRandomHSL() {
                 const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
                 const saturation = 100; // 채도 고정
@@ -569,7 +514,14 @@
                                 legend: { display: true },
                                 zoom: {
                                     pan: { enabled: true, mode: 'xy' },
-                                    zoom: { wheel: { enabled: true }, mode: 'xy' }
+                                    zoom: {
+                                        drag: {
+                                            enabled: true,
+                                            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                                        },
+                                        wheel: { enabled: true },
+                                        mode: 'xy'
+                                    }
                                 },
                                 annotation: { annotations: buildAnnotations(data, minDate) }
                             }
@@ -582,7 +534,7 @@
                     isUpdating = false;
                 }
             }
-            
+
             // --- 별도 함수로 분리: annotation 생성 ---
             function buildAnnotations(data, minDate) {
                 const annotations = {};
