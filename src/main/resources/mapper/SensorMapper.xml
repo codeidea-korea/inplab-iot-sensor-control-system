@@ -216,181 +216,111 @@
     </select>
 
     <select id="selectSensorList" parameterType="java.util.Map" resultType="java.util.Map">
-        select *
-        from (WITH lag_rank_data AS (SELECT sens_no,
-        sens_chnl_id,
-        meas_dt,
-        formul_data,
-        LAG(meas_dt, 1)
-        OVER (PARTITION BY sens_no, sens_chnl_id ORDER BY meas_dt)      AS prev_meas_dt, -- 이전 행의 meas_dt
-        ROW_NUMBER()
-        OVER (PARTITION BY sens_no, sens_chnl_id ORDER BY meas_dt DESC) AS rn            -- 각 그룹에서 가장 최신 데이터에 순위 1을 부여
-        FROM (SELECT * FROM tb_measure_details ORDER BY meas_dt desc LIMIT 1000) a -- LIMIT는  전체센서수(채널수)를 충분히 넘게 설정
-        ),
-        latest_meas_details AS (SELECT sens_no,
-        sens_chnl_id,
-        meas_dt,
-        prev_meas_dt,
-        formul_data,
-        -- 기존내용
---         EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60     AS diff_min, -- -- 최신 데이터와 직전 데이터의 시간 차이를 분 단위로 계산
---         EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60 - 1 AS err_cnt
-        -- 수정내용 ( 현재시간과 최신 데이터의 시간 차 를 계산 )
-        EXTRACT(EPOCH FROM (now() - meas_dt)) / 60     AS diff_min,
-        EXTRACT(EPOCH FROM (now() - meas_dt)) / 60 - 1 AS err_cnt
-        FROM lag_rank_data
-        WHERE rn = 1
-        AND prev_meas_dt IS NOT NULL -- 이전 데이터가 있는 경우만 계산
-        )
-
-        select
-        --   c.district_no
-        a.district_nm
-        , a.sens_no
-        , a.senstype_no
-        , a.sens_tp_nm
-        , a.sens_nm
-        , a.sens_chnl_nm
-        , a.logr_nm
-        , a.sect_no
-        , a.inst_ymd
-        , a.latest_meas_dt
-        , coalesce(c.maint_rslt_cd, 'MTN001') AS sens_status -- 센서상태
-        , a.comm_status                       AS comm_status -- 통신상태
-        , a.formul_data
-        , CASE
-        WHEN a.formul_data &lt;= b."1st_lvl_min" OR a.formul_data >= b."1st_lvl_max" THEN b."1st_lvl_nm"
-        WHEN a.formul_data &lt;= b."2nd_lvl_min" OR a.formul_data >= b."2nd_lvl_max" THEN b."2nd_lvl_nm"
-        WHEN a.formul_data &lt;= b."3rd_lvl_min" OR a.formul_data >= b."3rd_lvl_max" THEN b."3rd_lvl_nm"
-        WHEN a.formul_data &lt;= b."4th_lvl_min" OR a.formul_data >= b."4th_lvl_max" THEN b."4th_lvl_nm"
-        ELSE '정상' END                   as alram_lvl
-        from (SELECT a.sens_no
-        , a.senstype_no
-        , e.sens_chnl_id
-        , c.district_no
-        , c.district_nm
-        , d.sens_tp_nm
-        , a.sens_nm
-        , e.sens_chnl_nm
-        , b.logr_nm
-        , a.sect_no
-        , TO_CHAR(TO_DATE(a.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd
-        , lmd.meas_dt                                                           as latest_meas_dt
-        -- ,    case when lmd.diff_min = 1 then '통신정상' else '통신이상' end as net_staus  -- 통신상태
-        --    ,   coalesce(sst.maint_rslt_cd, 'MTN001') as sens_status  -- 센서상태 (유지보수테이블에서 센서상태를 체크)
-        -- ,    lmd.err_cnt as delay_min  -- 지연시간(분)
-        , case when lmd.err_cnt >= a.nonrecv_limit_min then '미수신' else '수신' end as comm_status -- 통신상태 (센서정보의 미수신시간을 체크)
-        , lmd.formul_data
-        FROM tb_sensor_info a,
-        tb_logger_info b,
-        tb_district_info c,
-        tb_sensor_type d,
-        tb_sensor_chnl e,
-        latest_meas_details lmd
-        WHERE a.logr_no = b.logr_no
-        AND b.district_no = c.district_no
-        AND a.senstype_no = d.senstype_no
-        AND a.sens_no = e.sens_no
-        AND e.sens_no = lmd.sens_no
-        AND e.sens_chnl_id = lmd.sens_chnl_id) a
-        LEFT OUTER JOIN
-        (SELECT *
-        from tb_alarm_info
-        WHERE "1st_lvl_min" != 0) b
-        ON a.sens_no = b.sens_no
-        AND a.sens_chnl_id = b.sens_chnl_id
-        left outer join
-        (SELECT sens_no, maint_rslt_cd
-        FROM tb_maint_details
-        WHERE (sens_no, maint_accpt_ymd) IN
-        (SELECT sens_no, MAX(maint_accpt_ymd) max_accpt_ymd FROM tb_maint_details GROUP BY sens_no)) c
-        on a.sens_no = c.sens_no) as final_result
+        SELECT
+            c.district_nm,
+            a.sens_no,
+            a.senstype_no,
+            d.sens_tp_nm,
+            a.sens_nm,
+            e.sens_chnl_nm,
+            b.logr_nm,
+            a.sect_no,
+            TO_CHAR(TO_DATE(a.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd,
+            lmd.meas_dt AS latest_meas_dt,
+            COALESCE(m.maint_rslt_cd, 'MTN001') AS sens_status,
+            CASE
+            WHEN COALESCE(lmd.err_cnt, 999999) >= a.nonrecv_limit_min THEN '미수신'
+                ELSE '수신'
+            END AS comm_status,
+            lmd.formul_data
+        FROM tb_sensor_info a
+        JOIN tb_logger_info b ON a.logr_no = b.logr_no
+        JOIN tb_district_info c ON b.district_no = c.district_no
+        JOIN tb_sensor_type d ON a.senstype_no = d.senstype_no
+        JOIN tb_sensor_chnl e ON a.sens_no = e.sens_no
+        LEFT JOIN LATERAL (
+            SELECT
+                m.sens_no,
+                m.sens_chnl_id,
+                m.meas_dt,
+                m.formul_data,
+                EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 AS diff_min,
+                EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 - 1 AS err_cnt
+            FROM tb_measure_details m
+            WHERE m.sens_no = e.sens_no
+                AND m.sens_chnl_id = e.sens_chnl_id
+            ORDER BY m.meas_dt DESC
+            LIMIT 1
+        ) AS lmd ON TRUE
+        LEFT JOIN (
+            SELECT sens_no, maint_rslt_cd
+            FROM tb_maint_details
+            WHERE (sens_no, maint_accpt_ymd) IN (
+                SELECT sens_no, MAX(maint_accpt_ymd)
+                FROM tb_maint_details
+                GROUP BY sens_no
+            )
+        ) m ON a.sens_no = m.sens_no
+        LEFT JOIN tb_alarm_info ai
+            ON a.sens_no = ai.sens_no
+            AND e.sens_chnl_id = ai.sens_chnl_id
         WHERE 1=1
+        ORDER BY a.sens_no
         <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
             LIMIT ${limit} OFFSET ${offset}
         </if>
     </select>
 
     <select id="selectSensorListTotal" parameterType="java.util.Map" resultType="int">
-        select count(*)
-        from (WITH lag_rank_data AS (SELECT sens_no,
-        sens_chnl_id,
-        meas_dt,
-        formul_data,
-        LAG(meas_dt, 1)
-        OVER (PARTITION BY sens_no, sens_chnl_id ORDER BY meas_dt)      AS prev_meas_dt, -- 이전 행의 meas_dt
-        ROW_NUMBER()
-        OVER (PARTITION BY sens_no, sens_chnl_id ORDER BY meas_dt DESC) AS rn            -- 각 그룹에서 가장 최신 데이터에 순위 1을 부여
-        FROM (SELECT * FROM tb_measure_details ORDER BY meas_dt desc LIMIT 1000) a -- LIMIT는  전체센서수(채널수)를 충분히 넘게 설정
-        ),
-        latest_meas_details AS (SELECT sens_no,
-        sens_chnl_id,
-        meas_dt,
-        prev_meas_dt,
-        formul_data,
-        EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60     AS diff_min, -- -- 최신 데이터와 직전 데이터의 시간 차이를 분 단위로 계산
-        EXTRACT(EPOCH FROM (meas_dt - prev_meas_dt)) / 60 - 1 AS err_cnt
-        FROM lag_rank_data
-        WHERE rn = 1
-        AND prev_meas_dt IS NOT NULL -- 이전 데이터가 있는 경우만 계산
-        )
-        select
-        --   c.district_no
-        a.district_nm
-        , a.sens_tp_nm
-        , a.sens_nm
-        , a.sens_chnl_nm
-        , a.logr_nm                                          --   , a.sect_no, a.inst_ymd
-        , a.latest_meas_dt
-        , coalesce(c.maint_rslt_cd, 'MTN001') AS sens_status -- 센서상태
-        , a.comm_status                       AS comm_status -- 통신상태
-        , a.formul_data
-        , CASE
-        WHEN a.formul_data &lt;= b."1st_lvl_min" OR a.formul_data >= b."1st_lvl_max" THEN b."1st_lvl_nm"
-        WHEN a.formul_data &lt;= b."2nd_lvl_min" OR a.formul_data >= b."2nd_lvl_max" THEN b."2nd_lvl_nm"
-        WHEN a.formul_data &lt;= b."3rd_lvl_min" OR a.formul_data >= b."3rd_lvl_max" THEN b."3rd_lvl_nm"
-        WHEN a.formul_data &lt;= b."4th_lvl_min" OR a.formul_data >= b."4th_lvl_max" THEN b."4th_lvl_nm"
-        ELSE '정상' END                   as alram_lvl
-        from (SELECT a.sens_no
-        , e.sens_chnl_id
-        , c.district_no
-        , c.district_nm
-        , d.sens_tp_nm
-        , a.sens_nm
-        , e.sens_chnl_nm
-        , b.logr_nm
-        , a.sect_no
-        , a.inst_ymd
-        , lmd.meas_dt                                                           as latest_meas_dt
-        -- ,    case when lmd.diff_min = 1 then '통신정상' else '통신이상' end as net_staus  -- 통신상태
-        --    ,   coalesce(sst.maint_rslt_cd, 'MTN001') as sens_status  -- 센서상태 (유지보수테이블에서 센서상태를 체크)
-        -- ,    lmd.err_cnt as delay_min  -- 지연시간(분)
-        , case when lmd.err_cnt >= a.nonrecv_limit_min then '미수신' else '수신' end as comm_status -- 통신상태 (센서정보의 미수신시간을 체크)
-        , lmd.formul_data
-        FROM tb_sensor_info a,
-        tb_logger_info b,
-        tb_district_info c,
-        tb_sensor_type d,
-        tb_sensor_chnl e,
-        latest_meas_details lmd
-        WHERE a.logr_no = b.logr_no
-        AND b.district_no = c.district_no
-        AND a.senstype_no = d.senstype_no
-        AND a.sens_no = e.sens_no
-        AND e.sens_no = lmd.sens_no
-        AND e.sens_chnl_id = lmd.sens_chnl_id) a
-        LEFT OUTER JOIN
-        (SELECT *
-        from tb_alarm_info
-        WHERE "1st_lvl_min" != 0) b
-        ON a.sens_no = b.sens_no
-        AND a.sens_chnl_id = b.sens_chnl_id
-        left outer join
-        (SELECT sens_no, maint_rslt_cd
-        FROM tb_maint_details
-        WHERE (sens_no, maint_accpt_ymd) IN
-        (SELECT sens_no, MAX(maint_accpt_ymd) max_accpt_ymd FROM tb_maint_details GROUP BY sens_no)) c
-        on a.sens_no = c.sens_no) as final_result
+        select count(*) from (SELECT
+                                  c.district_nm,
+                                  a.sens_no,
+                                  a.senstype_no,
+                                  d.sens_tp_nm,
+                                  a.sens_nm,
+                                  e.sens_chnl_nm,
+                                  b.logr_nm,
+                                  a.sect_no,
+                                  TO_CHAR(TO_DATE(a.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd,
+                                  lmd.meas_dt AS latest_meas_dt,
+                                  COALESCE(m.maint_rslt_cd, 'MTN001') AS sens_status,
+                                  CASE
+                                      WHEN COALESCE(lmd.err_cnt, 999999) >= a.nonrecv_limit_min THEN '미수신'
+                                      ELSE '수신'
+                                      END AS comm_status,
+                                  lmd.formul_data
+                              FROM tb_sensor_info a
+                                       JOIN tb_logger_info b ON a.logr_no = b.logr_no
+                                       JOIN tb_district_info c ON b.district_no = c.district_no
+                                       JOIN tb_sensor_type d ON a.senstype_no = d.senstype_no
+                                       JOIN tb_sensor_chnl e ON a.sens_no = e.sens_no
+                                       LEFT JOIN LATERAL (
+                                  SELECT
+                                      m.sens_no,
+                                      m.sens_chnl_id,
+                                      m.meas_dt,
+                                      m.formul_data,
+                                      EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 AS diff_min,
+                                      EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 - 1 AS err_cnt
+                                  FROM tb_measure_details m
+                                  WHERE m.sens_no = e.sens_no
+                                    AND m.sens_chnl_id = e.sens_chnl_id
+                                  ORDER BY m.meas_dt DESC
+                                      LIMIT 1
+                             ) AS lmd ON TRUE
+        LEFT JOIN (
+            SELECT sens_no, maint_rslt_cd
+            FROM tb_maint_details
+            WHERE (sens_no, maint_accpt_ymd) IN (
+                SELECT sens_no, MAX(maint_accpt_ymd)
+                FROM tb_maint_details
+                GROUP BY sens_no
+            )
+        ) m ON a.sens_no = m.sens_no
+            LEFT JOIN tb_alarm_info ai
+            ON a.sens_no = ai.sens_no
+            AND e.sens_chnl_id = ai.sens_chnl_id
+            ) as final
         WHERE 1=1
     </select>
 
