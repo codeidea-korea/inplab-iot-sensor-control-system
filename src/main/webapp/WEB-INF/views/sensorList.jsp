@@ -479,34 +479,48 @@
             $("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
-                const selectedSensorNo = $('#sensor-name-select').val();
+                let selectSensor = $("#sensor-name-select").val();
+
+                const case_ = ['', 'X', 'Y'];
+
+                const baseArray = [...selectArrary];
+
+                const expandedArray = case_.flatMap((item) => {
+                    return baseArray.map((data) => ({
+                        ...data,
+                        sens_chnl_id: item
+                    }));
+                });
 
                 chartDataArray.length = 0; // 배열 초기화
 
-                const requests = selectArrary.map((item) => {
-                    let sensChnlId = ''
+                const requests = expandedArray.map((item) => {
+                    let sensChnlId = '';
                     if (item.sens_chnl_nm) {
-                        const tempSensChnlId = item.sens_chnl_nm.split("-").pop()
+                        const tempSensChnlId = item.sens_chnl_nm.split("-").pop();
                         if (tempSensChnlId.length === 1) {
-                            sensChnlId = tempSensChnlId
+                            sensChnlId = tempSensChnlId;
                         }
                     }
 
-                    const sensorNo = selectedSensorNo && selectedSensorNo !== ""
-                        ? selectedSensorNo
-                        : item.sens_no;
+                    const targetSensor = (!selectSensor || selectSensor === 'null' || selectSensor === '')
+                        ? item.sens_no
+                        : selectSensor;
 
-                    return getChartData(sensorNo, startDateTime, endDateTime, sensChnlId);
+                    return getChartData(targetSensor, startDateTime, endDateTime, item.sens_chnl_id);
                 });
 
-                // 모든 요청이 완료된 후 차트를 그립니다.
-                Promise.all(requests).then(() => {
-                    updateChart(chartDataArray); // 차트 업데이트 함수 호출
-                }).catch((e) => {
-                    console.log('error', e)
-                    alert('조회할 수 없는 데이터 입니다.');
-                });
+                // 차트 업데이트
+                Promise.all(requests)
+                    .then(() => {
+                        updateChart(chartDataArray.filter((item) => item.length > 0));
+                    })
+                    .catch((e) => {
+                        console.log('error', e);
+                        alert('조회할 수 없는 데이터 입니다.');
+                    });
             });
+
 
             $("#chart-district-select").on('change', (e) => {
                 const district_no = e.target.value;
@@ -645,7 +659,7 @@
 
             function preprocessDataForBarChart(data, aggregationType) {
                 const processedData = {};
-
+debugger
                 data.forEach(item => {
                     const date = new Date(item.meas_dt);
                     let key;
@@ -687,7 +701,13 @@
                 return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
             }
 
-            function updateChart(data) {
+            async function updateChart(data) {
+                const existing = Chart.getChart("myChart");
+                if (existing) {
+                    existing.destroy();
+                    await Promise.resolve();
+                }
+
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
                 if (data.length === 1 && data[0].length === 0) {

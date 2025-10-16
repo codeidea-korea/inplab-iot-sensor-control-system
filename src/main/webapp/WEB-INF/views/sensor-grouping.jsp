@@ -224,6 +224,7 @@
                     });
 
                     Promise.all(requests).then((d) => {
+                        console.log(chartDataArray.filter((item) => item.length > 0));
                         updateChart(chartDataArray.filter((item) => item.length > 0));
                     }).catch((e) => {
                         console.log('error', e);
