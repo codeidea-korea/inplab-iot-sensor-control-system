@@ -224,7 +224,6 @@
                     });
 
                     Promise.all(requests).then((d) => {
-                        console.log(chartDataArray.filter((item) => item.length > 0));
                         updateChart(chartDataArray.filter((item) => item.length > 0));
                     }).catch((e) => {
                         console.log('error', e);
@@ -597,7 +596,7 @@
         <h2 class="txt">센서 모니터링</h2>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">센서 그룹핑 분석</h3>
+                <h3 class="txt">센서 그룹핑</h3>
                 <div class="btn-group">
                     <p class="search-top-label">현장명</p>
                     <select id="district-select">

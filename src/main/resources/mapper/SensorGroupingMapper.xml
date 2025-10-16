@@ -27,8 +27,14 @@
                 <when test="'sens_tp_nm' == sidx and sidx != ''">
                     MAX(tst.sens_tp_nm) ${sord}
                 </when>
+                <when test="'last_apply_dt' == sidx and sidx != ''">
+                    last_apply_dt ${sord}
+                </when>
+                <when test="'maint_sts_cd' == sidx and sidx != ''">
+                    tsinfo.maint_sts_cd ${sord}
+                </when>
                 <otherwise>
-                    tsinfo.reg_dt desc
+                    senstype_no, sens_nm
                 </otherwise>
             </choose>
         </trim>
@@ -44,7 +50,8 @@
         MAX(tsi.emer_status) AS emer_status,
         tsinfo.sens_no,
         tsinfo.maint_sts_cd,
-        MAX(tsi.sens_chnl_id) AS sens_chnl_id
+        MAX(tsi.sens_chnl_id) AS sens_chnl_id,
+        tsinfo.senstype_no as senstype_no
         FROM tb_sensor_info tsinfo
         LEFT JOIN tb_sensor_init tsi
         ON tsinfo.sens_no = tsi.sens_no

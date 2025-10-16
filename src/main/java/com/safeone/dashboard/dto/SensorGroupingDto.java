@@ -14,7 +14,7 @@ public class SensorGroupingDto implements Serializable {
     @FieldLabel(title = "센서명")
     private String sens_nm;
 
-    @FieldLabel(title = "최종계측일", type = "range")
+    @FieldLabel(title = "최종계측일시", type = "range")
     private String last_apply_dt;
 
     @FieldLabel(title = "센서상태", type = "selectable")
