@@ -365,7 +365,7 @@
     <div id="container">
         <h2 class="txt">
             관리자 전용
-            <span class="arr">관리자</span>
+            <span class="arr">현장관리</span>
         </h2>
         <div id="contents">
             <div class="contents-re">
