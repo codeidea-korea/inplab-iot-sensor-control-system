@@ -70,6 +70,7 @@
         SELECT
             tad.sens_no,
             tad.meas_dt,
+            tsi.sens_nm,
             tdi.district_nm,
             tad.sens_chnl_id,
             tad.alarm_lvl_cd,

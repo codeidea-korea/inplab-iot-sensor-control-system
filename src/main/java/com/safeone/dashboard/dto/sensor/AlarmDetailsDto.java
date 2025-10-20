@@ -14,6 +14,9 @@ public class AlarmDetailsDto implements Serializable {
     @FieldLabel(title = "현장명")
     private String district_nm;
 
+    @FieldLabel(title = "센서명")
+    private String sens_nm;
+
     @FieldLabel(title = "채널명")
     private String sens_chnl_id;
 
