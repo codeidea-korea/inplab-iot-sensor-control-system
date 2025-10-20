@@ -39,10 +39,56 @@
             align-items: center;
             justify-content: space-between;
         }
+
+        .search-top {
+            position: static;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2.2rem;
+        }
+
+        .search-top > div {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .search-top div:nth-child(2) > p {
+            margin-right: 1rem;
+        }
+
+        #container input[type="date"] {
+            width: 100%;
+            height: 3.6rem;
+            padding: 0 2rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            text-align: center;
+            display: inline-block;
+            vertical-align: top;
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(document).ready(function () {
+            function formatDateOnly(date) {
+                const pad = (n) => n.toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const month = pad(date.getMonth() + 1);
+                const day = pad(date.getDate());
+                return year + "-" + month + "-" + day;
+            }
+
+            const today = new Date();
+            // 종료일
+            const endDate = new Date(today);
+            // 시작일
+            const startDate = new Date(today);
+            startDate.setMonth(startDate.getMonth() - 1);
+
             const $grid = $("#jq-grid");
             const path = "/sensor/alarm-details"
             initGrid($grid, path, $('#grid-wrapper'), {
@@ -50,6 +96,10 @@
                 multiboxonly: true,
                 custom: {
                     useFilterToolbar: true,
+                },
+                postData: {
+                    start_date : formatDateOnly(startDate),
+                    end_date: formatDateOnly(endDate)
                 }
             }, null, {
                 sms_cnt: {
@@ -116,24 +166,12 @@
                 }
             })
 
-            // const currentYear = new Date().getFullYear();
-            // const startDate = currentYear + "-01-01";
-            // const endDate = currentYear + "-12-31";
-
             function formatDate(date) {
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
                 return year + "-" + month + "-" + day;
             }
-
-            const today = new Date();
-
-            // 종료일
-            const endDate = new Date(today);
-            // 시작일
-            const startDate = new Date(today);
-            startDate.setMonth(startDate.getMonth() - 1);
 
             $('#history-date-range').val(formatDate(startDate) + " ~ " + formatDate(endDate));
 
@@ -147,7 +185,8 @@
                     page: 1,
                     postData: {
                         ...$grid.jqGrid('getGridParam', 'postData'),
-                        reg_day: $('#history-date-range').val()
+                        start_date: $('#start-date').val(),
+                        end_date: $('#end-date').val()
                     }
                 }).trigger('reloadGrid', [{page: 1}]);
             }
@@ -172,7 +211,55 @@
             );
         });
 
+        function formatLocalDateTime(date) {
+            const pad = (n) => n.toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const month = pad(date.getMonth() + 1);
+            const day = pad(date.getDate());
+            const hours = pad(date.getHours());
+            const minutes = pad(date.getMinutes());
+            return year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
+        }
 
+        $(function () {
+            function formatDateOnly(date) {
+                const pad = (n) => n.toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const month = pad(date.getMonth() + 1);
+                const day = pad(date.getDate());
+                return year + "-" + month + "-" + day;
+            }
+
+            const today = new Date();
+
+            // 종료일 = 오늘
+            const endDate = new Date(today);
+
+            // 시작일 = 한 달 전
+            const startDate = new Date(today);
+            startDate.setMonth(startDate.getMonth() - 1);
+
+            $('#start-date').val(formatDateOnly(startDate));
+            $('#end-date').val(formatDateOnly(endDate));
+
+            $("#search-btn").click(() => {
+                const startDate = $('#start-date').val();
+                const endDate = $('#end-date').val();
+
+                const $grid = $("#jq-grid"); // jqGrid 객체 참조
+
+                // postData 갱신 + reloadGrid 실행
+                $grid.setGridParam({
+                    page: 1,
+                    postData: {
+                        ...$grid.jqGrid('getGridParam', 'postData'), // 기존 파라미터 유지
+                        start_date: $('#start-date').val(),
+                        end_date: $('#end-date').val()
+                    }
+                }).trigger("reloadGrid", [{ page: 1 }]);
+            });
+
+        });
     </script>
 </head>
 
@@ -188,11 +275,19 @@
             <div class="contents-re">
                 <div class="contents_header">
                     <h3 class="txt">알람이력조회</h3>
+                    <div class="search-top">
+                        <div>
+                            <p class="search-top-label">조회기간</p>
+                            <input id="start-date" type="date"/>
+                        </div>
+                        <div>
+                            <p class="search-top-label">~</p>
+                            <input id="end-date" type="date"/>
+                        </div>
+                    </div>
                     <div class="search-top_">
-                        <p class="search-top-label">조회기간</p>
-                        <input type="text" id="history-date-range" datetimepicker/>
-                        <a id="open-modal" class="pop-modaㅣ btns btn_large">문자 전송
-                            상세내역</a>
+                        <a id="search-btn" class="btns" >조회</a>
+                        <a id="open-modal" class="pop-modaㅣ btns btn_large">문자 전송 상세내역</a>
                         <a class="excelBtn btns">다운로드</a>
                     </div>
                 </div>

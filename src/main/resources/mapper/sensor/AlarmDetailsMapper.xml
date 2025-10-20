@@ -3,64 +3,67 @@
 
 <mapper namespace="com.safeone.dashboard.dao.sensor.AlarmDetailsMapper">
     <sql id="rowSearch">
-        <!--        <if test="risk_level != null and risk_level != ''">-->
-        <!--            and MG.risk_level = #{risk_level}-->
-        <!--        </if>-->
-        <!--        <if test="area_name != null and area_name != ''">-->
-        <!--            and MG.area_name ilike '%' || #{area_name} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="asset_kind_name != null and asset_kind_name != ''">-->
-        <!--            and MG.asset_kind_name ilike '%' || #{asset_kind_name} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="asset_name != null and asset_name != ''">-->
-        <!--            and MG.asset_name ilike '%' || #{asset_name} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="alarm_kind_id != null and alarm_kind_id != ''">-->
-        <!--            and MG.alarm_kind_id = #{alarm_kind_id}-->
-        <!--        </if>-->
-        <!--        <if test="reg_time != null and reg_time != ''">-->
-        <!--            and MG.reg_time ilike '%' || #{reg_time} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="zone_id != null and zone_id != ''">-->
-        <!--            and MG.zone_id = #{zone_id}-->
-        <!--        </if>-->
-        <!--        <if test="view_flag != null and view_flag != ''">-->
-        <!--            and MG.view_flag = #{view_flag}-->
-        <!--        </if>-->
-        <!--        <if test="reg_date_start != null and reg_date_start != '' and reg_date_end != null and reg_date_end != ''">-->
-        <!--            and MG.reg_date::timestamp between concat(#{reg_date_start},' 00:00:00')::timestamp and concat(#{reg_date_end},' 23:59:59')::timestamp-->
-        <!--        </if>-->
+        <if test="meas_dt != null and meas_dt != ''">
+            and tad.meas_dt::TEXT ILIKE '%' || #{meas_dt} || '%'
+        </if>
+        <if test="district_nm != null and district_nm != ''">
+            and tdi.district_nm ilike '%' || #{district_nm} || '%'
+        </if>
+        <if test="sens_chnl_id != null and sens_chnl_id != ''">
+            and tad.sens_chnl_id ilike '%' || #{sens_chnl_id} || '%'
+        </if>
+        <if test="alarm_lvl_cd != null and alarm_lvl_cd != ''">
+            and tad.alarm_lvl_cd ilike '%' || #{alarm_lvl_cd} || '%'
+        </if>
+        <if test="formul_data != null and formul_data != ''">
+            and tad.formul_data ilike '%' || #{formul_data} || '%'
+        </if>
+        <if test="maint_sts_cd != null and maint_sts_cd != ''">
+            and tad.maint_sts_cd ilike '%' || #{maint_sts_cd} || '%'
+        </if>
+        <if test="net_err_yn != null and net_err_yn != ''">
+            and tad.net_err_yn ilike '%' || #{net_err_yn} || '%'
+        </if>
+        <if test="sms_cnt != null and sms_cnt != ''">
+            and sms_cnt ilike '%' || #{sms_cnt} || '%'
+        </if>
+        <if test="start_date != null and start_date != '' and end_date != null and end_date != ''">
+            and tad.meas_dt::timestamp between concat(#{start_date},' 00:00:00')::timestamp and concat(#{end_date},' 23:59:59')::timestamp
+        </if>
     </sql>
 
     <sql id="rowOrder">
-        <!--        <trim prefix="order by">-->
-        <!--            <choose>-->
-        <!--                <when test="'risk_level' == sidx and sidx != ''">-->
-        <!--                    MG.risk_level ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'area_name' == sidx and sidx != ''">-->
-        <!--                    MG.area_name ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'asset_kind_name' == sidx and sidx != ''">-->
-        <!--                    MG.asset_kind_name ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'asset_name' == sidx and sidx != ''">-->
-        <!--                    MG.asset_name ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'alarm_kind_id' == sidx and sidx != ''">-->
-        <!--                    MG.alarm_kind_id ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'reg_day' == sidx and sidx != ''">-->
-        <!--                    MG.reg_day ${sord}-->
-        <!--                </when>-->
-        <!--                <when test="'reg_time' == sidx and sidx != ''">-->
-        <!--                    MG.reg_time ${sord}-->
-        <!--                </when>-->
-        <!--                <otherwise>-->
-        <!--                    MG.reg desc-->
-        <!--                </otherwise>-->
-        <!--            </choose>-->
-        <!--        </trim>-->
+        <trim prefix="order by">
+            <choose>
+                <when test="'meas_dt' == sidx and sidx != ''">
+                    tad.meas_dt ${sord}
+                </when>
+                <when test="'district_nm' == sidx and sidx != ''">
+                    tdi.district_nm ${sord}
+                </when>
+                <when test="'sens_chnl_id' == sidx and sidx != ''">
+                    tad.sens_chnl_id ${sord}
+                </when>
+                <when test="'alarm_lvl_cd' == sidx and sidx != ''">
+                    tad.alarm_lvl_cd ${sord}
+                </when>
+                <when test="'formul_data' == sidx and sidx != ''">
+                    tad.formul_data ${sord}
+                </when>
+                <when test="'maint_sts_cd' == sidx and sidx != ''">
+                    tad.maint_sts_cd ${sord}
+                </when>
+                <when test="'net_err_yn' == sidx and sidx != ''">
+                    tad.net_err_yn ${sord}
+                </when>
+                <when test="'sms_cnt' == sidx and sidx != ''">
+                    sms_cnt ${sord}
+                </when>
+                <otherwise>
+                    tad.meas_dt desc
+                </otherwise>
+            </choose>
+        </trim>
     </sql>
 
     <select id="getList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.sensor.AlarmDetailsDto">

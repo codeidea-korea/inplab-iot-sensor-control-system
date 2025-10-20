@@ -26,16 +26,6 @@ public class AlarmDetailsController extends JqGridAbstract<AlarmDetailsDto> {
 
     @Override
     protected List getList(Map param) {
-        if (param.containsKey("reg_day")) {
-            String[] dates = ((String) param.get("reg_day")).split(" ~ ");
-            if (dates.length > 1) {
-                param.put("reg_date_start", dates[0]);
-                param.put("reg_date_end", dates[1]);
-            } else {
-                param.put("reg_date_start", dates[0]);
-                param.put("reg_date_end", dates[0]);
-            }
-        }
         return alarmDetailsService.getList(param);
     }
 
