@@ -659,7 +659,6 @@
 
             function preprocessDataForBarChart(data, aggregationType) {
                 const processedData = {};
-debugger
                 data.forEach(item => {
                     const date = new Date(item.meas_dt);
                     let key;
