@@ -3,9 +3,10 @@ function initGrid($grid, path, $gridWrapper, options = {
     shrinkToFit: true
 }, loadCompleteCallback, formatters, selectableRows) {
     // multi select 제거
-    $grid.on('jqGridInitGrid', function () {
-        $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
-    });
+    /* 20251020 - 커밋내역상 250224에 전체 선택 제거 요청이 있었던 걸로 보여지나 [ 경보기준관리/센서초기치설정 ] 에서 노출시켜달라고 재요청들어온 걸로 보여지므로 아래와 같이 전체 주석 처리 */
+    // $grid.on('jqGridInitGrid', function () {
+    //     $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
+    // });
 
     getColumns(path, (columns) => {
         const columnData = {
@@ -143,6 +144,25 @@ function setColumn($grid, column, formatters, selectableRows) {
         _column.formatoptions = {
             srcformat: 'Y/m/d',
             newformat: 'Y-m-d'
+        };
+        _column.searchoptions = {
+            dataInit: function (element) {
+                setRangePicker($(element), function (rangeValue) {
+                    const postData = $grid.jqGrid('getGridParam', 'postData');
+                    postData[_column.name] = rangeValue
+                    reloadJqGrid($grid);
+                });
+            }
+        }
+    }
+
+    if (column['type'] === 'datetime') {
+        _column.width = '220';
+        _column.sorttype = 'date';
+        _column.formatter = 'date';
+        _column.formatoptions = {
+            srcformat: 'Y/m/d H:i:s',
+            newformat: 'Y-m-d H:i:s'
         };
         _column.searchoptions = {
             dataInit: function (element) {

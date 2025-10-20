@@ -50,7 +50,7 @@ public class AlertStandardManagementDto implements Serializable {
     @FieldLabel(title = "4차 최대", type="editable")
     private String max4;
 
-    @FieldLabel(title = "적용 일시", type="range")
+    @FieldLabel(title = "적용 일시", type="datetime")
     private String lvl_apply_dt;
 
 
