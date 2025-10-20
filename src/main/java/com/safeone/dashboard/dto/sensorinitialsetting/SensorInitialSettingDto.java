@@ -32,7 +32,7 @@ public class SensorInitialSettingDto implements Serializable {
     @FieldLabel(title = "최종계측일시", type = "range")
     private String last_apply_dt;
 
-    @FieldLabel(title = "초기치설정일시", type = "range")
+    @FieldLabel(title = "초기치설정일시", type="datetime")
     private String init_apply_dt;
 
     @FieldLabel(title = "센서_no", type = "hidden")

@@ -53,7 +53,7 @@
                     tsi.emer_status ${sord}
                 </when>
                 <otherwise>
-                    tsi.reg_dt desc
+                    tst.senstype_no, tsi.sens_no, tsi.sens_chnl_id asc
                 </otherwise>
             </choose>
         </trim>
