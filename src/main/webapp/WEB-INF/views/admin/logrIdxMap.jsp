@@ -212,8 +212,8 @@
 
             $('.locationApply').on('click', function () {
                 let coords = window.vworld.getCenter();
-                $('#lay-form-write input[name=sens_lon]').val(coords[1]);
-                $('#lay-form-write input[name=sens_lat]').val(coords[0]);
+                $('#lay-form-write input[name=sens_lon]').val(coords[0]);
+                $('#lay-form-write input[name=sens_lat]').val(coords[1]);
                 popFancyClose('#lay-form-address');
             });
 

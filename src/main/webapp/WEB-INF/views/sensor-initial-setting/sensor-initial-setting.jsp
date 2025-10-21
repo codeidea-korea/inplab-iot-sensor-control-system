@@ -4,6 +4,50 @@
 <html lang="ko">
 <head>
     <jsp:include page="../common/include_head.jsp" flush="true"/>
+    <style>
+        .search-top-label {
+            color: #ffffff76;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .filter-area .select_filter .search-top-label {
+            padding: 0;
+        }
+
+        #district-select {
+            width: 150px;
+            height: 3.6rem;
+            padding: 0 1rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            display: inline-block;
+            vertical-align: top;
+            margin-right:auto;
+        }
+
+        #contents .contents-in {
+            position: static;
+            padding: 2rem;
+            margin-top: 2rem;
+            height: calc(100% - 10rem);
+            background-color: #fff;
+            border-radius: 1rem;
+        }
+
+        .btn-group{
+            position: static;
+            display:flex;
+            align-items:center;
+            gap: .8rem;
+        }
+    </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
@@ -97,17 +141,11 @@
         <div id="contents">
             <div class="contents-re">
                 <h3 class="txt">초기치설정관리</h3>
-                <div class="search-bg">
-                    <dl>
-                        <dt>현장명</dt>
-                        <dd>
-                            <select id="district-select">
-                                <option value="">선택</option>
-                            </select>
-                        </dd>
-                    </dl>
-                </div>
                 <div class="btn-group">
+                    <p class="search-top-label">현장명</p>
+                    <select id="district-select">
+                        <option value="">선택</option>
+                    </select>
                     <a class="save-btn">저장</a>
                 </div>
                 <div id="grid-wrapper" class="contents-in">
