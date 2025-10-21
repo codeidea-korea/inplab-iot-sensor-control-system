@@ -193,15 +193,26 @@
             }
         }
 
-        const formatDateTime = (cellValue) => {
+        const formatDateTime = (cellValue, _opts, rowObject) => {
             if (cellValue) {
-                return moment(cellValue)
-                    //.subtract(9, "hours")   // 9시간 빼기
-                    .format("YYYY-MM-DD HH:mm:ss");
+                const text = moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+                if(rowObject.comm_status === '미수신'){
+                    return '<span style="color: red">' + text + '</span>';
+                }else{
+                    return text;
+                }
             } else {
                 return "";
             }
         };
+
+        const formatCommStatus = (cellValue) => {
+            if (cellValue === '미수신') {
+                return '<span style="color: red">미수신</span>'
+            }else{
+                return cellValue;
+            }
+        }
 
         const column = [
             {
@@ -236,7 +247,13 @@
                 hidden: false,
                 formatter: formatSensStatus
             },
-            {name: 'comm_status', index: 'comm_status', width: 70, align: 'center', hidden: false},
+            {
+                name: 'comm_status',
+                index: 'comm_status',
+                width: 70, align: 'center',
+                hidden: false,
+                formatter: formatCommStatus
+            },
             {name: 'formul_data', index: 'formul_data', width: 70, align: 'center', hidden: false},
             {name: 'senstype_no', index: 'senstype_no', width: 100, align: 'center', hidden: true},
             {name: 'sens_no', index: 'sens_no', width: 100, align: 'center', hidden: true},

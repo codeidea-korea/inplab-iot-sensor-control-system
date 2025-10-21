@@ -180,16 +180,8 @@
                         }
                         return value
                     }
-                },
+                }
             }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"});
-
-            // const currentYear = new Date().getFullYear();
-            //
-            // const startDate = new Date(currentYear, 0, 1, 23, 59); // 0은 1월
-            // $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
-            //
-            // const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
-            // $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
 
             function formatLocalDateTime(date) {
                 const pad = (n) => n.toString().padStart(2, '0');

@@ -40,6 +40,7 @@
 		FROM tb_cctv_info A
 		<include refid="getCctvList-where"/>
 		AND A.del_yn = 'N'
+		ORDER BY cctv_no
 		<if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
 			LIMIT ${limit} OFFSET ${offset}
 		</if>
