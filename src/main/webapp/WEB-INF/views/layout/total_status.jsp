@@ -727,28 +727,60 @@
         var date = year + month + day;
     }
 
+    function toMs(v){
+        const n = Number(v);
+        return n < 1e12 ? n * 1000 : n; // 1e12 미만이면 초 → ms 변환
+    }
+
+    function fmtKST(v){
+        return moment(toMs(v)).format('YYYY-MM-DD HH:mm:ss'); // 기본 로컬TZ(보통 KST) 사용
+    }
+
     function loadAlarmHistory() {
         $.get('/alarmList/alarmHistory', function (res) {
-            if (typeof res != 'undefined') $('.overall-status_re .alarm-list li').empty();
-            if (res.length > 0) $('.overall-status_re .alarm-list').css("cursor", "pointer");
-            $.each(res, function (idx){
+            if (!Array.isArray(res)) return;
+
+            $('.overall-status_re .alarm-list li').empty();
+            $('.overall-status_re .alarm-list').css('cursor', res.length > 0 ? 'pointer' : 'default');
+
+            const now = Date.now();
+
+            $.each(res, function (idx) {
                 let contents = '<div style="padding: 1.5rem 0; display: block;">';
-                let level = res[idx].risk_level;
-                if (level === '1') {
-                    contents += '<p class="cate" bc_step1>관심</p>';
-                } else if (level === '2') {
-                    contents += '<p class="cate" bc_step2>주의</p>';
-                } else if (level === '3') {
-                    contents += '<p class="cate" bc_step3>경계</p>';
-                } else if (level === '4') {
-                    contents += '<p class="cate" bc_step4>심각</p>';
-                }
-                contents += '<p class="title">' + res[idx].asset_name + " " + res[idx].alarm_kind_name + '</p>';
-                contents += '<p class="title">' + res[idx].area_name + '</p>';
-                contents += '<p class="day">' + res[idx].reg_date + '</p>';
+                let text = '';
+                const level = res[idx].alarm_lvl_cd;
+
+                if (level === 'ARM001') { text = '관심'; contents += '<p class="cate" bc_step1>' + text + '</p>'; }
+                else if (level === 'ARM002') { text = '주의'; contents += '<p class="cate" bc_step2>' + text + '</p>'; }
+                else if (level === 'ARM003') { text = '경계'; contents += '<p class="cate" bc_step3>' + text + '</p>'; }
+                else if (level === 'ARM004') { text = '심각'; contents += '<p class="cate" bc_step4>' + text + '</p>'; }
+
+                contents += '<p class="title">' + res[idx].sens_nm + ' > ' + text + '</p>';
+                contents += '<p class="title">' + res[idx].district_nm + '</p>';
+                contents += '<p class="day">' + fmtKST(res[idx].meas_dt) + '</p>';
                 contents += '</div>';
 
                 $('.overall-status_re .alarm-list li:eq(' + idx + ')').html(contents);
+
+                // ── 여기서 1분 이내만 토스트 ──
+                const measMs = toMs(res[idx].meas_dt);
+                const diffMs = Math.abs(now - measMs);
+
+                if (diffMs <= 60 * 1000) {
+                    console.log("dd")
+                    const node = document.createElement('div');
+                    node.innerHTML = contents;
+                    Toastify({
+                        node,
+                        duration: 3000,
+                        className: 'toast-fixed',
+                        gravity: 'top',
+                        position: 'right',
+                        close: true,
+                        stopOnFocus: true,
+                        style: { zIndex: 2147483647 }
+                    }).showToast();
+                }
             });
         });
     }

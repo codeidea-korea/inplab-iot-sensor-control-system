@@ -64,24 +64,51 @@
     </sql>
 
     <select id="selectAlarmHistory" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT A.alarm_uid
-        , asset.zone_id
-        , A.asset_id
-        , A.asset_kind_id
-        , A.alarm_kind_id
-        , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD PM HH24:MI:SS') AS reg_date
-        , A.description
-        , ak.risk_level
-        , ak.name as alarm_kind_name
-        , (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) as asset_kind_name
-        , asset.name as asset_name
-        , ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) as area_name
-        , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
-        , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
-        FROM tb_alarm A
-        LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
-        LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id
-        ORDER BY A.reg_date desc LIMIT 4
+--         SELECT A.alarm_uid
+--              , asset.zone_id
+--              , A.asset_id
+--              , A.asset_kind_id
+--              , A.alarm_kind_id
+--              , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD PM HH24:MI:SS') AS reg_date
+--              , A.description
+--              , ak.risk_level
+--              , ak.name as alarm_kind_name
+--              , (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) as asset_kind_name
+--              , asset.name as asset_name
+--              , ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) as area_name
+--              , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
+--              , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
+--         FROM tb_alarm A
+--                  LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
+--                  LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id
+--         ORDER BY A.reg_date desc LIMIT 4
+        SELECT
+            tad.sens_no,
+            tad.meas_dt,
+            tsi.sens_nm,
+            tdi.district_nm,
+            tad.sens_chnl_id,
+            tad.alarm_lvl_cd,
+            tad.formul_data,
+            tad.net_err_yn,
+            tad.maint_sts_cd,
+            tai."1st_lvl_max" AS max1,
+            tai."1st_lvl_min" AS min1,
+            tai."2nd_lvl_max" AS max2,
+            tai."2nd_lvl_min" AS min2,
+            tai."3rd_lvl_max" AS max3,
+            tai."3rd_lvl_min" AS min3,
+            tai."4th_lvl_max" AS max4,
+            tai."4th_lvl_min" AS min4
+        FROM tb_alarm_details tad
+                 LEFT JOIN tb_district_info tdi
+                           ON tad.district_no = tdi.district_no
+                 LEFT JOIN tb_sensor_info tsi
+                           ON tad.sens_no = tsi.sens_no
+                 LEFT JOIN tb_alarm_info tai
+                           ON tad.sens_no = tai.sens_no
+        WHERE 1=1
+        order by tad.reg_dt desc limit 4
     </select>
 
     <select id="selectAlarmCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">

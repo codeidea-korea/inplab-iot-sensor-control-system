@@ -3,8 +3,31 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.css">
     <jsp:include page="common/include_head.jsp" flush="true"/>
     <style>
+        .toast-fixed {
+            background: #0b0166 !important; /* 배경색 */
+            color: #fff !important;
+            width: 400px;        /* 폭 고정 */
+            min-width: 400px;
+            max-width: 400px;
+            white-space: normal; /* 여러 줄 허용 */
+        }
+
+        .toast-fixed .cate {
+            width: 4.5rem;
+            height: 2rem;
+            font-weight: 500;
+            font-size: 1.2rem;
+            line-height: 1;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.9rem;
+        }
+
         .ui-search-toolbar input {
             border: 1px solid #ccc;
             padding: 2px;
@@ -240,6 +263,7 @@
     </style>
 </head>
 <script type="text/javascript" src="/admin_add.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js"></script>
 <script>
     const LATENCY = 60 * 1000;
     const ALARM_EFFECT_TIME = 500;
