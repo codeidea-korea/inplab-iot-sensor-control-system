@@ -184,7 +184,6 @@
         };
 
         function resetGridFilters(gridId){
-            debugger
             const $g = $('#' + gridId);
             const $view = $g.closest('.ui-jqgrid-view');
 
@@ -381,8 +380,10 @@
                 ['title', 'number', 'key'],
                 ['CCTV', res.cctv_count, '8'],
                 ['구조물경사계', res.tm_count, '2'],
-                ['지표변위계', res.tw_count, '3'],
-                ['강우계', res.wr_count, '4']
+                ['지표변위계', res.ttw_count, '3'],
+                ['강우계', res.rain_count, '4'],
+                ['지표경사계', res.ttm_count, '1'],
+                ['GNSS', res.gnss_count, '7']
                 // ['기타', res.etc_count, '9']
             ]);
 
@@ -397,7 +398,7 @@
                     }
                 },
                 pieSliceBorderColor: '#28293b',
-                colors: ['#464ef7', '#63e578', '#f4bd25', '#dd2ac8', '#2ae8d9'],
+                colors: ['#464ef7', '#63e578', '#f4bd25', '#dd2ac8', '#2ae8d9','#ff6b6b', '#795548'],
                 chartArea: { width: "90%", height: "90%" },
                 legend: { textStyle: { color: '#fff', fontSize: 13, fontName: 'Pretendard' }, width: 144, position: 'outside' },
                 pieSliceText: 'value',

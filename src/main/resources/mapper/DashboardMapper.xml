@@ -340,18 +340,27 @@
 
 
     <select id="selectDeviceCount" parameterType="java.util.Map" resultType="java.util.Map">
-        select count(case when ta.asset_kind_id = '2' then '1' end)  as tm_count
-             , count(case when ta.asset_kind_id = '3' then '1' end)  as tw_count
-             , count(case when ta.asset_kind_id = '4' then '1' end)  as wr_count
-             , count(case when ta.asset_kind_id = '8' then '1' end)  as cctv_count
---              , count(case when asset_kind_id not in ('2','3','4','6','7','8') then '1' end) as etc_count
-        from tb_asset ta
-        left join tb_zone tz on (ta.zone_id = tz.zone_id)
-        where 1=1
-        and tz.use_flag = 'Y'
-        <if test="zone_id != null and zone_id != ''">
-            and ta.zone_id = #{zone_id}
-        </if>
+        SELECT
+            c.cctv_count,
+            s.ttm_count,
+            s.ttw_count,
+            s.gnss_count,
+            s.tm_count,
+            s.rain_count
+        FROM (
+                 SELECT COUNT(*) AS cctv_count
+                 FROM tb_cctv_info
+                 WHERE del_yn IS DISTINCT FROM 'Y'
+             ) c
+                 CROSS JOIN (
+            SELECT
+                COUNT(*) FILTER (WHERE sens_nm LIKE 'TTM%')  AS ttm_count,
+                    COUNT(*) FILTER (WHERE sens_nm LIKE 'TTW%')  AS ttw_count,
+                    COUNT(*) FILTER (WHERE sens_nm LIKE 'GNSS%') AS gnss_count,
+                    COUNT(*) FILTER (WHERE sens_nm LIKE 'TM%')   AS tm_count,
+                    COUNT(*) FILTER (WHERE sens_nm LIKE 'RAIN%') AS rain_count
+            FROM tb_sensor_info
+        ) s;
     </select>
 
     <select id="selectDetailSystemCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
