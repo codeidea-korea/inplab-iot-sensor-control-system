@@ -87,6 +87,10 @@
             alert('개발진행 중입니다');
         });
 
+        /***********************************************************************************************************************************************************************************************************/
+        /********************************************************************************************* 계측기 상태 조회 /*********************************************************************************************/
+        /***********************************************************************************************************************************************************************************************************/
+
         const formatDateTime = (cellValue, _opts, rowObject) => {
             if (cellValue) {
                 const text = moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
@@ -183,47 +187,6 @@
             }
         };
 
-        function resetGridFilters(gridId){
-            const $g = $('#' + gridId);
-            const $view = $g.closest('.ui-jqgrid-view');
-
-            // ① 검색툴바 초기화(값 비우고 이벤트 트리거까지)
-            $view.find('.ui-search-toolbar input').each(function(){
-                if ($(this).val() !== '') {
-                    $(this).val('');
-                    $(this).trigger('input');   // ← filters.rules 비우도록
-                    $(this).trigger('change');
-                }
-            });
-            $view.find('.ui-search-toolbar select').each(function(){
-                if ($(this).val() !== '') {
-                    $(this).val('');
-                    $(this).trigger('change');  // ← select 필터 비우도록
-                }
-            });
-
-            // ② jqGrid 상태 초기화
-            $g.jqGrid('setGridParam', {
-                search: false,
-                postData: { filters: '' },
-                page: 1
-            }).trigger('reloadGrid');
-        }
-
-        // 닫기 이미지 직접 클릭(이벤트가 막히는 경우가 있어 mousedown도 함께 처리)
-        $(document).on('mousedown', '#lay-sensor-status-list img[data-fancybox-close]', function(){
-            resetGridFilters('gridSensor');
-            offset = 0;
-        });
-
-        // 팝업이 어떤 방식으로든 닫힌 후에도 한 번 더(ESC/오버레이 포함)
-        $(document).on('afterClose.fb', function(e, instance, slide){
-            if (slide && slide.src === '#lay-sensor-status-list') {
-                resetGridFilters('gridSensor');
-                offset = 0;
-            }
-        });
-
         //시스템 상태 > 계측기 상태 클릭시
         $('.sensor.status-number dl').off().on('click', function () {
             let status = $(this).attr('status');
@@ -284,10 +247,172 @@
             });
         });
 
+        /***********************************************************************************************************************************************************************************************************/
+        /********************************************************************************************* 계측기 상태 조회 /*********************************************************************************************/
+        /***********************************************************************************************************************************************************************************************************/
+
+        function resetGridFilters(gridId){
+            const $g = $('#' + gridId);
+            const $view = $g.closest('.ui-jqgrid-view');
+
+            // ① 검색툴바 초기화(값 비우고 이벤트 트리거까지)
+            $view.find('.ui-search-toolbar input').each(function(){
+                if ($(this).val() !== '') {
+                    $(this).val('');
+                    $(this).trigger('input');   // ← filters.rules 비우도록
+                    $(this).trigger('change');
+                }
+            });
+            $view.find('.ui-search-toolbar select').each(function(){
+                if ($(this).val() !== '') {
+                    $(this).val('');
+                    $(this).trigger('change');  // ← select 필터 비우도록
+                }
+            });
+
+            // ② jqGrid 상태 초기화
+            $g.jqGrid('setGridParam', {
+                search: false,
+                postData: { filters: '' },
+                page: 1
+            }).trigger('reloadGrid');
+        }
+
+        // 닫기 이미지 직접 클릭(이벤트가 막히는 경우가 있어 mousedown도 함께 처리)
+        $(document).on('mousedown', '#lay-sensor-status-list img[data-fancybox-close]', function(){
+            resetGridFilters('gridSensor');
+            offset = 0;
+        });
+        $(document).on('mousedown', '#lay-cctv-status-list img[data-fancybox-close]', function(){
+            resetGridFilters('gridCCTV');
+            offset = 0;
+        });
+
+        // 팝업이 어떤 방식으로든 닫힌 후에도 한 번 더(ESC/오버레이 포함)
+        $(document).on('afterClose.fb', function(e, instance, slide){
+            if (slide && slide.src === '#lay-sensor-status-list') {
+                resetGridFilters('gridSensor');
+                offset = 0;
+            }else if(slide && slide.src === '#lay-cctv-status-list') {
+                resetGridFilters('gridCCTV');
+                offset = 0;
+            }
+        });
+
+        /***********************************************************************************************************************************************************************************************************/
+        /********************************************************************************************* cctv 상태 조회 /*********************************************************************************************/
+        /***********************************************************************************************************************************************************************************************************/
+
+        const column_c = [
+            {
+                name: 'checkbox',
+                index: 'checkbox',
+                width: 10,
+                align: 'center',
+                sortable: false,
+                hidden: false,
+                formatter: checkboxFormatter
+            },
+            {name: 'district_nm', index: 'district_nm', width: 100, align: 'center', hidden: false},
+            {name: 'cctv_nm', index: 'cctv_nm', align: 'center', hidden: false},
+            {name: 'partner_comp_nm', index: 'partner_comp_nm', align: 'center', hidden: false},
+            {name: 'partner_comp_user_nm', index: 'partner_comp_user_nm', width: 100, align: 'center', hidden: false},
+            {
+                name: 'partner_comp_user_phone',
+                index: 'partner_comp_user_phone',
+                width: 100,
+                align: 'center',
+                hidden: false
+            },
+            {
+                name: 'rtsp_status',
+                index: 'rtsp_status',
+                align: 'center',
+                hidden: false,
+                formatter: (cellValue, _options, _rowObject) => {
+                    if (cellValue === 'Y') {
+                        return '정상';
+                    } else {
+                        return '에러';
+                    }
+                }
+            },
+            {
+                name: 'maint_sts_cd',
+                index: 'maint_sts_cd',
+                align: 'center',
+                hidden: false,
+                formatter: (cellValue, _options, _rowObject) => {
+                    let value = '';
+                    if (cellValue === 'MTN001') {
+                        value = '정상';
+                    } else if (cellValue === 'MTN002') {
+                        value = '망실';
+                    } else if (cellValue === 'MTN003') {
+                        value = '점검';
+                    } else if (cellValue === 'MTN004') {
+                        value = '철거';
+                    }
+                    return value
+                }
+            },
+        ];
+
+        const header_c = [
+            '', '현장명', 'CCTV명', '계측사', '담당자', '전화번호', 'RTSP 연결', '계측 상태'
+        ];
+
+        const gridComplete_c = () => {
+            // 검색 행 추가
+            if ($("#gridCCTV").closest(".ui-jqgrid-view").find(".ui-search-toolbar").length === 0) {
+                let $thead = $("#gridCCTV").closest(".ui-jqgrid-view").find(".ui-jqgrid-htable thead");
+                let $searchRow = $('<tr class="ui-search-toolbar"></tr>');
+                let distinctDistrict = [];
+                let distinctSensType = [];
+
+                // 현재 필터링 조건을 저장할 객체
+                let filters = {
+                    groupOp: "AND",
+                    rules: []
+                };
+
+                getDistinct().then((res) => {
+                    distinctDistrict = res.district;
+                    distinctSensType = res.sensor_type;
+
+                    $("#gridCCTV").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
+                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "gridCCTV");
+                        $searchRow.append($cell);
+                    });
+                    $thead.append($searchRow);
+                }).catch((fail) => {
+                    console.log('getDistinct fail > ', fail);
+                });
+            }
+        };
+
+        const getCctv = (obj) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'GET',
+                    url: `/modify/cctv/cctv`,
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    async: true,
+                    data: obj
+                }).done(function (res) {
+                    resolve(res);
+                }).fail(function (fail) {
+                    reject(fail);
+                    alert2('CCTV 정보를 가져오는데 실패했습니다.', function () {
+                    });
+                });
+            });
+        };
+
         //시스템 상태 > CCTV 상태 클릭시
         $('.cctv.status-number dl').off().on('click', function () {
             let status = $(this).attr('status');
-            // console.log($(this).attr('column-id'));
             if (status === "1") {
                 $('#lay-cctv-status-list .layer-base-title').html("수신 CCTV 리스트");
             } else if (status === "2") {
@@ -300,42 +425,57 @@
                 $cctvGrid.destroy();
             }
 
-            setTimeout(() => {
-                $.get('/cctv/columns', function (res) {
-                    delete res.collect_date;
-                    delete res.real_value;
-                    res.etc1.width = 535;
-                    $cctvGrid = jqgridUtil($('.gridCCTV'), {
-                        listPathUrl: "/cctv",
-                        status: status
-                    }, res, true, null, null);
-                    $cctvGrid.jqGrid('setGridParam', {
-                        beforeRequest: function () {
-                            let currentParams = {
-                                listPathUrl: "/cctv",
-                                status: status
-                            };
+            getCctv({limit, offset}).then((res) => {
+                let rows = res.rows || [];
+                if (status === '1') {
+                    rows = rows.filter(r => r.rtsp_status === 'Y');
+                } else if (status === '2') {
+                    rows = rows.filter(r => r.rtsp_status === 'N');
+                }
 
-                            let p = Object.assign($cctvGrid.jqGrid('getGridParam', 'postData'), $('.ui-search-input input').filter(function () {
-                                return !!this.value;
-                            }).serializeObject());
+                // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
+                const gridId = 'gridCCTV';
+                const $g = $('#' + gridId);
+                const keyArray = ['district_nm'];
 
-                            $cctvGrid.setGridParam({
-                                postData: Object.assign(p, currentParams)
-                            });
-                        },
-                        ondblClickRow: function (rowId) {
-                            var rowData = $(this).getRowData(rowId);
-                            // console.log(rowData);
-                            openCctvPopup({label:rowData.name, etc1:rowData.etc1});
-                        }
+                if ($g[0] && $g[0].grid) {
+                    // 기존 그리드 재사용: 데이터만 교체
+                    const addData = actFormattedData(rows, keyArray);
+                    $g.jqGrid('clearGridData', true);
+                    addData.forEach(row => {
+                        $g.jqGrid('addRowData', row.id, row);
                     });
-                    $cctvGrid.trigger('reloadGrid');
-                });
-            }, 100);
+                    // 기존에 필터가 걸려있으면 유지
+                    const currentFilters = $g.jqGrid('getGridParam', 'postData').filters;
+                    $g.jqGrid('setGridParam', {
+                        search: !!currentFilters,
+                        postData: { filters: currentFilters || '' },
+                        page: 1
+                    }).trigger('reloadGrid');
+                } else {
+                    // 최초 생성
+                    setJqGridTable(rows, column_c, header_c, gridComplete_c, null, keyArray, gridId, limit, offset, getCctv, null, null);
+                }
+            }).catch((fail) => {
+                console.log('setJqGridTable fail > ', fail);
+            });
 
-            popFancy('#lay-cctv-status-list', { dragToClose : false, touch : false });
+            popFancy('#lay-cctv-status-list', {
+                dragToClose: false, touch: false,
+                afterShow: function () {
+                    const $g = $("#gridCCTV");
+                    const $wrap = $g.closest('.bTable');
+                    const $cont = $g.closest('.layer-base-conts');
+                    const h = Math.max(300, ($cont.innerHeight() || 520) - 120);
+                    $g.jqGrid('setGridWidth', $wrap.width());
+                    $g.jqGrid('setGridHeight', h);
+                }
+            });
         });
+
+        /***********************************************************************************************************************************************************************************************************/
+        /********************************************************************************************* cctv 상태 조회 /*********************************************************************************************/
+        /***********************************************************************************************************************************************************************************************************/
 
         // 알람 이력 클릭시
         $('.overall-status_re .alarm-list').off().on('click', function () {
@@ -864,7 +1004,7 @@
 <%--                    <a href="javascript:downloadExcel('cctvList', '/cctv/excel')">다운로드</a>--%>
 <%--                </div>--%>
                 <div class="bTable">
-                    <table class="gridCCTV"></table>
+                    <table class="gridCCTV" id="gridCCTV"></table>
                 </div>
             </div>
         </div>
