@@ -85,21 +85,15 @@
     </select>
 
     <select id="selectAlarmCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT
-            count(CASE WHEN ak.risk_level= '1' THEN 1 END) AS interest_cnt,
-            count(CASE WHEN ak.risk_level= '2' THEN 1 END) AS notice_cnt,
-            count(CASE WHEN ak.risk_level= '3' THEN 1 END) AS warning_cnt,
-            count(CASE WHEN ak.risk_level= '4' THEN 1 END) AS danger_cnt
-        FROM
-            tb_alarm A
-            LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id
-            LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
-        WHERE 1=1
-            and A.view_flag = 'Y'
-            and A.reg_date::timestamp > now() - interval '5 minutes'
-        <if test="zone_id != null and zone_id != ''">
-            and asset.zone_id = #{zone_id}
-        </if>
+        select
+            count(CASE WHEN tad.alarm_lvl_cd = 'ARM001' THEN 1 END) AS interest_cnt,
+            count(CASE WHEN tad.alarm_lvl_cd= 'ARM002' THEN 1 END) AS notice_cnt,
+            count(CASE WHEN tad.alarm_lvl_cd= 'ARM003' THEN 1 END) AS warning_cnt,
+            count(CASE WHEN tad.alarm_lvl_cd= 'ARM004' THEN 1 END) AS danger_cnt
+        from
+            tb_alarm_details tad
+        where 1=1
+            and tad.reg_dt::timestamp > now() - interval '1 minutes';
     </select>
 
     <select id="selectAlarmList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.AlarmListDto">

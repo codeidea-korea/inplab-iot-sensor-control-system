@@ -180,10 +180,17 @@ const setJqGridTable = (data, column, header, gridComplete, onSelectRow, keyArra
 
     const formattedData = actFormattedData(data, keyArray);
 
+    const $gridEl = $(`#${gridId}`);
+    const $cont   = $gridEl.closest('.layer-base-conts');
+    const contH   = ($cont.length ? $cont.innerHeight() : 0)
+        || ($('.contents-in').length ? $('.contents-in').innerHeight() : 0)
+        || 520;
+    const gridH = Math.max(300, contH - 120);
+
     let settingObj = {
         datatype: "local",
         data: formattedData,
-        height: $('.contents-in').height() - 65,
+        height: gridH,
         width: '100%',
         autowidth: true,
         shrinkToFit: true,

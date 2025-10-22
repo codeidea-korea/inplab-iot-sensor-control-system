@@ -232,8 +232,14 @@
             padding-left: 5px;
             font-size: 1.2rem;
         }
+
+        .ui-jqgrid .ui-search-toolbar select {
+            background: #fff !important;
+            color: #000;
+        }
     </style>
 </head>
+<script type="text/javascript" src="/admin_add.js"></script>
 <script>
     const LATENCY = 60 * 1000;
     const ALARM_EFFECT_TIME = 500;

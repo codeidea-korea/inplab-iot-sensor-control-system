@@ -22,21 +22,18 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        try {
-//            log.info("preHandle handler :: {}", request.getRequestURI());
-//            log.info("preHandle handler :: {}", handler.getClass());
-            //return true;
-            NoLoginCheck usingAuth = ((HandlerMethod) handler).getMethodAnnotation(NoLoginCheck.class);
+        if (!(handler instanceof HandlerMethod)) {
+            return true;
+        }
 
-            if (usingAuth != null)
-                return true;
+        HandlerMethod hm = (HandlerMethod) handler;
+        NoLoginCheck method = hm.getMethodAnnotation(NoLoginCheck.class);
+        NoLoginCheck type   = hm.getBeanType().getAnnotation(NoLoginCheck.class);
+        if (method != null || type != null) return true;
 
-            if (request.getSession().getAttribute("login") == null) {
-                response.sendRedirect("/login");
-                return false;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (request.getSession().getAttribute("login") == null) {
+            response.sendRedirect("/login");
+            return false;
         }
         return true;
     }

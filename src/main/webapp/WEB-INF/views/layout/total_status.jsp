@@ -21,6 +21,9 @@
     $(function () {
         google.charts.setOnLoadCallback(drawChart);
 
+        const limit = 50;
+        let offset = 0;
+
         // alarmInterval();
         startInterval();
         weatherInterval();
@@ -84,10 +87,148 @@
             alert('개발진행 중입니다');
         });
 
+        const formatDateTime = (cellValue, _opts, rowObject) => {
+            if (cellValue) {
+                const text = moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+                if(rowObject.comm_status === '미수신'){
+                    return '<span style="color: red">' + text + '</span>';
+                }else{
+                    return text;
+                }
+            } else {
+                return "";
+            }
+        };
+
+        const formatCommStatus = (cellValue) => {
+            if (cellValue === '미수신') {
+                return '<span style="color: red">미수신</span>'
+            }else{
+                return cellValue;
+            }
+        };
+
+        const checkboxFormatter = (cellValue, options, rowObject) => {
+            return '';
+        };
+
+        const column = [
+            {
+                name: 'checkbox',
+                index: 'checkbox',
+                width: 10,
+                align: 'center',
+                sortable: false,
+                hidden: false,
+                formatter: checkboxFormatter
+            },
+            {name:'district_nm', index:'district_nm', width:100, align:'center', hidden:false},
+            {name:'sens_tp_nm', index:'sens_tp_nm', width:100, align:'center', hidden:false},
+            {name:'sens_nm', index:'sens_nm', width:100, align:'center', hidden:false},
+            {name:'inst_ymd', index:'inst_ymd', width:100, align:'center', hidden:false},
+            {name:'latest_meas_dt', index:'latest_meas_dt', width:120, align:'center', hidden:false, formatter: formatDateTime},
+            {name:'comm_status', index:'comm_status', width:70, align:'center', hidden:false, formatter: formatCommStatus},
+        ];
+
+        const header = [
+            '', '현장명','센서타입명','센서명','설치일자','최종계측일시','통신상태'
+        ];
+
+        const getSensor = (obj) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'GET',
+                    url: `/modify/sensor/sensor`,
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    async: true,
+                    data: obj
+                }).done(function (res) {
+                    resolve(res);
+                }).fail(function (fail) {
+                    reject(fail);
+                    console.log('getSensor fail > ', fail);
+                    alert2('센서 정보를 가져오는데 실패했습니다.', function () {
+                    });
+                });
+            });
+        };
+
+        const gridComplete2 = () => {
+            // 검색 행 추가
+            if ($("#gridSensor").closest(".ui-jqgrid-view").find(".ui-search-toolbar").length === 0) {
+                let $thead = $("#gridSensor").closest(".ui-jqgrid-view").find(".ui-jqgrid-htable thead");
+                let $searchRow = $('<tr class="ui-search-toolbar"></tr>');
+                let distinctDistrict = [];
+                let distinctSensType = [];
+
+                // 현재 필터링 조건을 저장할 객체
+                let filters = {
+                    groupOp: "AND",
+                    rules: []
+                };
+
+                getDistinct().then((res) => {
+                    distinctDistrict = res.district;
+                    distinctSensType = res.sensor_type;
+
+                    $("#gridSensor").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
+                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "gridSensor");
+                        $searchRow.append($cell);
+                    });
+                    $thead.append($searchRow);
+                }).catch((fail) => {
+                    console.log('getDistinct fail > ', fail);
+                });
+            }
+        };
+
+        function resetGridFilters(gridId){
+            debugger
+            const $g = $('#' + gridId);
+            const $view = $g.closest('.ui-jqgrid-view');
+
+            // ① 검색툴바 초기화(값 비우고 이벤트 트리거까지)
+            $view.find('.ui-search-toolbar input').each(function(){
+                if ($(this).val() !== '') {
+                    $(this).val('');
+                    $(this).trigger('input');   // ← filters.rules 비우도록
+                    $(this).trigger('change');
+                }
+            });
+            $view.find('.ui-search-toolbar select').each(function(){
+                if ($(this).val() !== '') {
+                    $(this).val('');
+                    $(this).trigger('change');  // ← select 필터 비우도록
+                }
+            });
+
+            // ② jqGrid 상태 초기화
+            $g.jqGrid('setGridParam', {
+                search: false,
+                postData: { filters: '' },
+                page: 1
+            }).trigger('reloadGrid');
+        }
+
+        // 닫기 이미지 직접 클릭(이벤트가 막히는 경우가 있어 mousedown도 함께 처리)
+        $(document).on('mousedown', '#lay-sensor-status-list img[data-fancybox-close]', function(){
+            resetGridFilters('gridSensor');
+            offset = 0;
+        });
+
+        // 팝업이 어떤 방식으로든 닫힌 후에도 한 번 더(ESC/오버레이 포함)
+        $(document).on('afterClose.fb', function(e, instance, slide){
+            if (slide && slide.src === '#lay-sensor-status-list') {
+                resetGridFilters('gridSensor');
+                offset = 0;
+            }
+        });
+
         //시스템 상태 > 계측기 상태 클릭시
         $('.sensor.status-number dl').off().on('click', function () {
             let status = $(this).attr('status');
-            // console.log(status);
+
             if (status === "1") {
                 $('#lay-sensor-status-list .layer-base-title').html("수신 센서 리스트");
             } else if (status === "2") {
@@ -96,47 +237,52 @@
                 $('#lay-sensor-status-list .layer-base-title').html("전체 센서 리스트");
             }
 
-            if (!!$sensorGrid) {
-                $sensorGrid.destroy();
-            }
+            getSensor({limit, offset}).then((res) => {
+                let rows = res.rows || [];
+                if (status === '1') {
+                    rows = rows.filter(r => r.comm_status === '수신');
+                } else if (status === '2') {
+                    rows = rows.filter(r => r.comm_status === '미수신');
+                }
 
-            setTimeout(() => {
-                $.get('/admin/sensorByChannelList/columns', function (res) {
-                    res.zone_name.width = 90;
-                    res.ch_collect_date.width = 300;
-                    res.collect_date.type = 'hidden';
-                    res.real_value.type = 'hidden';
-                    $sensorGrid = jqgridUtil($('.gridSensor'), {
-                        listPathUrl: "/admin/sensorByChannelList",
-                        status: status
-                    }, res, true, null, null);
-                    $sensorGrid.jqGrid('setGridParam', {
-                        beforeRequest: function () {
-                            let currentParams = {
-                                listPathUrl: "/admin/sensorByChannelList",
-                                status: status
-                            };
+                // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
+                const gridId = 'gridSensor';
+                const $g = $('#' + gridId);
+                const keyArray = ['district_nm', 'sens_chnl_nm'];
 
-                            let p = Object.assign($sensorGrid.jqGrid('getGridParam', 'postData'), $('.ui-search-input input').filter(function () {
-                                return !!this.value;
-                            }).serializeObject());
-
-                            $sensorGrid.setGridParam({
-                                postData: Object.assign(p, currentParams)
-                            });
-                        },
-                        ondblClickRow: function (rowId) {
-                            $sensorGrid.find('tr').removeClass('custom_selected');
-                            var rowData = $(this).getRowData(rowId);
-                            // console.log(rowData);
-                            openSensorInfo(rowData);
-                        }
+                if ($g[0] && $g[0].grid) {
+                    // 기존 그리드 재사용: 데이터만 교체
+                    const addData = actFormattedData(rows, keyArray);
+                    $g.jqGrid('clearGridData', true);
+                    addData.forEach(row => {
+                        $g.jqGrid('addRowData', row.id, row);
                     });
-                    $sensorGrid.trigger('reloadGrid');
-                });
-            }, 100);
+                    // 기존에 필터가 걸려있으면 유지
+                    const currentFilters = $g.jqGrid('getGridParam', 'postData').filters;
+                    $g.jqGrid('setGridParam', {
+                        search: !!currentFilters,
+                        postData: { filters: currentFilters || '' },
+                        page: 1
+                    }).trigger('reloadGrid');
+                } else {
+                    // 최초 생성
+                    setJqGridTable(rows, column, header, gridComplete2, null, keyArray, gridId, limit, offset, getSensor, null, null);
+                }
+            }).catch((fail) => {
+                console.log('setJqGridTable fail > ', fail);
+            });
 
-            popFancy('#lay-sensor-status-list', { dragToClose : false, touch : false });
+            popFancy('#lay-sensor-status-list', {
+                dragToClose: false, touch: false,
+                afterShow: function () {
+                    const $g = $("#gridSensor");
+                    const $wrap = $g.closest('.bTable');
+                    const $cont = $g.closest('.layer-base-conts');
+                    const h = Math.max(300, ($cont.innerHeight() || 520) - 120);
+                    $g.jqGrid('setGridWidth', $wrap.width());
+                    $g.jqGrid('setGridHeight', h);
+                }
+            });
         });
 
         //시스템 상태 > CCTV 상태 클릭시
@@ -701,7 +847,7 @@
 <%--                    <a href="javascript:downloadExcel('sensorList', '/admin/sensorByChannelList/excel')">다운로드</a>--%>
 <%--                </div>--%>
                 <div class="bTable">
-                    <table class="gridSensor"></table>
+                    <table class="gridSensor" id="gridSensor"></table>
                 </div>
             </div>
         </div>
