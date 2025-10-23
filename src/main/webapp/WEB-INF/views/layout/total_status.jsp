@@ -782,15 +782,16 @@
 
     // 시스템 상태
     function loadSystemCount() {
-        $.get("/cctv/count", (res) => {
-            console.log(res)
+        $.get("/cctv/dashboard/count", (res) => {
             $('.cctv.status-number dt:eq(0)').html(res.allCnt);
             $('.cctv.status-number dt:eq(1)').html(res.conCnt);
             $('.cctv.status-number dt:eq(2)').html(res.errCnt);
         })
 
-        $.get("/modify/sensor/count", (res) => {
-            $('.sensor.status-number dt:eq(0)').html(res);
+        $.get("/modify/sensor/dashboard/count", (res) => {
+            $('.sensor.status-number dt:eq(0)').html(res.allCnt);
+            $('.sensor.status-number dt:eq(1)').html(res.conCnt);
+            $('.sensor.status-number dt:eq(2)').html(res.errCnt);
         })
     }
 

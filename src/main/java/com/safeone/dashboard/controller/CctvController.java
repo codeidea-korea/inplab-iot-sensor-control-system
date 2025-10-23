@@ -3,6 +3,7 @@ package com.safeone.dashboard.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.safeone.dashboard.dto.CctvCountDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,12 @@ public class CctvController extends JqGridAbstract<CctvListDto> {
     @ResponseBody
     public int count(Map param) {
         return cctvListService.getTotalCount(param);
+    }
+
+    @GetMapping("/dashboard/count")
+    @ResponseBody
+    public CctvCountDto dashboardCount() {
+        return cctvListService.getTotalCountByStatus();
     }
 
 }

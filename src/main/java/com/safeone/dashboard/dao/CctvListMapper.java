@@ -3,6 +3,7 @@ package com.safeone.dashboard.dao;
 import java.util.List;
 import java.util.Map;
 
+import com.safeone.dashboard.dto.CctvCountDto;
 import org.springframework.stereotype.Repository;
 
 import com.safeone.dashboard.dto.CctvListDto;
@@ -12,4 +13,5 @@ public interface CctvListMapper {
     List<CctvListDto> selectCctvList(Map param);
     int selectCctvListTotal(Map param);
     CctvListDto getCctvInfo(Map param);
+    CctvCountDto selectCctvListTotalByStatus();
 }

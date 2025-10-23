@@ -2,6 +2,7 @@ package com.safeone.dashboard.controller.modify;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dto.GetModifySensorDto;
+import com.safeone.dashboard.dto.SensorCountDto;
 import com.safeone.dashboard.dto.SensorDto;
 import com.safeone.dashboard.service.ModifySensorService;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +40,10 @@ public class ModifySensorController {
     @ResponseBody
     public List<SensorDto> getAll(@RequestParam  Map<String, Object> param) {
         return service.getAll(param);
+    }
+
+    @GetMapping("/dashboard/count")
+    public SensorCountDto dashboardCount() {
+        return service.getTotalCountByStatus();
     }
 }

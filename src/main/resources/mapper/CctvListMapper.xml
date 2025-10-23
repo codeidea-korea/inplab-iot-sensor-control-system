@@ -139,4 +139,29 @@
         From tb_cctv_info A
         WHERE A.cctv_no = #{cctv_no}
     </select>
+
+    <select id="selectCctvListTotalByStatus" resultType="com.safeone.dashboard.dto.CctvCountDto">
+        SELECT
+        COUNT(A.cctv_no) AS allCnt,
+        COUNT(*) FILTER (
+        WHERE
+        COALESCE(NULLIF(BTRIM(A.cctv_ip), ''), NULL) IS NULL
+        OR A.web_port IS NULL
+        OR COALESCE(NULLIF(BTRIM(A.cctv_conn_id), ''), NULL) IS NULL
+        OR COALESCE(NULLIF(BTRIM(A.cctv_conn_pwd), ''), NULL) IS NULL
+        ) AS errCnt,
+        COUNT(*) FILTER (
+        WHERE
+        COALESCE(NULLIF(BTRIM(A.cctv_ip), ''), NULL) IS NOT NULL
+        AND A.web_port IS NOT NULL
+        AND COALESCE(NULLIF(BTRIM(A.cctv_conn_id), ''), NULL) IS NOT NULL
+        AND COALESCE(NULLIF(BTRIM(A.cctv_conn_pwd), ''), NULL) IS NOT NULL
+        ) AS conCnt
+        FROM tb_cctv_info A
+        LEFT JOIN tb_district_info B ON A.district_no = B.district_no
+        LEFT JOIN (SELECT * FROM tb_common_code WHERE code_grp_id = 'MTN000') C ON A.maint_sts_cd = C.code_id
+        LEFT JOIN tb_maintcomp_info D ON A.partner_comp_id = D.partner_comp_id
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select>
 </mapper>

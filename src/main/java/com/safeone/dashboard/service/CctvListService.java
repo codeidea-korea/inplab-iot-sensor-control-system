@@ -3,6 +3,7 @@ package com.safeone.dashboard.service;
 import java.util.List;
 import java.util.Map;
 
+import com.safeone.dashboard.dto.CctvCountDto;
 import org.springframework.stereotype.Service;
 
 import com.safeone.dashboard.dao.CctvListMapper;
@@ -49,5 +50,9 @@ public class CctvListService implements JqGridService<CctvListDto> {
 	public int delete(Map param) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'delete'");
+	}
+
+	public CctvCountDto getTotalCountByStatus() {
+		return mapper.selectCctvListTotalByStatus();
 	}
 }
