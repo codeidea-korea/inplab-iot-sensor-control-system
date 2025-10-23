@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -61,5 +62,11 @@ public class AlarmDetailsController extends JqGridAbstract<AlarmDetailsDto> {
     @GetMapping(value = "/alarmHistory", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getAlarmHistory(@RequestParam Map<String, Object> param) {
         return alarmDetailsService.selectAlarmHistory(param);
+    }
+
+    @ResponseBody
+    @GetMapping("/history")
+    public List<Map> getDashboardAlarmHistory(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+        return alarmDetailsService.getDashboardAlarmHistory(param);
     }
 }

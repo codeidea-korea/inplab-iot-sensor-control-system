@@ -120,7 +120,7 @@ public class AlarmDataByLevelController extends JqGridAbstract<AlarmListDto> {
 
 	@ResponseBody
 	@GetMapping("/list_by_level")
-	public List<Map<String, Object>> test(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+	public List<Map<String, Object>> getListByLevel(HttpServletRequest request, @RequestParam Map<String, Object> param) {
 		return service.getListByLevel(param);
 	}
 }

@@ -13,5 +13,6 @@ public interface AlarmDetailsMapper {
     Map selectAlarmCountByStatus(Map<String, Object> param);
     boolean insertAlarm(Map param);
     List<Map> selectAlarmHistory(Map<String, Object> param);
+    List<Map> selectDashboardAlarmHistory(Map<String, Object> param);
 }
     

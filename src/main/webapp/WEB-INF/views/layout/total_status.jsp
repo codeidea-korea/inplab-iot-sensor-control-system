@@ -553,10 +553,6 @@
                 $('#lay-cctv-status-list .layer-base-title').html("전체 수신 CCTV 리스트");
             }
 
-            if (typeof $cctvGrid != 'undefined') {
-                $cctvGrid.destroy();
-            }
-
             getCctv({limit, offset}).then((res) => {
                 let rows = res.rows || [];
                 if (status === '1') {
@@ -609,33 +605,176 @@
         /********************************************************************************************* cctv 상태 조회 *********************************************************************************************/
         /***********************************************************************************************************************************************************************************************************/
 
-        // 알람 이력 클릭시
-        $('.overall-status_re .alarm-list').off().on('click', function () {
-            if (typeof $alarmHistoryGrid != 'undefined') {
-                $alarmHistoryGrid.destroy();
-            }
 
-            setTimeout(()=>{
-                $.get('/alarmList/columns' , function (res) {
-                    res.zone_id.width = 100;
-                    res.risk_level.width = 100;
-                    res.asset_kind_name.width = 100;
-                    res.asset_name.width = 140;
-                    $alarmHistoryGrid = jqgridUtil($('.gridAlarmHistory'), {
-                        listPathUrl: "/alarmList"
-                    }, res, true, null, null);
-                    $alarmHistoryGrid.jqGrid('setGridParam', {
-                        ondblClickRow: function (rowId) {
-                            $alarmHistoryGrid.find('tr').removeClass('custom_selected');
-                            var rowData = $(this).getRowData(rowId);
-                            openSensorInfo(rowData);
-                        }
+        /***********************************************************************************************************************************************************************************************************/
+        /********************************************************************************************* 알람 이력 조회 *********************************************************************************************/
+        /***********************************************************************************************************************************************************************************************************/
+
+        const column_a = [
+            {
+                name: 'checkbox',
+                index: 'checkbox',
+                width: 10,
+                align: 'center',
+                sortable: false,
+                hidden: false,
+                formatter: checkboxFormatter
+            },
+            {name: 'meas_dt', index: 'meas_dt', width: 200, align: 'center', hidden: false},
+            {name: 'district_nm', index: 'district_nm', width: 100, align: 'center', hidden: false},
+            {name: 'sens_nm', index: 'sens_nm', width: 150, align: 'center', hidden: false},
+            {name: 'sens_chnl_id', index: 'sens_chnl_id', width: 100, align: 'center', hidden: false},
+            {name: 'alarm_lvl_cd', index: 'alarm_lvl_cd', width: 100, align: 'center', hidden: false, formatter: alarmCdFormatter},
+            {name: 'formul_data', index: 'formul_data', width: 100, align: 'center', hidden: false},
+            {name: 'standard', index: 'standard', width: 100, align: 'center', hidden: false,
+                formatter: function (cellValue, options, rowObject) {
+                    const standard = rowObject?.alarm_lvl_cd;
+                    if (standard === 'ARM001') {
+                        return rowObject.min1 + " ~ " + rowObject.max1
+                    }
+                    else if (standard === 'ARM002') {
+                        return rowObject.min2 + " ~ " + rowObject.max2
+                    }
+                    else if (standard === 'ARM003') {
+                        return rowObject.min3 + " ~ " + rowObject.max3
+                    }
+                    else if (standard === 'ARM004') {
+                        return rowObject.min4 + " ~ " + rowObject.max4
+                    }
+                    else {
+                        return "-"
+                    }
+                }
+            },
+            {
+                name: 'maint_sts_cd',
+                index: 'maint_sts_cd',
+                align: 'center',
+                hidden: false,
+                formatter: (cellValue, _options, _rowObject) => {
+                    let value = '';
+                    if (cellValue === 'MTN001') {
+                        value = '정상';
+                    } else if (cellValue === 'MTN002') {
+                        value = '망실';
+                    } else if (cellValue === 'MTN003') {
+                        value = '점검';
+                    } else if (cellValue === 'MTN004') {
+                        value = '철거';
+                    }
+                    return value
+                }
+            },
+            { name:'min1', index:'min1', hidden:true },
+            { name:'max1', index:'max1', hidden:true },
+            { name:'min2', index:'min2', hidden:true },
+            { name:'max2', index:'max2', hidden:true },
+            { name:'min3', index:'min3', hidden:true },
+            { name:'max3', index:'max3', hidden:true },
+            { name:'min4', index:'min4', hidden:true },
+            { name:'max4', index:'max4', hidden:true }
+        ];
+
+        const header_a = [
+            '', '발생일시', '현장명', '센서명', '센서채널명', '알람상태', '계측값', '관리기준범위', '센서상태', '', '', '', '', '', '', '', ''
+        ];
+
+        const gridComplete_a = () => {
+            // 검색 행 추가
+            if ($("#gridAlarmHistory").closest(".ui-jqgrid-view").find(".ui-search-toolbar").length === 0) {
+                let $thead = $("#gridAlarmHistory").closest(".ui-jqgrid-view").find(".ui-jqgrid-htable thead");
+                let $searchRow = $('<tr class="ui-search-toolbar"></tr>');
+                let distinctDistrict = [];
+                let distinctSensType = [];
+
+                // 현재 필터링 조건을 저장할 객체
+                let filters = {
+                    groupOp: "AND",
+                    rules: []
+                };
+
+                getDistinct().then((res) => {
+                    distinctDistrict = res.district;
+                    distinctSensType = res.sensor_type;
+
+                    $("#gridAlarmHistory").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
+                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "gridAlarmHistory");
+                        $searchRow.append($cell);
+                    });
+                    $thead.append($searchRow);
+                }).catch((fail) => {
+                    console.log('getDistinct fail > ', fail);
+                });
+            }
+        };
+
+        const getAlarmHistory = (obj) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'GET',
+                    url: `/sensor/alarm-details/history`,
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    async: true,
+                    data: obj
+                }).done(function (res) {
+                    resolve(res);
+                }).fail(function (fail) {
+                    reject(fail);
+                    alert2('알람 정보를 가져오는데 실패했습니다.', function () {
                     });
                 });
-            }, 100)
+            });
+        };
 
-            popFancy('#lay-alarm-history', { dragToClose : false, touch : false });
+        // 알람 이력 클릭시
+        $('.overall-status_re .alarm-list').off().on('click', function () {
+            getAlarmHistory({limit, offset}).then((res) => {
+                let rows = res || [];
+
+                // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
+                const gridId = 'gridAlarmHistory';
+                const $g = $('#' + gridId);
+                const keyArray = ['district_nm'];
+
+                if ($g[0] && $g[0].grid) {
+                    // 기존 그리드 재사용: 데이터만 교체
+                    const addData = actFormattedData(rows, keyArray);
+                    $g.jqGrid('clearGridData', true);
+                    addData.forEach(row => {
+                        $g.jqGrid('addRowData', row.id, row);
+                    });
+                    // 기존에 필터가 걸려있으면 유지
+                    const currentFilters = $g.jqGrid('getGridParam', 'postData').filters;
+                    $g.jqGrid('setGridParam', {
+                        search: !!currentFilters,
+                        postData: { filters: currentFilters || '' },
+                        page: 1
+                    }).trigger('reloadGrid');
+                } else {
+                    // 최초 생성
+                    setJqGridTable(rows, column_a, header_a, gridComplete_a, null, keyArray, gridId, limit, offset, getAlarmHistory, null, null);
+                }
+            }).catch((fail) => {
+                console.log('setJqGridTable fail > ', fail);
+            });
+
+            popFancy('#lay-alarm-history', {
+                dragToClose: false, touch: false,
+                afterShow: function () {
+                    const $g = $("#gridAlarmHistory");
+                    const $wrap = $g.closest('.bTable');
+                    const $cont = $g.closest('.layer-base-conts');
+                    const h = Math.max(300, ($cont.innerHeight() || 520) - 120);
+                    $g.jqGrid('setGridWidth', $wrap.width());
+                    $g.jqGrid('setGridHeight', h);
+                }
+            });
         });
+
+        /***********************************************************************************************************************************************************************************************************/
+        /********************************************************************************************* 알람 이력 조회 *********************************************************************************************/
+        /***********************************************************************************************************************************************************************************************************/
 
         $(document).on('click', '.weather-api', function() {
             popFancy('#lay-weather-area', { dragToClose : false, touch : false });
