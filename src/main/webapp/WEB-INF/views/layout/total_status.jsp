@@ -1,5 +1,6 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<script type="text/javascript" src="/jqgrid.js"></script>
 <script type="text/javascript">
     let $alarmGrid, $sensorGrid, $cctvGrid, $deviceGrid, $alarmHistoryGrid, $setInterval0, $setInterval1, $setInterval2;
 
@@ -31,64 +32,246 @@
         $setInterval1 = setInterval(startInterval, LATENCY); // 60초 마다
         $setInterval2 = setInterval(weatherInterval, 60 * 60 * 1000); // 60분 마다
 
+        const checkboxFormatter = (cellValue, options, rowObject) => {
+            return '';
+        };
+
+        // 1) 공통 리셋 함수 (그대로 사용)
+        function resetGridFilters(gridId){
+            const $g = $('#' + gridId);
+            const $view = $g.closest('.ui-jqgrid-view');
+
+            $view.find('.ui-search-toolbar input').each(function(){
+                if ($(this).val() !== '') {
+                    $(this).val('');
+                    $(this).trigger('input');
+                    $(this).trigger('change');
+                }
+            });
+            $view.find('.ui-search-toolbar select').each(function(){
+                if ($(this).val() !== '') {
+                    $(this).val('');
+                    $(this).trigger('change');
+                }
+            });
+
+            $g.jqGrid('setGridParam', {
+                search: false,
+                postData: { filters: '' },
+                page: 1
+            }).trigger('reloadGrid');
+        }
+
+        // 2) 팝업-그리드 매핑
+        const POPUPS = [
+            { layer: '#lay-sensor-status-list',  grid: 'gridSensor' },
+            { layer: '#lay-cctv-status-list',    grid: 'gridCCTV' },
+            { layer: '#lay-alarm-info',           grid: 'gridAlarm' },
+            { layer: '#lay-alarm-history',        grid: 'gridAlarmHistory' }
+        ];
+
+        // 3) 공통 바인딩
+        function bindPopupGridReset(pairs){
+            // 중복 바인딩 방지
+            $(document).off('mousedown.resetClose');
+            $(document).off('afterClose.fb.reset');
+
+            // (A) 닫기 버튼 클릭 시
+            pairs.forEach(p => {
+                $(document).on('mousedown.resetClose', `${p.layer} img[data-fancybox-close]`, function(){
+                    resetGridFilters(p.grid);
+                    offset = 0;
+                });
+            });
+
+            // (B) ESC/오버레이 등 모든 닫힘 경로
+            $(document).on('afterClose.fb.reset', function(_e, _instance, slide){
+                if (!slide || !slide.src) return;
+                pairs.forEach(p => {
+                    if (slide.src === p.layer) {
+                        resetGridFilters(p.grid);
+                        offset = 0;
+                    }
+                });
+            });
+        }
+
+        // 4) 호출 (문서 준비 후 한 번만)
+        $(function(){
+            bindPopupGridReset(POPUPS);
+        });
+
+        /***********************************************************************************************************************************************************************************************************/
+        /********************************************************************************************* 알람 현황 (1분) 조회 *********************************************************************************************/
+        /***********************************************************************************************************************************************************************************************************/
+
+        const alarmCdFormatter = (cellValue, options, rowObject) => {
+            if (cellValue === 'ARM001') {
+                return "관심"
+            } else if (cellValue === 'ARM002') {
+                return "주의"
+            } else if (cellValue === 'ARM003') {
+                return "경계"
+            } else if (cellValue === 'ARM004') {
+                return "심각"
+            }
+        };
+
+        const maintCdFormatter = (cellValue, options, rowObject) => {
+            if (cellValue === 'MTN001') {
+                return '정상';
+            } else if (cellValue === 'MTN002') {
+                return '망실';
+            } else if (cellValue === 'MTN003') {
+                return '점검';
+            } else if (cellValue === 'MTN004') {
+                return '철거';
+            }
+        };
+
+        const column_l = [
+            {
+                name: 'checkbox',
+                index: 'checkbox',
+                width: 10,
+                align: 'center',
+                sortable: false,
+                hidden: false,
+                formatter: checkboxFormatter
+            },
+            {name:'district_nm', index:'district_nm', width:100, align:'center', hidden:false},
+            {name:'sens_nm', index:'sens_nm', width:100, align:'center', hidden:false},
+            {name:'sens_chnl_id', index:'sens_chnl_id', width:100, align:'center', hidden:false},
+            {name:'alarm_lvl_cd', index:'alarm_lvl_cd', width:100, align:'center', hidden:false, formatter: alarmCdFormatter},
+            {name:'formul_data', index:'formul_data', width:100, align:'center', hidden:false},
+            {name:'maint_sts_cd', index:'maint_sts_cd', width:100, align:'center', hidden:false, formatter: maintCdFormatter},
+        ];
+
+        const header_l = [
+            '', '현장명','센서명','센서채널명','알람 상태','계측값','센서상태'
+        ];
+
+        const getAlarmByLevel = (obj) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'GET',
+                    url: `/alarmDataByLevel/list_by_level`,
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    async: true,
+                    data: obj
+                }).done(function (res) {
+                    resolve(res);
+                }).fail(function (fail) {
+                    reject(fail);
+                    console.log('getSensor fail > ', fail);
+                    alert2('알람 정보를 가져오는데 실패했습니다.', function () {
+                    });
+                });
+            });
+        };
+
+        const gridComplete_l = () => {
+            // 검색 행 추가
+            if ($("#gridAlarm").closest(".ui-jqgrid-view").find(".ui-search-toolbar").length === 0) {
+                let $thead = $("#gridAlarm").closest(".ui-jqgrid-view").find(".ui-jqgrid-htable thead");
+                let $searchRow = $('<tr class="ui-search-toolbar"></tr>');
+                let distinctDistrict = [];
+                let distinctSensType = [];
+
+                // 현재 필터링 조건을 저장할 객체
+                let filters = {
+                    groupOp: "AND",
+                    rules: []
+                };
+
+                getDistinct().then((res) => {
+                    distinctDistrict = res.district;
+                    distinctSensType = res.sensor_type;
+
+                    $("#gridAlarm").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
+                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "gridAlarm");
+                        $searchRow.append($cell);
+                    });
+                    $thead.append($searchRow);
+                }).catch((fail) => {
+                    console.log('getDistinct fail > ', fail);
+                });
+            }
+        };
+
         // 각 알람 현황 클릭시
         $('.overall-status-area .donutty-area li').off().on('click', function () {
-            let level = $(this).attr('level');
-            // console.log(level);
+            let status = $(this).attr('level');
+            let alarmLevel;
 
-            if (typeof $alarmGrid != 'undefined') {
-                $alarmGrid.destroy();
+            if (status === "1") {
+                $('#lay-alarm-info .layer-base-title').html("관심 센서 리스트");
+                alarmLevel = 'ARM001';
+            } else if (status === "2") {
+                $('#lay-alarm-info .layer-base-title').html("주의 센서 리스트");
+                alarmLevel = 'ARM002';
+            } else if (status === "3") {
+                $('#lay-alarm-info .layer-base-title').html("경계 센서 리스트");
+                alarmLevel = 'ARM003';
+            } else {
+                $('#lay-alarm-info .layer-base-title').html("심각 센서 리스트");
+                alarmLevel = 'ARM004';
             }
 
-            setTimeout(() => {
-                $.get('/alarmDataByLevel/columns' , function (res) {
-                    //애초에 레벨에 맞게 리스트를 보여줌, 필요없는 컬럼
-                    delete res.risk_level;
-                    res.zone_id.width = 150;
-                    res.asset_kind_name.width = 150;
-                    res.asset_name.width = 150;
-                    $alarmGrid = jqgridUtil($('.gridAlarm'), {
-                        listPathUrl: "/alarmDataByLevel",
-                        risk_level: level,
-                        view_flag : 'Y'
-                    }, res, true, null, null);
+            getAlarmByLevel({limit, offset, alarmLevel}).then((res) => {
+                let rows = res || [];
 
-                    $alarmGrid.jqGrid('setGridParam', {
-                        beforeRequest: function() {
-                            let currentParams = {
-                                listPathUrl: "/alarmDataByLevel",
-                                risk_level: level,
-                                view_flag : 'Y'
-                            };
+                // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
+                const gridId = 'gridAlarm';
+                const $g = $('#' + gridId);
+                const keyArray = ['district_nm', 'sens_chnl_nm'];
 
-                            let p = Object.assign($alarmGrid.jqGrid('getGridParam', 'postData'), $('.ui-search-input input').filter(function () {
-                                return !!this.value;
-                            }).serializeObject());
-
-                            $alarmGrid.setGridParam({
-                                postData: Object.assign(p, currentParams)
-                            });
-                        },
-                        ondblClickRow: function (rowId) {
-                            $alarmGrid.find('tr').removeClass('custom_selected');
-                            var rowData = $(this).getRowData(rowId);
-                            // console.log(rowData);
-                            openSensorInfo(rowData);
-                        }
+                if ($g[0] && $g[0].grid) {
+                    // 기존 그리드 재사용: 데이터만 교체
+                    const addData = actFormattedData(rows, keyArray);
+                    $g.jqGrid('clearGridData', true);
+                    addData.forEach(row => {
+                        $g.jqGrid('addRowData', row.id, row);
                     });
-                    $alarmGrid.trigger('reloadGrid');
-                });
-            }, 100);
+                    // 기존에 필터가 걸려있으면 유지
+                    const currentFilters = $g.jqGrid('getGridParam', 'postData').filters;
+                    $g.jqGrid('setGridParam', {
+                        search: !!currentFilters,
+                        postData: { filters: currentFilters || '' },
+                        page: 1
+                    }).trigger('reloadGrid');
+                } else {
+                    // 최초 생성
+                    setJqGridTable(rows, column_l, header_l, gridComplete_l, null, keyArray, gridId, limit, offset, getAlarmByLevel, null, null);
+                }
+            }).catch((fail) => {
+                console.log('setJqGridTable fail > ', fail);
+            });
 
-            popFancy('#lay-alarm-info', { dragToClose : false, touch : false });
+            popFancy('#lay-alarm-info', {
+                dragToClose: false, touch: false,
+                afterShow: function () {
+                    const $g = $("#gridAlarm");
+                    const $wrap = $g.closest('.bTable');
+                    const $cont = $g.closest('.layer-base-conts');
+                    const h = Math.max(300, ($cont.innerHeight() || 520) - 120);
+                    $g.jqGrid('setGridWidth', $wrap.width());
+                    $g.jqGrid('setGridHeight', h);
+                }
+            });
         });
+
+        /***********************************************************************************************************************************************************************************************************/
+        /********************************************************************************************* 알람 현황 (1분) 조회 *********************************************************************************************/
+        /***********************************************************************************************************************************************************************************************************/
 
         $('.overall-status-area .hang.status-number dl').off().on('click', function () {
             alert('개발진행 중입니다');
         });
 
         /***********************************************************************************************************************************************************************************************************/
-        /********************************************************************************************* 계측기 상태 조회 /*********************************************************************************************/
+        /********************************************************************************************* 계측기 상태 조회 *********************************************************************************************/
         /***********************************************************************************************************************************************************************************************************/
 
         const formatDateTime = (cellValue, _opts, rowObject) => {
@@ -110,10 +293,6 @@
             }else{
                 return cellValue;
             }
-        };
-
-        const checkboxFormatter = (cellValue, options, rowObject) => {
-            return '';
         };
 
         const column = [
@@ -248,59 +427,12 @@
         });
 
         /***********************************************************************************************************************************************************************************************************/
-        /********************************************************************************************* 계측기 상태 조회 /*********************************************************************************************/
+        /********************************************************************************************* 계측기 상태 조회 *********************************************************************************************/
         /***********************************************************************************************************************************************************************************************************/
 
-        function resetGridFilters(gridId){
-            const $g = $('#' + gridId);
-            const $view = $g.closest('.ui-jqgrid-view');
-
-            // ① 검색툴바 초기화(값 비우고 이벤트 트리거까지)
-            $view.find('.ui-search-toolbar input').each(function(){
-                if ($(this).val() !== '') {
-                    $(this).val('');
-                    $(this).trigger('input');   // ← filters.rules 비우도록
-                    $(this).trigger('change');
-                }
-            });
-            $view.find('.ui-search-toolbar select').each(function(){
-                if ($(this).val() !== '') {
-                    $(this).val('');
-                    $(this).trigger('change');  // ← select 필터 비우도록
-                }
-            });
-
-            // ② jqGrid 상태 초기화
-            $g.jqGrid('setGridParam', {
-                search: false,
-                postData: { filters: '' },
-                page: 1
-            }).trigger('reloadGrid');
-        }
-
-        // 닫기 이미지 직접 클릭(이벤트가 막히는 경우가 있어 mousedown도 함께 처리)
-        $(document).on('mousedown', '#lay-sensor-status-list img[data-fancybox-close]', function(){
-            resetGridFilters('gridSensor');
-            offset = 0;
-        });
-        $(document).on('mousedown', '#lay-cctv-status-list img[data-fancybox-close]', function(){
-            resetGridFilters('gridCCTV');
-            offset = 0;
-        });
-
-        // 팝업이 어떤 방식으로든 닫힌 후에도 한 번 더(ESC/오버레이 포함)
-        $(document).on('afterClose.fb', function(e, instance, slide){
-            if (slide && slide.src === '#lay-sensor-status-list') {
-                resetGridFilters('gridSensor');
-                offset = 0;
-            }else if(slide && slide.src === '#lay-cctv-status-list') {
-                resetGridFilters('gridCCTV');
-                offset = 0;
-            }
-        });
 
         /***********************************************************************************************************************************************************************************************************/
-        /********************************************************************************************* cctv 상태 조회 /*********************************************************************************************/
+        /********************************************************************************************* cctv 상태 조회 *********************************************************************************************/
         /***********************************************************************************************************************************************************************************************************/
 
         const column_c = [
@@ -474,7 +606,7 @@
         });
 
         /***********************************************************************************************************************************************************************************************************/
-        /********************************************************************************************* cctv 상태 조회 /*********************************************************************************************/
+        /********************************************************************************************* cctv 상태 조회 *********************************************************************************************/
         /***********************************************************************************************************************************************************************************************************/
 
         // 알람 이력 클릭시
@@ -651,7 +783,10 @@
     // 시스템 상태
     function loadSystemCount() {
         $.get("/cctv/count", (res) => {
-            $('.cctv.status-number dt:eq(0)').html(res);
+            console.log(res)
+            $('.cctv.status-number dt:eq(0)').html(res.allCnt);
+            $('.cctv.status-number dt:eq(1)').html(res.conCnt);
+            $('.cctv.status-number dt:eq(2)').html(res.errCnt);
         })
 
         $.get("/modify/sensor/count", (res) => {
@@ -767,7 +902,6 @@
                 const diffMs = Math.abs(now - measMs);
 
                 if (diffMs <= 60 * 1000) {
-                    console.log("dd")
                     const node = document.createElement('div');
                     node.innerHTML = contents;
                     Toastify({
@@ -927,12 +1061,12 @@
                         </dl>
                         <dl class="box" status="1">
                             <dt>0</dt>
-                            <dd>수신</dd>
+                            <dd>정상</dd>
                         </dl>
 <%--                        <dl class="box" data-fancybox data-src="#lay-cctv-status-list">--%>
                         <dl class="box" status="2">
                             <dt>0</dt>
-                            <dd>미수신</dd>
+                            <dd>에러</dd>
                         </dl>
                     </div>
                 </div>
@@ -990,7 +1124,7 @@
             <div class="layer-base-title">알람 조회</div>
             <div class="layer-base-conts">
                 <div class="bTable">
-                    <table class="gridAlarm"></table>
+                    <table class="gridAlarm" id="gridAlarm"></table>
                 </div>
             </div>
         </div>
@@ -1003,7 +1137,7 @@
             <div class="layer-base-title">알람 이력 조회</div>
             <div class="layer-base-conts">
                 <div class="bTable">
-                    <table class="gridAlarmHistory"></table>
+                    <table class="gridAlarmHistory" id="gridAlarmHistory"></table>
                 </div>
             </div>
         </div>

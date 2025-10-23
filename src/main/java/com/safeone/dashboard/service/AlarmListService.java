@@ -59,4 +59,8 @@ public class AlarmListService implements JqGridService<AlarmListDto> {
   public List<Map> selectAlarmHistory(Map<String, Object> param) {
     return mapper.selectAlarmHistory(param);
   }
+
+  public List<Map<String, Object>> getListByLevel(Map<String, Object> param) {
+    return mapper.selectListByLevel(param);
+  }
 }
