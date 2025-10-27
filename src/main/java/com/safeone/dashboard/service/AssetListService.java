@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.safeone.dashboard.dto.EquipmentDto;
 import org.springframework.stereotype.Service;
 
 import com.safeone.dashboard.dao.AssetListMapper;
@@ -22,6 +23,10 @@ public class AssetListService implements JqGridService<AssetListDto> {
     public List<AssetListDto> getList(Map param) {
     	return mapper.selectAssetList(param);
     }
+
+	public List<EquipmentDto> getEquipmentList(Map param) {
+		return mapper.selectEquipmentList(param);
+	}
 
     public Map selectAssetInfo(String assetId) {
     	return mapper.selectAssetInfo(assetId);

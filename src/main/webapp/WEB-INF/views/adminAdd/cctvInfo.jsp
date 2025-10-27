@@ -348,7 +348,7 @@
 
                 $.get('/adminAdd/cctv/max-no', null, (res) => {
                     if (res !== null && res !== undefined) {
-                        const newId = 'T' + (parseInt(res.substring(1)) + 1).toString().padStart(2, '0');
+                        const newId = 'CCTV' + (parseInt(res.substring(4)) + 1).toString().padStart(2, '0');
                         $('input[name=cctv_no]').val(newId)
                     }
                 });

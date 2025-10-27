@@ -19,11 +19,15 @@
         loadWeatherInfo();          // 현재 기상현황
     }
 
+    const checkboxFormatter = (cellValue, options, rowObject) => {
+        return '';
+    };
+
+    const limit = 50;
+    let offset = 0;
+
     $(function () {
         google.charts.setOnLoadCallback(drawChart);
-
-        const limit = 50;
-        let offset = 0;
 
         // alarmInterval();
         startInterval();
@@ -32,11 +36,7 @@
         $setInterval1 = setInterval(startInterval, LATENCY); // 60초 마다
         $setInterval2 = setInterval(weatherInterval, 60 * 60 * 1000); // 60분 마다
 
-        const checkboxFormatter = (cellValue, options, rowObject) => {
-            return '';
-        };
-
-        // 1) 공통 리셋 함수 (그대로 사용)
+        // 1) 공통 리셋 함수
         function resetGridFilters(gridId){
             const $g = $('#' + gridId);
             const $view = $g.closest('.ui-jqgrid-view');
@@ -67,12 +67,12 @@
             { layer: '#lay-sensor-status-list',  grid: 'gridSensor' },
             { layer: '#lay-cctv-status-list',    grid: 'gridCCTV' },
             { layer: '#lay-alarm-info',           grid: 'gridAlarm' },
-            { layer: '#lay-alarm-history',        grid: 'gridAlarmHistory' }
+            { layer: '#lay-alarm-history',        grid: 'gridAlarmHistory' },
+            { layer: '#lay-equipment-area',        grid: 'gridDevice' }
         ];
 
         // 3) 공통 바인딩
         function bindPopupGridReset(pairs){
-            // 중복 바인딩 방지
             $(document).off('mousedown.resetClose');
             $(document).off('afterClose.fb.reset');
 
@@ -96,10 +96,8 @@
             });
         }
 
-        // 4) 호출 (문서 준비 후 한 번만)
-        $(function(){
-            bindPopupGridReset(POPUPS);
-        });
+        // 4) 호출
+        bindPopupGridReset(POPUPS);
 
         /***********************************************************************************************************************************************************************************************************/
         /********************************************************************************************* 알람 현황 (1분) 조회 *********************************************************************************************/
@@ -782,113 +780,182 @@
         $(document).on('click', '.weather-comment', function() {
             popFancy('#lay-weather-area2', { dragToClose : false, touch : false });
         });
-    });
 
-    // 장비현황 차트
-    function drawChart() {
-        $.get('/deviceCount', function (res) {
-            var data = google.visualization.arrayToDataTable([
-                ['title', 'number', 'key'],
-                ['CCTV', res.cctv_count, '8'],
-                ['구조물경사계', res.tm_count, '2'],
-                ['지표변위계', res.ttw_count, '3'],
-                ['강우계', res.rain_count, '4'],
-                ['지표경사계', res.ttm_count, '1'],
-                ['GNSS', res.gnss_count, '7']
-                // ['기타', res.etc_count, '9']
-            ]);
+        const columnDevice = [
+            {
+                name: 'checkbox', index: 'checkbox', width: 10, align: 'center',
+                sortable: false, hidden: false, formatter: checkboxFormatter
+            },
+            { name: 'district_nm', index: 'district_nm', width: 220, align: 'center', hidden: false },
+            { name: 'equipment_nm', index: 'equipment_nm', width: 220, align: 'center', hidden: false },
+            { name: 'inst_ymd', index: 'inst_ymd', width: 220, align: 'center', hidden: false },
+            {
+                name: 'sens_status', index: 'sens_status', width: 220, align: 'center', hidden: false,
+                formatter: (v) => ({ MTN001:'정상', MTN002:'망실', MTN003:'점검', MTN004:'철거' }[v] || v || '')
+            },
+            { name: 'formul_data', index: 'formul_data', width: 220, align: 'center', hidden: false }
+        ];
 
-            var options = {
-                backgroundColor: '#28293b',
-                pieHole: 0.5,
-                tooltip: {
-                    trigger: 'focus',
-                    ignoreBounds : true,
-                    textStyle: {
-                        fontSize: 13
-                    }
-                },
-                pieSliceBorderColor: '#28293b',
-                colors: ['#464ef7', '#63e578', '#f4bd25', '#dd2ac8', '#2ae8d9','#ff6b6b', '#795548'],
-                chartArea: { width: "90%", height: "90%" },
-                legend: { textStyle: { color: '#fff', fontSize: 13, fontName: 'Pretendard' }, width: 144, position: 'outside' },
-                pieSliceText: 'value',
-            };
+        const headerDevice = [
+            '', '현장', '장비명', '설치일자', '상태', '계측값'
+        ];
 
-            var chart = new google.visualization.PieChart(document.getElementById('piechart'));
-            chart.draw(data, options);
+        const gridCompleteDevice = () => {
+            if ($("#gridDevice").closest(".ui-jqgrid-view").find(".ui-search-toolbar").length === 0) {
+                let $thead = $("#gridDevice").closest(".ui-jqgrid-view").find(".ui-jqgrid-htable thead");
+                const $searchRow = $('<tr class="ui-search-toolbar"></tr>');
+                let distinctDistrict = [];
+                let distinctSensType = [];
 
-            // 이벤트 리스너 추가
-            // google.visualization.events.addListener(chart, 'onmouseout', function() {
-            //     //the built-in tooltip
-            //     var tooltip = document.querySelector('.google-visualization-tooltip:not([clone])');
-            //     console.log('tooltip', tooltip);
-            // });
-            google.visualization.events.addListener(chart, 'ready', function() {
-                const svg = document.querySelector("#piechart div > svg");
-                svg.style.overflow = "visible";
-            });
+                const filters = {groupOp: "AND", rules: []};
 
-            google.visualization.events.addListener(chart, 'select', function() {
-                var selectedItem = chart.getSelection()[0];
+                getDistinct().then((res) => {
+                    distinctDistrict = res.district;
+                    distinctSensType = res.sensor_type;
 
-                if (selectedItem) {
-                    var selectedValue = data.getValue(selectedItem.row, 2);
-                    // alert('선택된 항목: ' + selectedValue);
-                    $.get('/admin/assetList/columns', function (res) {
-                        delete res.asset_kind_id;
-                        delete res.collect_date;
-                        delete res.etc1;
-                        delete res.etc2;
-                        delete res.etc3;
-                        res.zone_id.width = 220;
-                        res.name.width = 220;
-                        res.install_date.width = 220;
-                        res.status.width = 220;
-                        res.real_value.width = 220;
-                        $deviceGrid = jqgridUtil($('.gridDevice'), {
-                            listPathUrl: "/admin/assetList",
-                            asset_kind_id : selectedValue
-                        }, res, true, null, null);
-                        $deviceGrid.jqGrid('setGridParam', {
-                            beforeRequest: function () {
-                                let currentParams = {
-                                    listPathUrl: "/admin/assetList",
-                                    asset_kind_id : selectedValue
-                                };
-
-                                let p = Object.assign($deviceGrid.jqGrid('getGridParam', 'postData'), $('.ui-search-input input').filter(function () {
-                                    return !!this.value;
-                                }).serializeObject());
-
-                                $deviceGrid.setGridParam({
-                                    postData: Object.assign(p, currentParams)
-                                });
-                            },
-                            ondblClickRow: function (rowId) {
-                                $deviceGrid.find('tr').removeClass('custom_selected');
-                                var rowData = $(this).getRowData(rowId);
-                                openSensorInfo(rowData);
-                            }
-                        });
-                        $deviceGrid.trigger('reloadGrid');
+                    $("#gridDevice").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
+                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "gridDevice");
+                        $searchRow.append($cell);
                     });
-                    // 툴팁이 있으면 숨김
-                    var tooltip = document.querySelector('.google-visualization-tooltip');
-                    if(!!tooltip){
-                        tooltip.style.display = "none";
-                    }
+                    $thead.append($searchRow);
+                }).catch((fail) => {
+                    console.log('getDistinct fail > ', fail);
+                });
+            }
+        };
 
-                    if(!!$deviceGrid){
-                        $deviceGrid.destroy();
-                    }
-
-                    popFancy('#lay-equipment-area', { dragToClose : false, touch : false });
-                }
+        const getEquipment = (obj) => new Promise((resolve, reject) => {
+            $.ajax({
+                type: 'GET',
+                url: '/admin/assetList/getEquipmentList',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                async: true,
+                data: obj
+            }).done(resolve).fail((err) => {
+                reject(err);
+                alert2('장비 정보를 가져오는데 실패했습니다.', function(){});
             });
         });
 
-    }
+        // 장비현황 차트
+        function drawChart() {
+            /* 차트생성시점 == 테이블생성시점으로 만들어져있어서 고정픽셀로 처리 */
+            $("#gridDevice").closest('.bTable').width(1170);
+            $.get('/deviceCount', function (res) {
+                var data = google.visualization.arrayToDataTable([
+                    ['title', 'number', 'key'],
+                    ['CCTV', res.cctv_count, 'CCTV'],
+                    ['구조물경사계', res.tm_count, 'TM'],
+                    ['지표변위계', res.ttw_count, 'TTW'],
+                    ['강우계', res.rain_count, 'RAIN'],
+                    ['지표경사계', res.ttm_count, 'TTM'],
+                    ['GNSS', res.gnss_count, 'GNSS']
+                ]);
+
+                var options = {
+                    backgroundColor: '#28293b',
+                    pieHole: 0.5,
+                    tooltip: {
+                        trigger: 'focus',
+                        ignoreBounds : true,
+                        textStyle: {
+                            fontSize: 13
+                        }
+                    },
+                    pieSliceBorderColor: '#28293b',
+                    colors: ['#464ef7', '#63e578', '#f4bd25', '#dd2ac8', '#2ae8d9','#ff6b6b', '#795548'],
+                    chartArea: { width: "90%", height: "90%" },
+                    legend: { textStyle: { color: '#fff', fontSize: 13, fontName: 'Pretendard' }, width: 144, position: 'outside' },
+                    pieSliceText: 'value',
+                };
+
+                var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+                chart.draw(data, options);
+
+                google.visualization.events.addListener(chart, 'ready', function() {
+                    const svg = document.querySelector("#piechart div > svg");
+                    svg.style.overflow = "visible";
+                });
+
+                google.visualization.events.addListener(chart, 'select', function () {
+                    const selectedItem = chart.getSelection()[0];
+                    if (!selectedItem) return;
+
+                    const selectedValue = data.getValue(selectedItem.row, 2);
+                    const tooltip = document.querySelector('.google-visualization-tooltip');
+                    if (tooltip) tooltip.style.display = "none";
+
+                    const gridId = 'gridDevice';
+                    const $g = $('#' + gridId);
+                    const keyArray = ['district_nm', 'sens_chnl_nm'];
+
+                    // 먼저 데이터 가져와서
+                    getEquipment({ limit, offset, key: selectedValue }).then((res) => {
+                        const rows = res || [];
+
+                        // 기존 그리드 있으면 재사용, 없으면 생성
+                        if ($g[0] && $g[0].grid) {
+                            const addData = actFormattedData(rows, keyArray);
+                            $g.jqGrid('clearGridData', true);
+                            addData.forEach(row => $g.jqGrid('addRowData', row.id, row));
+
+                            // 기존 필터 유지
+                            const currentFilters = $g.jqGrid('getGridParam','postData').filters;
+                            $g.jqGrid('setGridParam', {
+                                search: !!currentFilters,
+                                postData: { filters: currentFilters || '', key: selectedValue },
+                                page: 1
+                            }).trigger('reloadGrid');
+                        } else {
+                            // 최초 생성 (알람 이력과 동일한 setJqGridTable 사용)
+                            setJqGridTable(
+                                rows,                       // data
+                                columnDevice,               // columns
+                                headerDevice,               // headers
+                                gridCompleteDevice,         // gridComplete
+                                null,                       // onSelectRow 등 필요 없으면 null
+                                keyArray,                   // key array
+                                gridId,                     // table id
+                                limit,                      // paging
+                                offset,                     // paging
+                                getEquipment,               // reload function
+                                null,                       // footerCallback 등
+                                null                        // extra
+                            );
+
+                            $g.jqGrid('setGridParam', {
+                                beforeRequest: function () {
+                                    let p = Object.assign(
+                                        $g.jqGrid('getGridParam','postData'),
+                                        $('.ui-search-input input').filter(function(){ return !!this.value; }).serializeObject()
+                                    );
+                                    $g.setGridParam({ postData: Object.assign(p, { key: selectedValue }) });
+                                },
+                                ondblClickRow: function (rowId) {
+                                    $g.find('tr').removeClass('custom_selected');
+                                    const rowData = $(this).getRowData(rowId);
+                                    openSensorInfo(rowData);
+                                }
+                            });
+                        }
+
+                        // 팝업 오픈 & 크기 맞춤
+                        popFancy('#lay-equipment-area', {
+                            dragToClose: false, touch: false,
+                            afterShow: function () {
+                                const $wrap = $g.closest('.bTable');
+                                const $cont = $g.closest('.layer-base-conts');
+                                const h = Math.max(300, ($cont.innerHeight() || 520) - 120);
+                                $g.jqGrid('setGridWidth', $wrap.width());
+                                $g.jqGrid('setGridHeight', h);
+                            }
+                        });
+                    }).catch((e) => console.log('getEquipment fail > ', e));
+                });
+            });
+        }
+    });
 
     // 알림현황 카운트
     function loadAlarmCount() {
@@ -1323,7 +1390,7 @@
             <div class="layer-base-title">장비 목록</div>
             <div class="layer-base-conts">
                 <div class="bTable">
-                    <table class="gridDevice"></table>
+                    <table class="gridDevice" id="gridDevice"></table>
                 </div>
             </div>
         </div>
