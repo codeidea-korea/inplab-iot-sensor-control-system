@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 @Controller
 @RequestMapping("/adminAdd/sensorInfo")
@@ -39,6 +40,20 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
 
     protected SensorInfoController() {
         super(SensorInfoDto.class);
+    }
+
+    /* 센서 채널 관련 MAP */
+    private static final Map<Integer, String> CH_ID_MAP;
+    static {
+        Map<Integer, String> m = new HashMap<>();
+        m.put(1, "X");
+        m.put(2, "Y");
+        m.put(3, "Z");
+        CH_ID_MAP = Collections.unmodifiableMap(m); // 불변화
+    }
+
+    private String mapChannelId(int ch) {
+        return CH_ID_MAP.getOrDefault(ch, String.valueOf(ch));
     }
 
     @Override
@@ -114,6 +129,8 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
 
         List<Map> sensAbbr = commonCodeEditService.getSensorAbbr(Collections.singletonMap("senstype_no", param.get("senstype_no").toString()));
 
+        int chnlCnt = (int) sensAbbr.get(0).get("sens_chnl_cnt");
+
         Map<String, Object> newMap = new HashMap<>();
         newMap.put("table_nm", "tb_sensor_info");
         newMap.put("column_nm", "sens_no");
@@ -138,10 +155,27 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
 
         sensorInfoService.logrInfoInsert(param);
 
-//        logrIdxMapService.create(param);
+//        alertStandardManagementService.create(param);
 
-        alertStandardManagementService.create(param);
-        sensorInitialSettingService.create(param);
+//        sensorInitialSettingService.create(param);
+
+        Map<Integer, String> map = new HashMap<>();
+        map.put(1, "X");
+        map.put(2, "Y");
+        map.put(3, "Z");
+
+        /* chnlCnt만큼 경보기준/초기치 생성 */
+        IntStream.rangeClosed(1, chnlCnt).forEach(ch -> {
+            String mappedId = mapChannelId(ch);
+
+            Map<String, Object> perChParam = new HashMap<>(param);
+            perChParam.put("sens_chnl_id", mappedId);
+            perChParam.put("sens_chnl_nm", param.get("sens_chnl_nm").toString() + "-" + mappedId);
+
+            sensorInitialSettingService.create(perChParam);
+            alertStandardManagementService.create(perChParam);
+            sensorInfoService.chnlCreate(perChParam);
+        });
 
         return sensorInfoService.create(param);
     }

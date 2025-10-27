@@ -117,8 +117,8 @@
 
     <insert id="insertSensorInitialSetting" parameterType="java.util.Map">
         INSERT INTO tb_sensor_init
-        (sens_no)
+        (sens_no, sens_chnl_id)
         VALUES
-        (#{sens_no})
+        (#{sens_no}, #{sens_chnl_id})
     </insert>
 </mapper>

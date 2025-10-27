@@ -114,7 +114,7 @@
     </select>
 
     <select id="selectSensorAbbr" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT sens_abbr
+        SELECT sens_abbr, sens_chnl_cnt
         FROM tb_sensor_type
         WHERE senstype_no = #{senstype_no} LIMIT 1
     </select>

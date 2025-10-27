@@ -204,6 +204,9 @@
             <if test="sens_lat != null">sens_lat,</if>
             <if test="sens_maker != null">sens_maker,</if>
             <if test="model_nm != null">model_nm,</if>
+            <if test="multi_senstype_no != null">multi_senstype_no,</if>
+            <if test="multi_sens_no != null">multi_sens_no,</if>
+            reg_dt
         </trim>
         )
         VALUES (
@@ -212,9 +215,7 @@
             <if test="logr_no != null">#{logr_no},</if>
             <if test="senstype_no != null">#{senstype_no},</if>
             <if test="sens_nm != null">#{sens_nm},</if>
-            <if test="inst_ymd != null">COALESCE(TO_CHAR(TO_DATE(NULLIF(#{inst_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'),
-                ''),
-            </if>
+            <if test="inst_ymd != null">COALESCE(TO_CHAR(TO_DATE(NULLIF(#{inst_ymd}, ''), 'YYYY-MM-DD'), 'YYYYMMDD'),''),</if>
             <if test="sect_no != null">#{sect_no}::int,</if>
             <if test="nonrecv_limit_min != null">#{nonrecv_limit_min}::int,</if>
             <if test="alarm_use_yn != null">#{alarm_use_yn},</if>
@@ -225,6 +226,9 @@
             <if test="sens_lat != null">#{sens_lat}::double precision,</if>
             <if test="sens_maker != null">#{sens_maker},</if>
             <if test="model_nm != null">#{model_nm},</if>
+            <if test="multi_senstype_no != null">#{multi_senstype_no},</if>
+            <if test="multi_sens_no != null">#{sens_nm},</if>
+            now()
         </trim>
         )
     </insert>
@@ -303,5 +307,24 @@
             tb_logr_idx_map
         WHERE
             senstype_no = #{senstypeNo}
+    </select>
+
+    <select id="insertSensorChnl" parameterType="java.util.Map">
+        INSERT INTO tb_sensor_chnl (
+            sens_no,
+            sens_chnl_id,
+            senstype_no,
+            sens_chnl_nm,
+            logr_no,
+            reg_dt
+        )
+        VALUES (
+            #{sens_no},
+            #{sens_chnl_id},
+            #{senstype_no},
+            #{sens_chnl_nm},
+            #{logr_no},
+            now()
+        )
     </select>
 </mapper>

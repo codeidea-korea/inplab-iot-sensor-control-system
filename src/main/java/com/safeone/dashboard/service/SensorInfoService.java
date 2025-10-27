@@ -42,6 +42,10 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
         return mapper.insertSensorInfo(param) > 0;
     }
 
+    public void chnlCreate(Map param) {
+        mapper.insertSensorChnl(param);
+    }
+
     @Override
     public SensorInfoDto read(int id) {
         // TODO Auto-generated method stub
@@ -169,6 +173,7 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
             newMap.put("sens_chnl_id", sendChnlId);
             newMap.put("logr_chnl_seq", i - 1);
             newMap.put("senstype_no", senstypeNo);
+            newMap.put("sens_chnl_nm", param.get("sens_chnl_nm").toString() + "-" + sendChnlId);
 
             logrIdxMapService.create(newMap);
         }
