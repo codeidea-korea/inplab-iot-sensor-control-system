@@ -6,6 +6,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.sensorinitialsetting.SensorInitialSettingDto;
+import com.safeone.dashboard.service.ModifySensorService;
+import com.safeone.dashboard.service.SensorService;
 import com.safeone.dashboard.service.sensorinitialsetting.SensorInitialSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,6 +26,9 @@ import java.util.Map;
 public class SensorInitialSettingController extends JqGridAbstract<SensorInitialSettingDto> {
     @Autowired
     private SensorInitialSettingService sensorInitialSettingService;
+
+    @Autowired
+    private ModifySensorService modifySensorService;
 
     protected SensorInitialSettingController() {
         super(SensorInitialSettingDto.class);
@@ -90,9 +95,23 @@ public class SensorInitialSettingController extends JqGridAbstract<SensorInitial
         JsonArray jArray = ((new JsonParser()).parse(param.get("jsonData").toString())).getAsJsonArray();
         for(JsonElement el : jArray) {
             Map m = (new Gson()).fromJson(el, Map.class);
+
+            /* 센서 신규 등록으로 인해 보정값이 0인 데이터일 경우, 해당 센서의 최신 실데이터의 (tb_measure_details) 계측값을 보정값으로 설정 */
+            String formulData = m.get("formul_data").toString();
+            if (formulData.equals("0")) {
+                /* tb_measure_details > sens_no / order by reg_dt / limit 1 로 뽑은 formul_data를 m에 엎기 */
+                Map measureFormulData = modifySensorService.getMeasureDetails(m);
+                if (measureFormulData != null) {
+                    m.put("formul_data", measureFormulData.get("formul_data"));
+                }
+            }
+            /* 빈 값으로 설정할 경우, 해당 센서의 보정값을 0으로 초기화할 수 있도록 설정 */
+            else if (formulData.equals("")) {
+                m.put("formul_data", "0");
+            }
+
             sensorInitialSettingService.update(m);
         }
         return true;
     }
-
 }

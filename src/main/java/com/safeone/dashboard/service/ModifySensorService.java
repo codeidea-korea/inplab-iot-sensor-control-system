@@ -19,4 +19,5 @@ public interface ModifySensorService {
     List<SensorDto> getAll(Map<String, Object> param);
 
     SensorCountDto getTotalCountByStatus();
+    Map<String, Object> getMeasureDetails(Map<String, Object> param);
 }

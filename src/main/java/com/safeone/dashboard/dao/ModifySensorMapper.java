@@ -45,4 +45,8 @@ public class ModifySensorMapper {
     public SensorCountDto getTotalCountByStatus() {
         return sqlSession.selectOne("com.safeone.dashboard.dao.ModifySensorMapper.selectTotalCountByStatus");
     }
+
+    public Map<String, Object> getMeasureDetails(Map<String, Object> param) {
+        return sqlSession.selectOne("com.safeone.dashboard.dao.ModifySensorMapper.getMeasureDetails", param);
+    }
 }

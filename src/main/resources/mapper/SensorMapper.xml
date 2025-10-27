@@ -482,4 +482,13 @@
                 COUNT(*) FILTER (WHERE comm_status = '수신')                 AS conCnt
         FROM comm;
     </select>
+
+    <select id="getMeasureDetails" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT *
+        FROM tb_measure_details
+        WHERE sens_no = #{sens_no}
+        AND sens_chnl_id = #{og_sens_chnl_id}
+        ORDER BY meas_dt DESC
+        LIMIT 1
+    </select>
 </mapper>

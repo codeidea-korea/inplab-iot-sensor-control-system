@@ -77,4 +77,8 @@ public class ModifySensorServiceImpl implements ModifySensorService {
     public SensorCountDto getTotalCountByStatus(){
         return modifySensorMapper.getTotalCountByStatus();
     }
+
+    public Map<String, Object> getMeasureDetails(Map<String, Object> param) {
+        return modifySensorMapper.getMeasureDetails(param);
+    }
 }
