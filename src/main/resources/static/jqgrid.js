@@ -4,9 +4,11 @@ function initGrid($grid, path, $gridWrapper, options = {
 }, loadCompleteCallback, formatters, selectableRows) {
     // multi select 제거
     /* 20251020 - 커밋내역상 250224에 전체 선택 제거 요청이 있었던 걸로 보여지나 [ 경보기준관리/센서초기치설정 ] 에서 노출시켜달라고 재요청들어온 걸로 보여지므로 아래와 같이 전체 주석 처리 */
-    // $grid.on('jqGridInitGrid', function () {
-    //     $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
-    // });
+    if(path.includes("/measure-details")){
+        $grid.on('jqGridInitGrid', function () {
+            $(this).closest(".ui-jqgrid").find(".ui-jqgrid-htable th input[type='checkbox']").remove();
+        });
+    }
 
     getColumns(path, (columns) => {
         const columnData = {

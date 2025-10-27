@@ -73,6 +73,7 @@
         ON tli.district_no = tdi.district_no
         WHERE tdi.district_no = #{district_no}))
         GROUP BY tsinfo.sens_nm, tsinfo.sens_no
+        ORDER BY senstype_no, sens_no, sens_chnl_id
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
         </if>

@@ -81,6 +81,10 @@
             vertical-align: top;
         }
 
+        #district-select {
+            width: 100px;
+        }
+
         .modal-header input[type="datetime-local"] {
             width: 100%;
             height: 3.6rem;
@@ -228,14 +232,6 @@
             cursor: pointer;
         }
 
-        .search-top-label {
-            color: #ffffff76;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-        }
-
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -268,11 +264,61 @@
                 transform: rotate(360deg);
             }
         }
+
+        .search-top {
+            position: static;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .search-top_ {
+            margin-bottom: 0;
+        }
+
+        #container input[type="date"] {
+            width: 80%;
+            height: 3.6rem;
+            padding: 0 2rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            text-align: center;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .contents-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script src="jquery.loading.js"></script>
     <script>
         $(function () {
+            function formatDateOnly(date) {
+                const pad = (n) => n.toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const month = pad(date.getMonth() + 1);
+                const day = pad(date.getDate());
+                return year + "-" + month + "-" + day;
+            }
+
+            const today = new Date();
+
+            const end = new Date(today);
+
+            const start = new Date(today);
+            start.setMonth(start.getMonth() - 1);
+
+            $('#start-date_left').val(formatDateOnly(start));
+            $('#end-date_left').val(formatDateOnly(end));
+
             $('.tab-button').click(function () {
                 $('.tab-button').removeClass('active');
                 $(this).addClass('active');
@@ -280,6 +326,7 @@
                 $('#' + $(this).data('chart')).addClass('active').show();
             });
             $('#chart1').show();
+
             const $districtSelect = $('#district-select');
 
             const $leftGrid = $("#left-jq-grid");
@@ -295,7 +342,23 @@
                 allRowIds.forEach(rowId => {
                     $leftGrid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
                 });
-            })
+            }, {
+                maint_sts_cd: {
+                    formatter: (cellValue, _options, _rowObject) => {
+                        let value = '';
+                        if (cellValue === 'MTN001') {
+                            value = '정상';
+                        } else if (cellValue === 'MTN002') {
+                            value = '망실';
+                        } else if (cellValue === 'MTN003') {
+                            value = '점검';
+                        } else if (cellValue === 'MTN004') {
+                            value = '철거';
+                        }
+                        return value
+                    }
+                }
+            }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"})
 
             const $rightGrid = $("#right-jq-grid");
             const rightPath = "/measure-details-data"
@@ -303,9 +366,26 @@
                 multiselect: true,
                 multiboxonly: false,
                 custom: {
-                    useFilterToolbar: false,
+                    useFilterToolbar: true,
+                    multiSelect: true,
                 }
-            })
+            }, null, {
+                maint_sts_cd: {
+                    formatter: (cellValue, _options, _rowObject) => {
+                        let value = '';
+                        if (cellValue === 'MTN001') {
+                            value = '정상';
+                        } else if (cellValue === 'MTN002') {
+                            value = '망실';
+                        } else if (cellValue === 'MTN003') {
+                            value = '점검';
+                        } else if (cellValue === 'MTN004') {
+                            value = '철거';
+                        }
+                        return value
+                    }
+                }
+            }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"});
 
             $.ajax({
                 url: '/adminAdd/districtInfo/all',
@@ -349,7 +429,9 @@
                         page: 1,
                         postData: {
                             ...$rightGrid.jqGrid('getGridParam', 'postData'),
-                            sens_no: targetArr[0].sens_no
+                            sens_no: targetArr[0].sens_no,
+                            meas_dt_start: $('#start-date_left').val(),
+                            meas_dt_end: $('#end-date_left').val()
                         }
                     }).trigger('reloadGrid', [{page: 1}]);
                     $("#district_nm").text($('#district-select option:selected').text());
@@ -963,13 +1045,25 @@
         </h2>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">센서 계측 현황</h3>
-                <div class="btn-group">
-                    <p class="search-top-label">현장명</p>
-                    <select id="district-select">
-                        <option value="">선택</option>
-                    </select>
-                    <a id="search-btn">조회</a>
+                <div class="contents-header">
+                    <h3 class="txt">센서 계측 현황</h3>
+                    <div class="search-top">
+                        <p class="search-top-label">현장명</p>
+                        <select id="district-select">
+                            <option value="">선택</option>
+                        </select>
+                        <div>
+                            <p class="search-top-label">조회기간</p>
+                            <input id="start-date_left" type="date"/>
+                        </div>
+                        <div>
+                            <p class="search-top-label">~</p>
+                            <input id="end-date_left" type="date"/>
+                        </div>
+                    </div>
+                    <div class="search-top_">
+                        <a id="search-btn" class="btns" >조회</a>
+                    </div>
                 </div>
                 <div id="left-grid-wrapper" class="contents-in">
                     <table id="left-jq-grid"></table>
@@ -979,12 +1073,7 @@
             <div class="contents-re cctv_area">
                 <div class="contents_header">
                     <h3 class="txt">데이터값 수정</h3>
-                    <div class="btn-group-2" style="display: flex; gap: 2px; margin-right: auto">
-                        <a id="district_nm">현장명</a>
-                        <a id="sens_tp_nm">센서타입</a>
-                        <a id="sens_nm">센서명</a>
-                    </div>
-                    <div class="search-btn-wrapper" style="display: flex">
+                    <div class="search-btn-wrapper" style="display: flex; margin-left: auto">
                         <a id="add-row">행추가</a>
                         <a id="del-row">행삭제</a>
                         <a id="save-button">저장</a>

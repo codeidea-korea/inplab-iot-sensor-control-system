@@ -18,12 +18,12 @@ public class MeasureDetailsDto implements Serializable {
     private String sens_nm;
 
     @FieldLabel(title = "최종계측일시", width = 300)
-    private String init_apply_dt;
+    private String last_apply_dt;
 
     @FieldLabel(title = "단면")
     private String sect_no;
 
-    @FieldLabel(title = "센서상태", width = 150)
+    @FieldLabel(title = "센서상태", width = 150, type = "selectable")
     private String maint_sts_cd;
 
     @FieldLabel(title = "통신상태", type = "hidden")

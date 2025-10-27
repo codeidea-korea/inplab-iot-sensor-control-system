@@ -3,29 +3,29 @@
 
 <mapper namespace="com.safeone.dashboard.dao.MeasureDetailsDataMapper">
     <sql id="rowSearch">
-        <!--        <if test="sens_tp_nm != null and sens_tp_nm != ''">-->
-        <!--            and tst.sens_tp_nm ilike '%' || #{sens_tp_nm} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="sens_nm != null and sens_nm != ''">-->
-        <!--            and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="sens_chnl_nm != null and sens_chnl_nm != ''">-->
-        <!--            and tai.sens_chnl_nm ilike '%' || #{sens_chnl_nm} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="formul_data != null and formul_data != ''">-->
-        <!--            and tsi.formul_data ilike '%' || #{formul_data} || '%'-->
-        <!--        </if>-->
-        <!--        <if test="init_apply_dt_start != null and init_apply_dt_start != '' and init_apply_dt_end != null and init_apply_dt_end != ''">-->
-        <!--            and tsi.init_apply_dt::timestamp between concat(#{init_apply_dt_start},' 00:00:00')::timestamp and-->
-        <!--            concat(#{init_apply_dt_end},' 23:59:59')::timestamp-->
-        <!--        </if>-->
-        <!--        <if test="last_apply_dt_start != null and last_apply_dt_start != '' and last_apply_dt_end != null and last_apply_dt_end != ''">-->
-        <!--            and tsi.last_apply_dt::timestamp between concat(#{last_apply_dt_start},' 00:00:00')::timestamp and-->
-        <!--            concat(#{last_apply_dt_end},' 23:59:59')::timestamp-->
-        <!--        </if>-->
-        <!--        <if test="emer_status != null and emer_status != ''">-->
-        <!--            and tsi.emer_status ilike '%' || #{emer_status} || '%'-->
-        <!--        </if>-->
+        <if test="sens_tp_nm != null and sens_tp_nm != ''">
+            and tst.sens_tp_nm ilike '%' || #{sens_tp_nm} || '%'
+        </if>
+        <if test="sens_nm != null and sens_nm != ''">
+            and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'
+        </if>
+        <if test="sens_chnl_nm != null and sens_chnl_nm != ''">
+            and tai.sens_chnl_nm ilike '%' || #{sens_chnl_nm} || '%'
+        </if>
+        <if test="formul_data != null and formul_data != ''">
+            and tsi.formul_data ilike '%' || #{formul_data} || '%'
+        </if>
+        <if test="meas_dt_start != null and meas_dt_start != '' and meas_dt_end != null and meas_dt_end != ''">
+            and meas_dt::timestamp between concat(#{meas_dt_start},' 00:00:00')::timestamp and
+            concat(#{meas_dt_end},' 23:59:59')::timestamp
+        </if>
+        <if test="last_apply_dt_start != null and last_apply_dt_start != '' and last_apply_dt_end != null and last_apply_dt_end != ''">
+            and last_apply_dt::timestamp between concat(#{last_apply_dt_start},' 00:00:00')::timestamp and
+            concat(#{last_apply_dt_end},' 23:59:59')::timestamp
+        </if>
+        <if test="emer_status != null and emer_status != ''">
+            and tsi.emer_status ilike '%' || #{emer_status} || '%'
+        </if>
     </sql>
 
     <sql id="rowOrder">
