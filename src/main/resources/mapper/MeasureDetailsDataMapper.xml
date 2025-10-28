@@ -32,34 +32,34 @@
         <trim prefix="order by">
             <choose>
                 <when test="'meas_dt' == sidx and sidx != ''">
-                    A.meas_dt ${sord}
+                    meas_dt ${sord}
                 </when>
                 <when test="'raw_data' == sidx and sidx != ''">
-                    A.raw_data ${sord}
+                    raw_data ${sord}
                 </when>
                 <when test="'formul_data' == sidx and sidx != ''">
-                    A.formul_data ${sord}
+                    formul_data ${sord}
                 </when>
                 <when test="'raw_data_x' == sidx and sidx != ''">
-                    A.raw_data_x ${sord}
+                    raw_data_x ${sord}
                 </when>
                 <when test="'formul_data_x' == sidx and sidx != ''">
-                    A.formul_data_x ${sord}
+                    formul_data_x ${sord}
                 </when>
                 <when test="'raw_data_y' == sidx and sidx != ''">
-                    A.raw_data_y ${sord}
+                    raw_data_y ${sord}
                 </when>
                 <when test="'formul_data_y' == sidx and sidx != ''">
-                    A.formul_data_y ${sord}
+                    formul_data_y ${sord}
                 </when>
                 <when test="'raw_data_z' == sidx and sidx != ''">
-                    A.raw_data_z ${sord}
+                    raw_data_z ${sord}
                 </when>
                 <when test="'formul_data_z' == sidx and sidx != ''">
-                    A.formul_data_z ${sord}
+                    formul_data_z ${sord}
                 </when>
                 <otherwise>
-                    A.latest_reg_dt desc
+                    latest_reg_dt asc
                 </otherwise>
             </choose>
         </trim>
@@ -146,11 +146,11 @@
         and sens_no = #{sens_no}
         <include refid="rowSearch"/>
         GROUP BY sens_no, meas_dt
+        <include refid="rowOrder"/>
         <if test="page != null and page > 0">
             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
         </if>
         ) A
-        <include refid="rowOrder"/>
     </select>
 
     <select id="selectListTotal" parameterType="java.util.Map" resultType="int">
