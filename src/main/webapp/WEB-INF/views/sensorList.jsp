@@ -380,6 +380,11 @@
     <script>
         $(function () {
             $('.tab-button').click(function () {
+                let selectedSensorType = $("#sensor-type-select").val();
+                if(selectedSensorType === "013" || selectedSensorType === "015" || selectedSensorType === "017"){
+                    alert("지표경사계, 구조물경사계, GNSS는 복합센서이므로<br> 캔들차트로 표현이 불가합니다.");
+                    return;
+                }
                 $('.tab-button').removeClass('active');
                 $(this).addClass('active');
                 $('.chart-content').removeClass('active').hide();
@@ -590,7 +595,6 @@
                     });
                 });
             }
-
             const ctx = document.getElementById('myChart1').getContext('2d');
             const myChart = new Chart(ctx, {
                 type: 'line',
@@ -856,6 +860,23 @@
                 myBarChart.update();
             }
         });
+
+        function messageTest() {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: '/message/test',
+                    type: 'GET',
+                    success: function (res) {
+                        console.log(res)
+                        debugger
+                        resolve();
+                    },
+                    error: function () {
+                        reject();
+                    }
+                });
+            });
+        }
     </script>
 </head>
 <body data-pgcode="0000">
@@ -919,7 +940,6 @@
                 <div style="display:flex;">
                     <p class="search-top-label">조회조건</p>
                     <select id="select-condition">
-                        <option value="">선택</option>
                         <option value="daily">일별</option>
                         <option value="hourly">시간별</option>
                     </select>

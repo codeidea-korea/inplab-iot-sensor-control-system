@@ -11,10 +11,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,6 +50,8 @@ public class SmsSenderService {
             int maxOver = getMaxOver(alertStandardList);
 
             // 5. 후보군을 필터링하여 문자를 발송할 대상을 선정한다
+            candidates.get(0).setAlarm_lvl_nm("1차 초과 이상");
+            maxOver = 1;
             List<SmsTargetDto> smsTargets = filterToTarget(candidates, maxOver);
 
             HashMap<String, List<SensInfoDto>> sensInfos = getSensInfos(alertStandardList);
@@ -88,19 +87,38 @@ public class SmsSenderService {
         });
     }
 
+//    private HashMap<String, List<SensInfoDto>> getSensInfos(List<AlertStandardDto> alertStandardList) {
+//        HashMap<String, List<SensInfoDto>> sensInfos = new HashMap<>();
+//
+//        for (AlertStandardDto alertStandard : alertStandardList) {
+//            SensInfoDto sensInfo = mapper.getSensInfo(alertStandard.getSens_no());
+//            if (alertStandard.getOver() != null) {
+//                sensInfo.setOver(true);
+//            }
+//            if (sensInfos.containsKey(sensInfo.getSens_tp_nm())) {
+//                List<SensInfoDto> test = sensInfos.get(sensInfo.getSens_tp_nm());
+//                sensInfos.get(sensInfo.getSens_tp_nm()).add(sensInfo);
+//            } else {
+//                sensInfos.put(sensInfo.getSens_tp_nm(), Collections.singletonList(sensInfo));
+//            }
+//        }
+//
+//        return sensInfos;
+//    }
+
     private HashMap<String, List<SensInfoDto>> getSensInfos(List<AlertStandardDto> alertStandardList) {
         HashMap<String, List<SensInfoDto>> sensInfos = new HashMap<>();
 
         for (AlertStandardDto alertStandard : alertStandardList) {
             SensInfoDto sensInfo = mapper.getSensInfo(alertStandard.getSens_no());
+
             if (alertStandard.getOver() != null) {
                 sensInfo.setOver(true);
             }
-            if (sensInfos.containsKey(sensInfo.getSens_tp_nm())) {
-                sensInfos.get(sensInfo.getSens_tp_nm()).add(sensInfo);
-            } else {
-                sensInfos.put(sensInfo.getSens_tp_nm(), Collections.singletonList(sensInfo));
-            }
+
+            sensInfos
+                    .computeIfAbsent(sensInfo.getSens_tp_nm(), k -> new ArrayList<>())
+                    .add(sensInfo);
         }
 
         return sensInfos;
