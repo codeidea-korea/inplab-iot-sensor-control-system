@@ -85,6 +85,9 @@ public class CctvServiceImpl implements CctvService {
                 continue;
             }
 
+            /* etc1, etc3 setting */
+            map = setEtc(map);
+
             insCount += cctvMapper.insCctv(map);
         }
 
@@ -96,6 +99,16 @@ public class CctvServiceImpl implements CctvService {
         return on;
     }
 
+    public Map<String, Object> setEtc(Map<String, Object> map) {
+        String etc1 = "rtsp://" + map.get("cctv_conn_id") + ":" + map.get("cctv_conn_pwd") + "@" + map.get("cctv_ip") + ":" + map.get("rtsp_port") + "/profile2/media.smp";
+        String etc3 = "http://" + map.get("cctv_ip") + ":" + map.get("web_port");
+
+        map.put("etc1", etc1);
+        map.put("etc3", etc3);
+
+        return map;
+    }
+
     public ObjectNode udtCctv(List<UdtAdminAddCctvDto> udtAdminAddCctvDtoList) {
         ObjectMapper om = new ObjectMapper();
         ObjectNode on = om.createObjectNode();
@@ -105,6 +118,10 @@ public class CctvServiceImpl implements CctvService {
 
         for (UdtAdminAddCctvDto dto : udtAdminAddCctvDtoList) {
             Map<String, Object> map = CommonUtils.dtoToMap(dto);
+
+            /* etc1, etc3 setting */
+            map = setEtc(map);
+
             count += cctvMapper.udtCctv(map);
         }
 

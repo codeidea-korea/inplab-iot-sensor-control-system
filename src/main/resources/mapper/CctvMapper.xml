@@ -53,7 +53,7 @@
 			AND A.cctv_no = #{cctv_no}
 		</if>
 		<if test="cctv_nm != null and !cctv_nm.equals('')">
-			AND A.cctv_nm ILIKE '%' || #{cctv_nm} || '%'
+			AND A.cctv_nm = #{cctv_nm}
 		</if>
 	</sql>
 
@@ -80,7 +80,9 @@
 			admin_center,
 			partner_comp_id,
 			partner_comp_user_nm,
-			partner_comp_user_phone
+			partner_comp_user_phone,
+		    etc1,
+			etc3
 		) VALUES (
 			#{cctv_no},
 			#{cctv_nm},
@@ -102,7 +104,9 @@
 			#{admin_center},
 			#{partner_comp_id},
 			#{partner_comp_user_nm},
-			#{partner_comp_user_phone}
+			#{partner_comp_user_phone},
+			#{etc1},
+			#{etc3}
 		)
 	</insert>
 
@@ -131,6 +135,8 @@
 			<if test='partner_comp_id != null'>partner_comp_id = #{partner_comp_id},</if>
 			<if test='partner_comp_user_nm != null'>partner_comp_user_nm = #{partner_comp_user_nm},</if>
 			<if test='partner_comp_user_phone != null'>partner_comp_user_phone = #{partner_comp_user_phone},</if>
+			<if test='etc1 != null'>etc1 = #{etc1},</if>
+			<if test='etc3 != null'>etc3 = #{etc3},</if>
 			mod_dt = current_timestamp,
 		</trim>
 		WHERE 1 = 1
