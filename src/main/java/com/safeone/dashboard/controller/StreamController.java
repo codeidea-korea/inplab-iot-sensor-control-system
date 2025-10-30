@@ -244,13 +244,13 @@ public class StreamController {
         
     }
 
-    private static void getFFMpegOutput(String rtspUrl, OutputStream os) {
+    private static void getFFMpegOutput(String url, OutputStream os) {
         FFmpeg.atPath()
             // .addArgument("-re")
             .addArgument("-y")
             .addArguments("-correct_ts_overflow", "0")
             .addArguments("-rtsp_transport", "tcp")
-            .addArguments("-i", rtspUrl)
+            .addArguments("-i", url)
             .addArguments("-vcodec", "libx264")
             .addArguments("-pix_fmt", "yuvj420p")
             .addArgument("-an")
@@ -258,8 +258,7 @@ public class StreamController {
             .addArguments("-max_delay", "10")
             .addArguments("-movflags", "faststart")
             .addArguments("-b:v", "4M")
-            .addOutput(PipeOutput.pumpTo(os)
-                    .setFormat("ismv"))
+            .addOutput(PipeOutput.pumpTo(os).setFormat("mjpeg"))
             .addArgument("-nostdin")
             .setOverwriteOutput(true)
             .execute();
