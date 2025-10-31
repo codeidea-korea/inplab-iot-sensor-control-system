@@ -268,7 +268,7 @@
     const LATENCY = 60 * 1000;
     const ALARM_EFFECT_TIME = 500;
     const MARKER_CHANGE_LEVEL = 17.5;
-    let wsUrl = 'ws://localhost:8080';
+    let wsUrl = "wss://goldencity.codeidea.io";
     let cctvWs;
     const _assetTypes = ${assetTypes};
     const _areaInfo = ${areaInfo};
@@ -1146,6 +1146,7 @@
                         type: type,
                         asset_id: cctv.cctv_no,
                         zone_id: districtNo,
+                        etc1: cctv.etc1
                     });
                 window.markers.assets.push(cctvMaker);
             });
