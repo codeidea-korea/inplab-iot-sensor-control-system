@@ -112,15 +112,25 @@
     </select>
 
     <select id="selectAlarmCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
-        select
-            count(CASE WHEN tad.alarm_lvl_cd = 'ARM001' THEN 1 END) AS interest_cnt,
-            count(CASE WHEN tad.alarm_lvl_cd= 'ARM002' THEN 1 END) AS notice_cnt,
-            count(CASE WHEN tad.alarm_lvl_cd= 'ARM003' THEN 1 END) AS warning_cnt,
-            count(CASE WHEN tad.alarm_lvl_cd= 'ARM004' THEN 1 END) AS danger_cnt
-        from
-            tb_alarm_details tad
-        where 1=1
-            and tad.reg_dt::timestamp > now() - interval '1 minutes';
+        SELECT
+            COUNT(CASE
+                      WHEN tmd.formul_data BETWEEN tai."1st_lvl_min" AND tai."1st_lvl_max" THEN 1
+                END) AS interest_cnt,
+            COUNT(CASE
+                      WHEN tmd.formul_data BETWEEN tai."2nd_lvl_min" AND tai."2nd_lvl_max" THEN 1
+                END) AS notice_cnt,
+            COUNT(CASE
+                      WHEN tmd.formul_data BETWEEN tai."3rd_lvl_min" AND tai."3rd_lvl_max" THEN 1
+                END) AS warning_cnt,
+            COUNT(CASE
+                      WHEN tmd.formul_data BETWEEN tai."4th_lvl_min" AND tai."4th_lvl_max" THEN 1
+                END) AS danger_cnt
+        FROM tb_measure_details tmd
+                 JOIN tb_alarm_info tai
+                      ON tmd.sens_no = tai.sens_no
+                          AND tmd.sens_chnl_id = tai.sens_chnl_id
+        WHERE 1=1
+          AND tmd.meas_dt > NOW() - interval '1 minute'
     </select>
 
     <select id="selectAlarmList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.AlarmListDto">
