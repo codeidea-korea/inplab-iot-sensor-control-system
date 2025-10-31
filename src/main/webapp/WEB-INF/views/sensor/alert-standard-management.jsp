@@ -35,7 +35,8 @@
                     data: {jsonData: JSON.stringify(selectedData)},
                     dataType: 'json',
                     success: function (_res) {
-                        alert('저장되었습니다.')
+                        alert('저장되었습니다.');
+                        $grid.trigger('reloadGrid');
                     },
                     error: function (_res) {
                         alert('저장에 실패하였습니다. 입력 값을 확인해 주세요.')
