@@ -61,26 +61,64 @@
 
     <select id="selectSensorInitialSettingList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.sensorinitialsetting.SensorInitialSettingDto">
-        select tsi.formul_data
-        , tsi.init_apply_dt
-        , tst.sens_tp_nm
-        , tsi.last_apply_dt
-        , tsi.emer_status
-        , tsi.sens_chnl_id
-        , tsi.sens_chnl_id as og_sens_chnl_id
-        , tsi.sens_no
-        , tsinfo.sens_nm
-        from tb_sensor_init tsi
-        left join tb_sensor_info tsinfo on tsi.sens_no = tsinfo.sens_no
-        left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
-        WHERE 1 = 1
-        and tsi.sens_no in
-        (select tlim.sens_no
-        from tb_logr_idx_map tlim
-        where logr_no in (select tli.logr_no
-        from tb_district_info tdi
-        left outer join tb_logger_info tli on tli.district_no = tdi.district_no
-        where tdi.district_no = #{district_no}))
+<!--        select tsi.formul_data-->
+<!--        , tsi.init_apply_dt-->
+<!--        , tst.sens_tp_nm-->
+<!--        , tsi.last_apply_dt-->
+<!--        , tsi.emer_status-->
+<!--        , tsi.sens_chnl_id-->
+<!--        , tsi.sens_chnl_id as og_sens_chnl_id-->
+<!--        , tsi.sens_no-->
+<!--        , tsinfo.sens_nm-->
+<!--        from tb_sensor_init tsi-->
+<!--        left join tb_sensor_info tsinfo on tsi.sens_no = tsinfo.sens_no-->
+<!--        left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no-->
+<!--        WHERE 1 = 1-->
+<!--        and tsi.sens_no in-->
+<!--        (select tlim.sens_no-->
+<!--        from tb_logr_idx_map tlim-->
+<!--        where logr_no in (select tli.logr_no-->
+<!--        from tb_district_info tdi-->
+<!--        left outer join tb_logger_info tli on tli.district_no = tdi.district_no-->
+<!--        where tdi.district_no = #{district_no}))-->
+<!--        <include refid="rowSearch"/>-->
+<!--        <include refid="rowOrder"/>-->
+<!--        <if test="page != null and page > 0">-->
+<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
+<!--        </if>-->
+
+        SELECT
+            tsi.formul_data AS formul_data,
+            tsi.init_apply_dt,
+            tst.sens_tp_nm,
+            tsi.last_apply_dt,
+            tsi.emer_status,
+            tsi.sens_chnl_id,
+            tsi.sens_chnl_id AS og_sens_chnl_id,
+            tsi.sens_no,
+            tsinfo.sens_nm,
+            tmd.formul_data AS real_data
+        FROM tb_sensor_init tsi
+        LEFT JOIN tb_sensor_info tsinfo ON tsi.sens_no = tsinfo.sens_no
+        LEFT JOIN tb_sensor_type tst ON tsinfo.senstype_no = tst.senstype_no
+        LEFT JOIN LATERAL (
+            SELECT sens_no, formul_data, sens_chnl_id
+            FROM tb_measure_details tmd2
+            WHERE tmd2.sens_no = tsi.sens_no
+            AND tmd2.sens_chnl_id = tsi.sens_chnl_id
+            ORDER BY tmd2.meas_dt DESC
+            LIMIT 1
+        ) tmd ON TRUE
+            WHERE tsi.sens_no IN (
+            SELECT tlim.sens_no
+            FROM tb_logr_idx_map tlim
+            WHERE logr_no IN (
+                SELECT tli.logr_no
+                FROM tb_district_info tdi
+                LEFT OUTER JOIN tb_logger_info tli ON tli.district_no = tdi.district_no
+                WHERE tdi.district_no = #{district_no}
+                )
+            )
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
@@ -110,6 +148,7 @@
             formul_data = #{formul_data}::float ,
         </if>
         emer_status = #{emer_status}
+        , init_apply_dt = now()
         , mod_dt = now()
         WHERE sens_no = #{sens_no}
         and sens_chnl_id = #{og_sens_chnl_id}

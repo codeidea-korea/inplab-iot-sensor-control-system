@@ -23,8 +23,11 @@ public class SensorInitialSettingDto implements Serializable {
     @FieldLabel(title = "채널명", type = "hidden")
     private String og_sens_chnl_id;
 
-    @FieldLabel(title = "측정값(보정값)", type = "editable")
+    @FieldLabel(title = "초기치", type = "editable")
     private String formul_data;
+
+    @FieldLabel(title = "측정값")
+    private String real_data;
 
     @FieldLabel(title = "경보상태", type = "editable")
     private String emer_status;
@@ -37,5 +40,4 @@ public class SensorInitialSettingDto implements Serializable {
 
     @FieldLabel(title = "센서_no", type = "hidden")
     private String sens_no;
-
 }
