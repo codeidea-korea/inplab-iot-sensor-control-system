@@ -71,7 +71,7 @@
                     MG.mod_dt ${sord}
                 </when>
                 <otherwise>
-                    district_nm, senstype_no, sens_no, sens_chnl_id asc
+                    district_nm, senstype_no, sens_no, sens_chnl_nm asc
                 </otherwise>
             </choose>
         </trim>
@@ -101,7 +101,7 @@
                 , A.sect_no
                 , A.district_no
                 , A.sens_chnl_id
-                , to_char(A.reg_dt, 'YYYY-MM-DD') AS reg_dt
+                , to_char(A.mapping_dt, 'YYYY-MM-DD') AS mapping_dt
                 , A.senstype_no
             FROM tb_logr_idx_map A
         ) MG
@@ -157,6 +157,7 @@
             <if test="district_no != null">, district_no</if>
             <if test="senstype_no != null">, senstype_no</if>
             , reg_dt
+            , mapping_dt
         ) VALUES (
             <if test="sens_no != null">#{sens_no}</if>
             <if test="sens_chnl_id != null">, #{sens_chnl_id}</if>
@@ -168,13 +169,15 @@
             <if test="district_no != null">, #{district_no}</if>
             <if test="senstype_no != null">, #{senstype_no}</if>
             , current_timestamp
+            , current_timestamp
         )
     </insert>
 
 
     <update id="updateLogrIdxMap" parameterType="java.util.Map">
         update tb_logr_idx_map set
-            mod_dt = now()
+            mod_dt = now(),
+            mapping_dt = now()
         <if test="sens_no != null">
             , sens_no = #{sens_no}
         </if>
@@ -210,6 +213,7 @@
     <update id="updateLogrIdx" parameterType="com.safeone.dashboard.dto.LogrIdxMapDto">
         update tb_logr_idx_map set
             mod_dt = now()
+            , mapping_dt = now()
             , logr_idx_no = #{logr_idx_no}
         where sens_no = #{sens_no}
             and logr_chnl_seq = CAST (#{logr_chnl_seq} AS INTEGER);
