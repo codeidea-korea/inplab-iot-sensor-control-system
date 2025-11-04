@@ -98,7 +98,7 @@
                     MG.mod_dt ${sord}
                 </when>
                 <otherwise>
-                    MG.sens_no
+                    MG.logr_no, MG.sens_no, MG.sens_nm
                 </otherwise>
             </choose>
         </trim>

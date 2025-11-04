@@ -68,7 +68,7 @@
             }, {
                 sens_chnl_id: {
                     formatter: function (cellValue, options, rowObject) {
-                        return cellValue ? rowObject.sens_nm + '-' + cellValue : "";
+                        return cellValue ? rowObject.sens_nm + '-' + cellValue : rowObject.sens_nm;
                     }
                 }
             })

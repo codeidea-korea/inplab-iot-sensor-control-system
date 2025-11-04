@@ -509,12 +509,14 @@
         <h2 class="txt">센서 모니터링</h2>
         <div id="contents">
             <div class="contents-re">
-                <h3 class="txt">센서 그룹핑</h3>
-                <div class="btn-group">
-                    <p class="search-top-label">현장명</p>
-                    <select id="district-select">
-                        <option value="">선택</option>
-                    </select>
+                <div class="contents_header">
+                    <h3 class="txt">센서 그룹핑</h3>
+                    <div class="btn-group">
+                        <p class="search-top-label">현장명</p>
+                        <select id="district-select">
+                            <option value="">선택</option>
+                        </select>
+                    </div>
                 </div>
                 <div id="grid-wrapper" class="contents-in">
                     <table id="jq-grid"></table>
