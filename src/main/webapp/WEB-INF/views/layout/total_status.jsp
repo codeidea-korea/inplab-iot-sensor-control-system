@@ -3,6 +3,7 @@
 <script type="text/javascript" src="/jqgrid.js"></script>
 <script type="text/javascript">
     let $alarmGrid, $sensorGrid, $cctvGrid, $deviceGrid, $alarmHistoryGrid, $setInterval0, $setInterval1, $setInterval2;
+    let param = {"view_flag": "N"};
 
     // const alarmInterval = function () {
     //     loadAlarmCount();           // 알람현황 횟수
@@ -12,6 +13,7 @@
         loadAlarmCount();           // 알람현황 횟수
         loadSystemCount()           // 시스템 상태
         loadAlarmHistory();         // 알람 이력
+        loadAlarmMessage();         // 토스트 메세지 출력
     };
 
     const weatherInterval = function () {
@@ -1099,35 +1101,111 @@
 
                 contents += '<p class="title">' + res[idx].sens_nm + ' > ' + text + '</p>';
                 contents += '<p class="title">' + res[idx].district_nm + '</p>';
-                contents += '<p class="day">' + fmtKST(res[idx].meas_dt) + '</p>';
+                contents += '<p class="day">' + fmtKST(res[idx].reg_dt) + '</p>';
                 contents += '</div>';
 
                 $('.overall-status_re .alarm-list li:eq(' + idx + ')').html(contents);
-
-                // ── 여기서 1분 이내만 토스트 ──
-                const measMs = toMs(res[idx].meas_dt);
-                const diffMs = Math.abs(now - measMs);
-
-                if (diffMs <= 60 * 1000) {
-                    const node = document.createElement('div');
-                    node.innerHTML = contents;
-                    Toastify({
-                        node,
-                        duration: 3000,
-                        className: 'toast-fixed',
-                        gravity: 'top',
-                        position: 'right',
-                        close: true,
-                        stopOnFocus: true,
-                        style: { zIndex: 2147483647 }
-                    }).showToast();
-                }
             });
         });
     }
 
+    function loadAlarmMessage() {
+        // 이전 알람 전체 제거
+        $("#toast-container").remove();
+
+        // 컨테이너 생성
+        const container = $(`
+        <div id="toast-container">
+            <div id="right-alarm"></div>
+        </div>
+    `).css({
+            position: "fixed",
+            top: "0px",
+            right: "10px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            zIndex: 2147483647
+        });
+
+        $("body").append(container);
+
+        const wrapper = container.find("#right-alarm");
+
+        if (!document.getElementById("alarm-style")) {
+            const style = `
+            <style id="alarm-style">
+                .right-alarm_re {
+                    opacity: 0;
+                    transform: translateX(20px);
+                    transition: all 0.5s ease-out;
+                }
+                .right-alarm_re.show {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            </style>
+        `;
+            $("head").append(style);
+        }
+
+        $.get("/alarmMessage", param, function (res) {
+            if (!Array.isArray(res)) return;
+
+            $.each(res, function (idx) {
+                let text = "";
+                let step = "";
+                const level = res[idx].alarm_lvl_cd;
+
+                if (level === "ARM001") text = "관심", step = "step1";
+                else if (level === "ARM002") text = "주의", step = "step2";
+                else if (level === "ARM003") text = "경계", step = "step3";
+                else if (level === "ARM004") text = "심각", step = "step4";
+
+                let contents = "";
+                contents += '<div class="right-alarm_re" ' + step + '>';
+                contents += '  <button type="button" class="close-alarm">';
+                contents += '    <img src="/images/close-alarm.png" alt="close">';
+                contents += '  </button>';
+                contents += '  <p class="icon"><span data-type="sensor"></span></p>';
+                contents += '  <dl>';
+                contents += '    <dt>' + text + ' / ' + res[idx].district_nm + '</dt>';
+                contents += '    <dd>' + res[idx].sens_tp_nm + ' ' + res[idx].sens_nm + '&nbsp;';
+                contents += '      <span point>센서값 ' + res[idx].formul_data + '</span>';
+                contents += '      <p class="small">' + fmtKST(res[idx].reg_dt) + '</p>';
+                contents += '    </dd>';
+                contents += '  </dl>';
+                contents += '</div>';
+
+                const $node = $(contents);
+
+                // 닫기 버튼
+                $node.find(".close-alarm").on("click", function () {
+                    updateAlarmViewFlag(res[idx].mgnt_no)
+                    $node.fadeOut(200, () => $node.remove());
+                });
+
+                wrapper.append($node);
+                setTimeout(() => $node.addClass("show"), 10);
+            });
+        });
+    }
+
+    function updateAlarmViewFlag(mgntNo) {
+        $.ajax({
+            url: '/updateViewFlag',
+            type: 'POST',
+            data: { mgntNo: mgntNo, view_flag: 'Y' },
+            success: function (res) {
+                console.log('✅ view_flag 업데이트 완료:', res);
+            },
+            error: function (xhr, status, err) {
+                console.error('❌ view_flag 업데이트 실패:', err);
+            }
+        });
+    }
+
     function openSensorInfo(data) {
-        // console.log(data);
         $.get('/popup/sensorInfo', {
             asset_id : data.asset_id
         }, function(layout) {

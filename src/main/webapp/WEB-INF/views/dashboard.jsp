@@ -278,6 +278,25 @@
     window.markers.assets = [];
     window.markers.risks = [];
 
+    function getZoneDetail() {
+        // 상세 보기 에서 시간 맞추기 위해 초기화
+        clearInterval($setInterval1);
+        clearInterval(window.zoneDetail);
+        $setInterval1 = setInterval(startInterval, LATENCY); // 60초마다
+
+        $.get('/popup/zoneDetail', {
+            district_no: $('.site-status-list select.selectZone option:selected').val()
+        }, function (html) {
+            $('.site-status-details').html(html);
+            $('.site-status-details').show();
+            setTimeout(function () {
+                if (!$("#site-status").hasClass("view")) {
+                    $("#site-status").addClass("view");
+                }
+            }, 50);
+        });
+    }
+
     function editMode(type) {
         const markers = window.vworld.getMap().getOverlays().getArray();
         const $wrap = $("#wrap");
@@ -1071,7 +1090,7 @@
                 $('.site-status-details .close-btns').trigger('click');
                 $(document).trigger('map_action_end');
             }
-            if ($('div.site-status-toggle.active > button').hasClass("show") && $selected.val() > 0) {
+            if ($('div.site-status-toggle.active > button').hasClass("show") && $selected.val != '') {
                 getZoneDetail();
             }
         });

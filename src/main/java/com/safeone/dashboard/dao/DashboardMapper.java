@@ -32,4 +32,10 @@ public interface DashboardMapper {
     List<Map> selectMaintenanceInfo(Map param);
 
     List<Map> selectSensorChartRealData(Map param);
+
+    List<Map> getAlarmHistory(Map param);
+
+    List<Map> getAlarmMessage(Map param);
+
+    void updateViewFlag(Integer mgntNo);
 }

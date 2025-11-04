@@ -24,8 +24,8 @@
         <if test="zone_id != null and zone_id != ''">
             and MG.zone_id = #{zone_id}
         </if>
-        <if test="view_flag != null and view_flag != ''">
-            and MG.view_flag = #{view_flag}
+        <if test="district_no != null and district_no != ''">
+            and MG.district_no = #{district_no}
         </if>
         <if test="reg_date_start != null and reg_date_start != '' and reg_date_end != null and reg_date_end != ''">
             and MG.reg_date::timestamp between concat(#{reg_date_start},' 00:00:00')::timestamp and concat(#{reg_date_end},' 23:59:59')::timestamp
@@ -56,6 +56,9 @@
                 <when test="'reg_time' == sidx and sidx != ''">
                     MG.reg_time ${sord}
                 </when>
+                <when test="'reg_time' == sidx and sidx != ''">
+                    MG.reg_time ${sord}
+                </when>
                 <otherwise>
                     MG.reg desc
                 </otherwise>
@@ -64,24 +67,6 @@
     </sql>
 
     <select id="selectAlarmHistory" parameterType="java.util.Map" resultType="java.util.Map">
---         SELECT A.alarm_uid
---              , asset.zone_id
---              , A.asset_id
---              , A.asset_kind_id
---              , A.alarm_kind_id
---              , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD PM HH24:MI:SS') AS reg_date
---              , A.description
---              , ak.risk_level
---              , ak.name as alarm_kind_name
---              , (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) as asset_kind_name
---              , asset.name as asset_name
---              , ( SELECT NAME FROM tb_area WHERE area_id = asset.area_id ) as area_name
---              , TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
---              , TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time
---         FROM tb_alarm A
---                  LEFT JOIN tb_asset asset ON A.asset_id = asset.asset_id
---                  LEFT JOIN tb_alarm_kind ak ON A.alarm_kind_id = ak.alarm_kind_id
---         ORDER BY A.reg_date desc LIMIT 4
         SELECT
             tad.sens_no,
             tad.meas_dt,
@@ -99,7 +84,9 @@
             tai."3rd_lvl_max" AS max3,
             tai."3rd_lvl_min" AS min3,
             tai."4th_lvl_max" AS max4,
-            tai."4th_lvl_min" AS min4
+            tai."4th_lvl_min" AS min4,
+            tad.reg_dt,
+            tst.sens_tp_nm
         FROM tb_alarm_details tad
                  LEFT JOIN tb_district_info tdi
                            ON tad.district_no = tdi.district_no
@@ -107,30 +94,48 @@
                            ON tad.sens_no = tsi.sens_no
                  LEFT JOIN tb_alarm_info tai
                            ON tad.sens_no = tai.sens_no
+                 LEFT JOIN tb_sensor_type tst
+                           ON tsi.senstype_no = tst.senstype_no
         WHERE 1=1
         order by tad.reg_dt desc limit 4
     </select>
 
     <select id="selectAlarmCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
         SELECT
-            COUNT(CASE
-                      WHEN tmd.formul_data BETWEEN tai."1st_lvl_min" AND tai."1st_lvl_max" THEN 1
-                END) AS interest_cnt,
-            COUNT(CASE
-                      WHEN tmd.formul_data BETWEEN tai."2nd_lvl_min" AND tai."2nd_lvl_max" THEN 1
-                END) AS notice_cnt,
-            COUNT(CASE
-                      WHEN tmd.formul_data BETWEEN tai."3rd_lvl_min" AND tai."3rd_lvl_max" THEN 1
-                END) AS warning_cnt,
-            COUNT(CASE
-                      WHEN tmd.formul_data BETWEEN tai."4th_lvl_min" AND tai."4th_lvl_max" THEN 1
-                END) AS danger_cnt
-        FROM tb_measure_details tmd
-                 JOIN tb_alarm_info tai
-                      ON tmd.sens_no = tai.sens_no
-                          AND tmd.sens_chnl_id = tai.sens_chnl_id
+            COUNT(CASE WHEN alarm_level = 'ARM001' THEN 1 END) AS interest_cnt,
+            COUNT(CASE WHEN alarm_level = 'ARM002' THEN 1 END) AS notice_cnt,
+            COUNT(CASE WHEN alarm_level = 'ARM003' THEN 1 END) AS warning_cnt,
+            COUNT(CASE WHEN alarm_level = 'ARM004' THEN 1 END) AS danger_cnt
+        FROM (
+            SELECT
+                tmd.*,
+                CASE
+                    WHEN ( (tai."4th_lvl_min" IS NOT NULL AND (tmd.formul_data - tsi.formul_data) <![CDATA[ <= ]]> tai."4th_lvl_min")
+                    OR  (tai."4th_lvl_max" IS NOT NULL AND (tmd.formul_data - tsi.formul_data) <![CDATA[ >= ]]> tai."4th_lvl_max") )
+                        THEN 'ARM004'
+                    WHEN ( (tai."3rd_lvl_min" IS NOT NULL AND (tmd.formul_data - tsi.formul_data) <![CDATA[ <= ]]> tai."3rd_lvl_min")
+                    OR  (tai."3rd_lvl_max" IS NOT NULL AND (tmd.formul_data - tsi.formul_data) <![CDATA[ >= ]]> tai."3rd_lvl_max") )
+                        THEN 'ARM003'
+                    WHEN ( (tai."2nd_lvl_min" IS NOT NULL AND (tmd.formul_data - tsi.formul_data) <![CDATA[ <= ]]> tai."2nd_lvl_min")
+                    OR  (tai."2nd_lvl_max" IS NOT NULL AND (tmd.formul_data - tsi.formul_data) <![CDATA[ >= ]]> tai."2nd_lvl_max") )
+                        THEN 'ARM002'
+                    WHEN ( (tai."1st_lvl_min" IS NOT NULL AND (tmd.formul_data - tsi.formul_data) <![CDATA[ <= ]]> tai."1st_lvl_min")
+                    OR  (tai."1st_lvl_max" IS NOT NULL AND (tmd.formul_data - tsi.formul_data) <![CDATA[ >= ]]> tai."1st_lvl_max") )
+                        THEN 'ARM001'
+                    ELSE 'ARM009'
+                END AS alarm_level,
+                tai.district_no
+            FROM tb_measure_details tmd
+            JOIN tb_alarm_info tai
+            ON tmd.sens_no = tai.sens_no
+            AND tmd.sens_chnl_id = tai.sens_chnl_id
+            JOIN tb_sensor_init tsi
+            ON tsi.sens_no = tmd.sens_no
+            AND tsi.sens_chnl_id = tmd.sens_chnl_id
+            WHERE tmd.reg_dt > NOW() - INTERVAL '1 minute'
+        ) AS MG
         WHERE 1=1
-          AND tmd.meas_dt > NOW() - interval '1 minute'
+        <include refid="rowSearch"/>
     </select>
 
     <select id="selectAlarmList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.AlarmListDto">

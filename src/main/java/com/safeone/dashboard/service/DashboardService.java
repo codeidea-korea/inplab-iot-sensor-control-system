@@ -59,4 +59,16 @@ public class DashboardService {
     public List<Map> selectSensorChartRealData(Map param) {
         return dashboardMapper.selectSensorChartRealData(param);
     }
+
+    public List<Map> getAlarmHistory(Map param) {
+        return dashboardMapper.getAlarmHistory(param);
+    }
+
+    public List<Map> getAlarmMessage(Map param) {
+        return dashboardMapper.getAlarmMessage(param);
+    }
+
+    public void updateViewFlag(Integer mgntNo) {
+        dashboardMapper.updateViewFlag(mgntNo);
+    }
 }

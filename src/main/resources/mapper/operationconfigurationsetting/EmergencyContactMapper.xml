@@ -24,6 +24,9 @@
         <if test="e_mail != null and e_mail != ''">
             and tec.e_mail ilike '%' || #{e_mail} || '%'
         </if>
+        <if test="district_no != null and district_no != ''">
+            and tec.district_no = #{district_no}
+        </if>
     </sql>
 
     <sql id="rowOrder">

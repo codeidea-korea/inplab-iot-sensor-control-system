@@ -1,17 +1,18 @@
 package com.safeone.dashboard.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.safeone.dashboard.service.*;
+import com.safeone.dashboard.service.operationconfigurationsetting.EmergencyContactService;
 import com.safeone.dashboard.util.ExcelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +40,9 @@ public class DashboardController {
 
     @Autowired
     private NewDashboardService newDashboardService;
-    
+    @Autowired
+    private EmergencyContactService emergencyContactService;
+
     @GetMapping(value = "dashboard")
     public String main(Model model) {
         model.addAttribute("assetTypes", (new Gson()).toJson(newDashboardService.getAssetTypes()));
@@ -130,7 +133,7 @@ public class DashboardController {
 
     @GetMapping(value = "/popup/zoneDetail")
     public String popupZoneDetail(Model model, @RequestParam Map param) {        
-        model.addAttribute("zone", dashboardService.selectAreaInfo(param).get(0));
+        model.addAttribute("district", dashboardService.selectAreaInfo(param).get(0));
         return "layout/zoneDetail";
     }
 
@@ -193,7 +196,7 @@ public class DashboardController {
     @ResponseBody
     @GetMapping(value = "/emergencyInfo", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getEmergencyInfo(@RequestParam Map param) {
-        return emergencyCallService.getList(param);
+        return emergencyContactService.getList(param);
     }
 
     @ResponseBody
@@ -223,5 +226,24 @@ public class DashboardController {
         String response = restTemplate.getForObject(url, String.class, params);
 
         return ResponseEntity.ok(response);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/alarmHistory", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getAlarmHistory(@RequestParam Map param) {
+        return dashboardService.getAlarmHistory(param);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/alarmMessage", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Object getAlarmMessage(@RequestParam Map param) {
+        return dashboardService.getAlarmMessage(param);
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/updateViewFlag", produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean updateViewFlag(HttpServletRequest request, @RequestParam Integer mgntNo) {
+        dashboardService.updateViewFlag(mgntNo);
+        return true;
     }
 }

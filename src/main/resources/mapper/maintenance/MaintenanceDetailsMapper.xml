@@ -37,6 +37,9 @@
             and tmd.reg_dt::timestamp between concat(#{reg_dt_start},' 00:00:00')::timestamp and
             concat(#{reg_dt_end},' 23:59:59')::timestamp
         </if>
+        <if test="district_no != null and district_no != ''">
+            and tmd.district_no = #{district_no}
+        </if>
     </sql>
 
     <sql id="rowOrder">
