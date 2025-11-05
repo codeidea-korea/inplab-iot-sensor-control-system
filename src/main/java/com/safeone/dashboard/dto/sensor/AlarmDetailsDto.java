@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class AlarmDetailsDto implements Serializable {
 
     @FieldLabel(title = "발생일시")
-    private String meas_dt;
+    private String reg_dt;
 
     @FieldLabel(title = "현장명")
     private String district_nm;

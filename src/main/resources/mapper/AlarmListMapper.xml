@@ -93,7 +93,7 @@
                  LEFT JOIN tb_sensor_info tsi
                            ON tad.sens_no = tsi.sens_no
                  LEFT JOIN tb_alarm_info tai
-                           ON tad.sens_no = tai.sens_no
+                           ON tad.sens_no = tai.sens_no and tad.sens_chnl_id = tai.sens_chnl_id
                  LEFT JOIN tb_sensor_type tst
                            ON tsi.senstype_no = tst.senstype_no
         WHERE 1=1

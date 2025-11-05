@@ -60,7 +60,7 @@
                     sms_cnt ${sord}
                 </when>
                 <otherwise>
-                    tad.meas_dt desc
+                    tad.reg_dt desc
                 </otherwise>
             </choose>
         </trim>
@@ -87,7 +87,8 @@
             tai."4th_lvl_min" AS min4,
             (SELECT COUNT(*)
             FROM tb_sms_details
-            WHERE alarm_mgnt_no = tad.mgnt_no) AS sms_cnt
+            WHERE alarm_mgnt_no = tad.mgnt_no) AS sms_cnt,
+            tad.reg_dt
         FROM tb_alarm_details tad
         LEFT JOIN tb_district_info tdi
             ON tad.district_no = tdi.district_no
