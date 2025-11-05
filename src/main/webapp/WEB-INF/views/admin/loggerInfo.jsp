@@ -221,7 +221,7 @@
             $('input[name=logr_lat], input[name=logr_lon]').on('click', function () {
                 if ($('#lay-form-write input[name=logr_lat]').val() != '' && $('#lay-form-write input[name=logr_lon]').val() != '') {
                     try {
-                        window.vworld.setPanBy([parseFloat($('#lay-form-write input[name=logr_lon]').val()), parseFloat($('#lay-form-write input[name=logr_lat]').val())]);
+                        window.vworld.setPanBy([parseFloat($('#lay-form-write input[name=logr_lon]').val()), parseFloat($('#lay-form-write input[name=logr_lat]').val())], 18);
                     } catch (e) {
                     }
                 }
@@ -402,12 +402,12 @@
                     <tr>
                         <th class="required_th">위도</th>
                         <td>
-                            <input type="text" name="logr_lon" class="required"/>
+                            <input type="text" name="logr_lat" class="required"/>
                         </td>
 
                         <th class="required_th">경도</th>
                         <td>
-                            <input type="text" name="logr_lat" class="required"/>
+                            <input type="text" name="logr_lon" class="required"/>
                         </td>
                     </tr>
 

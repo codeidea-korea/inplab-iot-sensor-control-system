@@ -227,7 +227,7 @@
             $('input[name=sens_lon], input[name=sens_lat]').on('click', function () {
                 if ($('#lay-form-write input[name=sens_lon]').val() != '' && $('#lay-form-write input[name=sens_lat]').val() != '') {
                     try {
-                        window.vworld.setPanBy([parseFloat($('#lay-form-write input[name=sens_lat]').val()), parseFloat($('#lay-form-write input[name=sens_lon]').val())]);
+                        window.vworld.setPanBy([parseFloat($('#lay-form-write input[name=sens_lon]').val()), parseFloat($('#lay-form-write input[name=sens_lat]').val())]);
                     } catch (e) {
                     }
                 }
