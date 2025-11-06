@@ -457,32 +457,32 @@
 
     <select id="selectTotalCountByStatus" resultType="com.safeone.dashboard.dto.SensorCountDto">
         WITH comm AS (
-            SELECT
-                a.sens_no,
-                e.sens_chnl_id,
-                CASE
-                    WHEN COALESCE(lmd.err_cnt, 999999) >= a.nonrecv_limit_min THEN '미수신'
-                    ELSE '수신'
-                    END AS comm_status
-            FROM tb_sensor_info a
-                     JOIN tb_sensor_chnl e
-                          ON a.sens_no = e.sens_no
-                     LEFT JOIN LATERAL (
                 SELECT
-                    m.sens_no,
-                    m.sens_chnl_id,
-                    m.meas_dt,
-                    m.formul_data,
-                    EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60     AS diff_min,
-                    EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 - 1 AS err_cnt
-                FROM tb_measure_details m
-                WHERE m.sens_no = e.sens_no
-                  AND m.sens_chnl_id = e.sens_chnl_id
-                ORDER BY m.meas_dt DESC
-                    LIMIT 1
-            ) AS lmd ON TRUE
-        WHERE 1=1
-            )
+                    a.sens_no,
+                    CASE
+                        WHEN COALESCE(lmd.err_cnt, 999999) >= a.nonrecv_limit_min THEN '미수신'
+                        ELSE '수신'
+                        END AS comm_status
+                FROM tb_sensor_info a
+                         JOIN tb_sensor_chnl e
+                              ON a.sens_no = e.sens_no
+                         LEFT JOIN LATERAL (
+                    SELECT
+                        m.sens_no,
+                        m.sens_chnl_id,
+                        m.meas_dt,
+                        m.formul_data,
+                        EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60     AS diff_min,
+                        EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 - 1 AS err_cnt
+                    FROM tb_measure_details m
+                    WHERE m.sens_no = e.sens_no
+                      AND m.sens_chnl_id = e.sens_chnl_id
+                    ORDER BY m.meas_dt DESC
+                        LIMIT 1
+                ) AS lmd ON TRUE
+            WHERE 1=1
+            group by a.sens_no, comm_status
+        )
         SELECT
             COUNT(*)                                                     AS allCnt,
             COUNT(*) FILTER (WHERE comm_status = '미수신')               AS errCnt,

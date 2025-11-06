@@ -381,10 +381,6 @@
         $(function () {
             $('.tab-button').click(function () {
                 let selectedSensorType = $("#sensor-type-select").val();
-                if(selectedSensorType === "013" || selectedSensorType === "015" || selectedSensorType === "017"){
-                    alert("지표경사계, 구조물경사계, GNSS는 복합센서이므로<br> 캔들차트로 표현이 불가합니다.");
-                    return;
-                }
                 $('.tab-button').removeClass('active');
                 $(this).addClass('active');
                 $('.chart-content').removeClass('active').hide();
@@ -503,6 +499,15 @@
                 const endDateTime = $('#end-date').val();
                 let selectSensor = $("#sensor-name-select").val();
 
+                let selectType = '';
+                if($("#select-condition").val() === "minute"){
+                    selectType = 'minute'
+                }else if($("#select-condition").val() === "hourly"){
+                    selectType = 'hour';
+                }else{
+                    selectType = 'day';
+                }
+
                 const case_ = ['', 'X', 'Y'];
 
                 const baseArray = [...selectArrary];
@@ -529,7 +534,7 @@
                         ? item.sens_no
                         : selectSensor;
 
-                    return getChartData(targetSensor, startDateTime, endDateTime, item.sens_chnl_id);
+                    return getChartData(targetSensor, startDateTime, endDateTime, item.sens_chnl_id, selectType);
                 });
 
                 // 차트 업데이트
@@ -580,10 +585,10 @@
                 });
             }
 
-            function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
+            function getChartData(sens_no, startDateTime, endDateTime, sensChnlId, selectType) {
                 return new Promise((resolve, reject) => {
                     $.ajax({
-                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
+                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + "&selectType=" + selectType,
                         type: 'GET',
                         success: function (res) {
                             chartDataArray.push(res); // 데이터 추가
@@ -595,6 +600,7 @@
                     });
                 });
             }
+
             const ctx = document.getElementById('myChart1').getContext('2d');
             const myChart = new Chart(ctx, {
                 type: 'line',
@@ -678,38 +684,24 @@
                 }
             });
 
-            function preprocessDataForBarChart(data, aggregationType) {
-                const processedData = {};
-                data.forEach(item => {
-                    const date = new Date(item.meas_dt);
-                    let key;
+            function preprocessDataForBarChart(data) {
+                const labels = data.map(item => item.meas_dt);
+                const ranges = data.map(item => {
+                    let min = parseFloat(item.min_data);
+                    let max = parseFloat(item.max_data);
 
-                    if (aggregationType === "daily") {
-                        key = date.getFullYear() + "-" +
-                            (date.getMonth() + 1).toString().padStart(2, "0") + "-" +
-                            date.getDate().toString().padStart(2, "0");
-                    } else {
-                        key = date.getFullYear() + "-" +
-                            (date.getMonth() + 1).toString().padStart(2, "0") + "-" +
-                            date.getDate().toString().padStart(2, "0") + " " +
-                            date.getHours().toString().padStart(2, "0") + ":00:00";
+                    if (min === max) {
+                        const delta = Math.max(0.001, Math.abs(min) * 0.01);
+                        min -= delta;
+                        max += delta;
                     }
 
-                    if (!processedData[key]) {
-                        processedData[key] = {min: Infinity, max: -Infinity};
-                    }
-
-                    const value = item.formul_data;
-
-                    if (value < processedData[key].min) processedData[key].min = value;
-                    if (value > processedData[key].max) processedData[key].max = value;
+                    return {
+                        x: item.meas_dt,
+                        y: [min, max],
+                        label: item.sens_nm + (item.sens_chnl_id ? "-" + item.sens_chnl_id : "")
+                    };
                 });
-
-                const labels = Object.keys(processedData);
-                const ranges = labels.map(label => ({
-                    x: label,
-                    y: [processedData[label].min, processedData[label].max]
-                }));
 
                 return {labels, ranges};
             }
@@ -730,7 +722,7 @@
 
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
-                if (data.length === 1 && data[0].length === 0) {
+                if (data.length === 0) {
                     alert('조회 결과가 존재하지 않습니다.');
                     return;
                 }
@@ -774,6 +766,8 @@
                         xUnit = 'hour';
                     }else if(aggregationType === "daily"){
                         xUnit = 'day';
+                    }else if(aggregationType === "minute"){
+                        xUnit = 'minute';
                     }
 
                 }
@@ -792,7 +786,7 @@
 
 
                 // 바 차트를 위한 데이터 전처리
-                const barChartData = preprocessDataForBarChart(data[0], aggregationType);
+                const barChartData = preprocessDataForBarChart(data[0]);
 
                 // 라인 차트를 위한 레이블 및 데이터셋 구성
                 // Chart.js의 time 스케일은 labels 배열이 필수는 아니며, datasets 내부의 x 값을 통해 처리합니다.
@@ -810,6 +804,25 @@
                 myChart.data.labels = labels;
                 myChart.data.datasets = datasets;
                 myChart.options.plugins.annotation.annotations = {}; // 기존 annotation 초기화
+
+                const allValues = data.flatMap(d => d.map(p => p.formul_data));
+                const absMax = Math.max(...allValues.map(v => Math.abs(v || 0)));
+
+                myChart.options.scales.y = {
+                    beginAtZero: false,
+                    suggestedMin: -absMax,
+                    suggestedMax: absMax,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: {
+                        color: '#555',
+                        callback: v => Number(v.toFixed(2))
+                    },
+                    title: {
+                        display: true,
+                        text: 'Value',
+                        color: '#555'
+                    }
+                };
 
                 // --- 상한선(annotation) 추가 로직 시작 ---
                 data.forEach((item, i) => {
@@ -854,6 +867,14 @@
                 // 바 차트 데이터 업데이트
                 myBarChart.data.labels = barChartData.labels;
                 myBarChart.data.datasets[0].data = barChartData.ranges;
+                myBarChart.data.datasets[0].label = barChartData.ranges[0].label;
+
+                const allBarValues = barChartData.ranges.flatMap(r => r.y);
+                const absMaxBar = Math.max(...allBarValues.map(v => Math.abs(v || 0)));
+
+                myBarChart.options.scales.y.beginAtZero = false;
+                myBarChart.options.scales.y.suggestedMin = -absMaxBar;
+                myBarChart.options.scales.y.suggestedMax = absMaxBar;
 
                 // 차트 업데이트
                 myChart.update();
@@ -868,7 +889,6 @@
                     type: 'GET',
                     success: function (res) {
                         console.log(res)
-                        debugger
                         resolve();
                     },
                     error: function () {
@@ -910,7 +930,7 @@
             </div>
             <div class="filter-area" style="margin-right: 150px; margin-bottom: 10px">
                 <div style="display:flex;">
-                    <p class="search-top-label">현장명</p>
+                    <p class="search-top-label" style="margin-right: 13px;">현장명</p>
                     <select id="chart-district-select">
                         <option value="">선택</option>
                     </select>
@@ -942,6 +962,7 @@
                     <select id="select-condition">
                         <option value="daily">일별</option>
                         <option value="hourly">시간별</option>
+                        <option value="minute">상세</option>
                     </select>
                 </div>
                 <div class="btn-group3">

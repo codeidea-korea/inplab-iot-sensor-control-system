@@ -180,6 +180,20 @@
                         }
                         return value
                     }
+                },
+                last_apply_dt: {
+                    formatter: (cellValue, _options, _rowObject) => {
+                        if (cellValue) {
+                            const text = moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
+                            if(_rowObject.comm_status === '미수신'){
+                                return '<span style="color: red">' + text + '</span>';
+                            }else{
+                                return text;
+                            }
+                        } else {
+                            return "";
+                        }
+                    }
                 }
             }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"});
 
@@ -240,6 +254,7 @@
 
             $("#graph-search-btn").click(() => {
                 let checkedData = getSelectedCheckData($grid);
+                const selectType = 'minute';
                 if (checkedData.length === 0) {
                     alert('선택된 데이터가 없습니다.');
                     return;
@@ -263,7 +278,7 @@
 
                     chartDataArray.length = 0; // 배열 초기화
                     const requests = checkedData.map((item) => {
-                        return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
+                        return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id, selectType);
                     });
 
                     Promise.all(requests).then((d) => {
@@ -275,10 +290,10 @@
                 }
             });
 
-            function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
+            function getChartData(sens_no, startDateTime, endDateTime, sensChnlId, selectType) {
                 return new Promise((resolve, reject) => {
                     $.ajax({
-                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
+                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + "&selectType=" + selectType,
                         type: 'GET',
                         success: function (res) {
                             if (res) {
@@ -307,6 +322,11 @@
             let isUpdating = false;
 
             async function updateChart(data) {
+                if (data.length === 0) {
+                    alert('조회 결과가 존재하지 않습니다.');
+                    return;
+                }
+
                 if (isUpdating) return;
                 isUpdating = true;
 
@@ -324,6 +344,15 @@
                         day:    'YYYY-MM-DD',
                         month:  'YYYY-MM'
                     };
+
+                    const senstypeList = {
+                        '013': '구조물경사계',
+                        '017': '지표경사계',
+                        '016': '지표변위계',
+                        '001': '강우량계',
+                        '015': 'GPS'
+                    };
+
 
                     let minDate = Infinity, maxDate = -Infinity;
                     data.forEach(sensorData => {
@@ -358,47 +387,59 @@
 
                     const datasets = [];
 
+                    const axisMap = {};
+
                     data.forEach((sensorItem, i) => {
-                        const yId = 'y' + i;
+                        const yId = axisMap[sensorItem[0].senstype_no] || 'y' + i;
                         const color = getRandomHSL();
-                        const labelText = sensorItem[0].sens_nm +
-                            (sensorItem[0].sens_chnl_id ? '-' + sensorItem[0].sens_chnl_id : '');
+                        const test = senstypeList[sensorItem[0].senstype_no];
 
-                        scales[yId] = {
-                            id: yId,
-                            type: 'linear',
-                            position: 'left',
-                            beginAtZero: true,
-                            display: true,
-                            grid: {
-                                drawOnChartArea: i === 0,
-                                color: 'rgba(0,0,0,0.05)',
-                            },
-                            border: { color, width: 1 },
-                            ticks: {
-                                color,
-                                font: { size: 10 },
-                                callback: v => Number(v.toFixed(1))
-                            },
-                            title: {
+                        if (!axisMap[sensorItem[0].senstype_no]) {
+                            const vals = sensorItem.map(p => p.formul_data);
+                            const absMax = Math.max(...vals.map(v => Math.abs(v || 0))) || 1; // 0 방지
+
+                            scales[yId] = {
+                                id: yId,
+                                type: 'linear',
+                                position: 'left',
                                 display: true,
-                                text: labelText,
-                                color,
-                                font: { size: 10 }
-                            },
-                            afterFit: scale => {
-                                const baseLeft = 10;
-                                const spacing = 50;
-                                scale.left = baseLeft + (i * spacing);
-                                scale.width = 40;
-                            }
-                        };
+                                grid: {
+                                    drawOnChartArea: i === 0,
+                                    color: 'rgba(0,0,0,0.05)',
+                                },
+                                border: { color, width: 1 },
+                                ticks: {
+                                    color,
+                                    font: { size: 10 },
+                                    callback: v => Number(v.toFixed(2))
+                                },
+                                title: {
+                                    display: true,
+                                    text: test,
+                                    color,
+                                    font: { size: 10 }
+                                },
 
-                        /* 강우량계는 막대그래프로 표현 */
+                                min: -absMax,
+                                max: absMax,
+
+                                grid: {
+                                    color: ctx => ctx.tick.value === 0 ? 'rgba(255,0,0,0.6)' : 'rgba(0,0,0,0.05)',
+                                    lineWidth: ctx => ctx.tick.value === 0 ? 1.5 : 0.5,
+                                    drawOnChartArea: i === 0
+                                }
+                            };
+
+                            axisMap[sensorItem[0].senstype_no] = yId;
+                        }
+                        else {
+                            console.log(`✅ 이미 존재하는 y축 재사용: ${test}`);
+                        }
+
                         const isRain = sensorItem[0].sens_nm.includes('RAIN');
 
                         datasets.push({
-                            label: labelText,
+                            label: sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? "-" + sensorItem[0].sens_chnl_id : ""),
                             type: isRain ? 'bar' : 'line',
                             data: sensorItem.map(p => ({
                                 x: new Date(p.meas_dt),
@@ -411,7 +452,7 @@
                             borderWidth: isRain ? 0 : 1,
                             barThickness: isRain ? 8 : undefined,
                             xAxisID: 'x',
-                            yAxisID: yId
+                            yAxisID: axisMap[sensorItem[0].senstype_no] // 공통축 사용
                         });
                     });
 
@@ -424,7 +465,32 @@
                             maintainAspectRatio: false,
                             scales,
                             plugins: {
-                                legend: { display: true },
+                                legend: {
+                                    display: true,
+                                    onClick: (e, legendItem, legend) => {
+                                        const ci = legend.chart;
+                                        const index = legendItem.datasetIndex;
+                                        const meta = ci.getDatasetMeta(index);
+
+                                        meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+
+                                        // ✅ y축만 재조정, x축은 min/max 고정
+                                        const activeDatasets = ci.data.datasets.filter((d, idx) => !ci.getDatasetMeta(idx).hidden);
+                                        Object.keys(ci.options.scales).forEach(yId => {
+                                            if (yId === 'x') return; // ✅ x축은 건드리지 않음
+                                            const vals = activeDatasets
+                                                .filter(d => d.yAxisID === yId)
+                                                .flatMap(d => d.data.map(p => p.y));
+                                            if (vals.length) {
+                                                const absMax = Math.max(...vals.map(v => Math.abs(v || 0))) || 1;
+                                                ci.options.scales[yId].min = -absMax;
+                                                ci.options.scales[yId].max = absMax;
+                                            }
+                                        });
+
+                                        ci.update();
+                                    }
+                                },
                                 zoom: {
                                     pan: { enabled: true, mode: 'xy' },
                                     zoom: {

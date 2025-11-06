@@ -40,4 +40,10 @@ public class SensorGroupingDto implements Serializable {
 
     @FieldLabel(title = "채널_id", type = "hidden")
     private String sens_chnl_id;
+
+    @FieldLabel(title = "통신상태", type = "hidden")
+    private String comm_status;
+
+    @FieldLabel(title = "센서타입 no", type = "hidden")
+    private String senstype_no;
 }

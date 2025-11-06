@@ -9,6 +9,8 @@ public class SensorChartDto implements Serializable {
 
     private String sens_no;
     private String sens_nm;
+    private String max_data;
+    private String min_data;
     private String sens_chnl_id;
     private String formul_data;
     private String meas_dt;
@@ -16,6 +18,6 @@ public class SensorChartDto implements Serializable {
     private String lvl_max2;
     private String lvl_max3;
     private String lvl_max4;
-
+    private String senstype_no;
 
 }
