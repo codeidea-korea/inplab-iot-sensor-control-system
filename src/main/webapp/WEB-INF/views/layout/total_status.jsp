@@ -321,7 +321,7 @@
             return new Promise((resolve, reject) => {
                 $.ajax({
                     type: 'GET',
-                    url: `/modify/sensor/sensor`,
+                    url: `/system/getSensorList`,
                     dataType: 'json',
                     contentType: 'application/json; charset=utf-8',
                     async: true,

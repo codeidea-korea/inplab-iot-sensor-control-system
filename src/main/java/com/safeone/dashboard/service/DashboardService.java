@@ -1,8 +1,14 @@
 package com.safeone.dashboard.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.safeone.dashboard.dto.GetModifySensorDto;
+import com.safeone.dashboard.util.CommonUtils;
 import org.springframework.stereotype.Service;
 
 import com.safeone.dashboard.dao.DashboardMapper;
@@ -71,4 +77,20 @@ public class DashboardService {
     public void updateViewFlag(Integer mgntNo) {
         dashboardMapper.updateViewFlag(mgntNo);
     }
+
+    public ObjectNode getSensorList(GetModifySensorDto getModifySensorDto) {
+        ObjectMapper om = new ObjectMapper();
+        ObjectNode on = om.createObjectNode();
+        ArrayNode an = om.createArrayNode();
+
+        Map<String, Object> map = CommonUtils.dtoToMap(getModifySensorDto);
+        List<HashMap<String, Object>> list = dashboardMapper.getSensorList(map);
+        an = om.valueToTree(list);
+
+        CommonUtils.setCountInfo("list", list.size(), on);
+
+        on.put("rows", an);
+
+        return on;
+    };
 }

@@ -499,4 +499,45 @@
         where mgnt_no = #{mgntNo}
     </update>
 
+    <select id="getSensorList" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            c.district_nm,
+            a.sens_no,
+            a.senstype_no,
+            d.sens_tp_nm,
+            a.sens_nm,
+            b.logr_nm,
+            a.sect_no,
+            TO_CHAR(TO_DATE(a.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd,
+            md.meas_dt AS latest_meas_dt,
+            COALESCE(m.maint_rslt_cd, 'MTN001') AS sens_status,
+            CASE
+            WHEN COALESCE(EXTRACT(EPOCH FROM (now() - md.meas_dt)) / 60, 999999) >= a.nonrecv_limit_min THEN '미수신'
+            ELSE '수신'
+            END AS comm_status,
+            md.formul_data
+        FROM tb_sensor_info a
+        JOIN tb_logger_info b ON a.logr_no = b.logr_no
+        JOIN tb_district_info c ON b.district_no = c.district_no
+        JOIN tb_sensor_type d ON a.senstype_no = d.senstype_no
+        LEFT JOIN LATERAL (
+            SELECT meas_dt, formul_data
+            FROM tb_measure_details m
+            WHERE m.sens_no = a.sens_no
+            ORDER BY m.meas_dt DESC
+            LIMIT 1
+        ) md ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT maint_rslt_cd
+            FROM tb_maint_details m2
+            WHERE m2.sens_no = a.sens_no
+            ORDER BY m2.maint_accpt_ymd DESC
+            LIMIT 1
+        ) m ON TRUE
+        ORDER BY c.district_nm, a.senstype_no, a.sens_no
+        <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
+            LIMIT ${limit} OFFSET ${offset}
+        </if>
+    </select>
+
 </mapper>

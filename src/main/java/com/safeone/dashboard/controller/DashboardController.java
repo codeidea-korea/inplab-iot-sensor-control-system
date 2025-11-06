@@ -1,9 +1,11 @@
 package com.safeone.dashboard.controller;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.safeone.dashboard.dto.GetModifySensorDto;
 import com.safeone.dashboard.service.*;
 import com.safeone.dashboard.service.operationconfigurationsetting.EmergencyContactService;
 import com.safeone.dashboard.util.ExcelUtils;
@@ -245,5 +247,11 @@ public class DashboardController {
     public boolean updateViewFlag(HttpServletRequest request, @RequestParam Integer mgntNo) {
         dashboardService.updateViewFlag(mgntNo);
         return true;
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/system/getSensorList", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ObjectNode getSensorList(HttpServletRequest request, GetModifySensorDto getModifySensorDto) {
+        return dashboardService.getSensorList(getModifySensorDto);
     }
 }
