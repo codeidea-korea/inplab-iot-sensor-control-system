@@ -177,6 +177,10 @@ function setColumn($grid, column, formatters, selectableRows) {
         }
     }
 
+    if (column['type'] === 'short') {
+        _column.width = '75';
+    }
+
     if (column['type'] === 'hidden') {
         _column.hidden = true;
     }

@@ -296,6 +296,10 @@
             align-items: center;
             justify-content: space-between;
         }
+
+        .ui-jqgrid .ui-jqgrid-hbox {
+            padding-right: 0px;
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script src="jquery.loading.js"></script>
@@ -314,7 +318,7 @@
             const end = new Date(today);
 
             const start = new Date(today);
-            start.setMonth(start.getMonth() - 1);
+            start.setDate(start.getDate() - 1);
 
             $('#start-date_left').val(formatDateOnly(start));
             $('#end-date_left').val(formatDateOnly(end));
@@ -370,22 +374,12 @@
                     multiSelect: true,
                 }
             }, null, {
-                maint_sts_cd: {
+                meas_dt: {
                     formatter: (cellValue, _options, _rowObject) => {
-                        let value = '';
-                        if (cellValue === 'MTN001') {
-                            value = '정상';
-                        } else if (cellValue === 'MTN002') {
-                            value = '망실';
-                        } else if (cellValue === 'MTN003') {
-                            value = '점검';
-                        } else if (cellValue === 'MTN004') {
-                            value = '철거';
-                        }
-                        return value
+                        return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
                     }
                 }
-            }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"});
+            });
 
             $.ajax({
                 url: '/adminAdd/districtInfo/all',
@@ -418,11 +412,17 @@
 
             $("#search-btn").on('click', function () {
                 const targetArr = getSelectedCheckData($leftGrid);
+                const startD = new Date($('#start-date_left').val());
+                const endD = new Date($('#end-date_left').val());
+
                 if (targetArr.length > 1) {
                     alert('조회할 데이터를 1건만 선택해주세요.');
                     return;
                 } else if (targetArr.length === 0) {
                     alert('조회할 데이터를 선택해주세요.');
+                    return;
+                } else if(diffYn(startD, endD)) {
+                    alert('조회 가능 기간은 최대 2일입니다.');
                     return;
                 } else {
                     $rightGrid.setGridParam({
@@ -439,14 +439,6 @@
                     $("#sens_nm").text(targetArr[0].sens_nm);
                 }
             });
-
-            const currentYear = new Date().getFullYear();
-
-            const startDate = new Date(currentYear, 0, 1); // 0은 1월
-            $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
-
-            const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
-            $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
 
             function popFancy(name) {
                 // 팝업 열기
@@ -466,13 +458,46 @@
                 }));
             }
 
+            function diffYn(startD, endD){
+                const diffDays = Math.abs((startD - endD) / (1000 * 60 * 60 * 24));
+                return diffDays >= 2;
+            }
+
             $("#view-chart").click(() => {
                 const targetArr = getSelectedCheckData($leftGrid);
+
+                const startD = new Date($('#start-date_left').val());
+                const endD = new Date($('#end-date_left').val());
+
+                function formatLocal(date) {
+                    const pad = (n) => (n < 10 ? "0" + n : n);
+                    return (
+                        date.getFullYear() +
+                        "-" +
+                        pad(date.getMonth() + 1) +
+                        "-" +
+                        pad(date.getDate()) +
+                        "T" +
+                        pad(date.getHours()) +
+                        ":" +
+                        pad(date.getMinutes())
+                    );
+                }
+
+                startD.setHours(0, 0, 0, 0);
+                $('#start-date').val(formatLocal(startD));
+
+                endD.setHours(23, 59, 0, 0);
+                $('#end-date').val(formatLocal(endD));
+
                 if (targetArr.length > 1) {
                     alert('조회할 데이터를 1건만 선택해주세요.');
                     return;
                 } else if (targetArr.length === 0) {
                     alert('조회할 데이터를 선택해주세요.');
+                    return;
+                } else if(diffYn(startD, endD)) {
+                    alert('조회 가능 기간은 최대 2일입니다.');
                     return;
                 }
                 popFancy('#chart-popup')
@@ -568,8 +593,24 @@
             $("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
-                // const popupSensorNo = $("#sensor-name-select").val();
-                chartDataArray.length = 0; // 배열 초기화
+                chartDataArray.length = 0;
+
+                const startD = new Date($('#start-date').val());
+                const endD = new Date($('#end-date').val());
+
+                if(diffYn(startD, endD)){
+                    alert('조회 가능 기간은 최대 2일입니다.');
+                    return;
+                }
+
+                let selectType = '';
+                if($("#select-condition").val() === "minute"){
+                    selectType = 'minute'
+                }else if($("#select-condition").val() === "hourly"){
+                    selectType = 'hour';
+                }else{
+                    selectType = 'day';
+                }
 
                 let targetArr = getSelectedCheckData($leftGrid);
 
@@ -586,7 +627,7 @@
 
                 chartDataArray.length = 0; // 배열 초기화
                 const requests = targetArr.map((item) => {
-                    return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
+                    return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id, selectType);
                 });
 
                 // 모든 요청이 완료된 후 차트를 그립니다.
@@ -598,10 +639,10 @@
                 });
             });
 
-            function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
+            function getChartData(sens_no, startDateTime, endDateTime, sensChnlId, selectType) {
                 return new Promise((resolve, reject) => {
                     $.ajax({
-                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
+                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + "&selectType=" + selectType,
                         type: 'GET',
                         success: function (res) {
                             chartDataArray.push(res); // 데이터 추가
@@ -752,6 +793,8 @@
                     month: 'YYYY-MM'
                 };
 
+                const aggregationType = $("#select-condition").val();
+
                 let minDate = Infinity;
                 let maxDate = -Infinity;
 
@@ -767,20 +810,18 @@
                     }
                 });
 
+                if(aggregationType === "hourly"){
+                    xUnit = 'hour';
+                }else if(aggregationType === "daily"){
+                    xUnit = 'day';
+                }else if(aggregationType === "minute"){
+                    xUnit = 'minute';
+                }
+
                 if (minDate !== Infinity && maxDate !== -Infinity) {
                     const firstDate = new Date(minDate);
                     const lastDate = new Date(maxDate);
                     const diffDays = Math.abs(lastDate - firstDate) / (1000 * 60 * 60 * 24);
-
-                    if (diffDays > 90) {
-                        xUnit = 'month';
-                    } else if (diffDays > 30) {
-                        xUnit = 'day';
-                    } else if (diffDays > 1) {
-                        xUnit = 'hour';
-                    } else {
-                        xUnit = 'minute';
-                    }
                 }
 
                 myChart.options.scales.x.time.unit = xUnit;
@@ -852,8 +893,6 @@
                     });
                 });
 
-                // 바 차트 데이터 전처리 (line chart의 첫 번째 데이터셋 기준으로)
-                const aggregationType = $("#select-condition").val() || "daily";
                 const barChartData = preprocessDataForBarChart(data[0], aggregationType);
 
                 // 바 차트 업데이트
@@ -1132,9 +1171,9 @@
                 <div style="display:flex;">
                     <p class="search-top-label">조회조건</p>
                     <select id="select-condition">
-                        <option value="">선택</option>
                         <option value="daily">일별</option>
                         <option value="hourly">시간별</option>
+                        <option value="minute">상세</option>
                     </select>
                 </div>
                 <div class="btn-group3">

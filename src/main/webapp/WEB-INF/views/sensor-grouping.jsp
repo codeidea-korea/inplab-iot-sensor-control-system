@@ -433,7 +433,7 @@
                             axisMap[sensorItem[0].senstype_no] = yId;
                         }
                         else {
-                            console.log(`✅ 이미 존재하는 y축 재사용: ${test}`);
+                            console.log(`이미 존재하는 y축 재사용: ${test}`);
                         }
 
                         const isRain = sensorItem[0].sens_nm.includes('RAIN');
@@ -474,10 +474,9 @@
 
                                         meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
 
-                                        // ✅ y축만 재조정, x축은 min/max 고정
                                         const activeDatasets = ci.data.datasets.filter((d, idx) => !ci.getDatasetMeta(idx).hidden);
                                         Object.keys(ci.options.scales).forEach(yId => {
-                                            if (yId === 'x') return; // ✅ x축은 건드리지 않음
+                                            if (yId === 'x') return;
                                             const vals = activeDatasets
                                                 .filter(d => d.yAxisID === yId)
                                                 .flatMap(d => d.data.map(p => p.y));
