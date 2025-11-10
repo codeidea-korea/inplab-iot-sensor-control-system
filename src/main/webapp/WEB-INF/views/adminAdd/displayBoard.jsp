@@ -244,12 +244,15 @@
 
             window.vworld.vwmap2d();
 
-            $('.mapSearchBtn').on('click', function () {
+            $('.mapBtn').on('click', function () {
                 if ($('#lay-form-write08 input[name=dispbd_lat]').val() !== '' && $('#lay-form-write08 input[name=dispbd_lon]').val() !== '') {
                     window.vworld.setPanBy([
                         parseFloat($('#lay-form-write08 input[name=dispbd_lon]').val()),
                         parseFloat($('#lay-form-write08 input[name=dispbd_lat]').val())], parseFloat($('#lay-form-write08 input[name=dispbd_zoom]').val())
                     );
+                }else{
+                    /* 빈 칸 default 처리 */
+                    window.vworld.setPanBy([127.449482276989, 36.9317789946793], 18);
                 }
                 popFancy('#lay-form-address', {dragToClose: false, touch: false});
             });
@@ -571,12 +574,13 @@
                     </tr>
                     <tr>
                         <th>위도 <span style="color: red">*</span></th>
-                        <td>
-                            <input type="text" name="dispbd_lat" class="mapSearchBtn"/>
+                        <td style="position: relative; text-align: left;">
+                            <input type="text" name="dispbd_lat" class="required" style="width: 80%;">
+                            <a class="mapBtn">지도찾기</a>
                         </td>
                         <th>경도 <span style="color: red">*</span></th>
                         <td>
-                            <input type="text" name="dispbd_lon" class="mapSearchBtn"/>
+                            <input type="text" name="dispbd_lon"/>
                         </td>
                     </tr>
                     <tr>

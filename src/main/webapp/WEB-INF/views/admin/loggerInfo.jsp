@@ -218,12 +218,15 @@
             });
 
 
-            $('input[name=logr_lat], input[name=logr_lon]').on('click', function () {
+            $('.mapBtn').on('click', function () {
                 if ($('#lay-form-write input[name=logr_lat]').val() != '' && $('#lay-form-write input[name=logr_lon]').val() != '') {
                     try {
                         window.vworld.setPanBy([parseFloat($('#lay-form-write input[name=logr_lon]').val()), parseFloat($('#lay-form-write input[name=logr_lat]').val())], 18);
                     } catch (e) {
                     }
+                }else{
+                    /* 빈 칸 default 처리 */
+                    window.vworld.setPanBy([127.449482276989, 36.9317789946793], 18);
                 }
 
                 popFancy('#lay-form-address', {dragToClose: false, touch: false});
@@ -401,10 +404,10 @@
 
                     <tr>
                         <th class="required_th">위도</th>
-                        <td>
-                            <input type="text" name="logr_lat" class="required"/>
+                        <td style="position: relative; text-align: left;">
+                            <input type="text" name="logr_lat" class="required" style="width: 60%;">
+                            <a class="mapBtn">지도찾기</a>
                         </td>
-
                         <th class="required_th">경도</th>
                         <td>
                             <input type="text" name="logr_lon" class="required"/>

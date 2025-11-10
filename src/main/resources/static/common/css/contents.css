@@ -3478,7 +3478,7 @@ select:-ms-expand {
 }
 
 #lay-form-write {
-    width: 640px;
+    width: 660px;
 }
 
 #lay-form-write.wide {
@@ -4396,4 +4396,24 @@ div.site-status-toggle.active > button.show {
 
 .paginate.customPaginateBar button {
     font-size: 1.3rem;
+}
+
+.bTable .mapBtn {
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2.8rem;
+    padding: 0 1.2rem;
+    background-color: #6975ac;
+    font-weight: 500;
+    font-size: 1.4rem;
+    color: #fff;
+    border-radius: 99px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    cursor: pointer;
 }
