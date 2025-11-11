@@ -678,7 +678,18 @@
                         }
                     },
                     scales: {
-                        x: {type: "category"},
+                        x: {
+                            type: 'time', // 시간 축 설정
+                            time: {
+                                displayFormats: {
+                                    minute: 'YYYY-MM-DD HH:mm' // 분 단위까지 표시
+                                },
+                                unit: 'minute', // 단위를 분(minute)으로 설정
+                            },
+                            adapters: {
+                                date: {} // 어댑터 설정(필요시 사용)
+                            }
+                        },
                         y: {beginAtZero: true}
                     }
                 }
@@ -720,8 +731,6 @@
                     await Promise.resolve();
                 }
 
-                const startDateTime = $('#start-date').val();
-                const endDateTime = $('#end-date').val();
                 if (data.length === 0) {
                     alert('조회 결과가 존재하지 않습니다.');
                     return;
@@ -775,6 +784,8 @@
                 // 차트의 X축 시간 단위를 업데이트합니다.
                 myChart.options.scales.x.time.unit = xUnit;
                 myChart.options.scales.x.time.displayFormats = displayFormats;
+                myBarChart.options.scales.x.time.unit = xUnit;
+                myBarChart.options.scales.x.time.displayFormats = displayFormats;
                 // 어댑터 설정 (필요시)
                 if (!myChart.options.scales.x.adapters) {
                     myChart.options.scales.x.adapters = {};
@@ -786,6 +797,7 @@
 
 
                 // 바 차트를 위한 데이터 전처리
+                console.log(data)
                 const barChartData = preprocessDataForBarChart(data[0]);
 
                 // 라인 차트를 위한 레이블 및 데이터셋 구성
@@ -804,6 +816,9 @@
                 myChart.data.labels = labels;
                 myChart.data.datasets = datasets;
                 myChart.options.plugins.annotation.annotations = {}; // 기존 annotation 초기화
+
+                myBarChart.data.labels = labels;
+                myBarChart.data.datasets = datasets;
 
                 const allValues = data.flatMap(d => d.map(p => p.formul_data));
                 const absMax = Math.max(...allValues.map(v => Math.abs(v || 0)));
@@ -863,18 +878,6 @@
                     });
                 });
                 // --- 상한선(annotation) 추가 로직 끝 ---
-
-                // 바 차트 데이터 업데이트
-                myBarChart.data.labels = barChartData.labels;
-                myBarChart.data.datasets[0].data = barChartData.ranges;
-                myBarChart.data.datasets[0].label = barChartData.ranges[0].label;
-
-                const allBarValues = barChartData.ranges.flatMap(r => r.y);
-                const absMaxBar = Math.max(...allBarValues.map(v => Math.abs(v || 0)));
-
-                myBarChart.options.scales.y.beginAtZero = false;
-                myBarChart.options.scales.y.suggestedMin = -absMaxBar;
-                myBarChart.options.scales.y.suggestedMax = absMaxBar;
 
                 // 차트 업데이트
                 myChart.update();

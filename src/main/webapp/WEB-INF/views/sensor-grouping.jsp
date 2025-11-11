@@ -392,7 +392,7 @@
                     data.forEach((sensorItem, i) => {
                         const yId = axisMap[sensorItem[0].senstype_no] || 'y' + i;
                         const color = getRandomHSL();
-                        const test = senstypeList[sensorItem[0].senstype_no];
+                        const senstype = senstypeList[sensorItem[0].senstype_no];
 
                         if (!axisMap[sensorItem[0].senstype_no]) {
                             const vals = sensorItem.map(p => p.formul_data);
@@ -407,16 +407,16 @@
                                     drawOnChartArea: i === 0,
                                     color: 'rgba(0,0,0,0.05)',
                                 },
-                                border: { color, width: 1 },
+                                border: { color: '#000', width: 1 },
                                 ticks: {
-                                    color,
+                                    color: '#000',
                                     font: { size: 10 },
                                     callback: v => Number(v.toFixed(2))
                                 },
                                 title: {
                                     display: true,
-                                    text: test,
-                                    color,
+                                    text: senstype,
+                                    color: '#000',
                                     font: { size: 10 }
                                 },
 
@@ -431,9 +431,6 @@
                             };
 
                             axisMap[sensorItem[0].senstype_no] = yId;
-                        }
-                        else {
-                            console.log(`이미 존재하는 y축 재사용: ${test}`);
                         }
 
                         const isRain = sensorItem[0].sens_nm.includes('RAIN');
