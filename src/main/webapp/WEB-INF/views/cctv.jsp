@@ -484,12 +484,9 @@
             window.videoWs = [];
 
 
+            // local
             // wsUrl = 'ws://localhost:8080';
-            // if (window.location.href.indexOf('106.245') > -1) {
-            //     wsUrl = 'ws://106.245.95.116:6099';
-            // } else if (window.location.href.indexOf('121.159') > -1) {
-            //     wsUrl = 'ws://121.159.33.107:9090';
-            // }
+            // dev / prod
             wsUrl = "wss://goldencity.codeidea.io";
 
             $(window).on('onSelectRow', function (e, data) {
