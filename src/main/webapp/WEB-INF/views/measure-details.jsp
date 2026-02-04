@@ -1266,8 +1266,10 @@
                             <input id="end-date_left" type="date"/>
                         </div>
                     </div>
-                    <div class="search-top_">
-                        <a id="search-btn" class="btns" >조회</a>
+                    <div class="search-top_" style="width: 80px">
+                        <div class="btn-group">
+                            <a id="search-btn">조회</a>
+                        </div>
                     </div>
                 </div>
                 <div id="left-grid-wrapper" class="contents-in">
