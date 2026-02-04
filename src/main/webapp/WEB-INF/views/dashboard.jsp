@@ -1066,7 +1066,9 @@
                             '<li ' + fcStep + ' asset_id="' + cctv.cctv_no + '">' +
                             '    <a href="javascript:void(0);" data-coords="' + cctv.cctv_lon + ',' + cctv.cctv_lat + '">' + cctv.cctv_nm + '</a>' +
                             '    <div>' +
+                            '       <div>'+
                             '        <i class="fa-regular fa-eye"></i>　' +
+                            '          </div>'+
                             '        <p class="check-box" notxt="" small="">' +
                             '            <input type="checkbox" id="check_conts01_' + _idx + '" name="check_conts01_' + _idx + '" value="" checked>' +
                             '            <label for="check_conts01_' + _idx + '">' +
