@@ -9,6 +9,21 @@
         $(function () {
             const $grid = $("#jq-grid");
             const path = "/operation-configuration-setting/user-management";
+
+            $grid.on('jqGridGridComplete', function() { // on에서는 명령어 앞에 jqgrid 붙여야 함
+                var ids = $grid.jqGrid('getDataIDs');
+                    for (var i = 0; i < ids.length; i++) {
+                        var rowId = ids[i];
+                        var val = $grid.jqGrid('getCell', rowId, 'usr_flag');
+
+                        // 태그가 포함되어 있을 수 있으므로 순수 텍스트만 비교하거나 처리 필요
+                        if (val.indexOf('1') > -1) $grid.jqGrid('setCell', rowId, 'usr_flag', '운영 관리자');
+                        else if (val.indexOf('0') > -1) $grid.jqGrid('setCell', rowId, 'usr_flag', '시스템 관리자');
+                }
+            });
+
+
+
             initGrid($grid, path, $('#grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
@@ -210,6 +225,11 @@
             });
         });
     </script>
+        <style>
+        .ui-jqgrid tr.jqgrow td {
+            text-align: center !important;
+        }
+    </style>
 </head>
 
 <body data-pgcode="0000">

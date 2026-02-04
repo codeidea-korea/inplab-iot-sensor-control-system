@@ -1028,6 +1028,11 @@
                 detail += '<br/>시간당 예상 강수량 ' + res.pcp + ' mm';
 
             $('.weather-detail').html(detail);
+
+            let rainAmount = res.pcp + 'mm';
+            const $rainInfo = $('.rain-info');
+            $rainInfo.find('span').remove(); 
+            $rainInfo.append('<span>' + rainAmount + '</span>');
         });
     }
 
