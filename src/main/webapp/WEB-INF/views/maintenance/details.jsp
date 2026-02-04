@@ -617,7 +617,7 @@
 
                 <div class="btn-btm">
                     <input type="button" id="form-submit-btn" blue value="저장"/>
-                    <button type="button" style="margin-right: auto" id="deleteBtn">삭제</button>
+                    <button type="button" id="deleteBtn">취소</button>
                     <input type="button" id="form-update-btn" blue value="수정"/>
                     <button type="button" data-fancybox-close>닫기</button>
                 </div>
