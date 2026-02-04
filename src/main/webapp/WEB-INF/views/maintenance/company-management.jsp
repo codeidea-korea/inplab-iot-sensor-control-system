@@ -96,7 +96,7 @@
             }
 
             function initInsertForm() {
-                $("#form_sub_title").html('등록');
+                $("#form_sub_title").html('신규등록');
                 $("#deleteBtn").hide()
                 $("#form-update-btn").hide();
             }
