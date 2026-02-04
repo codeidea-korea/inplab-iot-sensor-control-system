@@ -316,7 +316,7 @@
             $(window).on('beforeLoadGrid', (e, data) => {
                 const column = data.model.find(col => col.name === 'district_nm');
                 if (column) {
-                    column.search = false;
+                    column.hidden = true;
                 }
             });
 
