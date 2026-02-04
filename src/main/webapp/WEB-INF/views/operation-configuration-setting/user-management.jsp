@@ -210,6 +210,11 @@
             });
         });
     </script>
+        <style>
+        .ui-jqgrid tr.jqgrow td {
+            text-align: center !important;
+        }
+    </style>
 </head>
 
 <body data-pgcode="0000">
