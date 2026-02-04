@@ -121,7 +121,7 @@
             });
 
             function initModifyForm(data) {
-                $("#form_sub_title").html('상세 정보');
+                $("#form_sub_title").html('상세정보');
 
                 $('#district_no, #sens_nm, #senstype_no').prop('disabled', true);
                 $('.disabled-select').css('background-color', 'lightgray');
