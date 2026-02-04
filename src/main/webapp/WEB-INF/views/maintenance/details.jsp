@@ -572,7 +572,7 @@
                     <tr>
                         <th>연락처</th>
                         <td>
-                            <input id="maint_chgr_ph" type="text" placeholder="Ex) 010-1234-5678"/>
+                            <input id="maint_chgr_ph" type="text" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력)"/>
                         </td>
                     </tr>
                     </tbody>
