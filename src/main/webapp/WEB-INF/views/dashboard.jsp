@@ -1050,8 +1050,8 @@
                             '    <div>' +
                             '        <i class="fa-regular fa-eye"></i>　' +
                             '        <p class="check-box" notxt="" small="">' +
-                            '            <input type="checkbox" id="check_conts01_' + _idx + '" name="check_conts01_' + _idx + '" value="" checked>' +
-                            '            <label for="check_conts01_' + _idx + '">' +
+                            '            <input type="checkbox" id="check_cctv01_' + _idx + '" name="check_cctv01_' + _idx + '" value="" checked>' +
+                            '            <label for="check_cctv01_' + _idx + '">' +
                             '                <span class="graphic"></span>' +
                             '            </label>' +
                             '        </p>' +
