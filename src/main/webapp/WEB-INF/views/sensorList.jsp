@@ -254,7 +254,7 @@
                 hidden: false,
                 formatter: formatCommStatus
             },
-            {name: 'formul_data', index: 'formul_data', width: 70, align: 'center', hidden: false},
+            {name: 'formul_data', index: 'formul_data', width: 70, align: 'right', hidden: false},
             {name: 'senstype_no', index: 'senstype_no', width: 100, align: 'center', hidden: true},
             {name: 'sens_no', index: 'sens_no', width: 100, align: 'center', hidden: true},
             {name: 'logr_no', index: 'logr_no', width: 100, align: 'center', hidden: true},

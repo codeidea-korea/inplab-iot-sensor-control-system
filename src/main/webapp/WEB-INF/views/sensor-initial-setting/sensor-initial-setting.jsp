@@ -51,6 +51,13 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
+            $(window).on('beforeLoadGrid', (e, data) => {
+                const column = data.model.find(col => col.name === 'real_data');
+                if (column) {
+                    column.align = 'right';
+                }
+            });
+
             const $grid = $("#jq-grid");
             const $districtSelect = $('#district-select');
             initGrid($grid, "/sensor-initial-setting", $('#grid-wrapper'), {

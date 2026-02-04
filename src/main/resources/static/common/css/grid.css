@@ -114,6 +114,7 @@ jqgrid customize
 
 .ui-jqgrid tr.jqgrow td {
     border-color: #d3d3d3 !important;
+    text-align: center;
 }
 
 .ui-jqgrid tr.cctv_selected {
