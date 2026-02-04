@@ -220,7 +220,7 @@
         <jsp:include page="../common/include_sidebar.jsp" flush="true"/>
     </div>
     <div id="container">
-        <h2 class="txt">SMS (경보문자) 연계</h2>
+        <h2 class="txt">SMS 경보대상 관리</h2>
         <div id="contents">
             <div class="contents-re">
                 <h3 class="txt">SMS 경보 대상 관리</h3>
