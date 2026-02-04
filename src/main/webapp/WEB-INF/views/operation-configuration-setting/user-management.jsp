@@ -297,7 +297,7 @@
                     <tbody>
                     <tr>
                         <th>휴대폰</th>
-                        <td><input type="text" id="usr_ph" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력)"/></td>
+                        <td><input type="text" id="usr_ph" placeholder="Ex) 010-1234-5678"/></td>
                     </tr>
                     <tr>
                         <th>E-Mail</th>
