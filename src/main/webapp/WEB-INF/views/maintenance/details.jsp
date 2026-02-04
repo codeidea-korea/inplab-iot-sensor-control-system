@@ -190,7 +190,7 @@
                 $('#district_no, #sens_nm, #senstype_no').prop('disabled', false);
                 $('.disabled-select').css('background-color', 'white');
 
-                $("#form_sub_title").html('등록');
+                $("#form_sub_title").html('신규등록');
                 $("#form-submit-btn").show()
                 $("#deleteBtn").hide();
                 $("#form-update-btn").hide();
@@ -505,7 +505,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">유지 보수 이력 <span id="form_sub_title"></span></div>
+        <div class="layer-base-title">유지보수내역<span id="form_sub_title"></span></div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
