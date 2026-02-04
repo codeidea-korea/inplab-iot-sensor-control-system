@@ -1083,7 +1083,7 @@
                     $(document).trigger('map_action_end');
                 });
                 $('.zoneSelected').show();
-                window.vworld.setPanBy([parseFloat($selected.attr('lng')), parseFloat($selected.attr('lat'))], 18);
+                window.vworld.setPanBy([parseFloat($selected.attr('lng')), parseFloat($selected.attr('lat'))], 20);
             } else {
                 $('.zoneSelected').hide();
                 $('.site-status-toggle').removeClass('active');
