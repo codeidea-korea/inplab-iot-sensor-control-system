@@ -318,15 +318,22 @@
             let isExist;
 
             selectArrary.some(select => select.district_nm + '_' + select.sens_chnl_nm === rowId) ? isExist = true : isExist = false;
+
             selectArrary = selectArrary.filter((select) => select.district_nm + '_' + select.sens_chnl_nm !== data.district_nm + '_' + data.sens_chnl_nm);
 
             if (isExist) {
+
                 $('tr[id="' + rowId + '"] input[type=checkbox]').prop("checked", false);
             } else {
+
+                $('input.row-checkbox').prop('checked', false); 
+                selectArrary = [];
+
                 selectArrary.push(data);
-                $('tr[id="' + rowId + '"] input[type=checkbox]').prop("checked", true);
+                $('tr[id="' + rowId + '"] input[type=checkbox]').prop("checked", true); 
             }
         };
+
 
         const loadComplete2 = () => {
             selectArrary.map((select) => {
