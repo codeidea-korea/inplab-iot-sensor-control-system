@@ -84,7 +84,16 @@
                 custom: {
                     useFilterToolbar: true,
                 }
-            })
+            }, null, { 
+                    reg_dt: { //시간 양식 변화
+                        formatter: function (cellValue) {
+                            if (cellValue) {
+                                return moment(cellValue).format('YYYY-MM-DD HH:mm');
+                            }
+                            return '';
+                        }
+                    }
+            });
 
             initDistrict();
             initMaintComp();
