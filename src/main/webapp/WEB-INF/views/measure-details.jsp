@@ -313,6 +313,13 @@
                 return year + "-" + month + "-" + day;
             }
 
+            $(window).on('beforeLoadGrid', (e, data) => {
+                const column = data.model.find(col => col.name === 'district_nm');
+                if (column) {
+                    column.search = false;
+                }
+            });
+
             const today = new Date();
 
             const end = new Date(today);
