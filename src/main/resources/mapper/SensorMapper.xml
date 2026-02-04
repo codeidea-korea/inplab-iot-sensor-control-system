@@ -422,6 +422,15 @@
         ORDER BY tst.sens_tp_nm ASC;
     </select>
 
+    <select id="getDistinctPartnerComp" parameterType="java.util.Map" resultType="java.util.Map">
+        /* getDistinctPartnerComp */
+        SELECT DISTINCT D.partner_comp_nm
+        FROM tb_cctv_info A
+        INNER JOIN tb_maintcomp_info D ON A.partner_comp_id = D.partner_comp_id
+        WHERE D.partner_comp_nm IS NOT NULL AND D.partner_comp_nm != ''
+        ORDER BY D.partner_comp_nm ASC
+    </select>
+
     <select id="getSimpleTotalCount" parameterType="java.util.Map" resultType="int">
         select count(tsi.sens_no)
         from tb_sensor_info tsi

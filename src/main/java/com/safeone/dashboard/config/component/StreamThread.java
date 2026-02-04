@@ -35,65 +35,60 @@ public class StreamThread extends Thread {
             throw new RuntimeException("URL decoding failed", e);
         }
 
-        System.out.println("[StreamThread] Start stream for: " + url);
-
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(url)) {
             grabber.setOption("rtsp_transport", "tcp");
-            grabber.setOption("stimeout", "8000000"); // 8초 타임아웃
+            grabber.setOption("stimeout", "8000000");
             grabber.setOption("fflags", "nobuffer");
             grabber.setOption("flags", "low_delay");
-            grabber.setOption("an", "1"); // 오디오 비활성화
+            grabber.setOption("an", "1");
             grabber.setOption("rw_timeout", "8000000");
 
-            // grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-            // grabber.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-
-            System.out.println("[StreamThread] Trying to connect...");
             grabber.start();
-            System.out.println("[StreamThread] Stream started successfully: "
-                    + grabber.getImageWidth() + "x" + grabber.getImageHeight());
 
-            int frameCount = 0;
+            // 초기 RTSP 버퍼 드레인 - 버퍼된 과거 프레임 제거
+            long drainStart = System.currentTimeMillis();
+            while (System.currentTimeMillis() - drainStart < 2000) {
+                long t = System.currentTimeMillis();
+                Frame drainFrame = grabber.grabImage();
+                long elapsed = System.currentTimeMillis() - t;
+
+                if (drainFrame == null) break;
+                if (elapsed > 30) break;
+            }
+
             int emptyFrameCount = 0;
+            long lastSendTime = 0;
+            final long MIN_FRAME_INTERVAL = 100;
 
             while (session.isOpen() && !Thread.currentThread().isInterrupted()) {
                 Frame frame = grabber.grabImage();
 
                 if (frame == null) {
                     emptyFrameCount++;
-                    if (emptyFrameCount % 60 == 0) {
-                        System.out.println("[StreamThread] No frame received (" + emptyFrameCount + " frames skipped)");
-                    }
+                    Thread.sleep(10);
+                    continue;
+                }
+
+                long now = System.currentTimeMillis();
+                if (now - lastSendTime < MIN_FRAME_INTERVAL) {
                     continue;
                 }
 
                 BufferedImage image = converter.getBufferedImage(frame);
                 if (image != null) {
-                    frameCount++;
-                    if (frameCount % 30 == 0) {
-                        System.out.println("[StreamThread] Sending frame #" + frameCount);
-                    }
-
                     try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                         ImageIO.write(image, "jpeg", baos);
                         baos.flush();
                         session.sendMessage(new BinaryMessage(baos.toByteArray()));
+                        lastSendTime = System.currentTimeMillis();
                     }
                 }
-
-                // CPU 과부하 방지
-                Thread.sleep(33); // 약 30fps
             }
 
             grabber.stop();
             converter.close();
-            System.out.println("[StreamThread] Stream stopped normally.");
 
-        } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
-            System.err.println("[StreamThread] FFmpeg grabber error: " + e.getMessage());
-            e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("[StreamThread] Unexpected error: " + e.getMessage());
             e.printStackTrace();
         }
     }

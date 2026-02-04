@@ -36,7 +36,6 @@
             left: 0;
             top: 0;
             cursor: grab;
-            transition: transform 0.1s ease;
             border-radius: 0;
         }
 
@@ -97,6 +96,51 @@
         const limit = 25;
         let offset = 0;
         let isCheckedAll = false;
+
+        // WebSocket 종료 + 재연결 타이머 정리
+        const closeCctvWs = (cctvNo) => {
+            try {
+                const ws = window.videoWs['vid_' + cctvNo];
+                if (!ws) return;
+                if (ws._reconnectTimer) clearInterval(ws._reconnectTimer);
+                if (ws._prevUrl) URL.revokeObjectURL(ws._prevUrl);
+                ws.send(JSON.stringify({type: "close"}));
+                ws.close();
+                console.log('socket close - vid_' + cctvNo);
+            } catch (e) {}
+        };
+
+        // WebSocket 연결 생성
+        const connectCctvStream = (cctvNo, rtspUrl) => {
+            const ws = new WebSocket(wsUrl + '/video/stream?url=' + rtspUrl);
+            ws._latestData = null;
+            ws._renderScheduled = false;
+            ws._prevUrl = null;
+            ws._rtspUrl = rtspUrl;
+
+            ws.onmessage = function (event) {
+                ws._latestData = event.data;
+                if (ws._renderScheduled) return;
+                ws._renderScheduled = true;
+
+                requestAnimationFrame(() => {
+                    ws._renderScheduled = false;
+                    const video = $('#vid_' + cctvNo)[0];
+                    if (!video || !ws._latestData) return;
+
+                    const blob = new Blob([ws._latestData], {type: "image/jpeg"});
+                    const url = URL.createObjectURL(blob);
+                    if (ws._prevUrl) URL.revokeObjectURL(ws._prevUrl);
+                    video.src = url;
+                    ws._prevUrl = url;
+                });
+            };
+
+            window.videoWs['vid_' + cctvNo] = ws;
+        };
+
+        // 주기적 재연결 제거 - 대시보드처럼 연결 유지 방식으로 변경
+        // 서버 StreamThread에서 초기 버퍼 드레인 처리됨
 
         const makePage = () => {
             let html = '';
@@ -171,29 +215,7 @@
             $('#vid_' + data.cctv_no).one('load', function (e) {
                 $('#vid_' + data.cctv_no).siblings('.cctvContainer.nosignal .container').remove();
             });
-            window.videoWs['vid_' + data.cctv_no] = new WebSocket(wsUrl + '/video/stream?url=' + data.etc1);
-
-            window.videoWs['vid_' + data.cctv_no].onmessage = function (event) {
-                let blob = new Blob([event.data], {type: "image/jpeg"});
-                let url = URL.createObjectURL(blob);
-                let video = $('#vid_' + data.cctv_no)[0];
-
-                if (video === undefined) {
-                    return;
-                }
-
-                video.src = url;
-
-                try {
-                    video.src = url;
-                    // 객체 URL을 해제하여 메모리 누수 방지
-                    setTimeout(() => {
-                        URL.revokeObjectURL(url);
-                    }, 300);
-                } catch (e) {
-                    console.log('socket close');
-                }
-            };
+            connectCctvStream(data.cctv_no, data.etc1);
         };
 
         const uncheckedAllCctvList = () => {
@@ -244,13 +266,7 @@
             $('.paging_all').remove();
             cctvArray.forEach((data, idx) => {
                 if ($('.cctv-list li[cctvno=' + data.cctv_no + ']').length > 0) {
-                    try {
-                        window.videoWs['vid_' + data.cctv_no].send(JSON.stringify({type: "close"}));
-                        window.videoWs['vid_' + data.cctv_no].close();
-                        console.log('socket close - vid_' + data.cctv_no);
-                    } catch (e) {
-
-                    }
+                    closeCctvWs(data.cctv_no);
                     $('.cctv-list li[cctvno=' + data.cctv_no + ']').remove();
                 }
             });
@@ -361,9 +377,10 @@
                 getDistinct().then((res) => {
                     distinctDistrict = res.district;
                     distinctSensType = res.sensor_type;
+                    let distinctPartnerComp = res.partner_comp || [];
 
                     $("#jqGrid").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
-                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "jqGrid");
+                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "jqGrid", distinctPartnerComp);
                         $searchRow.append($cell);
                     });
                     $thead.append($searchRow);
@@ -438,13 +455,7 @@
             cctvArray = cctvArray.filter((cctv) => cctv.cctv_no !== data.cctv_no);
 
             if (isExist) {
-                try {
-                    window.videoWs['vid_' + data.cctv_no].send(JSON.stringify({type: "close"}));
-                    window.videoWs['vid_' + data.cctv_no].close();
-                    console.log('socket close - vid_' + data.cctv_no);
-                } catch (e) {
-
-                }
+                closeCctvWs(data.cctv_no);
                 $('.cctv-list li[cctvno=' + data.cctv_no + ']').remove();
                 $('tr[id=' + rowId + '] input[type=checkbox]').prop("checked", false);
             } else {
@@ -510,13 +521,7 @@
 
                 const isChecked = $('tr[id=' + data.rowId + '] input[type=checkbox]').is(':checked');
                 if (!isChecked) {
-                    try {
-                        window.videoWs['vid_' + data.cctv_no].send(JSON.stringify({type: "close"}));
-                        window.videoWs['vid_' + data.cctv_no].close();
-                        console.log('socket close - vid_' + data.cctv_no);
-                    } catch (e) {
-
-                    }
+                    closeCctvWs(data.cctv_no);
                     $('.cctv-list li[cctvno=' + data.cctv_no + ']').remove();
                 } else {
                     if (cctvArray.length < 7) {
@@ -540,14 +545,7 @@
                 target.removeClass("cctv_selected");
                 cctvArray = cctvArray.filter((cctv) => cctv.cctv_no !== cctvno);
 
-                try {
-                    window.videoWs['vid_' + cctvno].send(JSON.stringify({type: "close"}));
-                    window.videoWs['vid_' + cctvno].close();
-                    console.log('socket close - vid_' + cctvno);
-                } catch (e) {
-                    console.log(e);
-                }
-
+                closeCctvWs(cctvno);
                 $('.cctv-list li[cctvno=' + cctvno + ']').remove();
 
                 if ($('.cctv-list .cctvContainer').length === 0) {

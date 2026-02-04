@@ -60,6 +60,10 @@ public class ModifySensorServiceImpl implements ModifySensorService {
         an = om.valueToTree(sensorType);
         on.put("sensor_type", an);
 
+        List<HashMap<String, Object>> partnerComp = modifySensorMapper.getDistinctPartnerComp(map);
+        an = om.valueToTree(partnerComp);
+        on.put("partner_comp", an);
+
         return on;
     }
 

@@ -34,6 +34,10 @@ public class ModifySensorMapper {
         return sqlSession.selectList("com.safeone.dashboard.dao.ModifySensorMapper.getDistinctSensorType", map);
     }
 
+    public List<HashMap<String, Object>> getDistinctPartnerComp(Map<String, Object> map) {
+        return sqlSession.selectList("com.safeone.dashboard.dao.ModifySensorMapper.getDistinctPartnerComp", map);
+    }
+
     public int getSimpleTotalCount(Map param) {
         return sqlSession.selectOne("com.safeone.dashboard.dao.ModifySensorMapper.getSimpleTotalCount", param);
     }

@@ -49,7 +49,7 @@ const actFormattedData = (data, keyArray) => {
     });
 };
 
-const setFilterControls = (col, index, distinctDistrict, distinctSensType, filters, gridId) => {
+const setFilterControls = (col, index, distinctDistrict, distinctSensType, filters, gridId, distinctPartnerComp) => {
     let $cell = $('<th></th>');
 
     if (!col.hidden && index > 0) {
@@ -81,6 +81,75 @@ const setFilterControls = (col, index, distinctDistrict, distinctSensType, filte
             distinctSensType.forEach(function (item) {
                 $select.append('<option value="' + item.sens_tp_nm + '">' + item.sens_tp_nm + '</option>');
             });
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "eq",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($select);
+        } else if (col.name === "partner_comp_nm" && distinctPartnerComp && distinctPartnerComp.length > 0) {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            distinctPartnerComp.forEach(function (item) {
+                $select.append('<option value="' + item.partner_comp_nm + '">' + item.partner_comp_nm + '</option>');
+            });
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "eq",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($select);
+        } else if (col.name === "rtsp_status") {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            $select.append('<option value="Y">정상</option>');
+            $select.append('<option value="N">에러</option>');
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "eq",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($select);
+        } else if (col.name === "maint_sts_cd") {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            $select.append('<option value="MTN001">정상</option>');
+            $select.append('<option value="MTN002">망실</option>');
+            $select.append('<option value="MTN003">점검</option>');
+            $select.append('<option value="MTN004">철거</option>');
             $select.on("change", function () {
                 const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
                 const searchValue = $(this).val();
@@ -153,7 +222,8 @@ const setFilterControls = (col, index, distinctDistrict, distinctSensType, filte
             $cell.append($input);
         } else {
             let $input = $('<input type="text" style="width: 98%; box-sizing: border-box;" />');
-            $input.on("input", function () {
+            $input.on("keydown", function (e) {
+                if (e.key !== 'Enter') return;
                 const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
                 const searchValue = $(this).val();
                 filters.rules = filters.rules.filter(rule => rule.field !== colName);
