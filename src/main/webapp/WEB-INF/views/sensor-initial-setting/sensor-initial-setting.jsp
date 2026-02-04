@@ -57,6 +57,12 @@
                     column.align = 'right';
                 }
             });
+            $(window).on('beforeLoadGrid', (e, data) => {
+                const column = data.model.find(col => col.name === 'district_nm');
+                if (column) {
+                    column.hidden = true;
+                }
+            });
 
             const $grid = $("#jq-grid");
             const $districtSelect = $('#district-select');
