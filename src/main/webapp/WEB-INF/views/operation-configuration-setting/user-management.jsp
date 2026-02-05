@@ -50,6 +50,7 @@
                 $("#form_sub_title").html('신규 등록');
                 $("#deleteBtn").hide()
                 $("#form-update-btn").hide();
+                $("#form-submit-btn").show();
                 $("#usr_id").attr('readonly', false);
                 $("#usr_nm").attr('readonly', false);
             }
