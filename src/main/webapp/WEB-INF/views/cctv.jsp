@@ -48,6 +48,23 @@
             font-size: 1.4rem;
         }
 
+        .cctvzoom .cctvcontrol .preset-select {
+            background: #00000060;
+            color: white;
+            border: 1px solid #ffffff40;
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-size: 0.85rem;
+            max-width: 140px;
+            height: 26px;
+            cursor: pointer;
+        }
+
+        .cctvzoom .cctvcontrol .preset-select option {
+            background: #333;
+            color: white;
+        }
+
         .cctvzoom .cctvcontrol .conbtn_area {
             display: flex;
             gap: 5px;
@@ -167,6 +184,52 @@
             $('.cctv-list').append(html);
         };
 
+        const parsePresets = (text) => {
+            const presets = [];
+            const lines = text.split('\n');
+            lines.forEach(line => {
+                const match = line.match(/Channel\.0\.Preset\.(\d+)\.Name=(.*)/);
+                if (match) {
+                    presets.push({number: match[1], name: match[2].trim()});
+                }
+            });
+            return presets;
+        };
+
+        const loadPresets = (cctvNo) => {
+            $.ajax({
+                url: '/modify/cctv/preset/list',
+                type: 'GET',
+                data: {cctv_no: cctvNo},
+                dataType: 'text',
+                success: function (response) {
+                    const $select = $('.preset-select[data-cctv-no="' + cctvNo + '"]');
+                    const presets = parsePresets(response);
+                    presets.forEach(preset => {
+                        $select.append('<option value="' + preset.number + '">' + preset.number + '. ' + preset.name + '</option>');
+                    });
+                },
+                error: function (err) {
+                    console.log('프리셋 목록 조회 실패 - CCTV ' + cctvNo, err);
+                }
+            });
+        };
+
+        const changePreset = (cctvNo, presetNo) => {
+            if (!presetNo) return;
+            $.ajax({
+                url: '/modify/cctv/preset/change',
+                type: 'GET',
+                data: {cctv_no: cctvNo, preset: presetNo},
+                success: function (res) {
+                    console.log('프리셋 변경 완료:', presetNo, res);
+                },
+                error: function (err) {
+                    console.log('프리셋 변경 실패:', err);
+                }
+            });
+        };
+
         const setCctvVideoList = (data) => {
             const html =
                 '<li cctvno=' + data.cctv_no + ' rowId=' + data.rowId + '>' +
@@ -185,6 +248,9 @@
                 '</div>' +
                 '<div class="videoClose">X</div>' +
                 '<div class="cctvcontrol">' +
+                '    <select class="preset-select" data-cctv-no="' + data.cctv_no + '">' +
+                '        <option value="">프리셋</option>' +
+                '    </select>' +
                 '    <div class="conbtn_area">' +
                 '        <button data-operator="left" data-cctv-no=' + data.cctv_no + ' type="button" class="operator-btn">◀</button> ' +
                 '        <button data-operator="up" data-cctv-no=' + data.cctv_no + ' type="button" class="operator-btn">▲</button> ' +
@@ -216,6 +282,7 @@
                 $('#vid_' + data.cctv_no).siblings('.cctvContainer.nosignal .container').remove();
             });
             connectCctvStream(data.cctv_no, data.etc1);
+            loadPresets(data.cctv_no);
         };
 
         const uncheckedAllCctvList = () => {
@@ -351,7 +418,7 @@
             {name: 'cctv_lon', index: 'cctv_lon', align: 'center', hidden: true},
             {name: 'admin_center', index: 'admin_center', align: 'center', hidden: true},
             {name: 'etc1', index: 'etc1', align: 'center', hidden: true},
-            {name: 'etc2', index: 'etc2', align: 'center', hidden: true},
+            {name: 'etc3', index: 'etc3', align: 'center', hidden: true},
             {name: 'etc3', index: 'etc3', align: 'center', hidden: true},
         ];
 
@@ -680,6 +747,12 @@
             });
 
             // row 의 체크박스를 해제하기 위해 클릭했을때 onselectrow 이 반응하지 않기에 추가된 이벤트
+            $(document).on('change', '.preset-select', function () {
+                const presetNo = $(this).val();
+                const cctvNo = $(this).data('cctv-no');
+                changePreset(cctvNo, presetNo);
+            });
+
             $(document).on('change', '#jqGrid input[type=checkbox]', function (e) {
                 e.stopImmediatePropagation(); // 현재 이벤트가 다른 이벤트 핸들러로 전파되는 것을 방지
                 const isChecked = $(this).is(':checked');

@@ -133,6 +133,50 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
     }
 
 
+    @Override
+    public String getPresetList(Map<String, Object> param) {
+        CctvListDto cctvInfo = cctvListMapper.getCctvInfo(param);
+        String requestUrl = "http://" + cctvInfo.getCctv_ip() + ":" + cctvInfo.getWeb_port()
+                + "/stw-cgi/ptzconfig.cgi?msubmenu=preset&action=view&Channel=0";
+        return sendCctvRequest(cctvInfo.getCctv_ip(), cctvInfo.getWeb_port(), cctvInfo.getCctv_conn_id(), cctvInfo.getCctv_conn_pwd(), requestUrl);
+    }
+
+    @Override
+    public String changePreset(Map<String, Object> param) {
+        CctvListDto cctvInfo = cctvListMapper.getCctvInfo(param);
+        String preset = param.get("preset").toString();
+        String requestUrl = "http://" + cctvInfo.getCctv_ip() + ":" + cctvInfo.getWeb_port()
+                + "/stw-cgi/ptzconfig.cgi?msubmenu=presetimageconfig&action=set&Channel=0&ImagePreview=Start&Preset=" + preset;
+        return sendCctvRequest(cctvInfo.getCctv_ip(), cctvInfo.getWeb_port(), cctvInfo.getCctv_conn_id(), cctvInfo.getCctv_conn_pwd(), requestUrl);
+    }
+
+    private String sendCctvRequest(String ipAddress, String port, String id, String password, String requestUrl) {
+        Credentials credentials = new UsernamePasswordCredentials(id, password.toCharArray());
+        BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(new AuthScope(ipAddress, Integer.parseInt(port)), credentials);
+
+        HttpClientContext context = HttpClientContext.create();
+        context.setCredentialsProvider(credentialsProvider);
+
+        try (CloseableHttpClient httpClient = HttpClients.custom()
+                .setDefaultCredentialsProvider(credentialsProvider)
+                .build()) {
+
+            HttpGet request = new HttpGet(requestUrl);
+
+            try (CloseableHttpResponse response = httpClient.execute(new HttpHost(ipAddress, Integer.parseInt(port)), request, context)) {
+                if (response.getCode() == 200) {
+                    return EntityUtils.toString(response.getEntity());
+                } else {
+                    return "FAIL";
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "FAIL";
+        }
+    }
+
     private String getPtzValues(String ipAddress, String port, String id, String password) {
         String requestUrl = "http://" + ipAddress + ":" + port + "/stw-cgi/ptzcontrol.cgi?msubmenu=query&action=view&Channel=0&Query=Pan,Tilt,Zoom";
 

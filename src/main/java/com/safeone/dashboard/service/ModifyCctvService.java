@@ -11,4 +11,8 @@ public interface ModifyCctvService {
   ObjectNode getCctv(GetModifyCctvDto getModifyCctvDto);
 
     String operation(Map<String, Object> param);
+
+    String getPresetList(Map<String, Object> param);
+
+    String changePreset(Map<String, Object> param);
 }

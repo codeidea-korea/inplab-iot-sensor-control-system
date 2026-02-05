@@ -3,11 +3,11 @@
 
 <mapper namespace="com.safeone.dashboard.dao.displayconnection.DisplaySendManagementMapper">
     <sql id="rowSearch">
-        <if test="img_grp_nm != null and img_grp_nm != ''">
-            and tdi.img_grp_nm = #{img_grp_nm}
+        <if test="dispbd_imgfile_nm != null and dispbd_imgfile_nm != ''">
+            and tdi.dispbd_imgfile_nm ilike '%' || #{dispbd_imgfile_nm} || '%'
         </if>
-        <if test="dispbd_evnt_flag != null and dispbd_evnt_flag != ''">
-            and tdi.dispbd_evnt_flag = #{dispbd_evnt_flag}
+        <if test="use_yn != null and use_yn != ''">
+            and tdi.use_yn = #{use_yn}
         </if>
     </sql>
 
@@ -49,18 +49,17 @@
             resultType="com.safeone.dashboard.dto.displayconnection.DisplaySendManagementDto">
         SELECT tdi.mgnt_no
         , tdi.dispbd_imgfile_nm
-        , tdi.img_grp_nm
-        , tdi.dispbd_evnt_flag
-        , tdi.img_effect_cd
-        , tdi.img_disp_min
         , tdi.img_file_path
-        , tdi.dispbd_autosnd_yn
         , tdi.use_yn
+        , tdi.img_size
+        , tdi.img_bg_color
+        , tdi.font_size
+        , tdi.font_color
         , tdi.reg_dt
         , tdi.mod_dt
         , tdi.mgnt_no as edit
         , tdi.mgnt_no as del
-        FROM tb_dispbd_image tdi
+        FROM tb_dispbd_image_new tdi
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -71,7 +70,7 @@
 
     <select id="selectDisplaySendManagementListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(tdi.mgnt_no)
-        FROM tb_dispbd_image tdi
+        FROM tb_dispbd_image_new tdi
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>

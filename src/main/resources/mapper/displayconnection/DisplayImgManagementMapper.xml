@@ -3,34 +3,46 @@
 
 <mapper namespace="com.safeone.dashboard.dao.displayconnection.DisplayImgManagementMapper">
     <sql id="rowSearch">
-        <if test="send_group_name != null and send_group_name != ''">
-            and MG.send_group_name ilike '%' || #{send_group_name} || '%'
+        <if test="dispbd_evnt_flag != null and dispbd_evnt_flag != ''">
+            and MG.dispbd_evnt_flag = #{dispbd_evnt_flag}
         </if>
-        <if test="description != null and description != ''">
-            and MG.description ilike '%' || #{description} || '%'
+        <if test="img_grp_nm != null and img_grp_nm != ''">
+            and MG.img_grp_nm ilike '%' || #{img_grp_nm} || '%'
+        </if>
+        <if test="alarm_lvl_cd != null and alarm_lvl_cd != ''">
+            and MG.alarm_lvl_cd = #{alarm_lvl_cd}
         </if>
         <if test="use_yn != null and use_yn != ''">
             and MG.use_yn = #{use_yn}
+        </if>
+        <if test="img_grp_comment != null and img_grp_comment != ''">
+            and MG.img_grp_comment ilike '%' || #{img_grp_comment} || '%'
         </if>
     </sql>
 
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
-                <when test="'send_group_id' == sidx and sidx != ''">
-                    MG.send_group_id ${sord}
+                <when test="'mgnt_no' == sidx and sidx != ''">
+                    MG.mgnt_no::integer ${sord}
                 </when>
-                <when test="'send_group_name' == sidx and sidx != ''">
-                    MG.send_group_name ${sord}
+                <when test="'dispbd_evnt_flag' == sidx and sidx != ''">
+                    MG.dispbd_evnt_flag ${sord}
                 </when>
-                <when test="'description' == sidx and sidx != ''">
-                    MG.description ${sord}
+                <when test="'img_grp_nm' == sidx and sidx != ''">
+                    MG.img_grp_nm ${sord}
+                </when>
+                <when test="'alarm_lvl_cd' == sidx and sidx != ''">
+                    MG.alarm_lvl_cd ${sord}
                 </when>
                 <when test="'use_yn' == sidx and sidx != ''">
                     MG.use_yn ${sord}
                 </when>
+                <when test="'img_grp_comment' == sidx and sidx != ''">
+                    MG.img_grp_comment ${sord}
+                </when>
                 <otherwise>
-                    MG.reg_dt
+                    MG.mgnt_no::integer
                 </otherwise>
             </choose>
         </trim>
@@ -39,7 +51,8 @@
     <select id="selectDisplayImgManagementList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.displayconnection.DisplayImgManagementDto">
         SELECT *
-        FROM tb_dispbd_group MG
+        FROM tb_dispbd_group_new MG
+        WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
@@ -49,36 +62,39 @@
 
     <select id="selectDisplayImgManagementListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(*)
-        FROM tb_dispbd_group MG
+        FROM tb_dispbd_group_new MG
+        WHERE 1=1
         <include refid="rowSearch"/>
     </select>
 
     <update id="updateDisplayImgManagement" parameterType="java.util.Map">
-        update tb_dispbd_group
+        update tb_dispbd_group_new
         set img_grp_nm      = #{img_grp_nm},
             img_grp_comment = #{img_grp_comment},
+            dispbd_evnt_flag = #{dispbd_evnt_flag},
+            alarm_lvl_cd    = #{alarm_lvl_cd},
             use_yn          = #{use_yn},
             mod_dt          = now()
         where mgnt_no = #{mgnt_no}::integer
     </update>
 
     <insert id="insertDisplayImgManagement" parameterType="java.util.Map">
-        INSERT INTO tb_dispbd_image (mgnt_no, dispbd_imgfile_nm, img_grp_nm, dispbd_evnt_flag, img_effect_cd,
-                                     img_disp_min, img_file_path, dispbd_autosnd_yn, use_yn, reg_dt, mod_dt)
-        VALUES ((SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_dispbd_image), #{dispbd_imgfile_nm}, #{img_grp_nm},
-                #{dispbd_evnt_flag}, #{img_effect_cd}, #{img_disp_min}::integer,
-                #{img_file_path}, #{dispbd_autosnd_yn}, #{use_yn}, now(), now())
+        INSERT INTO tb_dispbd_image_new (mgnt_no, dispbd_imgfile_nm, img_file_path, use_yn,
+                                     img_size, img_bg_color, font_size, font_color, reg_dt, mod_dt)
+        VALUES ((SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_dispbd_image_new), #{dispbd_imgfile_nm},
+                #{img_file_path}, #{use_yn}, #{img_size}, #{img_bg_color},
+                #{font_size}, #{font_color}, now(), now())
     </insert>
 
     <insert id="insertGroup" parameterType="java.util.Map">
-        INSERT INTO tb_dispbd_group (mgnt_no, img_grp_nm, img_grp_comment, use_yn, reg_dt, mod_dt)
-        VALUES ((SELECT COALESCE(MAX(mgnt_no::integer), 0) + 1 FROM tb_dispbd_group), #{img_grp_nm},
-                #{img_grp_comment}, #{use_yn}, now(), now())
+        INSERT INTO tb_dispbd_group_new (mgnt_no, img_grp_nm, img_grp_comment, dispbd_evnt_flag, alarm_lvl_cd, use_yn, reg_dt, mod_dt)
+        VALUES ((SELECT COALESCE(MAX(mgnt_no::integer), 0) + 1 FROM tb_dispbd_group_new), #{img_grp_nm},
+                #{img_grp_comment}, #{dispbd_evnt_flag}, #{alarm_lvl_cd}, #{use_yn}, now(), now())
     </insert>
 
     <delete id="deleteDisplayImgManagement" parameterType="java.util.Map">
         DELETE
-        FROM tb_dispbd_group
+        FROM tb_dispbd_group_new
         WHERE mgnt_no = #{mgnt_no}::integer
     </delete>
 

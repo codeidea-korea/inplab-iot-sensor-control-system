@@ -33,8 +33,21 @@
             position: relative;
         }
 
+        #contents {
+            min-height: auto;
+            max-height: 70%;
+        }
+
         #contents .contents-in {
             padding: 20px;
+        }
+
+        #footer .paginate {
+            display: none;
+        }
+
+        #lay-form-write2.layer-base {
+            width: 99.2rem;
         }
 
         .stepTable {
@@ -150,8 +163,21 @@
                 }
             });
 
+            $('.bgColorPicker').colorPickerByGiro({
+                preview: '.bgColorPicker-preview',
+                text: {
+                    close: '확인'
+                },
+                onChanged: function () {
+                    applyBgColor();
+                }
+            });
+
             $('span.myColorPicker-preview').css('background-color', '#ffffff');
             $('input[name=color]').val('rgba(255,255,255,1)');
+
+            $('span.bgColorPicker-preview').css('background-color', '#000000');
+            $('input[name=bgColor]').val('rgba(0,0,0,1)');
 
             $('.btnCreateCanvas').on('click', function () {
                 if ($('input[name=option]:checked').val() == '160x32') {
@@ -219,12 +245,16 @@
             $('.btnCancel').on('click', function () {
                 confirm('작업을 삭제하시겠습니까?', function () {
                     $('.canvasContainer canvas').remove();
+                    $('#canvasSizeLabel').text('');
 
                     $('.canvasBtn').hide();
                     $('.setupText').hide();
 
                     $('span.myColorPicker-preview').css('background-color', '#ffffff');
                     $('input[name=color]').val('rgba(255,255,255,1)');
+
+                    $('span.bgColorPicker-preview').css('background-color', '#000000');
+                    $('input[name=bgColor]').val('rgba(0,0,0,1)');
 
                     texts = [];
 
@@ -233,8 +263,18 @@
             });
         });
 
+        function applyBgColor() {
+            if (canvas && ctx) {
+                drawTexts();
+            }
+        }
+
         function drawTexts() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            var bgColor = $('input[name=bgColor]').val() || 'rgba(0,0,0,1)';
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             texts.forEach(function (text, index) {
                 ctx.font = text.fontSize + "px Arial";
@@ -266,14 +306,17 @@
         }
 
         var selectedTextIndex = -1;
+        var dragOffsetX = 0;
+        var dragOffsetY = 0;
 
         function createCanvas(w, h) {
             canvas = document.createElement('canvas');
             canvas.width = w;
             canvas.height = h;
 
+            $('#canvasSizeLabel').text('(' + w + ' x ' + h + 'px)');
+
             canvas.style.border = '1px solid #bbb';
-            canvas.style.backgroundColor = '#000';
 
             // 기존 캔버스를 제거하고 새 캔버스를 컨테이너에 추가합니다
             var container = $('.canvasContainer');
@@ -281,6 +324,10 @@
             container.append(canvas); // 새 캔버스를 추가합니다
 
             ctx = canvas.getContext('2d');
+
+            var bgColor = $('input[name=bgColor]').val() || 'rgba(0,0,0,1)';
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             canvas.onmousedown = function (e) {
                 var mousePos = getMousePos(canvas, e);
@@ -295,6 +342,8 @@
                         mousePos.y > text.y - textHeight && mousePos.y < text.y) {
                         text.dragging = true;
                         selectedTextIndex = index;
+                        dragOffsetX = mousePos.x - text.x;
+                        dragOffsetY = mousePos.y - text.y;
                     }
                 });
 
@@ -304,17 +353,12 @@
             };
 
             canvas.onmousemove = function (e) {
-                if (selectedTextIndex !== -1) {
+                if (selectedTextIndex !== -1 && texts[selectedTextIndex].dragging) {
                     var mousePos = getMousePos(canvas, e);
                     var text = texts[selectedTextIndex];
 
-                    var metrics = ctx.measureText(text.content);
-                    var textWidth = metrics.width;
-                    var textHeight = parseInt(text.fontSize); // 'px'을 제거하고 정수로 변환
-
-                    // 텍스트의 중앙이 마우스 위치에 오도록 조정
-                    text.x = mousePos.x - textWidth / 2;
-                    text.y = mousePos.y + textHeight / 2;
+                    text.x = mousePos.x - dragOffsetX;
+                    text.y = mousePos.y - dragOffsetY;
 
                     drawTexts();
                 }
@@ -342,7 +386,7 @@
 
             if (index == -1) {
                 $('input[name=displayText]').val('');
-                $('input[name=fontSize]').val('20');
+                $('input[name=fontSize]').val('16');
                 $('span.myColorPicker-preview').css('background-color', '#ffffff');
                 $('input[name=color]').val('rgba(255,255,255,1)');
                 $('button.btnAddText').attr('idx', index);
@@ -364,7 +408,12 @@
         window.jqgridOption = {
             columnAutoWidth: true,
             multiselect: true,
-            multiboxonly: false
+            multiboxonly: false,
+            rowNum: 9999,
+            rowList: [],
+            pgbuttons: false,
+            pginput: false,
+            viewrecords: false
         }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
 
         var _popupClearData;
@@ -400,7 +449,7 @@
             // 등록
             $('.insertBtn').on('click', function () {
 
-                $("#form_sub_title").html('등록');
+                $("#form_sub_title").html('신규 등록');
 
                 setSerialize('#lay-form-write2', _popupClearData);
                 $('#lay-form-write2 .btn-btm .deleteBtn').hide();
@@ -431,7 +480,7 @@
 
             // 수정 팝업
             $('.modifyBtn').on('click', function () {
-                $("#form_sub_title").html('수정');
+                $("#form_sub_title").html('상세 정보');
                 const targetArr = getSelectedCheckData();
 
                 if (!targetArr) {
@@ -446,7 +495,15 @@
                     return;
                 }
 
-                setSerialize('#lay-form-write2', targetArr[0]); // 선택값 세팅
+                const data = targetArr[0];
+                // formatter 적용된 텍스트를 원본 값으로 역변환
+                const evntMap = {'평시': '1', '긴급': '2', '센서경보': '3'};
+                const alarmMap = {'관심': 'ARM001', '주의': 'ARM002', '경계': 'ARM003', '심각': 'ARM004'};
+                const useMap = {'사용': 'Y', '사용중지': 'N'};
+                if (evntMap[data.dispbd_evnt_flag]) data.dispbd_evnt_flag = evntMap[data.dispbd_evnt_flag];
+                if (alarmMap[data.alarm_lvl_cd]) data.alarm_lvl_cd = alarmMap[data.alarm_lvl_cd];
+                if (useMap[data.use_yn]) data.use_yn = useMap[data.use_yn];
+                setSerialize('#lay-form-write2', data); // 선택값 세팅
                 $('#lay-form-write2 .btn-btm .deleteBtn').show();
 
                 popFancy('#lay-form-write2');
@@ -530,7 +587,7 @@
                             </tr>
                             <tr>
                                 <td width="30%" class="label">폰트 사이즈</td>
-                                <td><span><input type="text" name="fontSize" style="width: 50px;" value="20"> &nbsp;(픽셀)</span>
+                                <td><span><input type="text" name="fontSize" style="width: 50px;" value="16"> &nbsp;(픽셀)</span>
                                 </td>
                             </tr>
                             <tr>
@@ -541,12 +598,20 @@
                                             type="hidden" name="color"/></span>
                                 </td>
                             </tr>
+                            <tr>
+                                <td width="30%" class="label">배경색 변경</td>
+                                <td class="bgColorPicker">
+                                    <span class="bgColorPicker-preview"
+                                          style="display: inline-block; width: 80px; height: 25px">&nbsp;<input
+                                            type="hidden" name="bgColor"/></span>
+                                </td>
+                            </tr>
                         </table>
                     </div>
                 </div>
             </div>
             <div class="contents-re" style="flex: 1.5">
-                <h3 class="txt">생성 이미지 및 문구 디자인</h3>
+                <h3 class="txt">생성 이미지 및 문구 디자인 <span id="canvasSizeLabel" style="font-weight:normal; font-size:13px; color:#888;"></span></h3>
                 <div class="btn-group asd canvasBtn" style="background: none">
                     <button type="button" class="btnSave" style="margin: 0 10px 0 0; width: 140px">이미지 저장</button>
                     <button type="button" class="btnCancel" style="margin: 0">취소</button>
@@ -558,7 +623,7 @@
         <div id="footer">
             <div class="footerItem">
                 <div class="btn-group2">
-                    <h3 class="txt">전송 그룹 관리</h3>
+                    <h3 class="txt">전송그룹 관리</h3>
                     <a class="insertBtn">신규등록</a>
                     <a class="modifyBtn">상세정보</a>
 <%--                    <a class="deleteBtn">삭제</a>--%>
@@ -601,7 +666,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"/></a>
         </div>
-        <div class="layer-base-title">전송그룹 <span id="form_sub_title">등록/수정</span></div>
+        <div class="layer-base-title">전송그룹 <span id="form_sub_title">신규 등록/상세 정보</span></div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
@@ -611,15 +676,30 @@
                     </colgroup>
                     <tbody>
                     <tr>
+                        <th>이벤트 구분</th>
+                        <td>
+                            <select name="dispbd_evnt_flag">
+                                <option value="1">평시</option>
+                                <option value="2">긴급</option>
+                                <option value="3">센서경보</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
                         <th>전송그룹</th>
                         <td>
                             <input type="text" name="img_grp_nm"/>
                         </td>
                     </tr>
                     <tr>
-                        <th>설명</th>
+                        <th>경고단계</th>
                         <td>
-                            <textarea name="img_grp_comment"></textarea>
+                            <select name="alarm_lvl_cd">
+                                <option value="ARM001">관심</option>
+                                <option value="ARM002">주의</option>
+                                <option value="ARM003">경계</option>
+                                <option value="ARM004">심각</option>
+                            </select>
                         </td>
                     </tr>
                     <tr>
@@ -631,12 +711,18 @@
                             </select>
                         </td>
                     </tr>
+                    <tr>
+                        <th>설명</th>
+                        <td>
+                            <textarea name="img_grp_comment"></textarea>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
             <div class="btn-btm">
-                <input type="submit" blue value="저장"/>
                 <a class="deleteBtn">삭제</a>
+                <input type="submit" blue value="저장"/>
                 <button type="button" data-fancybox-close>취소</button>
             </div>
         </div>

@@ -26,4 +26,14 @@ public class ModifyCctvController {
     public String getOperation(@RequestParam Map<String, Object> param) {
         return modifyCctvService.operation(param);
     }
+
+    @GetMapping("/preset/list")
+    public String getPresetList(@RequestParam Map<String, Object> param) {
+        return modifyCctvService.getPresetList(param);
+    }
+
+    @GetMapping("/preset/change")
+    public String changePreset(@RequestParam Map<String, Object> param) {
+        return modifyCctvService.changePreset(param);
+    }
 }
