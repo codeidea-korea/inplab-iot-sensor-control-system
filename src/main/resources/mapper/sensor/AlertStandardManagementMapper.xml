@@ -110,10 +110,12 @@
         , tai."4th_lvl_max" as max4
         , tai.lvl_apply_dt
         , tdi.district_nm
+        , tsc.sens_chnl_nm
         from tb_alarm_info tai
         left join tb_sensor_info tsi on tai.sens_no = tsi.sens_no
         left join tb_sensor_type tst on tsi.senstype_no = tst.senstype_no
         left join tb_district_info tdi on tai.district_no = tdi.district_no
+        left join tb_sensor_chnl tsc on  tai.sens_no = tsc.sens_no and tai.sens_chnl_id = tsc.sens_chnl_id
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
