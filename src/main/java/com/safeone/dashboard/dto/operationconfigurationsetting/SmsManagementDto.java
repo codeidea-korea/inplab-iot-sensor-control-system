@@ -10,6 +10,9 @@ public class SmsManagementDto implements Serializable {
     @FieldLabel(title = "관리_no", type = "hidden")
     private int mgnt_no;
 
+    @FieldLabel(title = "현장명")
+    private String district_nm;
+
     @FieldLabel(title = "현장_no", type = "hidden")
     private String district_no;
 
