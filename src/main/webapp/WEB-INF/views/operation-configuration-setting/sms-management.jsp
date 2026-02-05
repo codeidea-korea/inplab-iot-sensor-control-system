@@ -225,7 +225,6 @@
             <div class="contents-re">
                 <h3 class="txt">SMS 경보 대상 관리</h3>
                 <div class="btn-group">
-                    <a class="save-btn">저장</a>
                     <a class="insertBtn">신규등록</a>
                     <a class="modifyBtn">상세정보</a>
                     <a class="excelBtn">다운로드</a>
