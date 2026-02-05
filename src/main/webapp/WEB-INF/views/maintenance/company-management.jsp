@@ -337,12 +337,12 @@
                     </colgroup>
                     <tbody>
                     <tr>
-                        <th>등록일시</th>
+                        <th>등록일자</th>
                         <td><input type="text" id="reg_dt" placeholder="Ex) 2024-01-01" datepicker=""
                                    readonly="readonly"/></td>
                     </tr>
                     <tr>
-                        <th>수정일시</th>
+                        <th>수정일자</th>
                         <td><input type="text" id="mod_dt" placeholder="Ex) 2024-01-01" datepicker=""
                                    readonly="readonly"/></td>
                     </tr>
