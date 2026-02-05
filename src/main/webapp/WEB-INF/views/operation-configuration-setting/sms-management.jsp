@@ -273,7 +273,7 @@
                     </tr>
                     <tr>
                         <th class="required_th">휴대폰 번호</th>
-                        <td><input type="text" id="sms_recv_ph" class="required"/></td>
+                        <td><input type="text" id="sms_recv_ph" class="required" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력)"/></td>
                     </tr>
                     <tr>
                         <th class="required_th">경보단계</th>
