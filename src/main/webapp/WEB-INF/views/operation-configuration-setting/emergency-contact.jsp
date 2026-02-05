@@ -270,12 +270,12 @@
                     </tr>
                     <tr>
                         <th class="required_th">연락처 1</th>
-                        <td><input type="text" id="emerg_recv_ph" placeholder="Ex) 010-1234-5678" class="required"/>
+                        <td><input type="text" id="emerg_recv_ph" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력) class="required"/>
                         </td>
                     </tr>
                     <tr>
                         <th>연라처 2</th>
-                        <td><input type="text" id="emerg_tel" placeholder="Ex) 010-1234-5678"/></td>
+                        <td><input type="text" id="emerg_tel" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력)"/></td>
                     </tr>
                     <tr>
                         <th>이메일</th>
