@@ -325,7 +325,7 @@
                     </tr>
                     <tr>
                         <th>대표연락처</th>
-                        <td><input type="text" id="maint_rep_ph" placeholder="Ex) 123-456-7890"/></td>
+                        <td><input type="text" id="maint_rep_ph" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력)"/></td>
                     </tr>
                     </tbody>
                 </table>
