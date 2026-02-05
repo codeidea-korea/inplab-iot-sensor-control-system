@@ -317,7 +317,7 @@
                     <tbody>
                     <tr>
                         <th>사업자번호</th>
-                        <td><input type="text" id="comp_biz_no" placeholder="Ex) 123123123-123123123"/></td>
+                        <td><input type="text" id="comp_biz_no" placeholder="Ex) 1231212345 (“-” 없이 숫자만 입력)"/></td>
                     </tr>
                     <tr>
                         <th>대표명</th>
