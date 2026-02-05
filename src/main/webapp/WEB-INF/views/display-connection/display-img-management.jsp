@@ -389,6 +389,7 @@
                                 }
                             });
                         });
+                        popFancyClose();
                     });
                 } else {
                     alert('삭제하실 그룹를 선택해주세요.');
@@ -402,6 +403,7 @@
                 $("#form_sub_title").html('등록');
 
                 setSerialize('#lay-form-write2', _popupClearData);
+                $('#lay-form-write2 .btn-btm .deleteBtn').hide();
 
                 popFancy('#lay-form-write2');
 
@@ -445,6 +447,7 @@
                 }
 
                 setSerialize('#lay-form-write2', targetArr[0]); // 선택값 세팅
+                $('#lay-form-write2 .btn-btm .deleteBtn').show();
 
                 popFancy('#lay-form-write2');
 
@@ -556,9 +559,9 @@
             <div class="footerItem">
                 <div class="btn-group2">
                     <h3 class="txt">전송 그룹 관리</h3>
-                    <a class="insertBtn">등록</a>
-                    <a class="modifyBtn">수정</a>
-                    <a class="deleteBtn">삭제</a>
+                    <a class="insertBtn">신규등록</a>
+                    <a class="modifyBtn">상세정보</a>
+<%--                    <a class="deleteBtn">삭제</a>--%>
                 </div>
                 <div class="contents-in">
                     <jsp:include page="../common/include_jqgrid_old.jsp" flush="true"/>
@@ -633,6 +636,7 @@
             </div>
             <div class="btn-btm">
                 <input type="submit" blue value="저장"/>
+                <a class="deleteBtn">삭제</a>
                 <button type="button" data-fancybox-close>취소</button>
             </div>
         </div>
