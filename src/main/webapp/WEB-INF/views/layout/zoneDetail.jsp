@@ -632,7 +632,7 @@ ${district}
                         contents += '<td><div class="level" fc_step4=""><strong>심각</strong></div></td>';
                     }
                     contents += '<td>' + res[idx].sens_tp_nm + '</td>';
-                    contents += '<td>' + res[idx].sens_nm + '</td>';
+                    contents += '<td>' + res[idx].sens_chnl_nm + '</td>';
                     contents += '<td>' + res[idx].formul_data + '</td>';
                     contents += '<td>' + fmtKST(res[idx].meas_dt) + '</td>';
                     contents += '</tr>';

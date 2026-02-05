@@ -438,7 +438,8 @@
             tai."4th_lvl_max" AS max4,
             tai."4th_lvl_min" AS min4,
             tad.reg_dt,
-            tst.sens_tp_nm
+            tst.sens_tp_nm,
+            tsc.sens_chnl_nm
         FROM tb_alarm_details tad
                  LEFT JOIN tb_district_info tdi
                            ON tad.district_no = tdi.district_no
@@ -448,6 +449,9 @@
                            ON tad.sens_no = tai.sens_no
                  LEFT JOIN tb_sensor_type tst
                            ON tsi.senstype_no = tst.senstype_no
+                 LEFT JOIN  tb_sensor_chnl tsc
+                           ON tad.sens_no = tsc.sens_no
+                           AND tad.sens_chnl_id = tsc.sens_chnl_id
         WHERE 1=1
             <if test="district_no != null and district_no != ''">
                 and tad.district_no = #{district_no}
