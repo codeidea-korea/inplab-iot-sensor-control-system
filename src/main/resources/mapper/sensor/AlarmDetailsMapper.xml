@@ -77,6 +77,7 @@
             tad.formul_data,
             tad.net_err_yn,
             tad.maint_sts_cd,
+            tsc.sens_chnl_nm,
             tai."1st_lvl_max" AS max1,
             tai."1st_lvl_min" AS min1,
             tai."2nd_lvl_max" AS max2,
@@ -96,6 +97,8 @@
             ON tad.sens_no = tsi.sens_no
         LEFT JOIN tb_alarm_info tai
             ON tad.sens_no = tai.sens_no and tad.sens_chnl_id = tai.sens_chnl_id
+        LEFT JOIN tb_sensor_chnl tsc
+            ON tad.sens_no = tsc.sens_no and tad.sens_chnl_id = tsc.sens_chnl_id
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
