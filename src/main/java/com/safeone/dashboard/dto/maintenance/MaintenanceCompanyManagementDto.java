@@ -19,6 +19,9 @@ public class MaintenanceCompanyManagementDto implements Serializable {
     @FieldLabel(title = "주소")
     private String partner_comp_addr;
 
+    @FieldLabel(title = "상세주소")
+    private String partner_comp_addr_add;
+
     @FieldLabel(title = "사업자번호")
     private String comp_biz_no;
 

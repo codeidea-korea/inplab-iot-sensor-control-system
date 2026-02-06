@@ -77,6 +77,7 @@
         , tmi.partner_comp_nm
         , tmi.partner_type_flag
         , tmi.partner_comp_addr
+        , tmi.partner_comp_addr_add
         , tmi.comp_biz_no
         , tmi.maint_rep_nm
         , tmi.maint_rep_ph
@@ -110,15 +111,18 @@
                                       , partner_comp_nm
                                       , partner_type_flag
                                       , partner_comp_addr
+                                      , partner_comp_addr_add
                                       , comp_biz_no
                                       , maint_rep_nm
                                       , maint_rep_ph
                                       , reg_dt
-                                      , mod_dt)
+                                      , mod_dt
+                                      )
         VALUES ( #{partner_comp_id}
                , #{partner_comp_nm}
                , #{partner_type_flag}
                , #{partner_comp_addr}
+               , #{partner_comp_addr_add}
                , #{comp_biz_no}
                , #{maint_rep_nm}
                , #{maint_rep_ph}
@@ -131,6 +135,7 @@
         SET partner_comp_nm   = #{partner_comp_nm}
           , partner_type_flag = #{partner_type_flag}
           , partner_comp_addr = #{partner_comp_addr}
+          , partner_comp_addr_add = #{partner_comp_addr_add}
           , comp_biz_no       = #{comp_biz_no}
           , maint_rep_nm      = #{maint_rep_nm}
           , maint_rep_ph      = #{maint_rep_ph}

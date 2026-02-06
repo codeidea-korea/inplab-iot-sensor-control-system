@@ -76,6 +76,7 @@
 
 
                 $('#partner_comp_addr').val(data.partner_comp_addr);
+                $('#partner_comp_addr_add').val(data.partner_comp_addr);
                 $('#comp_biz_no').val(data.comp_biz_no);
                 $('#maint_rep_nm').val(data.maint_rep_nm);
                 $('#maint_rep_ph').val(data.maint_rep_ph);
@@ -97,6 +98,7 @@
 
             function initInsertForm() {
                 $("#form_sub_title").html('신규등록');
+                $("#form-submit-btn").show();
                 $("#deleteBtn").hide()
                 $("#form-update-btn").hide();
             }
@@ -106,6 +108,7 @@
                 $('#partner_comp_nm').val('');
                 $('#partner_type_flag').val('');
                 $('#partner_comp_addr').val('');
+                $('#partner_comp_addr_add').val('');
                 $('#comp_biz_no').val('');
                 $('#maint_rep_nm').val('');
                 $('#maint_rep_ph').val('');
@@ -124,6 +127,7 @@
                         partner_comp_nm: $('#partner_comp_nm').val(),
                         partner_type_flag: $('#partner_type_flag').val(),
                         partner_comp_addr: $('#partner_comp_addr').val(),
+                        partner_comp_addr_add: $('#partner_comp_addr_add').val(),
                         comp_biz_no: $('#comp_biz_no').val(),
                         maint_rep_nm: $('#maint_rep_nm').val(),
                         maint_rep_ph: $('#maint_rep_ph').val(),
@@ -152,6 +156,7 @@
                         partner_comp_nm: $('#partner_comp_nm').val(),
                         partner_type_flag: $('#partner_type_flag').val(),
                         partner_comp_addr: $('#partner_comp_addr').val(),
+                        partner_comp_addr_add: $('#partner_comp_addr_add'),
                         comp_biz_no: $('#comp_biz_no').val(),
                         maint_rep_nm: $('#maint_rep_nm').val(),
                         maint_rep_ph: $('#maint_rep_ph').val(),
@@ -305,6 +310,10 @@
                                 </button>
                             </div>
                         </td>
+                    </tr>
+                    <tr>
+                        <th style="vertical-align: middle;">상세 주소</th>
+                        <td><input type="text" id="partner_comp_addr_add"/></td>
                     </tr>
                     </tbody>
                 </table>
