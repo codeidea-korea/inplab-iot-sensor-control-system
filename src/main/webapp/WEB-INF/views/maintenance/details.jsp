@@ -85,12 +85,17 @@
                     useFilterToolbar: true,
                 }
             }, null, { 
-                    reg_dt: { //시간 양식 변화
+                    reg_dt: {
                         formatter: function (cellValue) {
                             if (cellValue) {
                                 return moment(cellValue).format('YYYY-MM-DD HH:mm');
                             }
                             return '';
+                        }
+                    },
+                    maint_chgr_ph: {
+                        formatter: function (cellValue) {
+                            return getFormattedPhoneNumber(cellValue);
                         }
                     }
             });
@@ -474,7 +479,32 @@
             });
 
         });
+        function getFormattedPhoneNumber(phoneNumber) {
+            if (!phoneNumber) return "";
 
+            const cleanNum = phoneNumber.toString().replace(/[^0-9]/g, "");
+
+            if (cleanNum.length === 11) {
+                return cleanNum.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 10) {
+                if (cleanNum.startsWith("02")) {
+                    return cleanNum.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+                }
+                return cleanNum.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 9 && cleanNum.startsWith("02")) {
+                return cleanNum.replace(/(\d{2})(\d{3})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 8) {
+                return cleanNum.replace(/(\d{4})(\d{4})/, "$1-$2");
+            }
+
+            return cleanNum;
+        }
     </script>
 </head>
 
@@ -505,7 +535,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">유지보수내역<span id="form_sub_title"></span></div>
+        <div class="layer-base-title">유지보수내역 <span id="form_sub_title"></span></div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
@@ -572,7 +602,7 @@
                     <tr>
                         <th>연락처</th>
                         <td>
-                            <input id="maint_chgr_ph" type="text" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력)"/>
+                            <input id="maint_chgr_ph" type="text" placeholder="EX) 01012341234 (“-” 없이 숫자만 입력)"/>
                         </td>
                     </tr>
                     </tbody>
@@ -588,7 +618,7 @@
                             <option value="">Ex) 정상</option>
                             <option value="MTN001">정상</option>
                             <option value="MTN002">망실</option>
-                            <option value="MTN003">점검</option>
+                            <option value="MTN003">점검</option>`
                             <option value="MTN004">철거</option>
                         </select></td>
                     </tr>
