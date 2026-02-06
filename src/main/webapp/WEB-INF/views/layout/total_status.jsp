@@ -1274,7 +1274,7 @@
             <div class="title">행안부 전송 상태</div>
             <div class="on-off">
                 <button type="button" class="on"></button>
-                <button type="button" class="off"></button>
+                <button type="button" class="off red"></button>
             </div>
             <div class="conts">
                 <!--[s] 상태 반복 -->

@@ -1875,12 +1875,24 @@ select:-ms-expand {
     content: "OFF";
 }
 
-#overall-status .overall-status_re > .on-off button.on {
+#overall-status .overall-status_re > .on-off button.on.green {
+    border-color: #3e4b70;
+    color: #fff;
     background-color: #81c300;
+    animation: twinkle-ani 0.7s linear infinite alternate both;
+    box-shadow: 0 0 1rem rgba(255, 255, 255, 0.5);
+}
+
+#overall-status .overall-status_re > .on-off button.off.red {
+    background-color: #ff0000;
     border-color: #3e4b70;
     color: #fff;
     animation: twinkle-ani 0.7s linear infinite alternate both;
     box-shadow: 0 0 1rem rgba(255, 255, 255, 0.5);
+}
+
+#overall-status .overall-status_re > .on-off button.off:before {
+    content: "OFF";
 }
 
 #overall-status .overall-status_re > .on-off button.on:before {
