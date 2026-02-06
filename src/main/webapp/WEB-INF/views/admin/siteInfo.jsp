@@ -245,6 +245,7 @@
                             <div class="btn-btm" style="width: auto; margin-top: 0px;">
                                 <button type="button" class="btn-search" onclick="$('#site_logo').click()">파일 선택</button>
                             </div>
+                            <div style="margin-left: 10px">권장 사이즈 143 x 133</div>
                         </td>
                     </tr>
                     <tr>
