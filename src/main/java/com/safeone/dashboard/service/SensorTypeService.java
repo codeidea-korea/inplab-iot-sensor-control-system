@@ -39,7 +39,6 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
     public boolean create(Map param) {
         int start = Integer.parseInt((String) param.get("logr_idx_str"));
         int end = Integer.parseInt((String) param.get("logr_idx_end"));
-
         if (start < 0 || end < 0 || start > 256 || end > 256) {
             throw new IllegalArgumentException("범위는 0 ~ 256 사이여야 합니다.");
         }
@@ -68,6 +67,30 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
 
     @Override
     public boolean update(Map param) {
+        int start = Integer.parseInt((String) param.get("logr_idx_str"));
+        int end = Integer.parseInt((String) param.get("logr_idx_end"));
+
+        if (start < 0 || end < 0 || start > 256 || end > 256) {
+            throw new IllegalArgumentException("범위는 0 ~ 256 사이여야 합니다.");
+        }
+
+        if (start > end) {
+            throw new IllegalArgumentException("logr_idx_str 값은 logr_idx_end 값보다 클 수 없습니다.");
+        }
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("start", start);
+        map.put("end", end);
+        // 업데이트 시에는 자기 자신(senstype_no)을 제외하고 중복 체크를 해야 합니다.
+        if (param.get("senstype_no") != null) {
+            map.put("senstype_no", param.get("senstype_no"));
+        }
+
+        int count = mapper.checkOverlap(map);
+        if (count > 0) {
+            throw new IllegalArgumentException("로거 idx 범위는 중복 되어서는 안됩니다");
+        }
+
         return mapper.updateSensorType(param) > 0;
     }
 

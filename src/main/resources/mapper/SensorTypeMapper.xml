@@ -217,9 +217,12 @@
         SELECT COUNT(*)
         FROM tb_sensor_type
         WHERE
-            (#{start}::int BETWEEN logr_idx_str::int AND logr_idx_end::int)
-           OR (#{end}::int BETWEEN logr_idx_str::int AND logr_idx_end::int)
-           OR (logr_idx_str::int BETWEEN #{start}::int AND #{end}::int)
-           OR (logr_idx_end::int BETWEEN #{start}::int AND #{end}::int)
+            ((#{start}::int BETWEEN CASE WHEN logr_idx_str = '' THEN NULL ELSE logr_idx_str::int END AND CASE WHEN logr_idx_end = '' THEN NULL ELSE logr_idx_end::int END)
+           OR (#{end}::int BETWEEN CASE WHEN logr_idx_str = '' THEN NULL ELSE logr_idx_str::int END AND CASE WHEN logr_idx_end = '' THEN NULL ELSE logr_idx_end::int END)
+           OR (CASE WHEN logr_idx_str = '' THEN NULL ELSE logr_idx_str::int END BETWEEN #{start}::int AND #{end}::int)
+           OR (CASE WHEN logr_idx_end = '' THEN NULL ELSE logr_idx_end::int END BETWEEN #{start}::int AND #{end}::int))
+        <if test="senstype_no != null and senstype_no != ''">
+            AND senstype_no != #{senstype_no}
+        </if>
     </select>
 </mapper>
