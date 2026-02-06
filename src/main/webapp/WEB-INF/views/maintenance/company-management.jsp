@@ -26,6 +26,16 @@
                             return 'ALL';
                         }
                     }
+                },
+                maint_rep_ph: {
+                    formatter: function (cellValue) {
+                        return getFormattedPhoneNumber(cellValue);
+                    }
+                },
+                comp_biz_no: {
+                    formatter: function (cellValue) {
+                        return getFormattedCompanyNumber(cellValue);
+                    }
                 }
             })
 
@@ -76,7 +86,7 @@
 
 
                 $('#partner_comp_addr').val(data.partner_comp_addr);
-                $('#partner_comp_addr_add').val(data.partner_comp_addr);
+                $('#partner_comp_addr_add').val(data.partner_comp_addr_add);
                 $('#comp_biz_no').val(data.comp_biz_no);
                 $('#maint_rep_nm').val(data.maint_rep_nm);
                 $('#maint_rep_ph').val(data.maint_rep_ph);
@@ -156,7 +166,7 @@
                         partner_comp_nm: $('#partner_comp_nm').val(),
                         partner_type_flag: $('#partner_type_flag').val(),
                         partner_comp_addr: $('#partner_comp_addr').val(),
-                        partner_comp_addr_add: $('#partner_comp_addr_add'),
+                        partner_comp_addr_add: $('#partner_comp_addr_add').val(),
                         comp_biz_no: $('#comp_biz_no').val(),
                         maint_rep_nm: $('#maint_rep_nm').val(),
                         maint_rep_ph: $('#maint_rep_ph').val(),
@@ -239,6 +249,44 @@
                 })
             });
         });
+        function getFormattedPhoneNumber(phoneNumber) {
+            if (!phoneNumber) return "";
+
+            const cleanNum = phoneNumber.toString().replace(/[^0-9]/g, "");
+
+            if (cleanNum.length === 11) {
+                return cleanNum.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 10) {
+                if (cleanNum.startsWith("02")) {
+                    return cleanNum.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+                }
+                return cleanNum.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 9 && cleanNum.startsWith("02")) {
+                return cleanNum.replace(/(\d{2})(\d{3})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 8) {
+                return cleanNum.replace(/(\d{4})(\d{4})/, "$1-$2");
+            }
+
+            return cleanNum;
+        }
+
+        function getFormattedCompanyNumber(companyNumber){
+            if (!companyNumber) return "";
+
+            const cleanNum = companyNumber.toString().replace(/[^0-9]/g, "");
+
+            if(cleanNum.length === 10){
+                return cleanNum.replace(/(\d{3})(\d{2})(\d{5})/, "$1-$2-$3");
+            }
+
+            return cleanNum;
+        }
     </script>
 </head>
 
