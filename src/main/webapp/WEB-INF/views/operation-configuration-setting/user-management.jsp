@@ -30,8 +30,13 @@
                 custom: {
                     useFilterToolbar: true,
                 }
-            })
-
+            }, null, { 
+                usr_ph: {
+                    formatter: function (cellValue) {
+                        return getFormattedPhoneNumber(cellValue);
+                    }
+                }
+            });
             $('.insertBtn').on('click', () => {
                 resetForm();
                 initInsertForm();
@@ -225,6 +230,33 @@
                 })
             });
         });
+
+        function getFormattedPhoneNumber(phoneNumber) {
+            if (!phoneNumber) return "";
+
+            const cleanNum = phoneNumber.toString().replace(/[^0-9]/g, "");
+
+            if (cleanNum.length === 11) {
+                return cleanNum.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 10) {
+                if (cleanNum.startsWith("02")) {
+                    return cleanNum.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+                }
+                return cleanNum.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 9 && cleanNum.startsWith("02")) {
+                return cleanNum.replace(/(\d{2})(\d{3})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 8) {
+                return cleanNum.replace(/(\d{4})(\d{4})/, "$1-$2");
+            }
+
+            return cleanNum;
+        }
     </script>
         <style>
         .ui-jqgrid tr.jqgrow td {
