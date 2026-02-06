@@ -15,7 +15,13 @@
                 custom: {
                     useFilterToolbar: true,
                 }
-            }, null, null, {alarm_lvl_nm: "1:1차 초과 이상;2:2차 초과 이상;3:3차 초과 이상;4:4차 초과 이상", sms_autosnd_yn: "Y:Y;N:N"});
+            }, null, { 
+                sms_recv_ph: {
+                    formatter: function (cellValue) {
+                        return getFormattedPhoneNumber(cellValue);
+                    }
+                }
+            }, {alarm_lvl_nm: "1:1차 초과 이상;2:2차 초과 이상;3:3차 초과 이상;4:4차 초과 이상", sms_autosnd_yn: "Y:Y;N:N"});
 
             const $partnerSelect = $('#partner_comp_select');
             const $districtSelect = $('#district_select');
@@ -210,6 +216,32 @@
                 })
             });
         });
+        function getFormattedPhoneNumber(phoneNumber) {
+            if (!phoneNumber) return "";
+
+            const cleanNum = phoneNumber.toString().replace(/[^0-9]/g, "");
+
+            if (cleanNum.length === 11) {
+                return cleanNum.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 10) {
+                if (cleanNum.startsWith("02")) {
+                    return cleanNum.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
+                }
+                return cleanNum.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 9 && cleanNum.startsWith("02")) {
+                return cleanNum.replace(/(\d{2})(\d{3})(\d{4})/, "$1-$2-$3");
+            }
+
+            if (cleanNum.length === 8) {
+                return cleanNum.replace(/(\d{4})(\d{4})/, "$1-$2");
+            }
+
+            return cleanNum;
+        }
     </script>
 </head>
 
