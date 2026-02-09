@@ -47,4 +47,12 @@ public class BroadcastHistoryService implements JqGridService<BroadcastHistoryDt
     public int delete(Map param) {
         return mapper.deleteBroadcastHistory(param);
     }
+
+    public List<Map<String, String>> getDistrictOptions() {
+        return mapper.selectBroadcastHistoryDistrictOptions();
+    }
+
+    public List<Map<String, String>> getBroadcastOptions() {
+        return mapper.selectBroadcastHistoryBroadcastOptions();
+    }
 }

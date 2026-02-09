@@ -4,23 +4,30 @@
 <mapper namespace="com.safeone.dashboard.dao.broadcastsystemconnection.BroadcastHistoryMapper">
     <sql id="rowSearch">
         <if test="mgnt_no != null and mgnt_no != ''">
-            and tbh.mgnt_no::TEXT ilike '%' || #{mgnt_no} || '%'
+            and tbd.mgnt_no::TEXT ilike '%' || #{mgnt_no} || '%'
         </if>
         <if test="send_dt_start != null and send_dt_start != '' and send_dt_end != null and send_dt_end != ''">
-            and tbh.send_dt::timestamp between concat(#{send_dt_start},' 00:00:00')::timestamp and
+            and tbd.brdcast_dt::timestamp between concat(#{send_dt_start},' 00:00:00')::timestamp and
             concat(#{send_dt_end},' 23:59:59')::timestamp
         </if>
-        <if test="brdcast_msg_dtls != null and brdcast_msg_dtls != ''">
-            and tbh.brdcast_msg_dtls ilike '%' || #{brdcast_msg_dtls} || '%'
+        <if test="district_nm != null and district_nm != ''">
+            and tdi.district_nm = #{district_nm}
         </if>
-        <if test="brdcast_no != null and brdcast_no != ''">
-            and tbh.brdcast_no ilike '%' || #{brdcast_no} || '%'
+        <if test="brdcast_nm != null and brdcast_nm != ''">
+            and tbi.brdcast_nm = #{brdcast_nm}
+        </if>
+        <if test="brdcast_title != null and brdcast_title != ''">
+            and tbn.brdcast_title ilike '%' || #{brdcast_title} || '%'
         </if>
         <if test="send_rslt_yn != null and send_rslt_yn != ''">
-            and tbh.send_rslt_yn ilike '%' || #{send_rslt_yn} || '%'
+            and (CASE WHEN tbd.brdcast_rslt_yn = 'Y' THEN '성공'
+                      WHEN tbd.brdcast_rslt_yn = 'N' THEN '실패'
+                      ELSE '-' END) ilike '%' || #{send_rslt_yn} || '%'
         </if>
         <if test="broadcast_rslt_yn != null and broadcast_rslt_yn != ''">
-            and tbh.broadcast_rslt_yn ilike '%' || #{broadcast_rslt_yn} || '%'
+            and (CASE WHEN COALESCE(tbd.brdcast_contnts, '') IN ('Y', '방송') THEN '방송'
+                      WHEN COALESCE(tbd.brdcast_contnts, '') IN ('N', '미방송', '') THEN '미방송'
+                      ELSE tbd.brdcast_contnts END) ilike '%' || #{broadcast_rslt_yn} || '%'
         </if>
     </sql>
 
@@ -28,25 +35,28 @@
         <trim prefix="order by">
             <choose>
                 <when test="'mgnt_no' == sidx and sidx != ''">
-                    tbh.mgnt_no ${sord}
+                    tbd.mgnt_no ${sord}
                 </when>
                 <when test="'send_dt' == sidx and sidx != ''">
-                    tbh.send_dt ${sord}
+                    tbd.brdcast_dt ${sord}
                 </when>
-                <when test="'brdcast_msg_dtls' == sidx and sidx != ''">
-                    tbh.brdcast_msg_dtls ${sord}
+                <when test="'district_nm' == sidx and sidx != ''">
+                    tdi.district_nm ${sord}
                 </when>
-                <when test="'brdcast_no' == sidx and sidx != ''">
-                    tbh.brdcast_no ${sord}
+                <when test="'brdcast_nm' == sidx and sidx != ''">
+                    tbi.brdcast_nm ${sord}
+                </when>
+                <when test="'brdcast_title' == sidx and sidx != ''">
+                    tbn.brdcast_title ${sord}
                 </when>
                 <when test="'send_rslt_yn' == sidx and sidx != ''">
-                    tbh.send_rslt_yn ${sord}
+                    tbd.brdcast_rslt_yn ${sord}
                 </when>
                 <when test="'broadcast_rslt_yn' == sidx and sidx != ''">
-                    tbh.broadcast_rslt_yn ${sord}
+                    tbd.brdcast_contnts ${sord}
                 </when>
                 <otherwise>
-                    tbh.reg_dt desc
+                    tbd.reg_dt desc
                 </otherwise>
             </choose>
         </trim>
@@ -54,15 +64,31 @@
 
     <select id="selectBroadcastHistoryList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastHistoryDto">
-        SELECT tbh.mgnt_no
-        , tbh.send_dt
-        , tbh.brdcast_msg_dtls
-        , tbh.brdcast_no
-        , tbh.send_rslt_yn
-        , tbh.broadcast_rslt_yn
-        , tbh.reg_dt
-        , tbh.mod_dt
-        FROM tb_broadcast_history tbh
+        SELECT tbd.mgnt_no
+             , tbd.brdcast_dt as send_dt
+             , COALESCE(tdi.district_nm, '-') as district_nm
+             , COALESCE(tbi.brdcast_nm, '-') as brdcast_nm
+             , COALESCE(tbn.brdcast_title, '-') as brdcast_title
+             , CASE WHEN tbd.brdcast_rslt_yn = 'Y' THEN '성공'
+                    WHEN tbd.brdcast_rslt_yn = 'N' THEN '실패'
+                    ELSE '-' END as send_rslt_yn
+             , CASE WHEN COALESCE(tbd.brdcast_contnts, '') IN ('Y', '방송') THEN '방송'
+                    WHEN COALESCE(tbd.brdcast_contnts, '') IN ('N', '미방송', '') THEN '미방송'
+                    ELSE tbd.brdcast_contnts END as broadcast_rslt_yn
+             , tbd.reg_dt
+             , tbd.mod_dt
+        FROM tb_broadcast_details tbd
+                 LEFT OUTER JOIN tb_broadcast_info tbi
+                                 ON tbd.brdcast_no = tbi.brdcast_no
+                 LEFT OUTER JOIN tb_district_info tdi
+                                 ON tbd.district_no = tdi.district_no
+                 LEFT OUTER JOIN LATERAL (
+            SELECT n.brdcast_title
+            FROM tb_broadcast_notice n
+            WHERE n.brdcast_msg_dtls = tbd.brdcast_msg_dtls
+            ORDER BY n.mod_dt DESC NULLS LAST, n.reg_dt DESC NULLS LAST, n.mgnt_no DESC
+            LIMIT 1
+            ) tbn ON true
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -72,27 +98,40 @@
     </select>
 
     <select id="selectBroadcastHistoryListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT count(tbh.mgnt_no)
-        FROM tb_broadcast_history tbh
+        SELECT count(tbd.mgnt_no)
+        FROM tb_broadcast_details tbd
+                 LEFT OUTER JOIN tb_broadcast_info tbi
+                                 ON tbd.brdcast_no = tbi.brdcast_no
+                 LEFT OUTER JOIN tb_district_info tdi
+                                 ON tbd.district_no = tdi.district_no
+                 LEFT OUTER JOIN LATERAL (
+            SELECT n.brdcast_title
+            FROM tb_broadcast_notice n
+            WHERE n.brdcast_msg_dtls = tbd.brdcast_msg_dtls
+            ORDER BY n.mod_dt DESC NULLS LAST, n.reg_dt DESC NULLS LAST, n.mgnt_no DESC
+            LIMIT 1
+            ) tbn ON true
         WHERE 1 = 1
         <include refid="rowSearch"/>
     </select>
 
     <insert id="insertBroadcastHistory" parameterType="java.util.Map">
-        INSERT INTO tb_broadcast_history ( mgnt_no
-                                         , send_dt
+        INSERT INTO tb_broadcast_details ( mgnt_no
+                                         , brdcast_dt
                                          , brdcast_msg_dtls
                                          , brdcast_no
-                                         , send_rslt_yn
-                                         , broadcast_rslt_yn
+                                         , brdcast_rslt_yn
+                                         , brdcast_contnts
+                                         , district_no
                                          , reg_dt
                                          , mod_dt)
-        VALUES ((SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_broadcast_history),
+        VALUES ((SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_broadcast_details),
                 now(),
                 #{brdcast_msg_dtls},
                 #{brdcast_no},
                 'Y',
-                'N',
+                '미방송',
+                (SELECT district_no FROM tb_broadcast_info WHERE brdcast_no = #{brdcast_no} LIMIT 1),
                 now(),
                 now())
     </insert>
@@ -102,7 +141,27 @@
 
     <delete id="deleteBroadcastHistory" parameterType="java.util.Map">
         DELETE
-        FROM tb_maintenance
-        WHERE maintenance_id = #{maintenance_id}
+        FROM tb_broadcast_details
+        WHERE mgnt_no = #{mgnt_no}::int
     </delete>
+
+    <select id="selectBroadcastHistoryDistrictOptions" resultType="java.util.HashMap">
+        SELECT DISTINCT tdi.district_nm as option_value
+                      , tdi.district_nm as option_label
+        FROM tb_broadcast_details tbd
+                 JOIN tb_district_info tdi
+                      ON tbd.district_no = tdi.district_no
+        WHERE tdi.district_nm IS NOT NULL
+        ORDER BY tdi.district_nm
+    </select>
+
+    <select id="selectBroadcastHistoryBroadcastOptions" resultType="java.util.HashMap">
+        SELECT DISTINCT tbi.brdcast_nm as option_value
+                      , tbi.brdcast_nm as option_label
+        FROM tb_broadcast_details tbd
+                 JOIN tb_broadcast_info tbi
+                      ON tbd.brdcast_no = tbi.brdcast_no
+        WHERE tbi.brdcast_nm IS NOT NULL
+        ORDER BY tbi.brdcast_nm
+    </select>
 </mapper>

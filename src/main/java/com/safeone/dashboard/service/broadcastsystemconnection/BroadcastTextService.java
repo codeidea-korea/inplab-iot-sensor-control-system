@@ -54,4 +54,16 @@ public class BroadcastTextService implements JqGridService<BroadcastTextDto> {
     public List<BroadcastInfoDto> getAllBroadCastInfo() {
         return mapper.selectBroadcastInfoList();
     }
+
+    public List<Map<String, Object>> getBroadcastNoticeOptions() {
+        return mapper.selectBroadcastNoticeOptions();
+    }
+
+    public List<Map<String, Object>> getDistrictOptions() {
+        return mapper.selectDistrictOptions();
+    }
+
+    public List<Map<String, Object>> getBroadcastEquipOptions() {
+        return mapper.selectBroadcastEquipOptions();
+    }
 }

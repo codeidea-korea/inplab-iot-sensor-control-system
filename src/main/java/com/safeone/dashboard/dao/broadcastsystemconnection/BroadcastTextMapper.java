@@ -20,5 +20,11 @@ public interface BroadcastTextMapper {
     int deleteBroadcastText(Map param);
 
     List<BroadcastInfoDto> selectBroadcastInfoList();
+
+    List<Map<String, Object>> selectBroadcastNoticeOptions();
+
+    List<Map<String, Object>> selectDistrictOptions();
+
+    List<Map<String, Object>> selectBroadcastEquipOptions();
 }
     

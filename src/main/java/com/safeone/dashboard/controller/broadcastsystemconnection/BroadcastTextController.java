@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,16 @@ public class BroadcastTextController extends JqGridAbstract<BroadcastTextDto> {
     @GetMapping("/broadcast-info")
     public List<BroadcastInfoDto> getAllBroadCastInfo() {
         return broadcastTextService.getAllBroadCastInfo();
+    }
+
+    @ResponseBody
+    @GetMapping("/send-form-options")
+    public Map<String, Object> getSendFormOptions() {
+        Map<String, Object> result = new HashMap<>();
+        result.put("noticeOptions", broadcastTextService.getBroadcastNoticeOptions());
+        result.put("districtOptions", broadcastTextService.getDistrictOptions());
+        result.put("equipOptions", broadcastTextService.getBroadcastEquipOptions());
+        return result;
     }
 
     @Override

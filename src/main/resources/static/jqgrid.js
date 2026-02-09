@@ -16,7 +16,7 @@ function initGrid($grid, path, $gridWrapper, options = {
         };
 
         $.each(columns, (index) => {
-            columnData.model.push(setColumn($grid, columns[index], formatters, selectableRows));
+            columnData.model.push(setColumn($grid, columns[index], formatters, selectableRows, options));
         });
 
         $(window).trigger('beforeLoadGrid', columnData)
@@ -128,7 +128,7 @@ function getColumns(path, callback) {
     })
 }
 
-function setColumn($grid, column, formatters, selectableRows) {
+function setColumn($grid, column, formatters, selectableRows, options) {
     const _column = {
         name: column['columnName'],
         label: column['title'],
@@ -137,8 +137,10 @@ function setColumn($grid, column, formatters, selectableRows) {
         fixed: true
     };
 
-    delete _column.width;
-    delete _column.fixed;
+    if (!options?.custom?.useColumnWidth) {
+        delete _column.width;
+        delete _column.fixed;
+    }
 
     if (column['type'] === 'range') {
         _column.sorttype = 'date';
@@ -238,7 +240,8 @@ function setAdditionalFunc($grid, $gridWrapper) {
     });
     $(window).resize(function () {
         const gridWidth = $gridWrapper.width();
-        $grid.jqGrid('setGridWidth', gridWidth, true);
+        const shrinkToFit = $grid.jqGrid('getGridParam', 'shrinkToFit');
+        $grid.jqGrid('setGridWidth', gridWidth, shrinkToFit !== false);
         const gridHeight = $gridWrapper.height() - 35;
         $grid.jqGrid('setGridHeight', gridHeight);
     });

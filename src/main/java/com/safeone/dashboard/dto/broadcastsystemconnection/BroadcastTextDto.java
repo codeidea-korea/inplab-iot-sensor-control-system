@@ -7,35 +7,12 @@ import java.io.Serializable;
 
 @Data
 public class BroadcastTextDto implements Serializable {
-    @FieldLabel(title = "No", width = 150)
+    @FieldLabel(title = "No", width = 70)
     private int mgnt_no;
 
-
-    @FieldLabel(title = "방송일시", type = "hidden")
-    private String brdcast_dt;
-
-    @FieldLabel(title = "안내 제목", width = 300, type = "editable")
+    @FieldLabel(title = "안내제목", width = 190, type = "editable")
     private String brdcast_title;
 
-    @FieldLabel(title = "안내 문구", width = 500, type = "editable")
+    @FieldLabel(title = "안내문구", width = 420, type = "editable")
     private String brdcast_msg_dtls;
-
-    @FieldLabel(title = "방송장비명", type = "selectable")
-    private String brdcast_no;
-
-    @FieldLabel(title = "전송 성공 여부", type = "hidden")
-    private String brdcast_rslt_yn;
-
-    @FieldLabel(title = "상세 정보", type = "hidden")
-    private String brdcast_contnts;
-
-    @FieldLabel(title = "현장 No", type = "hidden")
-    private String district_no;
-
-    @FieldLabel(title = "등록일시", type = "hidden")
-    private String reg_dt;
-
-    @FieldLabel(title = "수정일시", type = "hidden")
-    private String mod_dt;
-
 }

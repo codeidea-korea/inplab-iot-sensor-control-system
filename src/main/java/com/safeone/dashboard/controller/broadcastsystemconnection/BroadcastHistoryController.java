@@ -2,16 +2,16 @@ package com.safeone.dashboard.controller.broadcastsystemconnection;
 
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastHistoryDto;
-import com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastTextDto;
 import com.safeone.dashboard.service.broadcastsystemconnection.BroadcastHistoryService;
-import com.safeone.dashboard.service.broadcastsystemconnection.BroadcastTextService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -55,9 +55,24 @@ public class BroadcastHistoryController extends JqGridAbstract<BroadcastHistoryD
     }
 
     @ResponseBody
-    @GetMapping("/del")
+    @RequestMapping(value = "/del", method = {RequestMethod.GET, RequestMethod.POST})
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         return broadcastHistoryService.delete(param);
+    }
+
+    @ResponseBody
+    @GetMapping("/filter-options")
+    public Map<String, String> getFilterOptions() {
+        Map<String, String> result = new HashMap<>();
+        result.put("district_nm", toSelectableValue(broadcastHistoryService.getDistrictOptions()));
+        result.put("brdcast_nm", toSelectableValue(broadcastHistoryService.getBroadcastOptions()));
+        return result;
+    }
+
+    private String toSelectableValue(List<Map<String, String>> options) {
+        return options.stream()
+                .map(row -> row.get("option_value") + ":" + row.get("option_label"))
+                .collect(Collectors.joining(";"));
     }
 
     @ResponseBody

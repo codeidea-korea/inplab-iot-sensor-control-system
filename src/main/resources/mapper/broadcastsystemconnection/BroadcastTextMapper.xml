@@ -4,13 +4,13 @@
 <mapper namespace="com.safeone.dashboard.dao.broadcastsystemconnection.BroadcastTextMapper">
     <sql id="rowSearch">
         <if test="mgnt_no != null and mgnt_no != ''">
-            and tbd.mgnt_no::TEXT ilike '%' || #{mgnt_no} || '%'
+            and tbn.mgnt_no::TEXT ilike '%' || #{mgnt_no} || '%'
         </if>
         <if test="brdcast_title != null and brdcast_title != ''">
-            and tbd.brdcast_title ilike '%' || #{brdcast_title} || '%'
+            and tbn.brdcast_title ilike '%' || #{brdcast_title} || '%'
         </if>
         <if test="brdcast_msg_dtls != null and brdcast_msg_dtls != ''">
-            and tbd.brdcast_msg_dtls ilike '%' || #{brdcast_msg_dtls} || '%'
+            and tbn.brdcast_msg_dtls ilike '%' || #{brdcast_msg_dtls} || '%'
         </if>
     </sql>
 
@@ -18,16 +18,16 @@
         <trim prefix="order by">
             <choose>
                 <when test="'mgnt_no' == sidx and sidx != ''">
-                    tbd.mgnt_no ${sord}
+                    tbn.mgnt_no ${sord}
                 </when>
                 <when test="'brdcast_title' == sidx and sidx != ''">
-                    tbd.brdcast_title ${sord}
+                    tbn.brdcast_title ${sord}
                 </when>
                 <when test="'brdcast_msg_dtls' == sidx and sidx != ''">
-                    tbd.brdcast_msg_dtls ${sord}
+                    tbn.brdcast_msg_dtls ${sord}
                 </when>
                 <otherwise>
-                    tbd.reg_dt desc
+                    tbn.reg_dt desc
                 </otherwise>
             </choose>
         </trim>
@@ -42,17 +42,10 @@
 
     <select id="selectBroadcastTextList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.broadcastsystemconnection.BroadcastTextDto">
-        SELECT tbd.mgnt_no
-        , tbd.brdcast_no
-        , tbd.brdcast_dt
-        , tbd.brdcast_msg_dtls
-        , tbd.brdcast_title
-        , tbd.brdcast_rslt_yn
-        , tbd.brdcast_contnts
-        , tbd.district_no
-        , tbd.reg_dt
-        , tbd.mod_dt
-        FROM tb_broadcast_details tbd
+        SELECT tbn.mgnt_no
+        , tbn.brdcast_title
+        , tbn.brdcast_msg_dtls
+        FROM tb_broadcast_notice tbn
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -62,48 +55,61 @@
     </select>
 
     <select id="selectBroadcastTextListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT count(tbd.mgnt_no)
-        FROM tb_broadcast_details tbd
+        SELECT count(tbn.mgnt_no)
+        FROM tb_broadcast_notice tbn
         WHERE 1 = 1
         <include refid="rowSearch"/>
     </select>
 
     <insert id="insertBroadcastText" parameterType="java.util.Map">
-        INSERT INTO tb_broadcast_details ( mgnt_no
-                                         , brdcast_no
-                                         , brdcast_dt
-                                         , brdcast_msg_dtls
-                                         , brdcast_title
-                                         , brdcast_rslt_yn
-                                         , brdcast_contnts
-                                         , district_no
-                                         , reg_dt
-                                         , mod_dt)
+        INSERT INTO tb_broadcast_notice ( mgnt_no
+                                        , brdcast_title
+                                        , brdcast_msg_dtls
+                                        , reg_dt
+                                        , mod_dt)
         SELECT COALESCE(max(mgnt_no::integer), 0) + 1 as mgnt_no
-             , #{brdcast_no}
-             , #{brdcast_dt}::timestamp
-             , #{brdcast_msg_dtls}
              , #{brdcast_title}
-             , #{brdcast_rslt_yn}
-             , #{brdcast_contnts}
-             , #{district_no}
+             , #{brdcast_msg_dtls}
              , now()
              , now()
-        FROM tb_broadcast_details
+        FROM tb_broadcast_notice
     </insert>
 
     <update id="updateBroadcastText" parameterType="java.util.Map">
-        UPDATE tb_broadcast_details
+        UPDATE tb_broadcast_notice
         SET brdcast_msg_dtls = #{brdcast_msg_dtls}
           , brdcast_title    = #{brdcast_title}
-          , brdcast_no       = #{brdcast_no}
           , mod_dt           = now()
         WHERE mgnt_no = #{mgnt_no}
     </update>
 
     <delete id="deleteBroadcastText" parameterType="java.util.Map">
         DELETE
-        FROM tb_broadcast_details
+        FROM tb_broadcast_notice
         WHERE mgnt_no = #{mgnt_no}
     </delete>
+
+    <select id="selectBroadcastNoticeOptions" resultType="java.util.HashMap">
+        SELECT tbn.mgnt_no
+             , tbn.brdcast_title
+             , tbn.brdcast_msg_dtls
+        FROM tb_broadcast_notice tbn
+        ORDER BY tbn.reg_dt DESC, tbn.mgnt_no DESC
+    </select>
+
+    <select id="selectDistrictOptions" resultType="java.util.HashMap">
+        SELECT tdi.district_no
+             , tdi.district_nm
+        FROM tb_district_info tdi
+        ORDER BY tdi.district_nm
+    </select>
+
+    <select id="selectBroadcastEquipOptions" resultType="java.util.HashMap">
+        SELECT tbi.brdcast_no
+             , tbi.brdcast_nm
+             , tbi.district_no
+        FROM tb_broadcast_info tbi
+        WHERE COALESCE(tbi.del_yn, 'N') = 'N'
+        ORDER BY tbi.brdcast_nm
+    </select>
 </mapper>

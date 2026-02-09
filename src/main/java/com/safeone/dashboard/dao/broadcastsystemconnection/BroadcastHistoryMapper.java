@@ -17,5 +17,9 @@ public interface BroadcastHistoryMapper {
     int updateBroadcastHistory(Map param);
 
     int deleteBroadcastHistory(Map param);
+
+    List<Map<String, String>> selectBroadcastHistoryDistrictOptions();
+
+    List<Map<String, String>> selectBroadcastHistoryBroadcastOptions();
 }
     
