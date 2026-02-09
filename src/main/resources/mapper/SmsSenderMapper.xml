@@ -16,6 +16,8 @@
              , tai."4th_lvl_max" as max4
              , tai.lvl_apply_dt
         from tb_alarm_info tai
+        left join tb_sensor_info tsi
+        on tai.sens_no = tsi.sens_no and tsi.sms_snd_yn ='Y'
     </select>
 
     <select id="getMeasuredData" resultType="com.safeone.dashboard.dto.MeasureDataDto">
