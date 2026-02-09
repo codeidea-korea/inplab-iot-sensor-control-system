@@ -538,6 +538,7 @@
             ORDER BY m2.maint_accpt_ymd DESC
             LIMIT 1
         ) m ON TRUE
+        where a.sens_disp_yn ='Y'
         ORDER BY c.district_nm, a.senstype_no, a.sens_no
         <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
             LIMIT ${limit} OFFSET ${offset}

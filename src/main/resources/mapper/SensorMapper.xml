@@ -489,7 +489,7 @@
                     ORDER BY m.meas_dt DESC
                         LIMIT 1
                 ) AS lmd ON TRUE
-            WHERE 1=1
+            WHERE 1=1 and a.sens_disp_yn ='Y'
             group by a.sens_no, comm_status
         )
         SELECT
