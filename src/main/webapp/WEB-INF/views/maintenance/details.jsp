@@ -360,7 +360,7 @@
                     return false;
                 }
 
-                if (!$('#maint_str_ymd').val()) {
+                /*if (!$('#maint_str_ymd').val()) {
                     alert('작업시작일을 입력해주세요.');
                     return false;
                 }
@@ -368,7 +368,7 @@
                 if (!$('#maint_end_ymd').val()) {
                     alert('작업종료일을 입력해주세요.');
                     return false;
-                }
+                }*/
 
                 if (!$('#maint_comp_nm').val()) {
                     alert('작업업체를 선택해주세요.');
