@@ -16,6 +16,19 @@
                     useFilterToolbar: true,
                 }
             }, null, {
+
+                partner_comp_addr: {
+                    formatter: function (cellValue, options, rowObject) {
+                        const addr = rowObject.partner_comp_addr || '';
+                        const addrAdd = rowObject.partner_comp_addr_add || '';
+
+                        return (addr + ' ' + addrAdd).trim();
+                    }
+                },
+                partner_comp_addr_add: {
+                    hidden: true
+                },
+
                 partner_type_flag: {
                     formatter: function (cellValue) {
                         if (cellValue === '0') {
@@ -83,10 +96,24 @@
                         $(this).prop('selected', true);
                     }
                 });
+                
+                let fullAddr = data.partner_comp_addr || '';
+                let addrDetail = data.partner_comp_addr_add || '';
+                let baseAddr = fullAddr;
 
 
-                $('#partner_comp_addr').val(data.partner_comp_addr);
-                $('#partner_comp_addr_add').val(data.partner_comp_addr_add);
+                if (addrDetail && fullAddr.endsWith(addrDetail)) {
+
+                    baseAddr = fullAddr.substring(0, fullAddr.lastIndexOf(addrDetail)).trim();
+                }
+
+                $('#partner_comp_addr').val(baseAddr);
+                $('#partner_comp_addr_add').val(addrDetail);
+
+                //$('#partner_comp_addr').val(data.partner_comp_addr);
+                //$('#partner_comp_addr_add').val(data.partner_comp_addr_add);
+
+
                 $('#comp_biz_no').val(data.comp_biz_no);
                 $('#maint_rep_nm').val(data.maint_rep_nm);
                 $('#maint_rep_ph').val(data.maint_rep_ph);
