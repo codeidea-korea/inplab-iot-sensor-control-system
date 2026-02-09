@@ -41,4 +41,12 @@ public class SensorTypeDto implements Serializable {
     @FieldLabel(title="연락처")
     String contactor_phone;
 
+    public String getSens_chnl_cnt() {
+        return sens_chnl_cnt;
+    }
+
+    public String getLogr_idx_str() {
+        return logr_idx_str;
+    }
+
 }

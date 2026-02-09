@@ -207,10 +207,11 @@ public class ExcelUtils {
                     }
 
                     // 열 너비 초기화
-                    columnWidths[cols] = headerset[cols].length();
+                    columnWidths[cols] = getLen(headerset[cols]);
                 }
 
                 int mergeStart = -1;
+
                 String mergeLabel = "";
 
                 for (int cols = 0; cols < headerset.length; cols++) {
@@ -260,9 +261,10 @@ public class ExcelUtils {
                     sheet.addCell(label);
 
                     // 열 너비를 자동으로 설정하기 위해 최대 길이를 계산
-                    columnWidths[cols] = Math.max(columnWidths[cols], cellValue.length());
+                    columnWidths[cols] = Math.max(columnWidths[cols], getLen(cellValue));
                 }
             } catch (Exception e) {
+
                 System.out.println(e.getMessage());
                 e.printStackTrace();
             }
@@ -341,5 +343,19 @@ public class ExcelUtils {
     protected static Object NVL(Object object) {
         if (object == null) return "";
         return object;
+    }
+
+    public static int getLen(String str) {
+        int len = 0;
+        if (str == null) return 0;
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (c > 127) {
+                len += 2;
+            } else {
+                len += 1;
+            }
+        }
+        return len;
     }
 }

@@ -327,4 +327,10 @@
             now()
         )
     </select>
+
+    <select id="countBySensNm" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_sensor_info
+        WHERE sens_nm = #{sensNm}
+    </select>
 </mapper>
