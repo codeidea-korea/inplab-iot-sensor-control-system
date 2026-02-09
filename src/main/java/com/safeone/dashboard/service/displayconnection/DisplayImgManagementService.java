@@ -5,12 +5,14 @@ import com.safeone.dashboard.dto.displayconnection.DisplayImgManagementDto;
 import com.safeone.dashboard.service.JqGridService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DisplayImgManagementService implements JqGridService<DisplayImgManagementDto> {
 
     private final DisplayImgManagementMapper mapper;
@@ -27,7 +29,12 @@ public class DisplayImgManagementService implements JqGridService<DisplayImgMana
 
     @Override
     public boolean create(Map param) {
-        return mapper.insertDisplayImgManagement(param);
+        boolean imageInserted = mapper.insertDisplayImgManagement(param);
+        boolean mappingInserted = mapper.insertDisplayMapping(param);
+        if (!imageInserted || !mappingInserted) {
+            throw new RuntimeException("Display image/mapping insert failed");
+        }
+        return true;
     }
 
     @Override

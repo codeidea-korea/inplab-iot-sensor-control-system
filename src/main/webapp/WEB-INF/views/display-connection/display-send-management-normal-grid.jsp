@@ -237,6 +237,16 @@
                     column.sorttype = 'date';
                     column.formatter = timestampFormat;
                 }
+
+                if (_names[idx] === 'detail') {
+                    column.align = 'center';
+                    column.search = false;
+                    column.sortable = false;
+                    column.formatter = function (cellValue, options) {
+                        return "<a class='detail-btn' data-grid='" + gridId + "' data-row-id='" + options.rowId + "' data-mgnt-no='" + cellValue + "'>상세정보</a>";
+                    };
+                }
+
                 if (_types[idx].indexOf('hidden') > -1 || _types[idx].indexOf('password') > -1) { // if (_types[idx].indexOf('hidden') > -1) {
                     column.hidden = true;
                 }
@@ -290,6 +300,9 @@
                     initPage($grid, $(".paginate"), true, "TOT", pageCount);
                 },
                 gridComplete: function () {
+                    if (window.renderDisplayDetailButtons) {
+                        window.renderDisplayDetailButtons($grid);
+                    }
                     $(window).trigger('gridComplete');
                     if (window.jqgridOption.columnAutoWidth) {
                         $(window).trigger('resize');
@@ -411,4 +424,3 @@
 
     })
 </script>
-

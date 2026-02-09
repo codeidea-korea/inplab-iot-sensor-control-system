@@ -13,6 +13,8 @@ public interface DisplaySendManagementMapper {
     int selectDisplaySendManagementListTotal(Map param);
     boolean insertDisplaySendManagement(Map param);
     int updateDisplaySendManagement(Map param);
+    int updateDisplayImageUseYnNew(Map param);
+    int updateDisplayImageUseYnLegacy(Map param);
     int deleteDisplaySendManagement(Map param);
 
     List<DisplayGroupDto> selectDisplayGroupList(Map<String, Object> param);

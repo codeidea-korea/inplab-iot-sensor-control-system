@@ -50,8 +50,11 @@
         SELECT tdm.mgnt_no
         , COALESCE(tbi.dispbd_imgfile_nm, tdm.dispbd_imgfile_nm) as dispbd_imgfile_nm
         , COALESCE(tbi.img_file_path, tdi.img_file_path) as img_file_path
+        , tdm.dispbd_evnt_flag
+        , tdm.img_grp_nm
         , tdm.img_effect_cd
         , tcc.code_nm as img_effect_nm
+        , tdm.img_disp_min
         , COALESCE(tbi.use_yn, tdi.use_yn) as use_yn
         , tdi.img_size
         , tdi.img_bg_color
@@ -59,8 +62,7 @@
         , tdi.font_color
         , tdm.reg_dt
         , tdm.mod_dt
-        , tdm.mgnt_no as edit
-        , tdm.mgnt_no as del
+        , tdm.mgnt_no as detail
         FROM tb_dispbd_mapping tdm
                  LEFT OUTER JOIN tb_dispbd_image tbi
                                  ON tdm.dispbd_evnt_flag = tbi.dispbd_evnt_flag
@@ -128,7 +130,7 @@
                 img_effect_cd = #{img_effect_cd},
             </if>
             <if test="img_disp_min != null">
-                img_disp_min = #{img_disp_min},
+                img_disp_min = #{img_disp_min}::integer,
             </if>
             mod_dt = now(),
         </trim>
@@ -143,7 +145,7 @@
                , #{img_grp_nm}
                , #{dispbd_imgfile_nm}
                , #{img_effect_cd}
-               , #{img_disp_min}
+               , #{img_disp_min}::integer
                , now()
                , now())
     </insert>
@@ -153,6 +155,21 @@
         FROM tb_dispbd_mapping
         WHERE mgnt_no = #{mgnt_no}::integer
     </delete>
+
+    <update id="updateDisplayImageUseYnNew" parameterType="java.util.Map">
+        UPDATE tb_dispbd_image_new
+        SET use_yn = #{use_yn},
+            mod_dt = now()
+        WHERE dispbd_imgfile_nm = #{dispbd_imgfile_nm}
+    </update>
+
+    <update id="updateDisplayImageUseYnLegacy" parameterType="java.util.Map">
+        UPDATE tb_dispbd_image
+        SET use_yn = #{use_yn}
+        WHERE dispbd_evnt_flag = #{dispbd_evnt_flag}
+          AND img_grp_nm = #{img_grp_nm}
+          AND dispbd_imgfile_nm = #{dispbd_imgfile_nm}
+    </update>
 
     <insert id="sendHistory" parameterType="java.util.Map">
         insert into tb_dispbd_details_new (mgnt_no, dispbd_no, dispbd_evnt_flag, img_grp_nm,

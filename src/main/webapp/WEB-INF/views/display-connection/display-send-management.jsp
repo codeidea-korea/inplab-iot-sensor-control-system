@@ -134,6 +134,62 @@
         margin-bottom: 1rem;
     }
 
+    .detail-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 2.6rem;
+        padding: 0 1.2rem;
+        border-radius: 99px;
+        background: #244ea3;
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+
+    .detail-btn,
+    .detail-btn:visited,
+    .detail-btn:hover,
+    .detail-btn:active {
+        color: #fff !important;
+        text-decoration: none;
+    }
+
+    #lay-form-write,
+    #lay-form-detail {
+        width: 560px;
+        max-width: calc(100vw - 40px);
+        height: auto !important;
+    }
+
+    #lay-form-write .layer-base-conts,
+    #lay-form-detail .layer-base-conts {
+        max-height: none !important;
+        overflow-y: visible !important;
+    }
+
+    #lay-form-write .bTable,
+    #lay-form-detail .bTable {
+        height: auto !important;
+        display: block;
+    }
+
+    .fancybox-slide--html .fancybox-content {
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    .fancybox__content > .f-button.is-close-btn {
+        display: none !important;
+    }
+
+    #lay-form-write .btn-btm,
+    #lay-form-detail .btn-btm {
+        position: static;
+        background: #fff;
+        padding-top: 1rem;
+    }
+
     @media (max-width: 1280px) {
         #contents {
             height: auto !important;
@@ -192,6 +248,14 @@
         });
         syncLayoutHeight();
 
+        const reloadAllImageGrids = () => {
+            $normalGrid.trigger('reloadGrid');
+            $emerGrid.trigger('reloadGrid');
+            $sensorGrid.trigger('reloadGrid');
+        };
+
+        window.renderDisplayDetailButtons = () => {};
+
         $.ajax({
             url: '/adminAdd/districtInfo/all',
             type: 'GET',
@@ -232,9 +296,7 @@
                     setGridData($normalGrid, res.responseJSON[0].img_grp_nm, 0);
                     setGridData($emerGrid, res.responseJSON[0].img_grp_nm, 1);
                     setGridData($sensorGrid, res.responseJSON[0].img_grp_nm, 2);
-                    $normalGrid.trigger('reloadGrid');
-                    $emerGrid.trigger('reloadGrid');
-                    $sensorGrid.trigger('reloadGrid');
+                    reloadAllImageGrids();
                     $(window).trigger('resize');
                 }, 100);
             },
@@ -245,17 +307,17 @@
 
         $("#normal-group").on('change', function () {
             setGridData($normalGrid, $("#normal-group").val(), 0);
-            $normalGrid.trigger('reloadGrid');
+            reloadAllImageGrids();
         });
 
         $("#emer-group").on('change', function () {
             setGridData($emerGrid, $("#emer-group").val(), 1);
-            $emerGrid.trigger('reloadGrid');
+            reloadAllImageGrids();
         });
 
         $("#sensor-group").on('change', function () {
             setGridData($sensorGrid, $("#sensor-group").val(), 2);
-            $sensorGrid.trigger('reloadGrid');
+            reloadAllImageGrids();
         });
 
         $("#district-no").on('change', () => {
@@ -334,7 +396,34 @@
                 $('#event_flag').val('센서 경보');
             }
             popFancy('#lay-form-write');
+            enforceModalNoScroll('#lay-form-write');
         })
+
+        $(document).on("click", ".detail-btn", function () {
+            const gridId = $(this).data("grid");
+            const rowId = $(this).data("row-id");
+            const mgntNo = $(this).data("mgnt-no");
+            const $grid = $("#" + gridId);
+            const rowData = $grid.jqGrid("getRowData", rowId);
+            const resolvedMgntNo = mgntNo || rowData.mgnt_no;
+            if (!rowData || !resolvedMgntNo) {
+                alert("상세정보를 불러오지 못했습니다.");
+                return;
+            }
+
+            const eventMap = {"0": "평시", "1": "긴급", "2": "센서경보"};
+            $("#detail_mgnt_no").val(resolvedMgntNo);
+            $("#detail_event_flag").val(eventMap[rowData.dispbd_evnt_flag] || rowData.dispbd_evnt_flag);
+            $("#detail-modal-title").text((eventMap[rowData.dispbd_evnt_flag] || rowData.dispbd_evnt_flag) + " 이미지 상세정보");
+            $("#detail_img_grp_nm").val(rowData.img_grp_nm);
+            $("#detail_dispbd_imgfile_nm").val(rowData.dispbd_imgfile_nm);
+            $("#detail_effect").val(rowData.img_effect_cd);
+            $("#detail_effect_sec").val(rowData.img_disp_min);
+            $("#detail_use_yn").val(rowData.use_yn || "Y");
+
+            popFancy("#lay-form-detail");
+            enforceModalNoScroll('#lay-form-detail');
+        });
 
         function setGridData($grid, img_grp_nm, dispbd_evnt_flag) {
             $grid.setGridParam({
@@ -359,10 +448,52 @@
             });
         }
 
+        function parsePositiveInt(value) {
+            const parsed = parseInt(value, 10);
+            if (Number.isNaN(parsed) || parsed <= 0) {
+                return null;
+            }
+            return parsed;
+        }
+
+        function enforceModalNoScroll(targetId) {
+            const applyStyles = () => {
+                const $layer = $(targetId);
+                $layer.css({
+                    maxHeight: 'none',
+                    height: 'auto',
+                    overflow: 'visible'
+                });
+                $layer.find('.layer-base-conts').css({
+                    maxHeight: 'none',
+                    height: 'auto',
+                    overflow: 'visible'
+                });
+
+                const $content = $layer.closest('.fancybox__content');
+                const $slide = $layer.closest('.fancybox__slide');
+                $content.css({
+                    maxHeight: 'none',
+                    height: 'auto',
+                    overflow: 'visible'
+                });
+                $slide.css({
+                    maxHeight: 'none',
+                    height: 'auto',
+                    overflow: 'visible'
+                });
+
+                $content.find('> .f-button.is-close-btn').hide();
+            };
+
+            [0, 80, 180].forEach((delay) => setTimeout(applyStyles, delay));
+        }
+
         $("#form-submit-btn").click(async () => {
             let eventFlagCode = $("#event_flag").val();
             let eventFlag;
             let base64Image;
+            let fileName;
 
             if (eventFlagCode === '평시') {
                 eventFlag = 0;
@@ -372,10 +503,19 @@
                 eventFlag = 2;
             }
 
+            const imageFile = $("#image_file")[0].files[0];
+            if (!imageFile) {
+                alert('이미지 파일을 선택해주세요.');
+                return;
+            }
+
             try {
-                base64Image = await readFileAsBase64($("#image_file")[0].files[0]);
-            } catch (error) {
-                alert(error.message);
+                const originalName = imageFile.name || "image.png";
+                const extension = originalName.includes(".") ? originalName.split(".").pop() : "png";
+                fileName = "dispbd_" + Date.now() + "_" + Math.floor(Math.random() * 1000) + "." + extension;
+                base64Image = await readFileAsBase64(imageFile);
+            } catch (_error) {
+                alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
                 return;
             }
 
@@ -389,8 +529,9 @@
                 return;
             }
 
-            if ($("#effect_sec").val() === '') {
-                alert('표시시간을 입력해주세요.');
+            const effectSeconds = parsePositiveInt($("#effect_sec").val());
+            if (effectSeconds === null) {
+                alert('표시시간은 1 이상의 숫자로 입력해주세요.');
                 return;
             }
 
@@ -407,13 +548,18 @@
                     img_file_path: base64Image,
                     dispbd_evnt_flag: eventFlag,
                     img_effect_cd: $("#effect").val(),
-                    img_disp_min: $("#effect_sec").val(),
+                    img_disp_min: effectSeconds,
                     use_yn: $("#use_yn").val(),
-                    dispbd_imgfile_nm: 'temp'
+                    img_size: "1920x1080",
+                    img_bg_color: "#000000",
+                    font_size: "24",
+                    font_color: "#FFFFFF",
+                    dispbd_imgfile_nm: fileName
                 },
                 success: function (_res) {
                     alert('이미지가 등록되었습니다.');
                     popFancyClose('#lay-form-write');
+                    reloadAllImageGrids();
                 },
                 error: function (err) {
                     if (err?.responseJSON?.trace?.toString()?.includes('Duplicate')) {
@@ -425,6 +571,78 @@
             });
 
         })
+
+        $(document).on("click", "#detail-update-btn", () => {
+            const detailMgntNo = $.trim($("#detail_mgnt_no").val());
+            if (!detailMgntNo) {
+                alert("관리번호를 찾지 못했습니다. 상세정보를 다시 열어주세요.");
+                return;
+            }
+
+            if ($("#detail_effect").val() === '') {
+                alert("표시효과를 선택해주세요.");
+                return;
+            }
+            const detailEffectSeconds = parsePositiveInt($("#detail_effect_sec").val());
+            if (detailEffectSeconds === null) {
+                alert("표시시간은 1 이상의 숫자로 입력해주세요.");
+                return;
+            }
+
+            $.ajax({
+                url: '/display-connection/display-send-management/mod',
+                type: 'GET',
+                cache: false,
+                data: {
+                    mgnt_no: detailMgntNo,
+                    img_effect_cd: $("#detail_effect").val(),
+                    img_disp_min: detailEffectSeconds,
+                    use_yn: $("#detail_use_yn").val(),
+                    dispbd_evnt_flag: {"평시": "0", "긴급": "1", "센서경보": "2"}[$("#detail_event_flag").val()] || "",
+                    img_grp_nm: $("#detail_img_grp_nm").val(),
+                    dispbd_imgfile_nm: $("#detail_dispbd_imgfile_nm").val()
+                },
+                success: function () {
+                    alert("수정되었습니다.");
+                    popFancyClose('#lay-form-detail');
+                    reloadAllImageGrids();
+                },
+                error: function () {
+                    alert("수정 중 오류가 발생했습니다.");
+                }
+            });
+        });
+
+        $(document).on("click", "#detail-delete-btn", () => {
+            const detailMgntNo = $.trim($("#detail_mgnt_no").val());
+            if (!detailMgntNo) {
+                alert("관리번호를 찾지 못했습니다. 상세정보를 다시 열어주세요.");
+                return;
+            }
+
+            confirm("해당 이미지를 삭제하시겠습니까?", function () {
+                $.ajax({
+                    url: '/display-connection/display-send-management/del',
+                    type: 'GET',
+                    cache: false,
+                    data: {
+                        mgnt_no: detailMgntNo
+                    },
+                    success: function (res) {
+                        if (Number(res) > 0) {
+                            alert("삭제되었습니다.");
+                            popFancyClose('#lay-form-detail');
+                            reloadAllImageGrids();
+                        } else {
+                            alert("삭제 대상이 없습니다.");
+                        }
+                    },
+                    error: function () {
+                        alert("삭제 중 오류가 발생했습니다.");
+                    }
+                });
+            });
+        });
     });
 </script>
 
@@ -607,7 +825,7 @@
                     </tr>
                     <tr>
                         <th>표시시간(초)</th>
-                        <td><input type="number" id="effect_sec" placeholder="Ex) 4"/></td>
+                        <td><input type="number" id="effect_sec" placeholder="Ex) 4" min="1"/></td>
                     </tr>
                     <tr>
                         <th>사용여부</th>
@@ -623,6 +841,74 @@
             <div class="btn-btm">
                 <input type="button" id="form-submit-btn" blue value="저장"/>
                 <button type="button" data-fancybox-close>닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lay-form-detail" class="layer-base">
+        <div class="layer-base-btns">
+            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
+        </div>
+        <div class="layer-base-title" id="detail-modal-title">이미지 상세정보</div>
+        <div class="layer-base-conts">
+            <div class="bTable">
+                <table>
+                    <colgroup>
+                        <col width="130"/>
+                        <col width="*"/>
+                    </colgroup>
+                    <tbody>
+                    <tr>
+                        <th>이벤트 구분</th>
+                        <td>
+                            <input type="hidden" id="detail_mgnt_no"/>
+                            <input type="text" id="detail_event_flag" readonly/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>전송그룹명</th>
+                        <td><input type="text" id="detail_img_grp_nm" readonly/></td>
+                    </tr>
+                    <tr>
+                        <th>이미지 파일명</th>
+                        <td><input type="text" id="detail_dispbd_imgfile_nm" readonly/></td>
+                    </tr>
+                    <tr>
+                        <th>표시효과</th>
+                        <td>
+                            <select id="detail_effect">
+                                <option value="">선택</option>
+                                <option value="DSP001">바로 표시</option>
+                                <option value="DSP002">우에서 좌로 스크롤</option>
+                                <option value="DSP003">하에서 상으로 스크롤</option>
+                                <option value="DSP004">상에서 하로 스크롤</option>
+                                <option value="DSP005">레이저효과</option>
+                                <option value="DSP006">중앙에서 상하로 떨어짐</option>
+                                <option value="DSP007">상하에서 중앙으로 모임</option>
+                                <option value="DSP008">1단으로 좌측 스크롤</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>표시시간(초)</th>
+                        <td><input type="number" id="detail_effect_sec" placeholder="Ex) 4" min="1"/></td>
+                    </tr>
+                    <tr>
+                        <th>사용여부</th>
+                        <td>
+                            <select id="detail_use_yn">
+                                <option value="Y">사용</option>
+                                <option value="N">미사용</option>
+                            </select>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="btn-btm">
+                <input type="button" id="detail-delete-btn" value="삭제"/>
+                <input type="button" id="detail-update-btn" blue value="수정"/>
+                <button type="button" data-fancybox-close>취소</button>
             </div>
         </div>
     </div>

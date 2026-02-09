@@ -23,6 +23,15 @@ public class DisplaySendManagementDto implements Serializable {
     @FieldLabel(title="효과코드", type = "hidden")
     private String img_effect_cd;
 
+    @FieldLabel(title="이벤트구분", type = "hidden")
+    private String dispbd_evnt_flag;
+
+    @FieldLabel(title="전송그룹", type = "hidden")
+    private String img_grp_nm;
+
+    @FieldLabel(title="표시시간", type = "hidden")
+    private String img_disp_min;
+
     @FieldLabel(title="사용여부")
     private String use_yn;
 
@@ -38,10 +47,7 @@ public class DisplaySendManagementDto implements Serializable {
     @FieldLabel(title="폰트색상")
     private String font_color;
 
-    @FieldLabel(title="수정")
-    private String edit;
-
-    @FieldLabel(title="삭제")
-    private String del;
+    @FieldLabel(title="상세정보")
+    private String detail;
 
 }

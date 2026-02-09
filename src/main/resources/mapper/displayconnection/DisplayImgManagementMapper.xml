@@ -82,8 +82,21 @@
         INSERT INTO tb_dispbd_image_new (mgnt_no, dispbd_imgfile_nm, img_file_path, use_yn,
                                      img_size, img_bg_color, font_size, font_color, reg_dt, mod_dt)
         VALUES ((SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_dispbd_image_new), #{dispbd_imgfile_nm},
-                #{img_file_path}, #{use_yn}, #{img_size}, #{img_bg_color},
-                #{font_size}, #{font_color}, now(), now())
+                #{img_file_path}, COALESCE(#{use_yn}, 'Y'), COALESCE(#{img_size}, '1920x1080'), COALESCE(#{img_bg_color}, '#000000'),
+                COALESCE(#{font_size}, '24'), COALESCE(#{font_color}, '#FFFFFF'), now(), now())
+    </insert>
+
+    <insert id="insertDisplayMapping" parameterType="java.util.Map">
+        INSERT INTO tb_dispbd_mapping (mgnt_no, dispbd_evnt_flag, img_grp_nm, dispbd_imgfile_nm,
+                                       img_effect_cd, img_disp_min, reg_dt, mod_dt)
+        VALUES ((SELECT COALESCE(MAX(mgnt_no::integer), 0) + 1 FROM tb_dispbd_mapping),
+                #{dispbd_evnt_flag},
+                #{img_grp_nm},
+                #{dispbd_imgfile_nm},
+                #{img_effect_cd},
+                #{img_disp_min}::integer,
+                now(),
+                now())
     </insert>
 
     <insert id="insertGroup" parameterType="java.util.Map">

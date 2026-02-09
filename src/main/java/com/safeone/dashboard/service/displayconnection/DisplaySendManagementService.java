@@ -38,7 +38,16 @@ public class DisplaySendManagementService implements JqGridService<DisplaySendMa
 
     @Override
     public boolean update(Map param) {
-        return mapper.updateDisplaySendManagement(param) > 0;
+        int updated = mapper.updateDisplaySendManagement(param);
+
+        if (param.get("use_yn") != null && param.get("dispbd_imgfile_nm") != null) {
+            mapper.updateDisplayImageUseYnNew(param);
+            if (param.get("dispbd_evnt_flag") != null && param.get("img_grp_nm") != null) {
+                mapper.updateDisplayImageUseYnLegacy(param);
+            }
+        }
+
+        return updated > 0;
     }
 
     @Override
