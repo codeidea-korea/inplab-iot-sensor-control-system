@@ -585,6 +585,13 @@
                             <textarea id="maint_dtls" placeholder="Ex) 1. 센서 교체"></textarea>
                         </td>
                     </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bTable" style="margin-top: 0">
+                <table>
+                    <tbody>
                     <tr>
                         <th>작업업체</th>
                         <td>
@@ -605,13 +612,6 @@
                             <input id="maint_chgr_ph" type="text" placeholder="EX) 01012341234 (“-” 없이 숫자만 입력)"/>
                         </td>
                     </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="bTable" style="margin-top: 0">
-                <table>
-                    <tbody>
                     <tr>
                         <th>작업결과</th>
                         <td><select id="maint_rslt_cd">
