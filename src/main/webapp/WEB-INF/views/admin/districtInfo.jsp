@@ -113,14 +113,14 @@
                     alert('삭제할 현장이 선택되지 않았습니다.');
                     return;
                 }
-                confirm('삭제하시겠습니까?', function () {
+                confirm('선택하신 현장정보를 삭제하시겠습니까?', function () {
                     $.get('/adminAdd/districtInfo/del', {district_no: districtNo}, function (res) {
                         if (res === 1) {  // 성공 시
                             alert('삭제되었습니다.');
                             popFancyClose('#lay-form-write');
                             reloadJqGrid();  // 그리드를 리로드하여 변경 사항을 반영
                         } else if (res === -1) {  // 검증 실패 시
-                            alert('이 현장은 삭제할 수 없습니다. 이미 사용 중이거나 다른 제약이 있습니다.');
+                            alert('선택하신 현장에는 로거가 등록되어 있습니다. 먼저 등록된 로거를 삭제하십시오');
                         } else {
                             alert('삭제 실패: ' + res);
                         }
