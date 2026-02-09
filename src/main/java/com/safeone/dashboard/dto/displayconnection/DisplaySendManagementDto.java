@@ -11,11 +11,17 @@ public class DisplaySendManagementDto implements Serializable {
     @FieldLabel(title="관리 no", type = "hidden")
     private String mgnt_no;
 
-    @FieldLabel(title="이미지파일명")
+    @FieldLabel(title="이미지")
     private String dispbd_imgfile_nm;
 
-	@FieldLabel(title="이미지")
+    @FieldLabel(title="이미지 경로", type = "hidden")
     private String img_file_path;
+
+    @FieldLabel(title="효과")
+    private String img_effect_nm;
+
+    @FieldLabel(title="효과코드", type = "hidden")
+    private String img_effect_cd;
 
     @FieldLabel(title="사용여부")
     private String use_yn;

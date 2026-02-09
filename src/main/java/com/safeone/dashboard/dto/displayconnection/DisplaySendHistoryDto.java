@@ -29,7 +29,7 @@ public class DisplaySendHistoryDto implements Serializable {
     @FieldLabel(title = "전송 그룹")
     private String dispbd_group;
 
-    @FieldLabel(title = "자동전송여부")
+    @FieldLabel(title = "자동전송여부", type = "hidden")
     private String dispbd_autosnd_yn;
 
     @FieldLabel(title = "전송결과")

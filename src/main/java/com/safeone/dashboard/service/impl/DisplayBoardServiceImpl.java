@@ -145,6 +145,7 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
 
     @Override
     public int sendHistory(Map<String, Object> param) {
+        log.warn("display-send-management send API stores history only. interface module integration is pending. param={}", param);
         if (param.get("dispbd_evnt_flag").equals("2") || Integer.parseInt(param.get("dispbd_evnt_flag").toString()) == 2) {
             param.put("dispbd_autosnd_yn", "Y");
         } else {

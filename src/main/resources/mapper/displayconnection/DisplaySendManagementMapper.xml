@@ -4,10 +4,10 @@
 <mapper namespace="com.safeone.dashboard.dao.displayconnection.DisplaySendManagementMapper">
     <sql id="rowSearch">
         <if test="dispbd_imgfile_nm != null and dispbd_imgfile_nm != ''">
-            and tdi.dispbd_imgfile_nm ilike '%' || #{dispbd_imgfile_nm} || '%'
+            and COALESCE(tbi.dispbd_imgfile_nm, tdm.dispbd_imgfile_nm) ilike '%' || #{dispbd_imgfile_nm} || '%'
         </if>
         <if test="use_yn != null and use_yn != ''">
-            and tdi.use_yn = #{use_yn}
+            and COALESCE(tbi.use_yn, tdi.use_yn) = #{use_yn}
         </if>
     </sql>
 
@@ -27,7 +27,7 @@
                 <!--                    MG.use_yn ${sord}-->
                 <!--                </when>-->
                 <otherwise>
-                    tdi.reg_dt desc
+                    tdm.reg_dt desc
                 </otherwise>
             </choose>
         </trim>
@@ -47,20 +47,32 @@
 
     <select id="selectDisplaySendManagementList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.displayconnection.DisplaySendManagementDto">
-        SELECT tdi.mgnt_no
-        , tdi.dispbd_imgfile_nm
-        , tdi.img_file_path
-        , tdi.use_yn
+        SELECT tdm.mgnt_no
+        , COALESCE(tbi.dispbd_imgfile_nm, tdm.dispbd_imgfile_nm) as dispbd_imgfile_nm
+        , COALESCE(tbi.img_file_path, tdi.img_file_path) as img_file_path
+        , tdm.img_effect_cd
+        , tcc.code_nm as img_effect_nm
+        , COALESCE(tbi.use_yn, tdi.use_yn) as use_yn
         , tdi.img_size
         , tdi.img_bg_color
         , tdi.font_size
         , tdi.font_color
-        , tdi.reg_dt
-        , tdi.mod_dt
-        , tdi.mgnt_no as edit
-        , tdi.mgnt_no as del
-        FROM tb_dispbd_image_new tdi
+        , tdm.reg_dt
+        , tdm.mod_dt
+        , tdm.mgnt_no as edit
+        , tdm.mgnt_no as del
+        FROM tb_dispbd_mapping tdm
+                 LEFT OUTER JOIN tb_dispbd_image tbi
+                                 ON tdm.dispbd_evnt_flag = tbi.dispbd_evnt_flag
+                                     AND tdm.img_grp_nm = tbi.img_grp_nm
+                                     AND tdm.dispbd_imgfile_nm = tbi.dispbd_imgfile_nm
+                 LEFT OUTER JOIN tb_dispbd_image_new tdi
+                                 ON tdm.dispbd_imgfile_nm = tdi.dispbd_imgfile_nm
+                 LEFT OUTER JOIN tb_common_code tcc
+                                 ON tdm.img_effect_cd = tcc.code_id
         WHERE 1=1
+          AND tdm.img_grp_nm = #{img_grp_nm}
+          AND tdm.dispbd_evnt_flag = #{dispbd_evnt_flag}
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
@@ -69,66 +81,87 @@
     </select>
 
     <select id="selectDisplaySendManagementListTotal" parameterType="java.util.Map" resultType="int">
-        SELECT count(tdi.mgnt_no)
-        FROM tb_dispbd_image_new tdi
+        SELECT count(tdm.mgnt_no)
+        FROM tb_dispbd_mapping tdm
+                 LEFT OUTER JOIN tb_dispbd_image tbi
+                                 ON tdm.dispbd_evnt_flag = tbi.dispbd_evnt_flag
+                                     AND tdm.img_grp_nm = tbi.img_grp_nm
+                                     AND tdm.dispbd_imgfile_nm = tbi.dispbd_imgfile_nm
+                 LEFT OUTER JOIN tb_dispbd_image_new tdi
+                                 ON tdm.dispbd_imgfile_nm = tdi.dispbd_imgfile_nm
+                 LEFT OUTER JOIN tb_common_code tcc
+                                 ON tdm.img_effect_cd = tcc.code_id
         WHERE 1=1
+          AND tdm.img_grp_nm = #{img_grp_nm}
+          AND tdm.dispbd_evnt_flag = #{dispbd_evnt_flag}
         <include refid="rowSearch"/>
     </select>
 
     <select id="selectDisplayGroupList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.displayconnection.DisplayGroupDto">
         SELECT
-        tdg.mgnt_no
-        , tdg.img_grp_nm
-        , tdg.img_grp_comment
-        , tdg.use_yn
-        , tdg.reg_dt
-        , tdg.mod_dt
-        FROM tb_dispbd_group tdg
+        MIN(tdm.mgnt_no) as mgnt_no
+        , tdm.img_grp_nm
+        , '' as img_grp_comment
+        , 'Y' as use_yn
+        , MIN(tdm.reg_dt) as reg_dt
+        , MAX(tdm.mod_dt) as mod_dt
+        FROM tb_dispbd_mapping tdm
         WHERE 1=1
-        <include refid="rowSearch"/>
+        GROUP BY tdm.img_grp_nm
+        ORDER BY tdm.img_grp_nm
     </select>
 
     <update id="updateDisplaySendManagement" parameterType="java.util.Map">
-        update tb_send_group
-        <set>
-            <if test="send_group_name != null">
-                , send_group_name = #{send_group_name}
+        update tb_dispbd_mapping
+        <trim prefix="set" suffixOverrides=",">
+            <if test="dispbd_evnt_flag != null">
+                dispbd_evnt_flag = #{dispbd_evnt_flag},
             </if>
-            <if test="description != null">
-                , description = #{description}
+            <if test="img_grp_nm != null">
+                img_grp_nm = #{img_grp_nm},
             </if>
-            <if test="use_yn != null">
-                , use_yn = #{use_yn}
+            <if test="dispbd_imgfile_nm != null">
+                dispbd_imgfile_nm = #{dispbd_imgfile_nm},
             </if>
-        </set>
-        where send_group_id = #{send_group_id}
+            <if test="img_effect_cd != null">
+                img_effect_cd = #{img_effect_cd},
+            </if>
+            <if test="img_disp_min != null">
+                img_disp_min = #{img_disp_min},
+            </if>
+            mod_dt = now(),
+        </trim>
+        where mgnt_no = #{mgnt_no}::integer
     </update>
 
     <insert id="insertDisplaySendManagement" parameterType="java.util.Map">
-        insert into tb_send_group (send_group_id, send_group_name, description, use_yn)
-        SELECT COALESCE(max(send_group_id::integer), 0) + 1 as tb_send_group
-             , #{send_group_name}
-             , #{description}
-             , 'Y'
-        FROM tb_send_group
+        insert into tb_dispbd_mapping (mgnt_no, dispbd_evnt_flag, img_grp_nm, dispbd_imgfile_nm,
+                                       img_effect_cd, img_disp_min, reg_dt, mod_dt)
+        values ((SELECT COALESCE(max(mgnt_no::integer), 0) + 1 from tb_dispbd_mapping)
+               , #{dispbd_evnt_flag}
+               , #{img_grp_nm}
+               , #{dispbd_imgfile_nm}
+               , #{img_effect_cd}
+               , #{img_disp_min}
+               , now()
+               , now())
     </insert>
 
     <delete id="deleteDisplaySendManagement" parameterType="java.util.Map">
         DELETE
-        FROM tb_send_group
-        WHERE send_group_id = #{send_group_id}
+        FROM tb_dispbd_mapping
+        WHERE mgnt_no = #{mgnt_no}::integer
     </delete>
 
     <insert id="sendHistory" parameterType="java.util.Map">
-        insert into tb_dispbd_details (mgnt_no, dispbd_no, sms_trans_dt, district_no, dispbd_evnt_flag,
-                                       dispbd_autosnd_yn, dispbd_rslt_yn, reg_dt)
-        values ( (SELECT COALESCE(max(mgnt_no::integer), 0) + 1 from tb_dispbd_details)
+        insert into tb_dispbd_details_new (mgnt_no, dispbd_no, dispbd_evnt_flag, img_grp_nm,
+                                           sms_trans_dt, dispbd_rslt_yn, reg_dt)
+        values ( (SELECT COALESCE(max(mgnt_no::integer), 0) + 1 from tb_dispbd_details_new)
                , #{dispbd_no}
-               , now()
-               , #{district_no}
                , #{dispbd_evnt_flag}
-               , #{dispbd_autosnd_yn}
+               , #{img_grp_nm}
+               , now()
                , #{dispbd_rslt_yn}
                , now())
     </insert>

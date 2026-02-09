@@ -401,8 +401,11 @@
 
             if (window.jqgridOption.columnAutoWidth) {
                 $(window).resize(function () {
-                    var gridWidth = $(window).width() - 445;
+                    var gridWidth = $grid.closest('.contents-in').width();
                     $grid.jqGrid('setGridWidth', gridWidth, true);
+
+                    var gridHeight = $grid.closest('.contents-in').height() - 35;
+                    $grid.jqGrid('setGridHeight', gridHeight);
                 });
 
                 $(window).trigger('resize');
@@ -411,4 +414,3 @@
 
     })
 </script>
-

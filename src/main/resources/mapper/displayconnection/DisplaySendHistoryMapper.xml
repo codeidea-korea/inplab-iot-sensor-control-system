@@ -38,17 +38,16 @@
         SELECT tdd.mgnt_no
         , tdd.dispbd_no
         , tdispi.dispbd_nm
---         , tdispi.d
         , tdd.sms_trans_dt
-        , tdd.district_no
         , tdi.district_nm
         , tdd.dispbd_evnt_flag
-        , tdd.dispbd_autosnd_yn
+        , tdd.img_grp_nm as dispbd_group
+        , case when tdd.dispbd_evnt_flag = '2' then 'Y' else 'N' end as dispbd_autosnd_yn
         , tdd.dispbd_rslt_yn
         , tdd.reg_dt
-        FROM tb_dispbd_details tdd
-        LEFT OUTER JOIN tb_district_info tdi ON tdd.district_no = tdi.district_no
+        FROM tb_dispbd_details_new tdd
         LEFT OUTER JOIN tb_dispboard_info tdispi ON tdd.dispbd_no = tdispi.dispbd_no
+        LEFT OUTER JOIN tb_district_info tdi ON tdispi.district_no = tdi.district_no
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -59,7 +58,7 @@
 
     <select id="getTotalCount" parameterType="java.util.Map" resultType="int">
         SELECT count(tdd.mgnt_no)
-        FROM tb_dispbd_details tdd
+        FROM tb_dispbd_details_new tdd
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>

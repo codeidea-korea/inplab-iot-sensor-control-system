@@ -14,10 +14,16 @@
         display: grid;
         align-items: stretch;
         grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+        gap: 1.2rem;
+        overflow: hidden;
     }
 
     .contents-re {
         width: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
     }
 
     .contents-re:nth-of-type(4) {
@@ -28,7 +34,8 @@
 
     .contents-head {
         display: flex;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
+        flex-shrink: 0;
     }
 
     .search-top {
@@ -37,47 +44,25 @@
 
     .btn-group {
         position: static;
+        display: flex;
+        align-items: center;
         justify-content: center;
         margin-bottom: 1rem;
     }
 
-    .btn-group a:nth-of-type(1) {
-        height: 2.8rem;
+    .btn-group .group-label {
         margin-left: 1rem;
-        padding: 0 2rem;
-        background-color: #fff;
         font-weight: 500;
         font-size: 1.4rem;
-        line-height: 1;
-        color: #000;
-        text-align: center;
-        border-radius: 99px;
-        display: flex;
-        align-items: center;
-        cursor: pointer;
+        line-height: 2.8rem;
+        color: #fff;
     }
 
-    .btn-group a:nth-of-type(2), #dispbd-send-btn {
+    .btn-group .insert-btn, #dispbd-send-btn {
         height: 2.8rem;
         margin-left: 1rem;
         padding: 0 2rem;
         background-color: #2e5fc3;
-        font-weight: 500;
-        font-size: 1.4rem;
-        line-height: 1;
-        color: #fff;
-        text-align: center;
-        border-radius: 99px;
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-    }
-
-    .btn-group a:nth-of-type(3) {
-        height: 2.8rem;
-        margin-left: 1rem;
-        padding: 0 2rem;
-        background-color: #6975ac;
         font-weight: 500;
         font-size: 1.4rem;
         line-height: 1;
@@ -103,6 +88,9 @@
 
     .contents-in {
         width: 100%;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
     }
 
 
@@ -145,6 +133,20 @@
     .hide_size .check-box {
         margin-bottom: 1rem;
     }
+
+    @media (max-width: 1280px) {
+        #contents {
+            height: auto !important;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+            overflow: visible;
+        }
+
+        .contents-re:nth-of-type(4) {
+            grid-column: auto;
+            grid-row: auto;
+        }
+    }
 </style>
 <script>
     window.jqgridOption = {
@@ -157,12 +159,38 @@
         const $sensorGrid = $('#display-send-management-sensor');
         const $historyGrid = $("#display-send-history-grid");
 
+        const syncLayoutHeight = () => {
+            if (window.matchMedia("(max-width: 1280px)").matches) {
+                $("#contents").css("height", "");
+                return;
+            }
+            const $contents = $("#contents");
+            const top = $contents.offset()?.top || 0;
+            const available = Math.max(0, window.innerHeight - top - 20);
+            $contents.css("height", available + "px");
+        };
+
+        const resizeGrid = ($grid) => {
+            if (!$grid.length) {
+                return;
+            }
+            const $container = $grid.closest('.contents-in');
+            const width = $container.width();
+            const height = Math.max(120, $container.height() - 38);
+            if (width > 0) {
+                $grid.jqGrid('setGridWidth', width, true);
+                $grid.jqGrid('setGridHeight', height);
+            }
+        };
+
         $(window).on("resize", () => {
-            $normalGrid.jqGrid('setGridWidth', $normalGrid.closest('.contents-in').width());
-            $emerGrid.jqGrid('setGridWidth', $emerGrid.closest('.contents-in').width());
-            $sensorGrid.jqGrid('setGridWidth', $sensorGrid.closest('.contents-in').width());
-            $historyGrid.jqGrid('setGridWidth', $historyGrid.closest('.contents-in').width());
-        })
+            syncLayoutHeight();
+            resizeGrid($normalGrid);
+            resizeGrid($emerGrid);
+            resizeGrid($sensorGrid);
+            resizeGrid($historyGrid);
+        });
+        syncLayoutHeight();
 
         $.ajax({
             url: '/adminAdd/districtInfo/all',
@@ -207,6 +235,7 @@
                     $normalGrid.trigger('reloadGrid');
                     $emerGrid.trigger('reloadGrid');
                     $sensorGrid.trigger('reloadGrid');
+                    $(window).trigger('resize');
                 }, 100);
             },
             error: function () {
@@ -282,10 +311,11 @@
                     dispbd_no: $("#dispbd_nm").val(),
                     district_no: $("#district-no").val(),
                     dispbd_evnt_flag: $("#event-select").val(),
+                    img_grp_nm: $("#dispbd_group").val(),
                     dispbd_rslt_yn: 'Y'
                 }),
                 success: function (_res) {
-                    alert('전송이 완료되었습니다.');
+                    alert('전송 이력이 저장되었습니다.');
                     $historyGrid.trigger('reloadGrid');
                 },
                 error: function (_err) {
@@ -364,11 +394,6 @@
                 return;
             }
 
-            if ($("#dispbd_autosnd_yn").val() === '') {
-                alert('자동여부를 선택해주세요.');
-                return;
-            }
-
             if ($("#use_yn").val() === '') {
                 alert('사용여부를 선택해주세요.');
                 return;
@@ -383,7 +408,6 @@
                     dispbd_evnt_flag: eventFlag,
                     img_effect_cd: $("#effect").val(),
                     img_disp_min: $("#effect_sec").val(),
-                    dispbd_autosnd_yn: $("#dispbd_autosnd_yn").val(),
                     use_yn: $("#use_yn").val(),
                     dispbd_imgfile_nm: 'temp'
                 },
@@ -418,7 +442,7 @@
                     <h3 class="txt">평시 이미지</h3>
                     <div class="search-top">
                         <div class="btn-group">
-                            <a href="javascript:void(0);">전송그룹</a>
+                            <span class="group-label">전송그룹</span>
                             <select id="normal-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
@@ -477,7 +501,6 @@
                                     <select id="event-select">
                                         <option value="0">평시</option>
                                         <option value="1">긴급</option>
-                                        <option value="2">센서경보</option>
                                     </select>
                                 </td>
                             </tr>
@@ -491,7 +514,7 @@
                     <h3 class="txt">긴급 이미지</h3>
                     <div class="search-top">
                         <div class="btn-group">
-                            <a href="javascript:void(0);">전송그룹</a>
+                            <span class="group-label">전송그룹</span>
                             <select id="emer-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
@@ -518,7 +541,7 @@
                     <h3 class="txt">센서 경보 이미지</h3>
                     <div class="search-top">
                         <div class="btn-group">
-                            <a href="javascript:void(0);">전송그룹</a>
+                            <span class="group-label">전송그룹</span>
                             <select id="sensor-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
@@ -585,14 +608,6 @@
                     <tr>
                         <th>표시시간(초)</th>
                         <td><input type="number" id="effect_sec" placeholder="Ex) 4"/></td>
-                    </tr>
-                    <tr>
-                        <th>자동여부</th>
-                        <td><select id="dispbd_autosnd_yn">
-                            <option value="">선택</option>
-                            <option value="Y">자동</option>
-                            <option value="N">수동</option>
-                        </select></td>
                     </tr>
                     <tr>
                         <th>사용여부</th>
