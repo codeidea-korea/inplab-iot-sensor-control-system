@@ -91,7 +91,7 @@
                  LEFT JOIN tb_district_info tdi
                            ON tad.district_no = tdi.district_no
                  LEFT JOIN tb_sensor_info tsi
-                           ON tad.sens_no = tsi.sens_no
+                           ON tad.sens_no = tsi.sens_no and tsi.alarm_use_yn ='Y'
                  LEFT JOIN tb_alarm_info tai
                            ON tad.sens_no = tai.sens_no and tad.sens_chnl_id = tai.sens_chnl_id
                  LEFT JOIN tb_sensor_type tst
@@ -132,6 +132,8 @@
             JOIN tb_sensor_init tsi
             ON tsi.sens_no = tmd.sens_no
             AND tsi.sens_chnl_id = tmd.sens_chnl_id
+            LEFT JOIN tb_sensor_info tsi
+            ON tai.sens_no = tsi.sens_no and tsi.alarm_use_yn ='Y'
             WHERE tmd.reg_dt > NOW() - INTERVAL '1 minute'
         ) AS MG
         WHERE 1=1
