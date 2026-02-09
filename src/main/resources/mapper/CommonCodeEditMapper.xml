@@ -184,7 +184,13 @@
     <select id="isLogrIdxNoExists" parameterType="java.util.Map" resultType="boolean">
         SELECT EXISTS (SELECT 1
                        FROM tb_logr_idx_map
-                       WHERE sens_no = #{sensNo})
+                       WHERE sens_no = #{sens_no})
+    </select>
+
+    <select id="isSensorByLoggerNoExists" parameterType="java.util.Map" resultType="boolean">
+        SELECT EXISTS (SELECT 1
+                       FROM tb_sensor_info
+                       WHERE logr_no = #{logr_no})
     </select>
 
 </mapper>

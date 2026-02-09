@@ -75,14 +75,14 @@
                     alert('삭제할 로거가 선택되지 않았습니다.');
                     return;
                 }
-                confirm('삭제하시겠습니까?', function() {
+                confirm('선택하신 로거정보를 삭제하시겠습니까?', function() {
                     $.get('/adminAdd/loggerInfo/del', {logr_no: logrNo}, function(res) {
                         if (res === 1) {  // 성공 시
                             alert('삭제되었습니다.');
                             popFancyClose('#lay-form-write');
                             reloadJqGrid();  // 그리드를 리로드하여 변경 사항을 반영
                         } else if (res === -1) {  // 검증 실패 시
-                            alert('이 로거는 삭제할 수 없습니다. 이미 사용 중이거나 다른 제약이 있습니다.');
+                            alert('선택하신 로거에는 센서가 등록되어 있습니다. 먼저 등록된 센서정보를 삭제하십시오.');
                         } else {
                             alert('삭제 실패: ' + res);
                         }

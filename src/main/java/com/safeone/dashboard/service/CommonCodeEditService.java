@@ -137,5 +137,9 @@ public class CommonCodeEditService {
         return mapper.isLogrIdxNoExists(param);
     }
 
+    public boolean isSensorByLoggerNoExists(Map param) {
+        return mapper.isSensorByLoggerNoExists(param);
+    }
+
 
 }

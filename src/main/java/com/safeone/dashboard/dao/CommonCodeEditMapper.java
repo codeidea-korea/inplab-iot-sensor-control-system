@@ -50,5 +50,6 @@ public interface CommonCodeEditMapper {
 
     boolean isLogrIdxNoExists(Map param);
 
+    boolean isSensorByLoggerNoExists(Map param);
 }
     

@@ -77,7 +77,7 @@ public class LoggerInfoController extends JqGridAbstract<LoggerInfoDto> {
     @ResponseBody
     @GetMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        boolean exists = commonCodeEditService.isLogrIdxNoExists(param);
+        boolean exists = commonCodeEditService.isSensorByLoggerNoExists(param);
         if (exists) {
             return -1; // -1은 삭제 불가 상태를 의미함.
         }
