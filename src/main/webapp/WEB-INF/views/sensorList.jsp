@@ -254,7 +254,9 @@
                 hidden: false,
                 formatter: formatCommStatus
             },
-            {name: 'formul_data', index: 'formul_data', width: 70, align: 'right', hidden: false},
+            {name: 'raw_data', index: 'raw_data', width: 70, align: 'right', hidden: false},
+            {name: 'disp_val', index: 'disp_val', width: 70, align: 'right', hidden: false, formatter: 'number', formatoptions: {decimalPlaces: 2, thousandsSeparator: ""}},
+            {name: 'formul_data', index: 'formul_data', width: 70, align: 'right', hidden: true},
             {name: 'senstype_no', index: 'senstype_no', width: 100, align: 'center', hidden: true},
             {name: 'sens_no', index: 'sens_no', width: 100, align: 'center', hidden: true},
             {name: 'logr_no', index: 'logr_no', width: 100, align: 'center', hidden: true},
@@ -279,9 +281,9 @@
         ];
 
         const header = [
-            '', '현장명', '센서타입명', '센서명', '채널명', '로거명', '단면번호', '설치일자', '최종계측일시', '센서상태', '통신상태', '센서값',
+            '', '현장명', '센서타입명', '센서명', '채널명', '로거명', '단면번호', '설치일자', '최종계측일시', '센서상태', '통신상태', 'RawData', '변위값',
             '', '', '', '', '', '', '', '', '', '',
-            '', '', '', '', '', '', '', '', '', ''
+            '', '', '', '', '', '', '', '', '', '',''
         ];
 
         const gridComplete2 = () => {

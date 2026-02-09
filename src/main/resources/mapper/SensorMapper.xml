@@ -232,17 +232,21 @@
             WHEN COALESCE(lmd.err_cnt, 999999) >= a.nonrecv_limit_min THEN '미수신'
                 ELSE '수신'
             END AS comm_status,
+            lmd.raw_data AS raw_data,
+            (CAST(lmd.raw_data AS DOUBLE PRECISION) - CAST(tsi.init_raw_data AS DOUBLE PRECISION)) AS disp_val,
             lmd.formul_data
         FROM tb_sensor_info a
         JOIN tb_logger_info b ON a.logr_no = b.logr_no
         JOIN tb_district_info c ON b.district_no = c.district_no
         JOIN tb_sensor_type d ON a.senstype_no = d.senstype_no
         JOIN tb_sensor_chnl e ON a.sens_no = e.sens_no
+        LEFT JOIN tb_sensor_init tsi ON a.sens_no = tsi.sens_no
         LEFT JOIN LATERAL (
             SELECT
                 m.sens_no,
-                m.sens_chnl_id,
+                m.sens_chnl_id, 
                 m.meas_dt,
+                m.raw_data,
                 m.formul_data,
                 EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 AS diff_min,
                 EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 - 1 AS err_cnt
