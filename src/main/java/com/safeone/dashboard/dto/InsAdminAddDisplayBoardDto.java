@@ -12,6 +12,9 @@ public class InsAdminAddDisplayBoardDto {
     @Schema(example = "brdcast-01", description = "전광판명")
     private String dispbd_nm;
 
+    @Schema(example = "N", description = "이벤트 전송 여부")
+    private String evnt_snd_yn;
+
     @Schema(example = "D01", description = "현장아이디")
     private String district_no;
 

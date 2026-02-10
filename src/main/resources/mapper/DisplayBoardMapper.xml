@@ -6,7 +6,7 @@
         /* DisplayBoardMapper.getDisplayBoardListTotalCnt */
         SELECT
         COUNT(1)
-        FROM tb_dispboard_info A
+        FROM tb_dispboard_info_new A
         <include refid="getDisplayBoardList-where"/>
     </select>
 
@@ -16,6 +16,7 @@
         ROW_NUMBER() OVER (ORDER BY A.mod_dt IS NULL ASC, A.mod_dt DESC, A.reg_dt DESC) AS row_num
         ,A.dispbd_no
         ,A.dispbd_nm
+        ,A.evnt_snd_yn
         ,A.district_no
         ,B.district_nm
         ,A.dispbd_ip
@@ -31,10 +32,9 @@
         ,A.dispbd_maker
         ,TO_CHAR(A.reg_dt, 'YYYY-MM-DD HH24:MI:SS') AS reg_dt
         ,TO_CHAR(A.mod_dt, 'YYYY-MM-DD HH24:MI:SS') AS mod_dt
-        FROM tb_dispboard_info A
+        FROM tb_dispboard_info_new A
         <include refid="getDisplayBoardList-where"/>
-        AND A.del_yn = 'N'
-        order by A.dispbd_no desc
+        order by CAST(SUBSTRING(A.dispbd_no, 2) AS INTEGER) asc
         <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
             LIMIT ${limit} OFFSET ${offset}
         </if>
@@ -45,7 +45,7 @@
         SELECT A.dispbd_no
              , A.dispbd_nm
              , A.district_no
-             , A.del_yn
+             , A.evnt_snd_yn
              , A.dispbd_ip
              , A.dispbd_port
              , A.dispbd_conn_id
@@ -58,9 +58,8 @@
              , A.dispbd_maker
              , A.reg_dt
              , A.mod_dt
-        FROM tb_dispboard_info A
+        FROM tb_dispboard_info_new A
         WHERE A.district_no = #{district_no}
-          AND A.del_yn = 'N'
     </select>
 
     <sql id="getDisplayBoardList-where">
@@ -83,8 +82,9 @@
 
     <insert id="insDisplayBoard" parameterType="java.util.HashMap">
         /* DisplayBoardMapper.insDisplayBoard */
-        INSERT INTO tb_dispboard_info (dispbd_no,
+        INSERT INTO tb_dispboard_info_new (dispbd_no,
                                        dispbd_nm,
+                                       evnt_snd_yn,
                                        district_no,
                                        dispbd_ip,
                                        dispbd_port,
@@ -99,6 +99,7 @@
                                        reg_dt)
         VALUES (#{dispbd_no},
                 #{dispbd_nm},
+                COALESCE(#{evnt_snd_yn}, 'N'),
                 #{district_no},
                 #{dispbd_ip},
                 #{dispbd_port},
@@ -115,11 +116,11 @@
 
     <update id="udtDisplayBoard" parameterType="java.util.HashMap">
         /* DisplayBoardMapper.udtDisplayBoard */
-        UPDATE tb_dispboard_info
+        UPDATE tb_dispboard_info_new
         <trim prefix="SET" suffixOverrides=",">
             <if test="dispbd_nm != null">dispbd_nm = #{dispbd_nm},</if>
             <if test="district_no != null">district_no = #{district_no},</if>
-            <if test="del_yn != null">del_yn = #{del_yn},</if>
+            <if test="evnt_snd_yn != null">evnt_snd_yn = #{evnt_snd_yn},</if>
             <if test="dispbd_ip != null">dispbd_ip = #{dispbd_ip},</if>
             <if test="dispbd_port != null">dispbd_port = #{dispbd_port},</if>
             <if test="dispbd_conn_id != null">dispbd_conn_id = #{dispbd_conn_id},</if>
@@ -139,13 +140,13 @@
     <delete id="delDisplayBoard" parameterType="java.util.HashMap">
         /* DisplayBoardMapper.delDisplayBoard */
         DELETE
-        FROM tb_dispboard_info
+        FROM tb_dispboard_info_new
         WHERE 1 = 1
           AND dispbd_no = #{dispbd_no}
     </delete>
 
     <select id="getMaxDispbdNo" resultType="String">
         SELECT MAX(dispbd_no)
-        FROM tb_dispboard_info
+        FROM tb_dispboard_info_new
     </select>
 </mapper>

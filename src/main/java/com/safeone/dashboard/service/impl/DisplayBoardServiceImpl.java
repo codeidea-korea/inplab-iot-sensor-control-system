@@ -10,8 +10,6 @@ import com.safeone.dashboard.dto.InsAdminAddDisplayBoardDto;
 import com.safeone.dashboard.dto.UdtAdminAddDisplayBoardDto;
 import com.safeone.dashboard.dto.displayconnection.DisplayBoardDto;
 import com.safeone.dashboard.service.DisplayBoardService;
-import com.safeone.dashboard.service.CctvService;
-import com.safeone.dashboard.service.DisplayBoardService;
 import com.safeone.dashboard.util.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +27,6 @@ import java.util.Map;
 @Service("displayBoardService")
 @RequiredArgsConstructor
 public class DisplayBoardServiceImpl implements DisplayBoardService {
-
-    private final CctvService cctvService;
 
     @Resource(name = "displayBoardMapper")
     private final DisplayBoardMapper displayBoardMapper;
@@ -62,16 +58,13 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
         int passCount = 0;
 
         for (InsAdminAddDisplayBoardDto dto : insAdminAddDisplayBoardDtoList) {
-            Map<String, Object> newMap = new HashMap<>();
-            newMap.put("table_nm", "tb_dispboard_info");
-            newMap.put("column_nm", "dispbd_no");
-            ObjectNode generationKeyOn = cctvService.newGenerationKey(newMap);
-            String newDisplayBoardNo = generationKeyOn.get("newId").asText();
-
             Map<String, Object> map = CommonUtils.dtoToMap(dto);
+            String dispbdNo = map.get("dispbd_no") == null ? "" : map.get("dispbd_no").toString();
+            if (dispbdNo.isBlank()) {
+                map.put("dispbd_no", getNextDisplayBoardNo());
+            }
             Map<String, Object> getMap = new HashMap<>();
-            map.put("dispbd_no", newDisplayBoardNo);
-            getMap.put("dispbd_no", newDisplayBoardNo);
+            getMap.put("dispbd_no", map.get("dispbd_no"));
             List<HashMap<String, Object>> list = displayBoardMapper.getDisplayBoardList(getMap);
             getMap.clear();
             getMap.put("dispbd_nm", map.get("dispbd_nm"));
@@ -102,6 +95,16 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
         on.put("pass_list", an);
 
         return on;
+    }
+
+    private String getNextDisplayBoardNo() {
+        String maxNo = displayBoardMapper.getMaxDispbdNo();
+        if (maxNo == null || maxNo.isBlank()) {
+            return "P01";
+        }
+        String prefix = maxNo.substring(0, 1);
+        int number = Integer.parseInt(maxNo.substring(1)) + 1;
+        return prefix + String.format("%02d", number);
     }
 
     public ObjectNode udtDisplayBoard(List<UdtAdminAddDisplayBoardDto> udtAdminAddDisplayBoardDtoList) {
@@ -156,6 +159,10 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
 
     @Override
     public String getMaxDispbdNo() {
-        return displayBoardMapper.getMaxDispbdNo();
+        String maxNo = displayBoardMapper.getMaxDispbdNo();
+        if (maxNo == null || maxNo.isBlank()) {
+            return "P00";
+        }
+        return maxNo;
     }
 }

@@ -107,13 +107,28 @@
             });
         };
 
-        const actionDelDisplayBoard = (dispbd_no) => {
-            udtDisplayBoard([{dispbd_no: dispbd_no, del_yn: 'Y'}]).then((res) => {
-                if (res.count?.pass > 0) {
-                    alert2(res?.pass_list[0]?.message, function () {
+        const delDisplayBoard = (array) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'DELETE',
+                    url: `/adminAdd/displayBoard/displayBoard`,
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    async: true,
+                    data: JSON.stringify(array)
+                }).done(function (res) {
+                    resolve(res);
+                }).fail(function (fail) {
+                    reject(fail);
+                    console.log('delDisplayBoard fail > ', fail);
+                    alert2('전광판 삭제하는데 실패했습니다.', function () {
                     });
-                    return;
-                }
+                });
+            });
+        };
+
+        const actionDelDisplayBoard = (dispbd_no) => {
+            delDisplayBoard([{dispbd_no: dispbd_no}]).then((res) => {
                 if (res.count?.del === 0) {
                     alert2('전광판 정보가 삭제되지 않았습니다.', function () {
                     });
@@ -131,7 +146,7 @@
                     });
                 });
             }).catch((fail) => {
-                console.log('delBroadcast fail > ', fail);
+                console.log('delDisplayBoard fail > ', fail);
                 alert2('전광판 정보 삭제에 실패했습니다.', function () {
                 });
             });
@@ -146,6 +161,7 @@
             let result = false;
             const dispbd_no = $('input[name=dispbd_no]').val();
             const dispbd_nm = $('input[name=dispbd_nm]').val();
+            const evnt_snd_yn = $('select[name=evnt_snd_yn]').val();
             const district_no = $('select[name=district_no]').val();
             const dispbd_ip = $('input[name=dispbd_ip]').val();
             const dispbd_port = $('input[name=dispbd_port]').val();
@@ -161,6 +177,7 @@
             const obj = {
                 dispbd_no: dispbd_no,
                 dispbd_nm: dispbd_nm,
+                evnt_snd_yn: evnt_snd_yn,
                 district_no: district_no,
                 dispbd_ip: dispbd_ip,
                 dispbd_port: dispbd_port,
@@ -217,6 +234,7 @@
         const setDisplayBoard = (data) => {
             $('input[name=dispbd_no]').val(data.dispbd_no);
             $('input[name=dispbd_nm]').val(data.dispbd_nm);
+            $('select[name=evnt_snd_yn]').val(data.evnt_snd_yn || 'N');
             $('select[name=district_no]').val(data.district_no);
             $('input[name=dispbd_ip]').val(data.dispbd_ip);
             $('input[name=dispbd_port]').val(data.dispbd_port);
@@ -308,13 +326,18 @@
             };
 
             $('.insertBtn').on('click', function () {
+                initForm();
+
                 getMaxNo().then((res) => {
-                    const prefix = res.substring(0, 1); // 'P'
-                    const number = parseInt(res.substring(1), 10) + 1;
+                    const maxNo = (res || '').toString().trim();
+                    const matched = maxNo.match(/^([A-Za-z])(\d+)$/);
+                    const prefix = matched ? matched[1] : 'P';
+                    const currentNo = matched ? parseInt(matched[2], 10) : 0;
+                    const number = currentNo + 1;
                     const dispbd_no = prefix + number.toString().padStart(2, '0');
                     $('input[name=dispbd_no]').val(dispbd_no);
-                })
-                initForm();
+                });
+
                 getDistrictInfo().then((res2) => {
                     let district_nm = $('select[name=district_no]');
                     district_nm.empty();
@@ -417,7 +440,7 @@
                 });
                 const dispbd_no = selectedDispbdNos[0]
 
-                if (dispbd_no === null) {
+                if (!dispbd_no) {
                     alert2('전광판을 선택해주세요.', function () {
                     });
                     return;
@@ -531,8 +554,15 @@
                     </tr>
                     <tr>
                         <th>전광판명 <span style="color: red">*</span></th>
-                        <td colspan="3">
+                        <td>
                             <input type="text" name="dispbd_nm"/>
+                        </td>
+                        <th>이벤트전송여부 <span style="color: red">*</span></th>
+                        <td>
+                            <select name="evnt_snd_yn">
+                                <option value="N">미전송</option>
+                                <option value="Y">전송</option>
+                            </select>
                         </td>
                     </tr>
                     <tr>
