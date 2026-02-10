@@ -256,11 +256,111 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
-            initGrid($("#jq-grid"), "/adminAdd/logrIdxMap", $('#grid-wrapper'), {
-                custom: {
-                    useFilterToolbar: true,
+            $.when(
+                $.get('/adminAdd/common/code/districtInfoList'),
+                $.get('/adminAdd/common/code/sensorType'),
+                $.get('/adminAdd/common/code/loggerInfo'),
+                $.get('/adminAdd/common/code/sectList')
+            ).done(function(distRes, typeRes, loggerRes, sectRes){
+
+                function makeJqGridSelect(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
+                        if(v.sect_no !== undefined){
+                            str += ";" + v.sect_no + ":" + v.sect_no;
+                        }
+                    });
+                    return str;
                 }
-            })
+
+                function makeJqGridSelectByName(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
+                       
+                        str += ";" + v.name + ":" + v.name;
+                    });
+                    return str;
+                }
+
+                var distStr = makeJqGridSelectByName(distRes[0]);
+                var typeStr = makeJqGridSelectByName(typeRes[0]);
+                var loggerStr = makeJqGridSelectByName(loggerRes[0]);
+                var sectStr = makeJqGridSelect(sectRes[0]);
+
+                initGrid($("#jq-grid"), "/adminAdd/logrIdxMap", $('#grid-wrapper'),{
+                    multiselect: true,
+                    multiboxonly: true,
+                    custom: {
+                        useFilterToolbar: false 
+                    },
+                    loadComplete : function(){
+                        var $grid = $("#jq-grid");
+                        if ($grid.data('toolbar_created')) return;
+
+                        $grid.jqGrid('setColProp','district_nm', {
+                            stype: 'select',
+                            searchoptions: {value:distStr, sopt:['eq']  }
+                        })
+
+                        $grid.jqGrid('setColProp', 'senstype_nm', {
+                            stype: 'select',
+                            searchoptions: { value: typeStr, sopt: ['eq'] }
+                        });
+                        $grid.jqGrid('setColProp', 'logr_nm', {
+                            stype: 'select',
+                            searchoptions: { value: loggerStr, sopt: ['eq'] }
+                        });
+
+                        $grid.jqGrid('setColProp','sect_no',{
+                            stype: 'select',
+                            searchoptions: { value: sectStr, sopt: ['eq'] }
+                        });
+
+                        $grid.jqGrid('filterToolbar', {
+                            stringResult: false, 
+                            searchOnEnter: true,
+                            defaultSearch: "eq",
+                            ignoreCase: true
+
+                        });
+
+                        $('.clearsearchclass').off('click').on('click', function () {
+                            var $this = $(this);
+
+                            var $inputTd = $this.closest('td').prev('td');
+                            var $select = $inputTd.find('select'); 
+                            var $input = $inputTd.find('input');   
+
+                            if ($select.length > 0) $select.val('');
+                            if ($input.length > 0) $input.val('');
+
+                            $grid[0].triggerToolbar();
+                        });
+
+                        $(document).off('click.debugX').on('click.debugX', '.clearsearchclass', function() {
+                            console.log("-----------------------------------------");
+                            console.log(">>> [Debug] 검색 초기화(x) 버튼 클릭됨");
+
+
+                            var $currentCell = $(this).closest('td');
+
+                            var $input = $currentCell.find('input[id^="gs_"], select[id^="gs_"]');
+
+                            if ($input.length === 0) {
+                                $input = $currentCell.prev('td').find('input[id^="gs_"], select[id^="gs_"]');
+                            }
+
+                            var postData = $grid.jqGrid('getGridParam', 'postData');
+
+                            $grid.jqGrid('setGridParam', { postData: postData });
+                        });
+
+                        $grid.data('toolbar_created', true);
+                    }
+                });
+            }).fail(function() {
+                alert("데이터 로딩 실패");
+            });
         });
     </script>
 </head>
