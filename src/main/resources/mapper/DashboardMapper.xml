@@ -460,41 +460,45 @@
     </select>
 
     <select id="getAlarmMessage" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT
-            tad.mgnt_no,
-            tad.sens_no,
-            tad.meas_dt,
-            tsi.sens_nm,
-            tdi.district_nm,
-            tad.sens_chnl_id,
-            tad.alarm_lvl_cd,
-            tad.formul_data,
-            tad.net_err_yn,
-            tad.maint_sts_cd,
-            tai."1st_lvl_max" AS max1,
-            tai."1st_lvl_min" AS min1,
-            tai."2nd_lvl_max" AS max2,
-            tai."2nd_lvl_min" AS min2,
-            tai."3rd_lvl_max" AS max3,
-            tai."3rd_lvl_min" AS min3,
-            tai."4th_lvl_max" AS max4,
-            tai."4th_lvl_min" AS min4,
-            tad.reg_dt,
-            tst.sens_tp_nm,
-            tad.view_flag
-        FROM tb_alarm_details tad
-        LEFT JOIN tb_district_info tdi
-        ON tad.district_no = tdi.district_no
-        LEFT JOIN tb_sensor_info tsi
-        ON tad.sens_no = tsi.sens_no
-        LEFT JOIN tb_alarm_info tai
-        ON tad.sens_no = tai.sens_no
-        LEFT JOIN tb_sensor_type tst
-        ON tsi.senstype_no = tst.senstype_no
-        WHERE 1=1
-            and tad.view_flag = #{view_flag}
-        order by tad.reg_dt desc
-        limit 6
+        SELECT *
+        FROM (
+            SELECT DISTINCT ON (tad.sens_no, tad.sens_chnl_id, tad.alarm_lvl_cd)
+                tad.mgnt_no,
+                tad.sens_no,
+                tad.meas_dt,
+                tsi.sens_nm,
+                tdi.district_nm,
+                tad.sens_chnl_id,
+                tad.alarm_lvl_cd,
+                tad.formul_data,
+                tad.net_err_yn,
+                tad.maint_sts_cd,
+                tai."1st_lvl_max" AS max1,
+                tai."1st_lvl_min" AS min1,
+                tai."2nd_lvl_max" AS max2,
+                tai."2nd_lvl_min" AS min2,
+                tai."3rd_lvl_max" AS max3,
+                tai."3rd_lvl_min" AS min3,
+                tai."4th_lvl_max" AS max4,
+                tai."4th_lvl_min" AS min4,
+                tad.reg_dt,
+                tst.sens_tp_nm,
+                tad.view_flag
+            FROM tb_alarm_details tad
+                     LEFT JOIN tb_district_info tdi
+                               ON tad.district_no = tdi.district_no
+                     LEFT JOIN tb_sensor_info tsi
+                               ON tad.sens_no = tsi.sens_no
+                     LEFT JOIN tb_alarm_info tai
+                               ON tad.sens_no = tai.sens_no
+                     LEFT JOIN tb_sensor_type tst
+                               ON tsi.senstype_no = tst.senstype_no
+            WHERE 1=1
+              AND tad.view_flag = #{view_flag}
+            ORDER BY tad.sens_no, tad.sens_chnl_id, tad.alarm_lvl_cd, tad.reg_dt DESC
+        ) dedup
+        ORDER BY dedup.reg_dt DESC
+        LIMIT 6
     </select>
 
     <update id="updateViewFlag" parameterType="java.lang.Integer">
