@@ -337,24 +337,7 @@
                             $grid[0].triggerToolbar();
                         });
 
-                        $(document).off('click.debugX').on('click.debugX', '.clearsearchclass', function() {
-                            console.log("-----------------------------------------");
-                            console.log(">>> [Debug] 검색 초기화(x) 버튼 클릭됨");
-
-
-                            var $currentCell = $(this).closest('td');
-
-                            var $input = $currentCell.find('input[id^="gs_"], select[id^="gs_"]');
-
-                            if ($input.length === 0) {
-                                $input = $currentCell.prev('td').find('input[id^="gs_"], select[id^="gs_"]');
-                            }
-
-                            var postData = $grid.jqGrid('getGridParam', 'postData');
-
-                            $grid.jqGrid('setGridParam', { postData: postData });
-                        });
-
+                    
                         $grid.data('toolbar_created', true);
                     }
                 });
