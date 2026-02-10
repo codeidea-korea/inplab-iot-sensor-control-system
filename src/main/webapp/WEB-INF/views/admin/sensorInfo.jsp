@@ -18,17 +18,102 @@
         }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
-    <script>
+
+<script>
         $(function () {
-            initGrid($("#jq-grid"), "/adminAdd/sensorInfo", $('#grid-wrapper'), {
-                multiselect: true,
-                multiboxonly: true,
-                custom: {
-                    useFilterToolbar: true,
+            $.when(
+                $.get('/adminAdd/common/code/list', {code_grp_nm: "유지보수상태"}),
+                $.get('/adminAdd/common/code/sensorType'),
+                $.get('/adminAdd/common/code/loggerInfo')
+            ).done(function (maintRes, typeRes, loggerRes) {
+
+            
+                function makeJqGridSelect(list) {
+                    var str = ":전체";
+                    $.each(list, function (i, v) {
+                        str += ";" + v.code + ":" + v.name;
+                    });
+                    return str;
                 }
-            })
+
+                var maintStr = makeJqGridSelect(maintRes[0]);
+                var typeStr = makeJqGridSelect(typeRes[0]);
+                var loggerStr = makeJqGridSelect(loggerRes[0]);
+
+                initGrid($("#jq-grid"), "/adminAdd/sensorInfo", $('#grid-wrapper'), {
+                    multiselect: true,
+                    multiboxonly: true,
+                    custom: {
+                        useFilterToolbar: false 
+                    },
+                    loadComplete: function () {
+                        var $grid = $("#jq-grid");
+                        if ($grid.data('toolbar_created')) return;
+
+                        $grid.jqGrid('setColProp', 'maint_sts_nm', {
+                            stype: 'select',
+                            searchoptions: { value: maintStr, sopt: ['eq'] }
+                        });
+                        $grid.jqGrid('setColProp', 'senstype_nm', {
+                            stype: 'select',
+                            searchoptions: { value: typeStr, sopt: ['eq'] }
+                        });
+                        $grid.jqGrid('setColProp', 'logr_nm', {
+                            stype: 'select',
+                            searchoptions: { value: loggerStr, sopt: ['eq'] }
+                        });
+
+            
+                        $grid.jqGrid('filterToolbar', {
+                            stringResult: false, 
+                            searchOnEnter: true,
+                            defaultSearch: "eq",
+                            ignoreCase: true
+                           
+                        });
+
+                        $('.clearsearchclass').off('click').on('click', function () {
+                            var $this = $(this);
+
+                            var $inputTd = $this.closest('td').prev('td');
+                            var $select = $inputTd.find('select'); 
+                            var $input = $inputTd.find('input');   
+                         
+                            if ($select.length > 0) $select.val('');
+                            if ($input.length > 0) $input.val('');
+
+                            $grid[0].triggerToolbar();
+                        });
+
+                        $(document).off('click.debugX').on('click.debugX', '.clearsearchclass', function() {
+                            console.log("-----------------------------------------");
+                            console.log(">>> [Debug] 검색 초기화(x) 버튼 클릭됨");
+
+
+                            var $currentCell = $(this).closest('td');
+
+                            var $input = $currentCell.find('input[id^="gs_"], select[id^="gs_"]');
+
+                            if ($input.length === 0) {
+                                $input = $currentCell.prev('td').find('input[id^="gs_"], select[id^="gs_"]');
+                            }
+
+                            var postData = $grid.jqGrid('getGridParam', 'postData');
+
+                            $grid.jqGrid('setGridParam', { postData: postData });
+                        });
+
+                        $grid.data('toolbar_created', true);
+                    }
+                });
+
+            }).fail(function() {
+                alert("데이터 로딩 실패");
+            });
+
         });
     </script>
+
     <script>
         var _popupClearData;
         $(function () {

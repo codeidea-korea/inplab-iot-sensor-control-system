@@ -3,32 +3,27 @@
 
 <mapper namespace="com.safeone.dashboard.dao.SensorInfoMapper">
     <sql id="rowSearch">
-        <if test="sens_no != null and sens_no != ''">
-            and MG.sens_no = #{sens_no}
-        </if>
-        <if test="logr_no != null and logr_no != ''">
-            and MG.logr_no = #{logr_no}
-        </if>
-        <if test="senstype_no != null and senstype_no != ''">
-            and MG.senstype_no ilike '%' || #{senstype_no} || '%'
-        </if>
-        <if test="senstype_nm != null and senstype_nm != ''">
-            and MG.senstype_nm ilike '%' || #{senstype_nm} || '%'
-        </if>
         <if test="sens_nm != null and sens_nm != ''">
             and MG.sens_nm ilike '%' || #{sens_nm} || '%'
         </if>
+
         <if test="logr_nm != null and logr_nm != ''">
-            and MG.logr_nm ilike '%' || #{logr_nm} || '%'
+            and MG.logr_no = #{logr_nm}
         </if>
+
+        <if test="senstype_nm != null and senstype_nm != ''">
+            and MG.senstype_no = #{senstype_nm}
+        </if>
+
+        <if test="maint_sts_nm != null and maint_sts_nm != ''">
+            and MG.maint_sts_cd = #{maint_sts_nm}
+        </if>
+
         <if test="sens_no != null and sens_no != ''">
             and MG.sens_no ilike '%' || #{sens_no} || '%'
         </if>
         <if test="sect_no != null">
             and MG.sect_no = #{sect_no}::integer
-        </if>
-        <if test="maint_sts_nm != null and maint_sts_nm != ''">
-            and MG.maint_sts_nm ilike '%' || #{maint_sts_nm} || '%'
         </if>
         <if test="nonrecv_limit_min != null">
             and MG.nonrecv_limit_min = #{nonrecv_limit_min}::integer
@@ -48,6 +43,11 @@
         <if test="inst_ymd_start != null and inst_ymd_start != '' and inst_ymd_end != null and inst_ymd_end != ''">
             and MG.inst_ymd::timestamp between (#{inst_ymd_start}::timestamp) and (#{inst_ymd_end}::timestamp)
         </if>
+
+        <if test="maint_sts_cd != null and maint_sts_cd != ''">
+            and MG.maint_sts_cd = #{maint_sts_cd}
+        </if>
+
         <if test="searchKeyword  != null and searchKeyword  != ''">
             and (select B.sens_tp_nm from tb_sensor_type B where B.senstype_no = MG.senstype_no) LIKE '%' ||
             #{searchKeyword} || '%' OR
@@ -56,7 +56,6 @@
             (select B.code_nm from tb_common_code B where B.code_id = MG.maint_sts_cd) LIKE '%' || #{searchKeyword} ||
             '%'
         </if>
-
     </sql>
 
     <sql id="rowOrder">
