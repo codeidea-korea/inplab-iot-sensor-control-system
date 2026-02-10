@@ -108,9 +108,21 @@
             padding: 1rem;
         }
 
+        #contents {
+            display: flex !important;
+            gap: 2rem; 
+        }
+
         #contents .contents-re {
             padding: 3rem;
-            width: 40rem;
+            width: 90rem !important;
+            flex: 0 0 30rem !important;
+        }
+
+        #contents .contents-re.cctv_area {
+            width: auto !important;
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
         }
 
         #contents .contents-in {
