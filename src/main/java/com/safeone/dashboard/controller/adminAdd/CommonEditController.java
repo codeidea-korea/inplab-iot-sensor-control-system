@@ -191,6 +191,12 @@ public class CommonEditController {
         return VworldGeocoder.getCoordToAddress(param.get("lat").toString(), param.get("lng").toString());
     }
 
+    @ResponseBody
+    @GetMapping("/code/sectList")
+    public List sectList() {
+        return commonCodeEditService.getSectList();
+    }
+
 
 
 }

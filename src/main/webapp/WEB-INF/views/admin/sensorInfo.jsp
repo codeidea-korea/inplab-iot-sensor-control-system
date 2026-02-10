@@ -24,14 +24,19 @@
             $.when(
                 $.get('/adminAdd/common/code/list', {code_grp_nm: "유지보수상태"}),
                 $.get('/adminAdd/common/code/sensorType'),
-                $.get('/adminAdd/common/code/loggerInfo')
-            ).done(function (maintRes, typeRes, loggerRes) {
+                $.get('/adminAdd/common/code/loggerInfo'),
+                $.get('/adminAdd/common/code/sectList')
+            ).done(function (maintRes, typeRes, loggerRes, sectRes) {
 
-            
+             
                 function makeJqGridSelect(list) {
                     var str = ":전체";
                     $.each(list, function (i, v) {
-                        str += ";" + v.code + ":" + v.name;
+                        if (v.sect_no !== undefined) {
+                            str += ";" + v.sect_no + ":" + v.sect_no;
+                        } else {
+                            str += ";" + v.code + ":" + v.name;
+                        }
                     });
                     return str;
                 }
@@ -39,6 +44,7 @@
                 var maintStr = makeJqGridSelect(maintRes[0]);
                 var typeStr = makeJqGridSelect(typeRes[0]);
                 var loggerStr = makeJqGridSelect(loggerRes[0]);
+                var sectStr = makeJqGridSelect(sectRes[0]);
 
                 initGrid($("#jq-grid"), "/adminAdd/sensorInfo", $('#grid-wrapper'), {
                     multiselect: true,
@@ -61,6 +67,11 @@
                         $grid.jqGrid('setColProp', 'logr_nm', {
                             stype: 'select',
                             searchoptions: { value: loggerStr, sopt: ['eq'] }
+                        });
+
+                        $grid.jqGrid('setColProp','sect_no',{
+                            stype: 'select',
+                            searchoptions: { value: sectStr, sopt: ['eq'] }
                         });
 
             

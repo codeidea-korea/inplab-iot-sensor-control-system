@@ -193,4 +193,10 @@
                        WHERE logr_no = #{logr_no})
     </select>
 
+    <select id="selectSectList" resultType="java.util.Map">
+        SELECT DISTINCT sect_no
+        FROM tb_sensor_info
+        WHERE sect_no IS NOT NULL
+        ORDER BY sect_no
+    </select>
 </mapper>

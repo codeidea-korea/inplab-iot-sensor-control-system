@@ -141,5 +141,8 @@ public class CommonCodeEditService {
         return mapper.isSensorByLoggerNoExists(param);
     }
 
+    public List<Map> getSectList() {
+        return mapper.selectSectList(); 
+    }
 
 }
