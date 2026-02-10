@@ -60,7 +60,7 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
         for (InsAdminAddDisplayBoardDto dto : insAdminAddDisplayBoardDtoList) {
             Map<String, Object> map = CommonUtils.dtoToMap(dto);
             String dispbdNo = map.get("dispbd_no") == null ? "" : map.get("dispbd_no").toString();
-            if (dispbdNo.isBlank()) {
+            if (dispbdNo.trim().isEmpty()) {
                 map.put("dispbd_no", getNextDisplayBoardNo());
             }
             Map<String, Object> getMap = new HashMap<>();
@@ -99,7 +99,7 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
 
     private String getNextDisplayBoardNo() {
         String maxNo = displayBoardMapper.getMaxDispbdNo();
-        if (maxNo == null || maxNo.isBlank()) {
+        if (maxNo == null || maxNo.trim().isEmpty()) {
             return "P01";
         }
         String prefix = maxNo.substring(0, 1);
@@ -160,7 +160,7 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
     @Override
     public String getMaxDispbdNo() {
         String maxNo = displayBoardMapper.getMaxDispbdNo();
-        if (maxNo == null || maxNo.isBlank()) {
+        if (maxNo == null || maxNo.trim().isEmpty()) {
             return "P00";
         }
         return maxNo;
