@@ -141,7 +141,12 @@
                        $grid.jqGrid('setColProp','district_nm', {
                            stype: 'select',
                            searchoptions: {value:distStr, sopt:['eq']  }
-                       })
+                       });
+
+                       $grid.jqGrid('setColProp', 'formul_data', {
+                            align: 'right'
+                        });
+                       
 
                        $grid.jqGrid('setColProp', 'maint_sts_cd', {
                            stype: 'select',
