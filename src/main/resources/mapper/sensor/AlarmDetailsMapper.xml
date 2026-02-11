@@ -6,27 +6,55 @@
         <if test="meas_dt != null and meas_dt != ''">
             and tad.meas_dt::TEXT ILIKE '%' || #{meas_dt} || '%'
         </if>
+
+        <if test="sens_nm != null and sens_nm != ''">
+            and tsi.sens_nm ILIKE '%' || #{sens_nm} || '%'
+        </if>
+
+        <if test="sens_chnl_nm != null and sens_chnl_nm != ''">
+            and tsc.sens_chnl_nm ILIKE '%' || #{sens_chnl_nm} || '%'
+        </if>
+
         <if test="district_nm != null and district_nm != ''">
-            and tdi.district_nm ilike '%' || #{district_nm} || '%'
+            and tdi.district_nm ILIKE '%' || #{district_nm} || '%'
         </if>
+
         <if test="sens_chnl_id != null and sens_chnl_id != ''">
-            and tad.sens_chnl_id ilike '%' || #{sens_chnl_id} || '%'
+            and tad.sens_chnl_id ILIKE '%' || #{sens_chnl_id} || '%'
         </if>
+
         <if test="alarm_lvl_cd != null and alarm_lvl_cd != ''">
-            and tad.alarm_lvl_cd ilike '%' || #{alarm_lvl_cd} || '%'
+            and tad.alarm_lvl_cd ILIKE '%' || #{alarm_lvl_cd} || '%'
         </if>
+
         <if test="formul_data != null and formul_data != ''">
-            and tad.formul_data ilike '%' || #{formul_data} || '%'
+            and tad.formul_data::TEXT ILIKE '%' || #{formul_data} || '%'
         </if>
+
+        <if test="standard != null and standard != ''">
+            AND (
+            CASE
+            WHEN tad.alarm_lvl_cd = 'ARM001' THEN CONCAT(tai."1st_lvl_min", ' ~ ', tai."1st_lvl_max")
+            WHEN tad.alarm_lvl_cd = 'ARM002' THEN CONCAT(tai."2nd_lvl_min", ' ~ ', tai."2nd_lvl_max")
+            WHEN tad.alarm_lvl_cd = 'ARM003' THEN CONCAT(tai."3rd_lvl_min", ' ~ ', tai."3rd_lvl_max")
+            WHEN tad.alarm_lvl_cd = 'ARM004' THEN CONCAT(tai."4th_lvl_min", ' ~ ', tai."4th_lvl_max")
+            ELSE ''
+            END
+            ) ILIKE '%' || #{standard} || '%'
+        </if>
+
         <if test="maint_sts_cd != null and maint_sts_cd != ''">
-            and tad.maint_sts_cd ilike '%' || #{maint_sts_cd} || '%'
+            and tad.maint_sts_cd ILIKE '%' || #{maint_sts_cd} || '%'
         </if>
+
         <if test="net_err_yn != null and net_err_yn != ''">
-            and tad.net_err_yn ilike '%' || #{net_err_yn} || '%'
+            and tad.net_err_yn ILIKE '%' || #{net_err_yn} || '%'
         </if>
+
         <if test="sms_cnt != null and sms_cnt != ''">
-            and sms_cnt ilike '%' || #{sms_cnt} || '%'
+            and sms_cnt::TEXT ILIKE '%' || #{sms_cnt} || '%'
         </if>
+
         <if test="start_date != null and start_date != '' and end_date != null and end_date != ''">
             and tad.meas_dt::timestamp between concat(#{start_date},' 00:00:00')::timestamp and concat(#{end_date},' 23:59:59')::timestamp
         </if>
@@ -113,6 +141,8 @@
         left join tb_district_info tdi on tad.district_no = tdi.district_no
         left join tb_sensor_info tsi on tad.sens_no = tsi.sens_no
         left join tb_alarm_info tai on tad.sens_no = tai.sens_no
+        left join tb_sensor_chnl tsc
+            on tad.sens_no = tsc.sens_no and tad.sens_chnl_id = tsc.sens_chnl_id
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>

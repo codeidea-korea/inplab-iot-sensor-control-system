@@ -145,4 +145,8 @@ public class CommonCodeEditService {
         return mapper.selectSectList(); 
     }
 
+    public List<Map> getNetErrList() {
+        return mapper.selectNetErrList();
+    }
+
 }

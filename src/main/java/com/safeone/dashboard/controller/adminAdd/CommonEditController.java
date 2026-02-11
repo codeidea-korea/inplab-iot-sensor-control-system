@@ -197,6 +197,10 @@ public class CommonEditController {
         return commonCodeEditService.getSectList();
     }
 
+    @ResponseBody
+    @GetMapping("/netErrList")
+    public List netErrList() { return commonCodeEditService.getNetErrList();}
+
 
 
 }
