@@ -57,60 +57,24 @@
                     column.align = 'right';
                 }
             });
-            $(window).on('beforeLoadGrid', (e, data) => {
-                const column = data.model.find(col => col.name === 'district_nm');
-                if (column) {
-                    column.hidden = true;
-                }
-            });
 
             const $grid = $("#jq-grid");
-            const $districtSelect = $('#district-select');
+
             initGrid($grid, "/sensor-initial-setting", $('#grid-wrapper'), {
-                    multiselect: true,
-                    multiboxonly: false,
+                multiselect: true,
+                multiboxonly: false,
                 custom: {
                     useFilterToolbar: true,
                     multiSelect: true,
                 }
-                }, () => {
-                const allRowIds = $grid.jqGrid('getDataIDs');
-                allRowIds.forEach(rowId => {
-                    $grid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
-                });
-            }, {
+            },null,{
                 sens_chnl_id: {
                     formatter: function (cellValue, options, rowObject) {
                         return cellValue ? rowObject.sens_nm + '-' + cellValue : rowObject.sens_nm;
                     }
                 }
-            })
-
-            $.ajax({
-                url: '/adminAdd/districtInfo/all',
-                type: 'GET',
-                success: (res) => {
-                    res.forEach((item) => {
-                        $districtSelect.append(
-                            "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
-                        )
-                    })
-                }
             });
 
-            $districtSelect.on('change', (e) => {
-                const value = e.target.value;
-                if (value === '') {
-                    return
-                }
-                $grid.setGridParam({
-                    page: 1,
-                    postData: {
-                        ...$grid.jqGrid('getGridParam', 'postData'),
-                        district_no: value
-                    }
-                }).trigger('reloadGrid', [{page: 1}]);
-            });
 
             $('.save-btn').on('click', function () {
                 // const allRowData = $grid.jqGrid("getRowData");
@@ -155,10 +119,6 @@
             <div class="contents-re">
                 <h3 class="txt">초기치설정관리</h3>
                 <div class="btn-group">
-                    <p class="search-top-label">현장명</p>
-                    <select id="district-select">
-                        <option value="">선택</option>
-                    </select>
                     <a class="save-btn">저장</a>
                 </div>
                 <div id="grid-wrapper" class="contents-in">
