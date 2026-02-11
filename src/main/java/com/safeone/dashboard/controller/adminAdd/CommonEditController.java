@@ -52,6 +52,12 @@ public class CommonEditController {
     }
 
     @ResponseBody
+    @GetMapping("/code/maintcompInfoGetList")
+    public List maintcompInfoGetList2(@RequestParam Map<String, Object> param) {
+        return commonCodeEditService.getMaintcompInfoList(param);
+    }
+
+    @ResponseBody
     @GetMapping("/code/sensorAbbr")
     public List sensorAbbr(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         return commonCodeEditService.getSensorAbbr(param);

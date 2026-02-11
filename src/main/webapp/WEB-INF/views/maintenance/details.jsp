@@ -74,17 +74,94 @@
         }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
-    <script>
+   <script>
         $(function () {
-            const $grid = $("#jq-grid");
-            const path = "/maintenance/details"
-            initGrid($grid, path, $('#grid-wrapper'), {
-                multiselect: true,
-                multiboxonly: false,
-                custom: {
-                    useFilterToolbar: true,
+            $.when(
+                $.get('/adminAdd/common/code/districtInfoList'),
+                $.get('/adminAdd/common/code/list', {code_grp_nm: "유지보수상태"}),
+                $.get('/adminAdd/common/code/maintcompInfoGetList')
+            ).done(function(distRes, maintRes, compRes){
+
+                function makeJqGridSelect(list) {
+                    var str = ":전체";
+                    $.each(list, function (i, v) {
+                        // [수정] 데이터에 'sect_no'가 있으면 그것을 쓰고, 없으면 기존처럼 'code/name'을 씁니다.
+                        if (v.sect_no !== undefined) {
+                            str += ";" + v.sect_no + ":" + v.sect_no;
+                        } else {
+                            str += ";" + v.code + ":" + v.name;
+                        }
+                    });
+                    return str;
                 }
-            }, null, { 
+
+                function makeJqGridSelectByName(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
+                        // Value와 Label 모두 Name을 사용
+                        str += ";" + v.name + ":" + v.name;
+                    });
+                    return str;
+                }
+
+                var distStr = makeJqGridSelectByName(distRes[0]);
+                var maintStr = makeJqGridSelectByName(maintRes[0]);
+                var compStr = makeJqGridSelectByName(compRes[0]);
+
+                const $grid = $("#jq-grid");
+                const path = "/maintenance/details";
+                initGrid($grid, path, $('#grid-wrapper'), {
+                    multiselect: true,
+                    multiboxonly: false,
+                    custom: {
+                        useFilterToolbar: false,
+                    },
+
+                    loadComplete: function () {
+                        var $grid = $("#jq-grid");
+                        if ($grid.data('toolbar_created')) return;
+
+                        $grid.jqGrid('setColProp','district_nm', {
+                            stype: 'select',
+                            searchoptions: {value:distStr, sopt:['eq']  }
+                        })
+
+                        $grid.jqGrid('setColProp', 'code_nm', {
+                            stype: 'select',
+                            searchoptions: { value: maintStr, sopt: ['eq'] }
+                        });
+
+                        $grid.jqGrid('setColProp', 'maint_comp_nm', {
+                            stype: 'select',
+                            searchoptions: { value: compStr, sopt: ['eq'] }
+                        });
+
+                        $grid.jqGrid('filterToolbar', {
+                            stringResult: false,
+                            searchOnEnter: true,
+                            defaultSearch: "eq",
+                            ignoreCase: true
+
+                        });
+
+                        $('.clearsearchclass').off('click').on('click', function () {
+                            var $this = $(this);
+
+                            var $inputTd = $this.closest('td').prev('td');
+                            var $select = $inputTd.find('select');
+                            var $input = $inputTd.find('input');
+
+                            if ($select.length > 0) $select.val('');
+                            if ($input.length > 0) $input.val('');
+
+                            $grid[0].triggerToolbar();
+                        });
+
+
+                        $grid.data('toolbar_created', true);
+                    }
+
+                }, null, {
                     reg_dt: {
                         formatter: function (cellValue) {
                             if (cellValue) {
@@ -93,390 +170,396 @@
                             return '';
                         }
                     },
+
+
+
                     maint_chgr_ph: {
                         formatter: function (cellValue) {
                             return getFormattedPhoneNumber(cellValue);
                         }
                     }
-            });
+                });
 
-            initDistrict();
-            initMaintComp();
+                initDistrict();
+                initMaintComp();
 
-            let imageStorage = {};
+                let imageStorage = {};
 
-            $('.insertBtn').on('click', () => {
-                resetForm();
-                initInsertForm();
-                popFancy('#lay-maintenance-history');
-            });
+                $('.insertBtn').on('click', () => {
+                    resetForm();
+                    initInsertForm();
+                    popFancy('#lay-maintenance-history');
+                });
 
-            $('.modifyBtn').on('click', () => {
-                resetForm();
-                const targetArr = getSelectedCheckData($grid);
-                if (targetArr.length > 1) {
-                    alert('수정할 데이터를 1건만 선택해주세요.');
-                    return;
-                } else if (targetArr.length === 0) {
-                    alert('수정할 데이터를 선택해주세요.');
-                    return;
-                }
-                initModifyForm(targetArr[0]);
-                popFancy('#lay-maintenance-history');
-            });
+                $('.modifyBtn').on('click', () => {
+                    resetForm();
+                    const targetArr = getSelectedCheckData($grid);
+                    if (targetArr.length > 1) {
+                        alert('수정할 데이터를 1건만 선택해주세요.');
+                        return;
+                    } else if (targetArr.length === 0) {
+                        alert('수정할 데이터를 선택해주세요.');
+                        return;
+                    }
+                    initModifyForm(targetArr[0]);
+                    popFancy('#lay-maintenance-history');
+                });
 
-            function initModifyForm(data) {
-                $("#form_sub_title").html('상세정보');
+                function initModifyForm(data) {
+                    $("#form_sub_title").html('상세정보');
 
-                $('#district_no, #sens_nm, #senstype_no').prop('disabled', true);
-                $('.disabled-select').css('background-color', 'lightgray');
+                    $('#district_no, #sens_nm, #senstype_no').prop('disabled', true);
+                    $('.disabled-select').css('background-color', 'lightgray');
 
-                $("#deleteBtn").show();
-                $("#form-submit-btn").hide();
-                $("#form-update-btn").show();
-                $('#district_no').val(data.district_no);
+                    $("#deleteBtn").show();
+                    $("#form-submit-btn").hide();
+                    $("#form-update-btn").show();
+                    $('#district_no').val(data.district_no);
 
-                getAllSensorTypes(() => {
-                    $('#senstype_no').val(data.senstype_no);
-                    getAllSensorInfo(data.district_no, data.senstype_no, () => {
-                        $('#sens_nm').val(data.sens_no);
+                    getAllSensorTypes(() => {
+                        $('#senstype_no').val(data.senstype_no);
+                        getAllSensorInfo(data.district_no, data.senstype_no, () => {
+                            $('#sens_nm').val(data.sens_no);
+                        });
                     });
-                });
 
-                $('#mgnt_no').val(data.mgnt_no);
-                $('#maint_accpt_ymd').val(data.maint_accpt_ymd);
-                $('#maint_str_ymd').val(data.maint_str_ymd);
-                $('#maint_end_ymd').val(data.maint_end_ymd);
-                $('#maint_dtls').val(data.maint_dtls);
-                $('#maint_comp_nm').val(data.maint_comp_nm);
-                $('#maint_chgr_nm').val(data.maint_chgr_nm);
-                $('#maint_chgr_ph').val(data.maint_chgr_ph);
-                $('#maint_rslt_cd').val(data.maint_rslt_cd);
+                    $('#mgnt_no').val(data.mgnt_no);
+                    $('#maint_accpt_ymd').val(data.maint_accpt_ymd);
+                    $('#maint_str_ymd').val(data.maint_str_ymd);
+                    $('#maint_end_ymd').val(data.maint_end_ymd);
+                    $('#maint_dtls').val(data.maint_dtls);
+                    $('#maint_comp_nm').val(data.maint_comp_nm);
+                    $('#maint_chgr_nm').val(data.maint_chgr_nm);
+                    $('#maint_chgr_ph').val(data.maint_chgr_ph);
+                    $('#maint_rslt_cd').val(data.maint_rslt_cd);
 
-                data.maint_pic_path1 && setInitialPhoto(1, data.maint_pic_path1);
-                data.maint_pic_path2 && setInitialPhoto(2, data.maint_pic_path2);
-                data.maint_pic_path3 && setInitialPhoto(3, data.maint_pic_path3);
-                data.maint_pic_path4 && setInitialPhoto(4, data.maint_pic_path4);
-            }
-
-            $('#district_no').on('change', () => {
-                emptySensorInfo();
-                emptySensorTypes()
-                const selectedDistrictNo = $('#district_no').val();
-                if (selectedDistrictNo) {
-                    getAllSensorTypes();
+                    data.maint_pic_path1 && setInitialPhoto(1, data.maint_pic_path1);
+                    data.maint_pic_path2 && setInitialPhoto(2, data.maint_pic_path2);
+                    data.maint_pic_path3 && setInitialPhoto(3, data.maint_pic_path3);
+                    data.maint_pic_path4 && setInitialPhoto(4, data.maint_pic_path4);
                 }
-            })
 
-            function resetForm() {
-                $('#mgnt_no').val('');
-                $('#district_no').val('');
-                $('#sens_nm').val('');
-                $('#senstype_no').val('');
-                $('#maint_accpt_ymd').val('');
-                $('#maint_str_ymd').val('');
-                $('#maint_end_ymd').val('');
-                $('#maint_dtls').val('');
-                $('#maint_comp_nm').val('');
-                $('#maint_chgr_nm').val('');
-                $('#maint_chgr_ph').val('');
-                $('#maint_rslt_cd').val('');
-                emptySensorInfo();
-                emptySensorTypes()
-                imageStorage = {};
-                $('.photo').empty();
-                $('.photo1').append('<span>사진1</span>');
-                $('.photo2').append('<span>사진2</span>');
-                $('.photo3').append('<span>사진3</span>');
-                $('.photo4').append('<span>사진4</span>');
-            }
-
-            function initInsertForm() {
-                $('#district_no, #sens_nm, #senstype_no').prop('disabled', false);
-                $('.disabled-select').css('background-color', 'white');
-
-                $("#form_sub_title").html('신규등록');
-                $("#form-submit-btn").show()
-                $("#deleteBtn").hide();
-                $("#form-update-btn").hide();
-            }
-
-            $('#senstype_no').on('change', () => {
-                emptySensorInfo();
-                const selectedSensTypeNo = $('#senstype_no').find(':selected').val();
-                const selectedDistrictNo = $('#district_no').find(':selected').val();
-                if (selectedSensTypeNo && selectedDistrictNo) {
-                    getAllSensorInfo(selectedDistrictNo, selectedSensTypeNo);
-                }
-            })
-
-            $('.excelBtn').on('click', () => {
-                downloadExcel('maintenance details', $grid, path);
-            });
-
-            function getAllSensorTypes(callback) {
-                $.ajax({
-                    url: '/adminAdd/sensorType/all',
-                    type: 'GET',
-                    success: function (res) {
-                        res.forEach((item) => {
-                            $('#senstype_no').append(
-                                item.sens_abbr ? "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "(" + item.sens_abbr + ")" + "</option>" :
-                                    "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "</option>"
-                            )
-                        })
-                        callback && callback();
+                $('#district_no').on('change', () => {
+                    emptySensorInfo();
+                    emptySensorTypes()
+                    const selectedDistrictNo = $('#district_no').val();
+                    if (selectedDistrictNo) {
+                        getAllSensorTypes();
                     }
-                });
-            }
+                })
 
-            function getAllSensorInfo(districtNo, senstypeNo, callback) {
-                $.ajax({
-                    url: '/adminAdd/sensorInfo/all-by-district-no-and-senstype-no',
-                    type: 'GET',
-                    data: {district_no: districtNo, senstype_no: senstypeNo},
-                    success: function (res) {
-                        res.forEach((item) => {
-                            $('#sens_nm').append(
-                                "<option data-senstypeno=" + item.senstype_no + " value='" + item.sens_no + "'>" + item.sens_nm + "</option>"
-                            )
-                        })
-                        callback && callback();
-                    },
-                });
-            }
+                function resetForm() {
+                    $('#mgnt_no').val('');
+                    $('#district_no').val('');
+                    $('#sens_nm').val('');
+                    $('#senstype_no').val('');
+                    $('#maint_accpt_ymd').val('');
+                    $('#maint_str_ymd').val('');
+                    $('#maint_end_ymd').val('');
+                    $('#maint_dtls').val('');
+                    $('#maint_comp_nm').val('');
+                    $('#maint_chgr_nm').val('');
+                    $('#maint_chgr_ph').val('');
+                    $('#maint_rslt_cd').val('');
+                    emptySensorInfo();
+                    emptySensorTypes()
+                    imageStorage = {};
+                    $('.photo').empty();
+                    $('.photo1').append('<span>사진1</span>');
+                    $('.photo2').append('<span>사진2</span>');
+                    $('.photo3').append('<span>사진3</span>');
+                    $('.photo4').append('<span>사진4</span>');
+                }
 
-            function initMaintComp() {
-                $.ajax({
-                    url: '/maintenance/company-management/all',
-                    type: 'GET',
-                    success: function (res) {
-                        res.forEach((item) => {
-                            $('#maint_comp_nm').append(
-                                "<option value='" + item.partner_comp_nm + "'>" + item.partner_comp_nm + "</option>"
-                            )
-                        })
-                    },
-                    error: function () {
-                        alert('알 수 없는 오류가 발생했습니다.');
+                function initInsertForm() {
+                    $('#district_no, #sens_nm, #senstype_no').prop('disabled', false);
+                    $('.disabled-select').css('background-color', 'white');
+
+                    $("#form_sub_title").html('신규등록');
+                    $("#form-submit-btn").show()
+                    $("#deleteBtn").hide();
+                    $("#form-update-btn").hide();
+                }
+
+                $('#senstype_no').on('change', () => {
+                    emptySensorInfo();
+                    const selectedSensTypeNo = $('#senstype_no').find(':selected').val();
+                    const selectedDistrictNo = $('#district_no').find(':selected').val();
+                    if (selectedSensTypeNo && selectedDistrictNo) {
+                        getAllSensorInfo(selectedDistrictNo, selectedSensTypeNo);
                     }
+                })
+
+                $('.excelBtn').on('click', () => {
+                    downloadExcel('maintenance details', $grid, path);
                 });
-            }
 
-            function initDistrict() {
-                $.ajax({
-                    url: '/adminAdd/districtInfo/all',
-                    type: 'GET',
-                    success: function (res) {
-                        res.forEach((item) => {
-                            $('#district_no').append(
-                                "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
-                            )
-                        })
-                    },
-                    error: function () {
-                        alert('알 수 없는 오류가 발생했습니다.');
-                    }
-                });
-            }
-
-            function emptySensorInfo() {
-                $('#sens_nm').empty();
-                $('#sens_nm').append(
-                    "<option value=''>선택</option>"
-                )
-            }
-
-            function emptySensorTypes() {
-                $('#senstype_no').empty();
-                $('#senstype_no').append(
-                    "<option value=''>선택</option>"
-                )
-            }
-
-            $('.photo').on('click', function () {
-                const index = $(this).data('index');
-                $('#fileInput').data('photo-index', index).click();
-            });
-
-            $('#fileInput').on('change', function (event) {
-                const file = event.target.files[0];
-                const index = $(this).data('photo-index');
-
-                if (file) {
-                    const reader = new FileReader();
-
-                    reader.onload = function (e) {
-                        const base64String = e.target.result;
-                        imageStorage[index] = base64String;
-
-                        const photoDiv = $('.photo[data-index="' + index + '"]');
-                        photoDiv.empty();
-                        photoDiv.append('<img src="' + base64String + '" alt="Selected Image">');
-                        photoDiv.append('<button class="delete-btn" data-index="' + index + '">삭제</button>');
-                    };
-
-                    reader.readAsDataURL(file);
-                }
-                $(this).val('');
-            });
-
-            $(document).on('click', '.delete-btn', function (event) {
-                event.stopPropagation();
-                const index = $(this).data('index');
-
-                delete imageStorage[index];
-                const photoDiv = $('.photo[data-index="' + index + '"]');
-                photoDiv.empty();
-                photoDiv.append('<span>사진' + index + '</span>');
-            });
-
-            function setInitialPhoto(index, imageUrl) {
-                const photoDiv = $('.photo[data-index="' + index + '"]');
-                photoDiv.empty();
-                photoDiv.append('<img src="' + imageUrl + '" alt="Initial Image">'); // 기본 이미지 설정
-                photoDiv.append('<button class="delete-btn" data-index="' + index + '">삭제</button>');
-                imageStorage[index] = imageUrl; // 기본 이미지 저장
-            }
-
-            function validate() {
-                if (!$('#district_no').val()) {
-                    alert('현장명을 선택해주세요.');
-                    return false;
-                }
-
-                if (!$('#senstype_no').val()) {
-                    alert('센서타입을 선택해주세요.');
-                    return false;
-                }
-
-                if (!$('#sens_nm').val()) {
-                    alert('센서ID를 선택해주세요.');
-                    return false;
-                }
-
-                if (!$('#maint_accpt_ymd').val()) {
-                    alert('접수일을 입력해주세요.');
-                    return false;
-                }
-
-                /*if (!$('#maint_str_ymd').val()) {
-                    alert('작업시작일을 입력해주세요.');
-                    return false;
-                }
-
-                if (!$('#maint_end_ymd').val()) {
-                    alert('작업종료일을 입력해주세요.');
-                    return false;
-                }*/
-
-                if (!$('#maint_comp_nm').val()) {
-                    alert('작업업체를 선택해주세요.');
-                    return false;
-                }
-
-                if (!$('#maint_chgr_nm').val()) {
-                    alert('작업담당자를 입력해주세요.');
-                    return false;
-                }
-
-                if (!$('#maint_chgr_ph').val()) {
-                    alert('연락처를 입력해주세요.');
-                    return false;
-                }
-
-                if (!$('#maint_rslt_cd').val()) {
-                    alert('작업결과를 선택해주세요.');
-                    return false;
-                }
-                return true;
-            }
-
-            $("#form-submit-btn").on('click', function () {
-                if (!validate()) {
-                    return;
-                }
-
-                $.ajax({
-                    url: '/maintenance/details/add',
-                    type: 'POST',
-                    data: {
-                        district_no: $('#district_no').val(),
-                        sens_no: $('#sens_nm').val(),
-                        maint_accpt_ymd: $('#maint_accpt_ymd').val().replaceAll('-', ''),
-                        maint_str_ymd: $('#maint_str_ymd').val().replaceAll('-', ''),
-                        maint_end_ymd: $('#maint_end_ymd').val().replaceAll('-', ''),
-                        maint_dtls: $('#maint_dtls').val(),
-                        maint_comp_nm: $('#maint_comp_nm').val(),
-                        maint_chgr_nm: $('#maint_chgr_nm').val(),
-                        maint_chgr_ph: $('#maint_chgr_ph').val(),
-                        maint_rslt_cd: $('#maint_rslt_cd').val(),
-                        maint_pic_path1: imageStorage[1] || '',
-                        maint_pic_path2: imageStorage[2] || '',
-                        maint_pic_path3: imageStorage[3] || '',
-                        maint_pic_path4: imageStorage[4] || ''
-                    },
-                    success: function () {
-                        popFancyClose('#lay-maintenance-history');
-                        reloadJqGrid($grid);
-                    },
-                    error: function () {
-                        alert('잘못된 입력입니다. 다시 시도해 주세요.');
-                    }
-                });
-            });
-
-            $("#form-update-btn").on('click', function () {
-                if (!validate()) {
-                    return;
-                }
-
-                $.ajax({
-                    url: '/maintenance/details/mod',
-                    type: 'POST',
-                    data: {
-                        mgnt_no: $('#mgnt_no').val(),
-                        maint_accpt_ymd: $('#maint_accpt_ymd').val().replaceAll('-', ''),
-                        maint_str_ymd: $('#maint_str_ymd').val().replaceAll('-', ''),
-                        maint_end_ymd: $('#maint_end_ymd').val().replaceAll('-', ''),
-                        maint_dtls: $('#maint_dtls').val(),
-                        maint_comp_nm: $('#maint_comp_nm').val(),
-                        maint_chgr_nm: $('#maint_chgr_nm').val(),
-                        maint_chgr_ph: $('#maint_chgr_ph').val(),
-                        maint_rslt_cd: $('#maint_rslt_cd').val(),
-                        maint_pic_path1: imageStorage[1] || '',
-                        maint_pic_path2: imageStorage[2] || '',
-                        maint_pic_path3: imageStorage[3] || '',
-                        maint_pic_path4: imageStorage[4] || ''
-                    },
-                    success: function () {
-                        popFancyClose('#lay-maintenance-history');
-                        reloadJqGrid($grid);
-                    },
-                    error: function () {
-                        alert('잘못된 입력입니다. 다시 시도해 주세요.');
-                    }
-                });
-            });
-
-            $('#deleteBtn').on('click', () => {
-                confirm('삭제하시겠습니까?', () => {
+                function getAllSensorTypes(callback) {
                     $.ajax({
-                        url: '/maintenance/details/del',
+                        url: '/adminAdd/sensorType/all',
+                        type: 'GET',
+                        success: function (res) {
+                            res.forEach((item) => {
+                                $('#senstype_no').append(
+                                    item.sens_abbr ? "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "(" + item.sens_abbr + ")" + "</option>" :
+                                        "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "</option>"
+                                )
+                            })
+                            callback && callback();
+                        }
+                    });
+                }
+
+                function getAllSensorInfo(districtNo, senstypeNo, callback) {
+                    $.ajax({
+                        url: '/adminAdd/sensorInfo/all-by-district-no-and-senstype-no',
+                        type: 'GET',
+                        data: {district_no: districtNo, senstype_no: senstypeNo},
+                        success: function (res) {
+                            res.forEach((item) => {
+                                $('#sens_nm').append(
+                                    "<option data-senstypeno=" + item.senstype_no + " value='" + item.sens_no + "'>" + item.sens_nm + "</option>"
+                                )
+                            })
+                            callback && callback();
+                        },
+                    });
+                }
+
+                function initMaintComp() {
+                    $.ajax({
+                        url: '/maintenance/company-management/all',
+                        type: 'GET',
+                        success: function (res) {
+                            res.forEach((item) => {
+                                $('#maint_comp_nm').append(
+                                    "<option value='" + item.partner_comp_nm + "'>" + item.partner_comp_nm + "</option>"
+                                )
+                            })
+                        },
+                        error: function () {
+                            alert('알 수 없는 오류가 발생했습니다.');
+                        }
+                    });
+                }
+
+                function initDistrict() {
+                    $.ajax({
+                        url: '/adminAdd/districtInfo/all',
+                        type: 'GET',
+                        success: function (res) {
+                            res.forEach((item) => {
+                                $('#district_no').append(
+                                    "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
+                                )
+                            })
+                        },
+                        error: function () {
+                            alert('알 수 없는 오류가 발생했습니다.');
+                        }
+                    });
+                }
+
+                function emptySensorInfo() {
+                    $('#sens_nm').empty();
+                    $('#sens_nm').append(
+                        "<option value=''>선택</option>"
+                    )
+                }
+
+                function emptySensorTypes() {
+                    $('#senstype_no').empty();
+                    $('#senstype_no').append(
+                        "<option value=''>선택</option>"
+                    )
+                }
+
+                $('.photo').on('click', function () {
+                    const index = $(this).data('index');
+                    $('#fileInput').data('photo-index', index).click();
+                });
+
+                $('#fileInput').on('change', function (event) {
+                    const file = event.target.files[0];
+                    const index = $(this).data('photo-index');
+
+                    if (file) {
+                        const reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            const base64String = e.target.result;
+                            imageStorage[index] = base64String;
+
+                            const photoDiv = $('.photo[data-index="' + index + '"]');
+                            photoDiv.empty();
+                            photoDiv.append('<img src="' + base64String + '" alt="Selected Image">');
+                            photoDiv.append('<button class="delete-btn" data-index="' + index + '">삭제</button>');
+                        };
+
+                        reader.readAsDataURL(file);
+                    }
+                    $(this).val('');
+                });
+
+                $(document).on('click', '.delete-btn', function (event) {
+                    event.stopPropagation();
+                    const index = $(this).data('index');
+
+                    delete imageStorage[index];
+                    const photoDiv = $('.photo[data-index="' + index + '"]');
+                    photoDiv.empty();
+                    photoDiv.append('<span>사진' + index + '</span>');
+                });
+
+                function setInitialPhoto(index, imageUrl) {
+                    const photoDiv = $('.photo[data-index="' + index + '"]');
+                    photoDiv.empty();
+                    photoDiv.append('<img src="' + imageUrl + '" alt="Initial Image">'); // 기본 이미지 설정
+                    photoDiv.append('<button class="delete-btn" data-index="' + index + '">삭제</button>');
+                    imageStorage[index] = imageUrl; // 기본 이미지 저장
+                }
+
+                function validate() {
+                    if (!$('#district_no').val()) {
+                        alert('현장명을 선택해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#senstype_no').val()) {
+                        alert('센서타입을 선택해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#sens_nm').val()) {
+                        alert('센서ID를 선택해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#maint_accpt_ymd').val()) {
+                        alert('접수일을 입력해주세요.');
+                        return false;
+                    }
+
+                    /*if (!$('#maint_str_ymd').val()) {
+                        alert('작업시작일을 입력해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#maint_end_ymd').val()) {
+                        alert('작업종료일을 입력해주세요.');
+                        return false;
+                    }*/
+
+                    if (!$('#maint_comp_nm').val()) {
+                        alert('작업업체를 선택해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#maint_chgr_nm').val()) {
+                        alert('작업담당자를 입력해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#maint_chgr_ph').val()) {
+                        alert('연락처를 입력해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#maint_rslt_cd').val()) {
+                        alert('작업결과를 선택해주세요.');
+                        return false;
+                    }
+                    return true;
+                }
+
+                $("#form-submit-btn").on('click', function () {
+                    if (!validate()) {
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '/maintenance/details/add',
                         type: 'POST',
                         data: {
-                            mgnt_no: $('#mgnt_no').val()
+                            district_no: $('#district_no').val(),
+                            sens_no: $('#sens_nm').val(),
+                            maint_accpt_ymd: $('#maint_accpt_ymd').val().replaceAll('-', ''),
+                            maint_str_ymd: $('#maint_str_ymd').val().replaceAll('-', ''),
+                            maint_end_ymd: $('#maint_end_ymd').val().replaceAll('-', ''),
+                            maint_dtls: $('#maint_dtls').val(),
+                            maint_comp_nm: $('#maint_comp_nm').val(),
+                            maint_chgr_nm: $('#maint_chgr_nm').val(),
+                            maint_chgr_ph: $('#maint_chgr_ph').val(),
+                            maint_rslt_cd: $('#maint_rslt_cd').val(),
+                            maint_pic_path1: imageStorage[1] || '',
+                            maint_pic_path2: imageStorage[2] || '',
+                            maint_pic_path3: imageStorage[3] || '',
+                            maint_pic_path4: imageStorage[4] || ''
                         },
-                        success: function (_res) {
+                        success: function () {
                             popFancyClose('#lay-maintenance-history');
                             reloadJqGrid($grid);
                         },
-                        error: function (_err) {
-                            alert('삭제에 실패했습니다. 다시 시도해 주세요.');
+                        error: function () {
+                            alert('잘못된 입력입니다. 다시 시도해 주세요.');
                         }
                     });
-                })
-            });
+                });
+
+                $("#form-update-btn").on('click', function () {
+                    if (!validate()) {
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '/maintenance/details/mod',
+                        type: 'POST',
+                        data: {
+                            mgnt_no: $('#mgnt_no').val(),
+                            maint_accpt_ymd: $('#maint_accpt_ymd').val().replaceAll('-', ''),
+                            maint_str_ymd: $('#maint_str_ymd').val().replaceAll('-', ''),
+                            maint_end_ymd: $('#maint_end_ymd').val().replaceAll('-', ''),
+                            maint_dtls: $('#maint_dtls').val(),
+                            maint_comp_nm: $('#maint_comp_nm').val(),
+                            maint_chgr_nm: $('#maint_chgr_nm').val(),
+                            maint_chgr_ph: $('#maint_chgr_ph').val(),
+                            maint_rslt_cd: $('#maint_rslt_cd').val(),
+                            maint_pic_path1: imageStorage[1] || '',
+                            maint_pic_path2: imageStorage[2] || '',
+                            maint_pic_path3: imageStorage[3] || '',
+                            maint_pic_path4: imageStorage[4] || ''
+                        },
+                        success: function () {
+                            popFancyClose('#lay-maintenance-history');
+                            reloadJqGrid($grid);
+                        },
+                        error: function () {
+                            alert('잘못된 입력입니다. 다시 시도해 주세요.');
+                        }
+                    });
+                });
+
+                $('#deleteBtn').on('click', () => {
+                    confirm('삭제하시겠습니까?', () => {
+                        $.ajax({
+                            url: '/maintenance/details/del',
+                            type: 'POST',
+                            data: {
+                                mgnt_no: $('#mgnt_no').val()
+                            },
+                            success: function (_res) {
+                                popFancyClose('#lay-maintenance-history');
+                                reloadJqGrid($grid);
+                            },
+                            error: function (_err) {
+                                alert('삭제에 실패했습니다. 다시 시도해 주세요.');
+                            }
+                        });
+                    })
+                });
+
+
+            })
 
         });
         function getFormattedPhoneNumber(phoneNumber) {
