@@ -354,34 +354,108 @@
 
             const $leftGrid = $("#left-jq-grid");
             const leftPath = "/measure-details"
-            initGrid($leftGrid, leftPath, $('#left-grid-wrapper'), {
-                multiselect: true,
-                multiboxonly: false,
-                custom: {
-                    useFilterToolbar: true,
-                }
-            }, () => {
-                const allRowIds = $leftGrid.jqGrid('getDataIDs');
-                allRowIds.forEach(rowId => {
-                    $leftGrid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
-                });
-            }, {
-                maint_sts_cd: {
-                    formatter: (cellValue, _options, _rowObject) => {
-                        let value = '';
-                        if (cellValue === 'MTN001') {
-                            value = '정상';
-                        } else if (cellValue === 'MTN002') {
-                            value = '망실';
-                        } else if (cellValue === 'MTN003') {
-                            value = '점검';
-                        } else if (cellValue === 'MTN004') {
-                            value = '철거';
+
+            $.when(
+                $.get('/adminAdd/common/code/sensorType'),
+                $.get('/adminAdd/common/code/sectList')
+            ).done(function(typeRes, sectRes){
+
+                function makeJqGridSelect(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
+                        if(v.sect_no !== undefined){
+                            str += ";" + v.sect_no + ":" + v.sect_no;
                         }
-                        return value
-                    }
+                    });
+                    return str;
                 }
-            }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"})
+
+                function makeJqGridSelectByName(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
+
+                        str += ";" + v.name + ":" + v.name;
+                    });
+                    return str;
+                }
+
+
+                var typeStr = makeJqGridSelectByName(typeRes[0]);
+                var sectStr = makeJqGridSelect(sectRes[0]);
+
+                initGrid($leftGrid, leftPath, $('#left-grid-wrapper'), {
+                    multiselect: true,
+                    multiboxonly: false,
+                    custom: {
+                        useFilterToolbar: false,
+                    },
+                    loadComplete : function(){
+                        var $grid = $(this);
+                        if ($grid.data('toolbar_created')) return;
+
+
+
+                        $grid.jqGrid('setColProp', 'sens_tp_nm', {
+                            stype: 'select',
+                            searchoptions: { value: typeStr, sopt: ['eq'] }
+                        });
+
+                        $grid.jqGrid('setColProp','sect_no',{
+                            stype: 'select',
+                            searchoptions: { value: sectStr, sopt: ['eq'] }
+                        });
+
+                        $grid.jqGrid('filterToolbar', {
+                            stringResult: false,
+                            searchOnEnter: true,
+                            defaultSearch: "eq",
+                            ignoreCase: true
+
+                        });
+
+                        $('.clearsearchclass').off('click').on('click', function () {
+                            var $this = $(this);
+
+                            var $inputTd = $this.closest('td').prev('td');
+                            var $select = $inputTd.find('select');
+                            var $input = $inputTd.find('input');
+
+                            if ($select.length > 0) $select.val('');
+                            if ($input.length > 0) $input.val('');
+
+                            $grid[0].triggerToolbar();
+                        });
+
+                        $grid.data('toolbar_created', true);
+                    }
+                }, () => {
+                    const allRowIds = $leftGrid.jqGrid('getDataIDs');
+                    allRowIds.forEach(rowId => {
+                        $leftGrid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
+                    });
+                }, {
+                    maint_sts_cd: {
+                        formatter: (cellValue, _options, _rowObject) => {
+                            let value = '';
+                            if (cellValue === 'MTN001') {
+                                value = '정상';
+                            } else if (cellValue === 'MTN002') {
+                                value = '망실';
+                            } else if (cellValue === 'MTN003') {
+                                value = '점검';
+                            } else if (cellValue === 'MTN004') {
+                                value = '철거';
+                            }
+                            return value
+                        }
+                    }
+                }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"})
+            })
+
+
+
+
+
 
             const $rightGrid = $("#right-jq-grid");
             const rightPath = "/measure-details-data"
