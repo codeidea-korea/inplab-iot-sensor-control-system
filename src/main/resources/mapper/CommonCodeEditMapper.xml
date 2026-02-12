@@ -114,6 +114,11 @@
         ORDER BY senstype_no
     </select>
 
+    <select id="selectAralmLvlList" resultType="java.util.Map">
+        SELECT DISTINCT alarm_lvl_nm as name
+        FROM tb_sms_receiver
+    </select>
+
     <select id="selectSensorAbbr" parameterType="java.util.Map" resultType="java.util.Map">
         SELECT sens_abbr, sens_chnl_cnt
         FROM tb_sensor_type

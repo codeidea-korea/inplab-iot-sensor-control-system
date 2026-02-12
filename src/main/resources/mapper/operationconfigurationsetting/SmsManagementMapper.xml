@@ -18,6 +18,9 @@
         <if test="sms_autosnd_yn != null and sms_autosnd_yn != ''">
             and tsr.sms_autosnd_yn ilike '%' || #{sms_autosnd_yn} || '%'
         </if>
+        <if test="district_nm != null and district_nm != ''">
+            and tdi.district_nm ilike '%' || #{district_nm} || '%'
+        </if>
     </sql>
 
     <sql id="rowOrder">

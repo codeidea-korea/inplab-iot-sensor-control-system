@@ -85,6 +85,8 @@ public class CommonCodeEditService {
         return mapper.selectSensorTypeSenstypeNo(param);
     }
 
+
+
     public ObjectNode newGenerationKey(Map<String, Object> map) {
         ObjectMapper om = new ObjectMapper();
         ObjectNode on = om.createObjectNode();
@@ -148,5 +150,7 @@ public class CommonCodeEditService {
     public List<Map> getNetErrList() {
         return mapper.selectNetErrList();
     }
+
+    public List<Map> getAlarmLvlList(){ return mapper.selectAralmLvlList();}
 
 }

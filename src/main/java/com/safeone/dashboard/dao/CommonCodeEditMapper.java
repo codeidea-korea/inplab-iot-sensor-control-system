@@ -48,6 +48,8 @@ public interface CommonCodeEditMapper {
 
     List<Map> selectNetErrList();
 
+    List<Map> selectAralmLvlList();
+
     boolean isLoggerNoExists(Map param);
 
     boolean isSensNoExists(Map param);

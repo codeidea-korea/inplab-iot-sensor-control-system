@@ -207,6 +207,10 @@ public class CommonEditController {
     @GetMapping("/netErrList")
     public List netErrList() { return commonCodeEditService.getNetErrList();}
 
+    @ResponseBody
+    @GetMapping("/alarmLvl")
+    public List getAlarmLvl() { return commonCodeEditService.getAlarmLvlList();}
+
 
 
 }

@@ -7,215 +7,288 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
-            const $grid = $("#jq-grid");
-            const path = "/operation-configuration-setting/sms-management";
-            initGrid($grid, path, $('#grid-wrapper'), {
-                multiselect: true,
-                multiboxonly: false,
-                custom: {
-                    useFilterToolbar: true,
-                }
-            }, null, {
-                sms_recv_ph: {
-                    formatter: function (cellValue) {
-                        return getFormattedPhoneNumber(cellValue);
-                    }
-                }
-            });
+            $.when(
+                $.get('/adminAdd/common/code/districtInfoList'),
+                $.get('/adminAdd/common/alarmLvl')
+            ).done(function(distRes, lvlRes) {
 
-            const $partnerSelect = $('#partner_comp_select');
-            const $districtSelect = $('#district_select');
+                function makeJqGridSelectByCode(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
 
-            $.ajax({
-                url: '/api/maintenance-companies/all',
-                type: 'GET',
-                success: (res) => {
-                    res.forEach((item) => {
-                        $partnerSelect.append(
-                            "<option value='" + item.partnerCompId + "'>" + item.partnerCompNm + "</option>"
-                        );
+                        str += ";" + v.code + ":" + v.name;
                     });
+                    return str;
                 }
-            });
 
-            $.ajax({
-                url: '/api/districts/all',
-                type: 'GET',
-                success: (res) => {
-                    res.forEach((item) => {
-                        $districtSelect.append(
-                            "<option value='" + item.districtNo + "'>" + item.districtNm + "</option>"
-                        );
+
+                function makeJqGridSelectByName(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
+
+                        str += ";" + v.name + ":" + v.name;
                     });
+                    return str;
                 }
-            });
 
-            $('.save-btn').on('click', function () {
-                const allRowData = $grid.jqGrid("getRowData");
-                const filteredData = allRowData.filter((item) =>
-                    item.mgnt_no && item.alarm_lvl_nm
-                );
-                $.ajax({
-                    method: 'post',
-                    url: '/operation-configuration-setting/sms-management/mod',
-                    traditional: true,
-                    data: {jsonData: JSON.stringify(filteredData)},
-                    dataType: 'json',
-                    success: function (_res) {
-                        alert('저장되었습니다.')
+                var distStr = makeJqGridSelectByName(distRes[0]);
+                var lvlStr =  makeJqGridSelectByName(lvlRes[0]);
+
+                const $grid = $("#jq-grid");
+                const path = "/operation-configuration-setting/sms-management";
+                initGrid($grid, path, $('#grid-wrapper'), {
+                    multiselect: true,
+                    multiboxonly: false,
+                    custom: {
+                        useFilterToolbar: false,
+                    },
+                    loadComplete : function(){
+                        var $grid = $("#jq-grid");
+                        if ($grid.data('toolbar_created')) return;
+
+
+                        $grid.jqGrid('setColProp', 'district_nm', {
+                            stype: 'select',
+                            searchoptions: { value: distStr, sopt: ['eq'] }
+                        });
+
+                        $grid.jqGrid('setColProp', 'alarm_lvl_nm', {
+                            stype: 'select',
+                            searchoptions: { value: lvlStr, sopt: ['eq'] }
+                        });
+
+
+                        $grid.jqGrid('filterToolbar', {
+                            stringResult: false,
+                            searchOnEnter: true,
+                            defaultSearch: "eq",
+                            ignoreCase: true
+
+                        });
+
+                        $('.clearsearchclass').off('click').on('click', function () {
+                            var $this = $(this);
+
+                            var $inputTd = $this.closest('td').prev('td');
+                            var $select = $inputTd.find('select');
+                            var $input = $inputTd.find('input');
+
+                            if ($select.length > 0) $select.val('');
+                            if ($input.length > 0) $input.val('');
+
+                            $grid[0].triggerToolbar();
+                        });
+
+
+                        $grid.data('toolbar_created', true);
+                    }
+
+                }, null, {
+                    sms_recv_ph: {
+                        formatter: function (cellValue) {
+                            return getFormattedPhoneNumber(cellValue);
+                        }
                     }
                 });
-            });
 
-            $('.insertBtn').on('click', () => {
-                clearForm();
-                initInsertForm();
-                popFancy('#lay-form-write');
-            });
+                const $partnerSelect = $('#partner_comp_select');
+                const $districtSelect = $('#district_select');
 
-            $("#form-submit-btn").on('click', () => {
-                if (!validated()) {
-                    return;
-                }
                 $.ajax({
-                    url: '/api/sms-receivers',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        partnerCompId: $('#partner_comp_select').val(),
-                        smsRecvDept: '',
-                        districtNo: $('#district_select').val(),
-                        smsChgrNm: $('#sms_chgr_nm').val(),
-                        smsRecvPh: $('#sms_recv_ph').val(),
-                        alarmLvlNm: $('#alarm_lvl_nm_select').val(),
-                        smsAutosndYn: $('#sms_autosnd_yn_select').val()
-                    }),
-                    success: function (_res) {
-                        popFancyClose('#lay-form-write');
-                        reloadJqGrid($grid);
+                    url: '/api/maintenance-companies/all',
+                    type: 'GET',
+                    success: (res) => {
+                        res.forEach((item) => {
+                            $partnerSelect.append(
+                                "<option value='" + item.partnerCompId + "'>" + item.partnerCompNm + "</option>"
+                            );
+                        });
                     }
                 });
-            });
 
-            function validated() {
-                if (!$('#partner_comp_select').val()) {
-                    alert('소속 기관을 선택해주세요.');
-                    return false;
-                }
-
-                if (!$('#district_select').val()) {
-                    alert('현장명을 선택해주세요.');
-                    return false;
-                }
-
-                if (!$('#sms_chgr_nm').val()) {
-                    alert('이름을 입력해주세요.');
-                    return false;
-                }
-
-                if (!$('#sms_recv_ph').val()) {
-                    alert('휴대폰 번호를 입력해주세요.');
-                    return false;
-                }
-
-                if (!$('#alarm_lvl_nm_select').val()) {
-                    alert('경보단계를 선택해주세요.');
-                    return false;
-                }
-
-                if (!$('#sms_autosnd_yn_select').val()) {
-                    alert('자동 전송 여부를 선택해주세요.');
-                    return false;
-                }
-
-                return true;
-            }
-
-            function initInsertForm() {
-                $("#form_sub_title").html('신규 등록');
-                $("#deleteBtn").hide()
-                $("#form-update-btn").hide();
-            }
-
-            function clearForm() {
-                $('#partner_comp_select').val('');
-                $('#district_select').val('');
-                $('#sms_chgr_nm').val('');
-                $('#sms_recv_ph').val('');
-                $('#alarm_lvl_nm_select').val('');
-                $('#sms_autosnd_yn_select').val('');
-            }
-
-            $('.modifyBtn').on('click', () => {
-                const targetArr = getSelectedCheckData($grid);
-                if (targetArr.length > 1) {
-                    alert('수정할 데이터를 1건만 선택해주세요.');
-                    return;
-                } else if (targetArr.length === 0) {
-                    alert('수정할 데이터를 선택해주세요.');
-                    return;
-                }
-                clearForm();
-                initModifyForm(targetArr[0]);
-                popFancy('#lay-form-write');
-            });
-
-            function initModifyForm(data) {
-                $("#form_sub_title").html('상세 정보');
-
-                $("#deleteBtn").show();
-                $("#form-submit-btn").hide();
-                $("#form-update-btn").show();
-
-                $('#partner_comp_select').val(data.partner_comp_id);
-                $('#district_select').val(data.district_no);
-                $('#sms_chgr_nm').val(data.sms_chgr_nm);
-                $('#sms_recv_ph').val(data.sms_recv_ph);
-                $('#alarm_lvl_nm_select').val(data.alarm_lvl_nm);
-                $('#sms_autosnd_yn_select').val(data.sms_autosnd_yn);
-            }
-
-            $("#form-update-btn").on('click', () => {
-                if (!validated()) {
-                    return;
-                }
                 $.ajax({
-                    url: '/api/sms-receivers/' + getSelectedCheckData($grid)[0].mgnt_no,
-                    type: 'PUT',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        partnerCompId: $('#partner_comp_select').val(),
-                        smsRecvDept: '',
-                        districtNo: $('#district_select').val(),
-                        smsChgrNm: $('#sms_chgr_nm').val(),
-                        smsRecvPh: $('#sms_recv_ph').val(),
-                        alarmLvlNm: $('#alarm_lvl_nm_select').val(),
-                        smsAutosndYn: $('#sms_autosnd_yn_select').val()
-                    }),
-                    success: function (_res) {
-                        popFancyClose('#lay-form-write');
-                        reloadJqGrid($grid);
+                    url: '/api/districts/all',
+                    type: 'GET',
+                    success: (res) => {
+                        res.forEach((item) => {
+                            $districtSelect.append(
+                                "<option value='" + item.districtNo + "'>" + item.districtNm + "</option>"
+                            );
+                        });
                     }
                 });
-            });
 
-            $('.excelBtn').on('click', () => {
-                downloadExcel('sms receiver', $grid, path);
-            });
-
-            $('#deleteBtn').on('click', () => {
-                confirm('삭제하시겠습니까?', () => {
+                $('.save-btn').on('click', function () {
+                    const allRowData = $grid.jqGrid("getRowData");
+                    const filteredData = allRowData.filter((item) =>
+                        item.mgnt_no && item.alarm_lvl_nm
+                    );
                     $.ajax({
-                        url: '/api/sms-receivers/' + getSelectedCheckData($grid)[0].mgnt_no,
-                        type: 'DELETE',
+                        method: 'post',
+                        url: '/operation-configuration-setting/sms-management/mod',
+                        traditional: true,
+                        data: {jsonData: JSON.stringify(filteredData)},
+                        dataType: 'json',
+                        success: function (_res) {
+                            alert('저장되었습니다.')
+                        }
+                    });
+                });
+
+                $('.insertBtn').on('click', () => {
+                    clearForm();
+                    initInsertForm();
+                    popFancy('#lay-form-write');
+                });
+
+                $("#form-submit-btn").on('click', () => {
+                    if (!validated()) {
+                        return;
+                    }
+                    $.ajax({
+                        url: '/api/sms-receivers',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            partnerCompId: $('#partner_comp_select').val(),
+                            smsRecvDept: '',
+                            districtNo: $('#district_select').val(),
+                            smsChgrNm: $('#sms_chgr_nm').val(),
+                            smsRecvPh: $('#sms_recv_ph').val(),
+                            alarmLvlNm: $('#alarm_lvl_nm_select').val(),
+                            smsAutosndYn: $('#sms_autosnd_yn_select').val()
+                        }),
                         success: function (_res) {
                             popFancyClose('#lay-form-write');
                             reloadJqGrid($grid);
                         }
                     });
-                })
-            });
+                });
+
+                function validated() {
+                    if (!$('#partner_comp_select').val()) {
+                        alert('소속 기관을 선택해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#district_select').val()) {
+                        alert('현장명을 선택해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#sms_chgr_nm').val()) {
+                        alert('이름을 입력해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#sms_recv_ph').val()) {
+                        alert('휴대폰 번호를 입력해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#alarm_lvl_nm_select').val()) {
+                        alert('경보단계를 선택해주세요.');
+                        return false;
+                    }
+
+                    if (!$('#sms_autosnd_yn_select').val()) {
+                        alert('자동 전송 여부를 선택해주세요.');
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                function initInsertForm() {
+                    $("#form_sub_title").html('신규 등록');
+                    $("#deleteBtn").hide()
+                    $("#form-update-btn").hide();
+                }
+
+                function clearForm() {
+                    $('#partner_comp_select').val('');
+                    $('#district_select').val('');
+                    $('#sms_chgr_nm').val('');
+                    $('#sms_recv_ph').val('');
+                    $('#alarm_lvl_nm_select').val('');
+                    $('#sms_autosnd_yn_select').val('');
+                }
+
+                $('.modifyBtn').on('click', () => {
+                    const targetArr = getSelectedCheckData($grid);
+                    if (targetArr.length > 1) {
+                        alert('수정할 데이터를 1건만 선택해주세요.');
+                        return;
+                    } else if (targetArr.length === 0) {
+                        alert('수정할 데이터를 선택해주세요.');
+                        return;
+                    }
+                    clearForm();
+                    initModifyForm(targetArr[0]);
+                    popFancy('#lay-form-write');
+                });
+
+                function initModifyForm(data) {
+                    $("#form_sub_title").html('상세 정보');
+
+                    $("#deleteBtn").show();
+                    $("#form-submit-btn").hide();
+                    $("#form-update-btn").show();
+
+                    $('#partner_comp_select').val(data.partner_comp_id);
+                    $('#district_select').val(data.district_no);
+                    $('#sms_chgr_nm').val(data.sms_chgr_nm);
+                    $('#sms_recv_ph').val(data.sms_recv_ph);
+                    $('#alarm_lvl_nm_select').val(data.alarm_lvl_nm);
+                    $('#sms_autosnd_yn_select').val(data.sms_autosnd_yn);
+                }
+
+                $("#form-update-btn").on('click', () => {
+                    if (!validated()) {
+                        return;
+                    }
+                    $.ajax({
+                        url: '/api/sms-receivers/' + getSelectedCheckData($grid)[0].mgnt_no,
+                        type: 'PUT',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            partnerCompId: $('#partner_comp_select').val(),
+                            smsRecvDept: '',
+                            districtNo: $('#district_select').val(),
+                            smsChgrNm: $('#sms_chgr_nm').val(),
+                            smsRecvPh: $('#sms_recv_ph').val(),
+                            alarmLvlNm: $('#alarm_lvl_nm_select').val(),
+                            smsAutosndYn: $('#sms_autosnd_yn_select').val()
+                        }),
+                        success: function (_res) {
+                            popFancyClose('#lay-form-write');
+                            reloadJqGrid($grid);
+                        }
+                    });
+                });
+
+                $('.excelBtn').on('click', () => {
+                    downloadExcel('sms receiver', $grid, path);
+                });
+
+                $('#deleteBtn').on('click', () => {
+                    confirm('삭제하시겠습니까?', () => {
+                        $.ajax({
+                            url: '/api/sms-receivers/' + getSelectedCheckData($grid)[0].mgnt_no,
+                            type: 'DELETE',
+                            success: function (_res) {
+                                popFancyClose('#lay-form-write');
+                                reloadJqGrid($grid);
+                            }
+                        });
+                    })
+                });
+            })
         });
+
+
+
+
         function getFormattedPhoneNumber(phoneNumber) {
             if (!phoneNumber) return "";
 
