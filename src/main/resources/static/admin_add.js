@@ -49,9 +49,10 @@ const actFormattedData = (data, keyArray) => {
     });
 };
 
-const setFilterControls = (col, index, distinctDistrict, distinctSensType, filters, gridId, distinctPartnerComp) => {
+const setFilterControls = (col, index, distinctDistrict, distinctSensType, filters, gridId, distinctPartnerComp, distinctLogger, distinctSection) => {
     let $cell = $('<th></th>');
 
+   
     if (!col.hidden && index > 0) {
         if (col.name === "district_nm") {
             let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
@@ -99,7 +100,37 @@ const setFilterControls = (col, index, distinctDistrict, distinctSensType, filte
                 }).trigger("reloadGrid");
             });
             $cell.append($select);
-        } else if (col.name === "partner_comp_nm" && distinctPartnerComp && distinctPartnerComp.length > 0) {
+        }else if (col.name === "logr_nm" && distinctLogger && distinctLogger.length > 0) {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            distinctLogger.forEach(function (item) {
+                $select.append('<option value="' + item.logr_nm + '">' + item.logr_nm + '</option>');
+            });
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({ field: colName, op: "eq", data: searchValue });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", { postData: { filters: JSON.stringify(filters) }, search: true, page: 1 }).trigger("reloadGrid");
+            });
+            $cell.append($select);
+        }else if(col.name === "sect_no" && distinctSection && distinctSection.length > 0){
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            distinctSection.forEach(function (item) {
+                $select.append('<option value="' + item.sect_no + '">' + item.sect_no + '</option>');
+            });
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({ field: colName, op: "eq", data: searchValue });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", { postData: { filters: JSON.stringify(filters) }, search: true, page: 1 }).trigger("reloadGrid");
+            });
+            $cell.append($select);
+        }else if (col.name === "partner_comp_nm" && distinctPartnerComp && distinctPartnerComp.length > 0) {
             let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
             distinctPartnerComp.forEach(function (item) {
                 $select.append('<option value="' + item.partner_comp_nm + '">' + item.partner_comp_nm + '</option>');

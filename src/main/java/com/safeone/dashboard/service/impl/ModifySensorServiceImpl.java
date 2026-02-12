@@ -64,6 +64,15 @@ public class ModifySensorServiceImpl implements ModifySensorService {
         an = om.valueToTree(partnerComp);
         on.put("partner_comp", an);
 
+        List<HashMap<String, Object>> logger = modifySensorMapper.getDistinctLogger(map);
+        an = om.valueToTree(logger);
+        on.put("logger", an);
+
+
+        List<HashMap<String, Object>> section = modifySensorMapper.getDistinctSection(map);
+        an = om.valueToTree(section);
+        on.put("section", an);
+
         return on;
     }
 

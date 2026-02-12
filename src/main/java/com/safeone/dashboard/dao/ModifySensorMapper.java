@@ -51,6 +51,14 @@ public class ModifySensorMapper {
     }
 
     public Map<String, Object> getMeasureDetails(Map<String, Object> param) {
-        return sqlSession.selectOne("com.safeone.dashboard.dao.ModifySensorMapper.getMeasureDetails", param);
+        return null;
+    }
+
+    public List<HashMap<String, Object>> getDistinctLogger(Map<String, Object> map) {
+        return sqlSession.selectList("com.safeone.dashboard.dao.ModifySensorMapper.getDistinctLogger", map);
+    }
+
+    public List<HashMap<String, Object>> getDistinctSection(Map<String, Object> map) {
+        return sqlSession.selectList("com.safeone.dashboard.dao.ModifySensorMapper.getDistinctSection", map);
     }
 }

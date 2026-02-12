@@ -435,6 +435,20 @@
         ORDER BY D.partner_comp_nm ASC
     </select>
 
+    <select id="getDistinctLogger" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DISTINCT logr_nm
+        FROM tb_logger_info
+        WHERE logr_nm IS NOT NULL AND logr_nm != ''
+        ORDER BY logr_nm ASC
+    </select>
+
+    <select id="getDistinctSection" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DISTINCT sect_no
+        FROM tb_sensor_info
+        WHERE sect_no IS NOT NULL
+        ORDER BY sect_no ASC
+    </select>
+
     <select id="getSimpleTotalCount" parameterType="java.util.Map" resultType="int">
         select count(tsi.sens_no)
         from tb_sensor_info tsi

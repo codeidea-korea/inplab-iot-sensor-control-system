@@ -291,8 +291,11 @@
             if ($("#jqGrid").closest(".ui-jqgrid-view").find(".ui-search-toolbar").length === 0) {
                 let $thead = $("#jqGrid").closest(".ui-jqgrid-view").find(".ui-jqgrid-htable thead");
                 let $searchRow = $('<tr class="ui-search-toolbar"></tr>');
+
                 let distinctDistrict = [];
                 let distinctSensType = [];
+                let distinctLogger = [];
+                let distinctSection = [];
 
                 // 현재 필터링 조건을 저장할 객체
                 let filters = {
@@ -303,9 +306,11 @@
                 getDistinct().then((res) => {
                     distinctDistrict = res.district;
                     distinctSensType = res.sensor_type;
+                    distinctLogger = res.logger;
+                    distinctSection = res.section;
 
                     $("#jqGrid").jqGrid('getGridParam', 'colModel').forEach(function (col, index) {
-                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "jqGrid");
+                        let $cell = setFilterControls(col, index, distinctDistrict, distinctSensType, filters, "jqGrid", null, distinctLogger, distinctSection);
                         $searchRow.append($cell);
                     });
                     $thead.append($searchRow);
