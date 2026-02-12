@@ -7,13 +7,46 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
+            var compTypeStr = ":전체;0:시공사;1:계측사;2:ALL";
             const $grid = $("#jq-grid");
             const path = "/maintenance/company-management";
             initGrid($grid, path, $('#grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
                 custom: {
-                    useFilterToolbar: true,
+                    useFilterToolbar: false,
+                },
+                loadComplete: function () {
+                    var $grid = $("#jq-grid");
+                    if ($grid.data('toolbar_created')) return;
+
+                    $grid.jqGrid('setColProp', 'partner_type_flag', {
+                        stype: 'select',
+                        searchoptions: { value: compTypeStr, sopt: ['eq'] }
+                    });
+
+                    $grid.jqGrid('filterToolbar', {
+                        stringResult: false,
+                        searchOnEnter: true,
+                        defaultSearch: "eq",
+                        ignoreCase: true
+
+                    });
+
+                    $('.clearsearchclass').off('click').on('click', function () {
+                        var $this = $(this);
+
+                        var $inputTd = $this.closest('td').prev('td');
+                        var $select = $inputTd.find('select');
+                        var $input = $inputTd.find('input');
+
+                        if ($select.length > 0) $select.val('');
+                        if ($input.length > 0) $input.val('');
+
+                        $grid[0].triggerToolbar();
+                    });
+
+                    $grid.data('toolbar_created', true);
                 }
             }, null, {
 

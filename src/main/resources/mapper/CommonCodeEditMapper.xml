@@ -68,6 +68,7 @@
     <select id="selectMaintcompInfoList" parameterType="java.util.Map" resultType="java.util.Map">
         SELECT ak.partner_comp_id as code
         , ak.partner_comp_nm as name
+        , ak.partner_type_flag as type
         FROM tb_maintcomp_info ak
         <where>
             <if test="partner_type_flag != null and partner_type_flag.size() > 0">
