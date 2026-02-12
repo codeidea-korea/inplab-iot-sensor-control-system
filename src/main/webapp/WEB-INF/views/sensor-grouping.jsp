@@ -154,16 +154,71 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
+
+            $.when(
+                $.get('adminAdd/common/code/sensorType')
+            ).done(function(typeRes){
+
+
+                function makeJqGridSelectByName(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
+
+                        str += ";" + v.name + ":" + v.name;
+                    });
+                    return str;
+                }
+
+                var typeStr = makeJqGridSelectByName(typeRes);
+
+
             const $districtSelect = $('#district-select');
 
             const $grid = $("#jq-grid");
             const path = "/sensor-grouping";
+
+
             initGrid($grid, path, $('#grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
                 custom: {
-                    useFilterToolbar: true,
+                    useFilterToolbar: false,
                     multiSelect: true,
+                },
+                loadComplete : function(){
+                    var $grid = $("#jq-grid");
+                    if ($grid.data('toolbar_created')) return;
+
+
+                    $grid.jqGrid('setColProp', 'sens_tp_nm', {
+                        stype: 'select',
+                        searchoptions: { value: typeStr, sopt: ['eq'] }
+                    });
+
+
+                    $grid.jqGrid('filterToolbar', {
+                        stringResult: false,
+                        searchOnEnter: true,
+                        defaultSearch: "eq",
+                        ignoreCase: true
+
+                    });
+
+                    $('.clearsearchclass').off('click').on('click', function () {
+                        var $this = $(this);
+
+                        var $inputTd = $this.closest('td').prev('td');
+                        var $select = $inputTd.find('select');
+                        var $input = $inputTd.find('input');
+
+                        if ($select.length > 0) $select.val('');
+                        if ($input.length > 0) $input.val('');
+
+                        $grid[0].triggerToolbar();
+                    });
+
+
+                    $grid.data('toolbar_created', true);
                 }
             }, null, {
                 maint_sts_cd: {
@@ -558,6 +613,7 @@
                 });
                 return annotations;
             }
+        })
         });
     </script>
 </head>
