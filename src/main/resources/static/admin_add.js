@@ -52,7 +52,7 @@ const actFormattedData = (data, keyArray) => {
 const setFilterControls = (col, index, distinctDistrict, distinctSensType, filters, gridId, distinctPartnerComp, distinctLogger, distinctSection) => {
     let $cell = $('<th></th>');
 
-   
+
     if (!col.hidden && index > 0) {
         if (col.name === "district_nm") {
             let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');

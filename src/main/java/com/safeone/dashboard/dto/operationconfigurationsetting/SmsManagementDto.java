@@ -28,13 +28,13 @@ public class SmsManagementDto implements Serializable {
     @FieldLabel(title = "휴대폰 번호")
     private String sms_recv_ph;
 
-    @FieldLabel(title = "경보단계", type = "selectable")
+    @FieldLabel(title = "경보단계")
     private String alarm_lvl_nm;
 
     @FieldLabel(title = "상태", type = "hidden")
     private String sms_status;
 
-    @FieldLabel(title = "자동 전송 여부", type = "selectable")
+    @FieldLabel(title = "자동 전송 여부")
     private String sms_autosnd_yn;
 
     @FieldLabel(title = "등록일시", type = "hidden")

@@ -15,13 +15,13 @@
                 custom: {
                     useFilterToolbar: true,
                 }
-            }, null, { 
+            }, null, {
                 sms_recv_ph: {
                     formatter: function (cellValue) {
                         return getFormattedPhoneNumber(cellValue);
                     }
                 }
-            }, {alarm_lvl_nm: "1:1차 초과 이상;2:2차 초과 이상;3:3차 초과 이상;4:4차 초과 이상", sms_autosnd_yn: "Y:Y;N:N"});
+            });
 
             const $partnerSelect = $('#partner_comp_select');
             const $districtSelect = $('#district_select');
