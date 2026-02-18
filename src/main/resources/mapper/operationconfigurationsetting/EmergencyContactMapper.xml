@@ -7,7 +7,7 @@
             and tdi.district_nm ilike '%' || #{district_nm} || '%'
         </if>
         <if test="partner_comp_nm != null and partner_comp_nm != ''">
-            and tmi.partner_comp_nm ilike '%' || #{partner_comp_nm} || '%'
+            and tec.partner_comp_id ilike '%' || #{partner_comp_nm} || '%'
         </if>
         <if test="emerg_chgr_nm != null and emerg_chgr_nm != ''">
             and tec.emerg_chgr_nm ilike '%' || #{emerg_chgr_nm} || '%'
@@ -36,7 +36,7 @@
                     tdi.district_nm ${sord}
                 </when>
                 <when test="'partner_comp_nm' == sidx and sidx != ''">
-                    tmi.partner_comp_nm ${sord}
+                    tec.partner_comp_id ${sord}
                 </when>
                 <when test="'emerg_chgr_nm' == sidx and sidx != ''">
                     tec.emerg_chgr_nm ${sord}
@@ -72,11 +72,10 @@
         , tec.e_mail
         , tec.reg_dt
         , tec.mod_dt
-        , tmi.partner_comp_id
-        , tmi.partner_comp_nm
+        , tec.partner_comp_id
+        , tec.partner_comp_id as partner_comp_nm
         FROM tb_emerg_contact tec
         LEFT JOIN tb_district_info tdi ON tec.district_no = tdi.district_no
-        left join tb_maintcomp_info tmi on tec.partner_comp_id = tmi.partner_comp_id
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -89,7 +88,6 @@
         SELECT count(tec.mgnt_no)
         FROM tb_emerg_contact tec
         LEFT JOIN tb_district_info tdi ON tec.district_no = tdi.district_no
-        left join tb_maintcomp_info tmi on tec.partner_comp_id = tmi.partner_comp_id
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>
@@ -103,8 +101,8 @@
                , #{partner_comp_id}
                , #{emerg_chgr_nm}
                , #{emerg_chgr_role}
-               , #{emerg_recv_ph}
-               , #{emerg_tel}
+               , regexp_replace(COALESCE(#{emerg_recv_ph}::text, ''), '[^0-9]', '', 'g')
+               , regexp_replace(COALESCE(#{emerg_tel}::text, ''), '[^0-9]', '', 'g')
                , #{e_mail}
                , now()
                , now())
@@ -116,8 +114,8 @@
           , partner_comp_id = #{partner_comp_id}
           , emerg_chgr_nm   = #{emerg_chgr_nm}
           , emerg_chgr_role = #{emerg_chgr_role}
-          , emerg_recv_ph   = #{emerg_recv_ph}
-          , emerg_tel       = #{emerg_tel}
+          , emerg_recv_ph   = regexp_replace(COALESCE(#{emerg_recv_ph}::text, ''), '[^0-9]', '', 'g')
+          , emerg_tel       = regexp_replace(COALESCE(#{emerg_tel}::text, ''), '[^0-9]', '', 'g')
           , e_mail          = #{e_mail}
           , mod_dt          = now()
         WHERE mgnt_no = #{mgnt_no}

@@ -31,18 +31,6 @@
                 })
 
             $.ajax({
-                url: '/maintenance/company-management/all',
-                type: 'GET',
-                success: function (res) {
-                    res.forEach((item) => {
-                        $('#partner_comp').append(
-                            "<option value='" + item.partner_comp_id + "'>" + item.partner_comp_nm + "</option>"
-                        )
-                    })
-                }
-            });
-
-            $.ajax({
                 url: '/adminAdd/districtInfo/all',
                 type: 'GET',
                 success: function (res) {
@@ -105,13 +93,21 @@
 
             function resetForm() {
                 $('#district_no').val('');
-                $('#partner_comp_nm').val('');
+                $('#partner_comp').val('');
                 $('#emerg_chgr_nm').val('');
                 $('#emerg_chgr_role').val('');
                 $('#emerg_recv_ph').val('');
                 $('#emerg_tel').val('');
                 $('#e_mail').val('');
             }
+
+            // Phone number: digits only
+            function normalizePhoneNumber(value) {
+                return (value || '').toString().replace(/[^0-9]/g, '');
+            }
+            $('#emerg_recv_ph, #emerg_tel').on('input', function () {
+                this.value = normalizePhoneNumber(this.value).slice(0, 11);
+            });
 
             $("#form-submit-btn").on('click', () => {
                 if (validated() === false) {
@@ -125,16 +121,19 @@
                         partner_comp_id: $('#partner_comp').val(),
                         emerg_chgr_nm: $('#emerg_chgr_nm').val(),
                         emerg_chgr_role: $('#emerg_chgr_role').val(),
-                        emerg_recv_ph: $('#emerg_recv_ph').val(),
-                        emerg_tel: $('#emerg_tel').val(),
+                        emerg_recv_ph: normalizePhoneNumber($('#emerg_recv_ph').val()),
+                        emerg_tel: normalizePhoneNumber($('#emerg_tel').val()),
                         e_mail: $('#e_mail').val()
                     },
                     success: function (_res) {
                         popFancyClose('#lay-form-write');
                         reloadJqGrid($grid);
                     },
-                    error: function (err) {
-                        console.log(err)
+                    error: function (xhr) {
+                        const message = (xhr.responseJSON && xhr.responseJSON.message)
+                            ? xhr.responseJSON.message
+                            : '저장에 실패했습니다.';
+                        alert(message);
                     }
                 });
             });
@@ -152,16 +151,19 @@
                         partner_comp_id: $('#partner_comp').val(),
                         emerg_chgr_nm: $('#emerg_chgr_nm').val(),
                         emerg_chgr_role: $('#emerg_chgr_role').val(),
-                        emerg_recv_ph: $('#emerg_recv_ph').val(),
-                        emerg_tel: $('#emerg_tel').val(),
+                        emerg_recv_ph: normalizePhoneNumber($('#emerg_recv_ph').val()),
+                        emerg_tel: normalizePhoneNumber($('#emerg_tel').val()),
                         e_mail: $('#e_mail').val()
                     },
                     success: function (_res) {
                         popFancyClose('#lay-form-write');
                         reloadJqGrid($grid);
                     },
-                    error: function (_err) {
-                        alert('수정에 실패했습니다. 다시 시도해 주세요.');
+                    error: function (xhr) {
+                        const message = (xhr.responseJSON && xhr.responseJSON.message)
+                            ? xhr.responseJSON.message
+                            : '수정에 실패했습니다.';
+                        alert(message);
                     }
                 });
             });
@@ -173,7 +175,7 @@
                 }
 
                 if ($('#partner_comp').val() === '') {
-                    alert('소속 기관을 선택해 주세요.');
+                    alert('소속 기관을 입력해 주세요.');
                     return false;
                 }
 
@@ -294,9 +296,7 @@
                     </tr>
                     <tr>
                         <th class="required_th">소속 기관</th>
-                        <td><select id="partner_comp" class="required">
-                            <option value="">선택</option>
-                        </select></td>
+                        <td><input type="text" id="partner_comp" class="required" placeholder="소속 기관 입력"/></td>
                     </tr>
                     <tr>
                         <th class="required_th">이름</th>
@@ -309,7 +309,8 @@
                     </tr>
                     <tr>
                         <th class="required_th">연락처 1</th>
-                        <td><input type="text" id="emerg_recv_ph" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력) class="required"/>
+                        <td><input type="text" id="emerg_recv_ph" class="required"
+                                   placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력)"/>
                         </td>
                     </tr>
                     <tr>

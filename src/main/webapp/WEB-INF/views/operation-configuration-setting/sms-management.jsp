@@ -90,21 +90,7 @@
                         }
                     }
                 });
-
-                const $partnerSelect = $('#partner_comp_select');
                 const $districtSelect = $('#district_select');
-
-                $.ajax({
-                    url: '/api/maintenance-companies/all',
-                    type: 'GET',
-                    success: (res) => {
-                        res.forEach((item) => {
-                            $partnerSelect.append(
-                                "<option value='" + item.partnerCompId + "'>" + item.partnerCompNm + "</option>"
-                            );
-                        });
-                    }
-                });
 
                 $.ajax({
                     url: '/api/districts/all',
@@ -150,24 +136,30 @@
                         type: 'POST',
                         contentType: 'application/json',
                         data: JSON.stringify({
-                            partnerCompId: $('#partner_comp_select').val(),
-                            smsRecvDept: '',
+                            partnerCompId: '',
+                            smsRecvDept: $('#sms_recv_dept').val(),
                             districtNo: $('#district_select').val(),
                             smsChgrNm: $('#sms_chgr_nm').val(),
-                            smsRecvPh: $('#sms_recv_ph').val(),
+                            smsRecvPh: normalizePhoneNumber($('#sms_recv_ph').val()),
                             alarmLvlNm: $('#alarm_lvl_nm_select').val(),
                             smsAutosndYn: $('#sms_autosnd_yn_select').val()
                         }),
                         success: function (_res) {
                             popFancyClose('#lay-form-write');
                             reloadJqGrid($grid);
+                        },
+                        error: function (xhr) {
+                            const message = (xhr.responseJSON && xhr.responseJSON.message)
+                                ? xhr.responseJSON.message
+                                : '저장에 실패했습니다.';
+                            alert(message);
                         }
                     });
                 });
 
                 function validated() {
-                    if (!$('#partner_comp_select').val()) {
-                        alert('소속 기관을 선택해주세요.');
+                    if (!$('#sms_recv_dept').val()) {
+                        alert('소속 기관을 입력해주세요.');
                         return false;
                     }
 
@@ -206,7 +198,7 @@
                 }
 
                 function clearForm() {
-                    $('#partner_comp_select').val('');
+                    $('#sms_recv_dept').val('');
                     $('#district_select').val('');
                     $('#sms_chgr_nm').val('');
                     $('#sms_recv_ph').val('');
@@ -235,10 +227,10 @@
                     $("#form-submit-btn").hide();
                     $("#form-update-btn").show();
 
-                    $('#partner_comp_select').val(data.partner_comp_id);
+                    $('#sms_recv_dept').val(data.partner_comp_nm);
                     $('#district_select').val(data.district_no);
                     $('#sms_chgr_nm').val(data.sms_chgr_nm);
-                    $('#sms_recv_ph').val(data.sms_recv_ph);
+                    $('#sms_recv_ph').val(normalizePhoneNumber(data.sms_recv_ph));
                     $('#alarm_lvl_nm_select').val(data.alarm_lvl_nm);
                     $('#sms_autosnd_yn_select').val(data.sms_autosnd_yn);
                 }
@@ -252,20 +244,36 @@
                         type: 'PUT',
                         contentType: 'application/json',
                         data: JSON.stringify({
-                            partnerCompId: $('#partner_comp_select').val(),
-                            smsRecvDept: '',
+                            partnerCompId: '',
+                            smsRecvDept: $('#sms_recv_dept').val(),
                             districtNo: $('#district_select').val(),
                             smsChgrNm: $('#sms_chgr_nm').val(),
-                            smsRecvPh: $('#sms_recv_ph').val(),
+                            smsRecvPh: normalizePhoneNumber($('#sms_recv_ph').val()),
                             alarmLvlNm: $('#alarm_lvl_nm_select').val(),
                             smsAutosndYn: $('#sms_autosnd_yn_select').val()
                         }),
                         success: function (_res) {
                             popFancyClose('#lay-form-write');
                             reloadJqGrid($grid);
+                        },
+                        error: function (xhr) {
+                            const message = (xhr.responseJSON && xhr.responseJSON.message)
+                                ? xhr.responseJSON.message
+                                : '수정에 실패했습니다.';
+                            alert(message);
                         }
                     });
                 });
+
+                // Phone number: digits only
+                const $smsRecvPh = $('#sms_recv_ph');
+                $smsRecvPh.on('input', function () {
+                    this.value = normalizePhoneNumber(this.value).slice(0, 11);
+                });
+
+                function normalizePhoneNumber(value) {
+                    return (value || '').toString().replace(/[^0-9]/g, '');
+                }
 
                 $('.excelBtn').on('click', () => {
                     downloadExcel('sms receiver', $grid, path);
@@ -357,9 +365,7 @@
                     <tr>
                         <th class="required_th">소속 기관</th>
                         <td>
-                            <select id="partner_comp_select">
-                                <option value="">선택</option>
-                            </select>
+                            <input type="text" id="sms_recv_dept" class="required" placeholder="소속 기관 입력"/>
                         </td>
                     </tr>
                     <tr>

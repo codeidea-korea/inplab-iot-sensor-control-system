@@ -4,7 +4,7 @@
 <mapper namespace="com.safeone.dashboard.dao.operationconfigurationsetting.SmsManagementMapper">
     <sql id="rowSearch">
         <if test="partner_comp_nm != null and partner_comp_nm != ''">
-            and tmi.partner_comp_nm ilike '%' || #{partner_comp_nm} || '%'
+            and tsr.sms_recv_dept ilike '%' || #{partner_comp_nm} || '%'
         </if>
         <if test="sms_chgr_nm != null and sms_chgr_nm != ''">
             and tsr.sms_chgr_nm ilike '%' || #{sms_chgr_nm} || '%'
@@ -60,11 +60,10 @@
         , tsr.sms_autosnd_yn
         , tsr.reg_dt
         , tsr.mod_dt
-        , tmi.partner_comp_id
-        , tmi.partner_comp_nm
+        , tsr.partner_comp_id
+        , tsr.sms_recv_dept as partner_comp_nm
         FROM tb_sms_receiver tsr
         LEFT OUTER JOIN tb_district_info tdi ON tsr.district_no = tdi.district_no
-        left join tb_maintcomp_info tmi on tsr.partner_comp_id = tmi.partner_comp_id
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
@@ -77,7 +76,6 @@
         SELECT count(tsr.mgnt_no)
         FROM tb_sms_receiver tsr
         LEFT OUTER JOIN tb_district_info tdi ON tsr.district_no = tdi.district_no
-        left join tb_maintcomp_info tmi on tsr.partner_comp_id = tmi.partner_comp_id
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>
@@ -97,12 +95,13 @@
                , #{district_no}
                , #{sms_recv_dept}
                , #{sms_chgr_nm}
-               , #{sms_recv_ph}
+               , regexp_replace(COALESCE(#{sms_recv_ph}::text, ''), '[^0-9]', '', 'g')
                , #{alarm_lvl_nm}
                , #{sms_autosnd_yn}
                , now()
                , now()
                , #{partner_comp_id})
+        ON CONFLICT (district_no, sms_recv_ph) DO NOTHING
     </insert>
 
     <update id="updateSmsManagement" parameterType="java.util.Map">

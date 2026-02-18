@@ -16,7 +16,7 @@
                , #{districtNo}
                , #{smsRecvDept}
                , #{smsChgrNm}
-               , #{smsRecvPh}
+               , regexp_replace(#{smsRecvPh}, '[^0-9]', '', 'g')
                , #{alarmLvlNm}
                , #{smsAutosndYn}
                , now()
@@ -27,7 +27,7 @@
         update tb_sms_receiver
         set partner_comp_id = #{partnerCompId}
           , sms_recv_dept   = #{smsRecvDept}
-          , sms_recv_ph     = #{smsRecvPh}
+          , sms_recv_ph     = regexp_replace(#{smsRecvPh}, '[^0-9]', '', 'g')
           , district_no     = #{districtNo}
           , sms_chgr_nm     = #{smsChgrNm}
           , alarm_lvl_nm    = #{alarmLvlNm}

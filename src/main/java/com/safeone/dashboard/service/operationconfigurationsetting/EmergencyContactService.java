@@ -6,6 +6,7 @@ import com.safeone.dashboard.dto.operationconfigurationsetting.EmergencyContactD
 import com.safeone.dashboard.service.JqGridService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,13 +39,18 @@ public class EmergencyContactService implements JqGridService<EmergencyContactDt
 
         Map<String, Object> smsParam = new HashMap<>();
         smsParam.put("district_no", param.get("district_no"));
-        smsParam.put("partner_comp_id", param.get("partner_comp_id"));
-        smsParam.put("sms_recv_dept", "-");
+        smsParam.put("partner_comp_id", "");
+        smsParam.put("sms_recv_dept", param.get("partner_comp_id"));
         smsParam.put("sms_chgr_nm", param.get("emerg_chgr_nm"));
         smsParam.put("sms_recv_ph", param.get("emerg_recv_ph"));
         smsParam.put("alarm_lvl_nm", "1차 초과 이상");
         smsParam.put("sms_autosnd_yn", "N");
-        smsManagementMapper.insertSmsManagement(smsParam);
+        try {
+            smsManagementMapper.insertSmsManagement(smsParam);
+        } catch (DuplicateKeyException e) {
+            // Already exists (district_no + phone). Ignore to avoid rolling back emergency contact insert.
+            log.info("SMS receiver already exists. district_no={}, sms_recv_ph={}", smsParam.get("district_no"), smsParam.get("sms_recv_ph"));
+        }
 
         return true;
     }
