@@ -455,10 +455,11 @@
     </select>
 
     <select id="getAll" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.MeasureDetailsDto">
-        SELECT tsinfo.sens_nm,
-               tsinfo.sect_no,
-               tsinfo.maint_sts_cd,
+        SELECT MAX(tsinfo.sens_nm)    AS sens_nm,
+               MAX(tsinfo.sect_no)    AS sect_no,
+               MAX(tsinfo.maint_sts_cd) AS maint_sts_cd,
                MAX(tst.sens_tp_nm)    AS sens_tp_nm,
+               MAX(tst.senstype_no)   AS senstype_no,
                MAX(tsi.formul_data)   AS formul_data,
                MIN(tsi.init_apply_dt) AS init_apply_dt,
                MAX(tsi.last_apply_dt) AS last_apply_dt,
@@ -471,7 +472,8 @@
                  LEFT JOIN tb_sensor_type tst
                            ON tsinfo.senstype_no = tst.senstype_no
         WHERE 1 = 1
-          and tst.senstype_no = #{senstype_no}
+          and COALESCE(NULLIF(ltrim(tst.senstype_no, '0'), ''), '0')
+            = COALESCE(NULLIF(ltrim(#{senstype_no}, '0'), ''), '0')
           and tsinfo.sens_no IN (SELECT tlim.sens_no
                                  FROM tb_logr_idx_map tlim
                                  WHERE tlim.logr_no IN (SELECT tli.logr_no
@@ -479,7 +481,7 @@
                                                                  LEFT JOIN tb_logger_info tli
                                                                            ON tli.district_no = tdi.district_no
                                                         WHERE tdi.district_no = #{district_no}))
-        GROUP BY tsinfo.sens_nm, tsinfo.sens_no;
+        GROUP BY tsinfo.sens_no;
     </select>
 
     <select id="selectTotalCountByStatus" resultType="com.safeone.dashboard.dto.SensorCountDto">
