@@ -241,7 +241,7 @@
                                 "locale": "ko",
                                 dateFormat: "Y-m-d",
                                 onClose: function (selectedDates, dateStr, instance) {
-                                    reloadJqGrid();
+                                    reloadJqGrid($grid);
                                 }
                             });
                         }
@@ -415,8 +415,13 @@
 
             $('.ui-jqgrid-htable .clearsearchclass').off().on('click', function () {
                 $(this).closest('tr').find('select option:eq(0)').prop('selected', true);
+                var postData = $grid.jqGrid('getGridParam', 'postData');
+                $.each(_names, function (idx, name) {
+                    delete postData[name]; // 사용되었던 컬럼명 검색 조건 모두 삭제
+                });
+                $grid.jqGrid('setGridParam', { postData: postData, page: 1, search: false });
                 $grid[0].clearToolbar();
-                reloadJqGrid();
+                reloadJqGrid($grid);
             });
 
             $grid.jqGrid('navGrid', ".jqGridPager", {

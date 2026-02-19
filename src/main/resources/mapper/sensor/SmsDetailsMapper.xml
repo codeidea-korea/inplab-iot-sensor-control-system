@@ -30,6 +30,25 @@
         <!--        <if test="reg_date_start != null and reg_date_start != '' and reg_date_end != null and reg_date_end != ''">-->
         <!--            and MG.reg_date::timestamp between concat(#{reg_date_start},' 00:00:00')::timestamp and concat(#{reg_date_end},' 23:59:59')::timestamp-->
         <!--        </if>-->
+        <if test="sms_trans_dt != null and sms_trans_dt != ''">
+            and tsd.sms_trans_dt::text ilike '%' || #{sms_trans_dt} || '%'
+        </if>
+
+        <if test="sms_recv_chgr != null and sms_recv_chgr != ''">
+            and tsd.sms_recv_chgr ilike '%' || #{sms_recv_chgr} || '%'
+        </if>
+
+        <if test="sms_recv_ph != null and sms_recv_ph != ''">
+            and tsd.sms_recv_ph ilike '%' || #{sms_recv_ph} || '%'
+        </if>
+
+        <if test="district_nm != null and district_nm != ''">
+            and tsd.district_nm ilike '%' || #{district_nm} || '%'
+        </if>
+
+        <if test="sms_rslt_yn != null and sms_rslt_yn != ''">
+            and tsd.sms_rslt_yn ilike '%' || #{sms_rslt_yn} || '%'
+        </if>
     </sql>
 
     <sql id="rowOrder">
@@ -167,6 +186,7 @@
         , tsd.district_nm
         , tsd.sms_rslt_yn
         , tsd.sms_msg_dtls
+        , tsd.sms_recv_dept
         FROM tb_sms_details tsd
         WHERE 1=1
         <include refid="rowSearch"/>
@@ -176,12 +196,19 @@
         </if>
     </select>
 
-    <select id="getTotalCount" parameterType="java.util.Map" resultType="int">
+    <!--<select id="getTotalCount" parameterType="java.util.Map" resultType="int">
         SELECT count(tad.mgnt_no)
         FROM tb_alarm_details tad
         left join tb_district_info tdi on tad.district_no = tdi.district_no
         left join tb_sensor_info tsi on tad.sens_no = tsi.sens_no
         left join tb_alarm_info tai on tad.sens_no = tai.sens_no
+        WHERE 1=1
+        <include refid="rowSearch"/>
+    </select> -->
+
+    <select id="getTotalCount" parameterType="java.util.Map" resultType="int">
+        SELECT count(tsd.mgnt_no)
+        FROM tb_sms_details tsd
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>
