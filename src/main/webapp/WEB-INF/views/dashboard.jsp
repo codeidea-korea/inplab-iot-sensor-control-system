@@ -605,6 +605,7 @@
 
         const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
         let sensNo = ''
+        let chartRequestSeq = 0;
 
         $(document).on('overlay_click', function (e, data) {
             if ($("#wrap").hasClass("editMode"))
@@ -633,34 +634,57 @@
             });
             const startDateTime = $('#start-date').val();
             const endDateTime = $('#end-date').val();
-            chartDataArray.length = 0; // 배열 초기화
+            const requestSeq = ++chartRequestSeq;
             const requests = checkedData.map((item) => {
                 return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
             });
-            Promise.all(requests).then((d) => {
-                updateChart(chartDataArray.filter((item) => item.length > 0));
-            }).catch((e) => {
-                console.log('error', e);
-                alert('조회할 수 없는 데이터 입니다.');
+            Promise.all(requests).then((results) => {
+                if (requestSeq !== chartRequestSeq) {
+                    return;
+                }
+
+                const hasError = results.some((item) => !item.ok);
+                const validResults = results
+                    .map((item) => item.data)
+                    .filter((item) => Array.isArray(item) && item.length > 0);
+                chartDataArray.length = 0;
+                validResults.forEach((item) => chartDataArray.push(item));
+
+                if (validResults.length === 0) {
+                    myChart.data.labels = [];
+                    myChart.data.datasets = [];
+                    myChart.update();
+                    alert(hasError ? '조회할 수 없는 데이터 입니다.' : '조회 결과가 존재하지 않습니다.');
+                    return;
+                }
+
+                try {
+                    updateChart(validResults);
+                } catch (e) {
+                    console.error('chart render error', e);
+                    alert('조회 데이터 표시 중 오류가 발생했습니다.');
+                }
             });
         });
 
         function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 $.ajax({
                     url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
                     type: 'GET',
                     success: function (res) {
-                        if (res) {
+                        if (Array.isArray(res)) {
                             if (res[0]) {
-                                res[0].sens_chnl_id = sensChnlId // 채널 ID 추가
+                                res[0].sens_chnl_id = sensChnlId; // 채널 ID 추가
                             }
-                            chartDataArray.push(res); // 데이터 추가
+                            resolve({ok: true, data: res});
+                            return;
                         }
-                        resolve();
+                        resolve({ok: true, data: []});
                     },
-                    error: function () {
-                        reject();
+                    error: function (xhr) {
+                        console.warn('chart query failed', sens_no, sensChnlId, xhr.status);
+                        resolve({ok: false, data: []});
                     }
                 });
             });
@@ -730,49 +754,75 @@
         }
 
         function updateChart(data) {
-            myChart.resetZoom();
+            if (typeof myChart.resetZoom === 'function') {
+                try {
+                    myChart.resetZoom();
+                } catch (e) {
+                    console.warn('resetZoom skipped', e);
+                }
+            }
 
             const allLabels = [];
-            const labelIndexMap = {};
+            const labelSet = new Set();
+            const labelIndexMap = new Map();
             const datasets = [];
 
             data.forEach((item) => {
+                if (!Array.isArray(item) || item.length === 0 || !item[0]) {
+                    return;
+                }
                 item.forEach((subItem) => {
-                    const date = new Date(subItem.meas_dt);
-                    const label = date.getFullYear() + '-' +
-                        (date.getMonth() + 1).toString().padStart(2, '0') + ' ' +
-                        date.getDate().toString().padStart(2, '0') + ' ' +
-                        date.getHours().toString().padStart(2, '0') + ':' +
-                        date.getMinutes().toString().padStart(2, '0') + ':' +
-                        date.getSeconds().toString().padStart(2, '0');
-
-                    if (!labelIndexMap[label]) {
-                        labelIndexMap[label] = allLabels.length; // 인덱스 저장
-                        allLabels.push(label); // 중복 없는 레이블 추가
+                    const ts = new Date(subItem.meas_dt).getTime();
+                    if (Number.isNaN(ts)) {
+                        return;
+                    }
+                    if (!labelSet.has(ts)) {
+                        labelSet.add(ts);
+                        allLabels.push(ts);
                     }
                 });
             });
 
+            allLabels.sort((a, b) => a - b);
+            allLabels.forEach((label, index) => {
+                labelIndexMap.set(label, index);
+            });
+
+            const firstLabel = allLabels[0];
+            const lastLabel = allLabels[allLabels.length - 1];
+            const diffMs = (firstLabel !== undefined && lastLabel !== undefined) ? (lastLabel - firstLabel) : 0;
+            const diffDays = diffMs / (1000 * 60 * 60 * 24);
+            let dynamicUnit = 'minute';
+            if (diffDays > 120) {
+                dynamicUnit = 'month';
+            } else if (diffDays > 2) {
+                dynamicUnit = 'day';
+            } else if (diffDays > (2 / 24)) {
+                dynamicUnit = 'hour';
+            }
+
             data.forEach((item) => {
+                if (!Array.isArray(item) || item.length === 0 || !item[0]) {
+                    return;
+                }
                 const mappedData = Array(allLabels.length).fill(null); // 모든 값을 null로 초기화
 
                 item.forEach((subItem) => {
-                    const date = new Date(subItem.meas_dt);
-                    const label = date.getFullYear() + '-' +
-                        (date.getMonth() + 1).toString().padStart(2, '0') + ' ' +
-                        date.getDate().toString().padStart(2, '0') + ' ' +
-                        date.getHours().toString().padStart(2, '0') + ':' +
-                        date.getMinutes().toString().padStart(2, '0') + ':' +
-                        date.getSeconds().toString().padStart(2, '0');
-
-                    const labelIndex = labelIndexMap[label];
+                    const ts = new Date(subItem.meas_dt).getTime();
+                    if (Number.isNaN(ts)) {
+                        return;
+                    }
+                    const labelIndex = labelIndexMap.get(ts);
                     if (labelIndex !== undefined) {
-                        mappedData[labelIndex] = subItem.formul_data; // 데이터 매핑
+                        const y = parseFloat(subItem.formul_data);
+                        mappedData[labelIndex] = Number.isNaN(y) ? null : y; // 데이터 매핑
                     }
                 });
 
+                const datasetLabel = (item[0].sens_nm || item[0].sens_no || 'sensor') +
+                    (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : "");
                 datasets.push({
-                    label: item[0].sens_nm + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : ""),
+                    label: datasetLabel,
                     data: mappedData,
                     borderColor: getRandomHSL(),
                     fill: false,
@@ -783,29 +833,32 @@
 
             myChart.data.labels = allLabels;
             myChart.data.datasets = datasets;
-            myChart.options.plugins.annotation.annotations = {};
+            const currentPlugins = myChart.options.plugins || {};
+            myChart.options.plugins = Object.assign({}, currentPlugins, {
+                annotation: false
+            });
 
-            data.forEach((item) => {
-                const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
-                const maxLevels = [
-                    parseFloat(item[0].lvl_max1),
-                    parseFloat(item[0].lvl_max2),
-                    parseFloat(item[0].lvl_max3),
-                    parseFloat(item[0].lvl_max4)
-                ];
+            const currentScales = myChart.options.scales || {};
+            const currentXScale = currentScales.x || {};
+            const nextTime = Object.assign({}, currentXScale.time || {});
+            const nextTicks = Object.assign({}, currentXScale.ticks || {});
 
-                maxLevels.forEach((maxLevel, index) => {
-                    if (!isNaN(maxLevel)) {
-                        myChart.options.plugins.annotation.annotations['line' + item[0].sens_no + '_' + index] = {
-                            type: 'line',
-                            yMin: maxLevel,
-                            yMax: maxLevel,
-                            borderColor: colors[index],
-                            borderWidth: 1.5,
-                            borderDash: [5, 4]
-                        };
-                    }
-                });
+            nextTime.unit = dynamicUnit;
+            if (nextTime.stepSize !== undefined) {
+                delete nextTime.stepSize;
+            }
+
+            nextTicks.autoSkip = true;
+            nextTicks.maxTicksLimit = 25;
+            if (nextTicks.stepSize !== undefined) {
+                delete nextTicks.stepSize;
+            }
+
+            myChart.options.scales = Object.assign({}, currentScales, {
+                x: Object.assign({}, currentXScale, {
+                    time: nextTime,
+                    ticks: nextTicks
+                })
             });
             myChart.update();
         }

@@ -2,6 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.safeone.dashboard.dao.SensorGroupingMapper">
+    <sql id="timeBucketExpr">
+        <choose>
+            <when test="selectType != null and selectType == 'hour'">
+                DATE_TRUNC('hour', tmd.meas_dt)
+            </when>
+            <when test="selectType != null and selectType == 'day'">
+                DATE_TRUNC('day', tmd.meas_dt)
+            </when>
+            <when test="selectType != null and selectType == 'week'">
+                DATE_TRUNC('week', tmd.meas_dt)
+            </when>
+            <when test="selectType != null and selectType == 'month'">
+                DATE_TRUNC('month', tmd.meas_dt)
+            </when>
+            <otherwise>
+                DATE_TRUNC('minute', tmd.meas_dt)
+            </otherwise>
+        </choose>
+    </sql>
+
     <sql id="rowSearch">
         <if test="sens_nm != null and sens_nm != ''">
             and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'
@@ -123,7 +143,7 @@
             max(tmd.formul_data - coalesce(tsit.formul_data, 0)) as max_data,
             min(tmd.formul_data - coalesce(tsit.formul_data, 0)) as min_data,
             AVG(tmd.formul_data - COALESCE(tsit.formul_data, 0)) AS formul_data,
-            DATE_TRUNC('${selectType}', tmd.meas_dt) AS meas_dt,
+            <include refid="timeBucketExpr"/> AS meas_dt,
             MAX(tai."1st_lvl_max") AS lvl_max1,
             MAX(tai."2nd_lvl_max") AS lvl_max2,
             MAX(tai."3rd_lvl_max") AS lvl_max3,
@@ -131,6 +151,7 @@
         FROM tb_measure_details tmd
                  LEFT JOIN tb_alarm_info tai
                            ON tai.sens_no = tmd.sens_no
+                               AND tai.sens_chnl_id = tmd.sens_chnl_id
                  LEFT JOIN tb_sensor_info tsi
                            ON tmd.sens_no = tsi.sens_no
                  LEFT JOIN tb_sensor_init tsit
@@ -138,9 +159,10 @@
                                AND tsit.sens_chnl_id = tmd.sens_chnl_id
         WHERE tmd.meas_dt BETWEEN (#{start_date_time}::timestamp) AND (#{end_date_time}::timestamp)
           AND tmd.sens_no = #{sens_no}
-          AND tmd.sens_chnl_id = #{sens_chnl_id}
-          AND tai.sens_chnl_id = #{sens_chnl_id}
-        GROUP BY tmd.sens_no, tsi.sens_nm, tmd.sens_chnl_id, tsi.senstype_no, DATE_TRUNC('${selectType}', tmd.meas_dt)
-        ORDER BY DATE_TRUNC('${selectType}', tmd.meas_dt)
+        <if test="sens_chnl_id != null and sens_chnl_id != ''">
+            AND tmd.sens_chnl_id = #{sens_chnl_id}
+        </if>
+        GROUP BY tmd.sens_no, tsi.sens_nm, tmd.sens_chnl_id, tsi.senstype_no, <include refid="timeBucketExpr"/>
+        ORDER BY <include refid="timeBucketExpr"/>
     </select>
 </mapper>

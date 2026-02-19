@@ -336,8 +336,20 @@
                         return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id, selectType);
                     });
 
-                    Promise.all(requests).then((d) => {
-                        updateChart(chartDataArray.filter((item) => item.length > 0));
+                    Promise.all(requests).then((responses) => {
+                        const hasError = responses.some((item) => !item.ok);
+                        const validData = responses
+                            .map((item) => item.data)
+                            .filter((item) => Array.isArray(item) && item.length > 0);
+
+                        if (validData.length === 0) {
+                            alert(hasError ? '조회할 수 없는 데이터 입니다.' : '조회 결과가 존재하지 않습니다.');
+                            return;
+                        }
+
+                        chartDataArray.length = 0;
+                        validData.forEach((item) => chartDataArray.push(item));
+                        updateChart(chartDataArray);
                     }).catch((e) => {
                         console.log('error', e);
                         alert('조회할 수 없는 데이터 입니다.');
@@ -346,21 +358,22 @@
             });
 
             function getChartData(sens_no, startDateTime, endDateTime, sensChnlId, selectType) {
-                return new Promise((resolve, reject) => {
+                return new Promise((resolve) => {
                     $.ajax({
                         url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + "&selectType=" + selectType,
                         type: 'GET',
                         success: function (res) {
-                            if (res) {
+                            if (Array.isArray(res)) {
                                 if (res[0]) {
                                     res[0].sens_chnl_id = sensChnlId // 채널 ID 추가
                                 }
-                                chartDataArray.push(res); // 데이터 추가
+                                resolve({ok: true, data: res});
+                                return;
                             }
-                            resolve();
+                            resolve({ok: true, data: []});
                         },
                         error: function () {
-                            reject();
+                            resolve({ok: false, data: []});
                         }
                     });
                 });
