@@ -2,19 +2,13 @@ package com.safeone.dashboard.config.component;
 
 import com.safeone.dashboard.dto.RawData;
 import com.safeone.dashboard.service.CalcService;
+import com.safeone.dashboard.service.DataMeasureService;
 import com.safeone.dashboard.service.ZoneService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -42,6 +36,9 @@ public class LoggerCollectComponent {
 
     @Autowired
     private ZoneService zoneService;
+
+    @Autowired
+    private DataMeasureService dataMeasureService;
 
     @Value("${dev}")
     private String devFlag;
@@ -171,15 +168,20 @@ public class LoggerCollectComponent {
         try {
             // 정규표현식으로 데이터 파싱
             List<RawData> parser_data = parserData(data);
-            ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-            RestTemplate restTemplate = new RestTemplate(requestFactory);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
             for (RawData parserData : parser_data) {
                 String key = parserData.getCollect_date() + parserData.getZone_id() + parserData.getSensor_id();
                 if (!processedData.contains(key)) {
-                    HttpEntity<RawData> entity = new HttpEntity<>(parserData, headers);
-                    ResponseEntity<String> response = restTemplate.postForEntity(send_url + send_index, entity, String.class);
+                    // tb_measure_details에 직접 insert (tb_logr_idx_map 매핑 사용)
+                    Map<String, String> map = new HashMap<>();
+                    map.put("zone_id", parserData.getZone_id());
+                    map.put("sensor_id", parserData.getSensor_id());
+                    map.put("collect_date", parserData.getCollect_date());
+                    map.put("raw_value", parserData.getRaw_value());
+                    map.put("calc_value", parserData.getCalc_value());
+                    map.put("real_value", parserData.getReal_value());
+                    map.put("num", parserData.getNum());
+                    map.put("type", parserData.getType());
+                    dataMeasureService.create(map);
                     // 간헐적으로 _cdate가 겹쳐서 insert 빠지는 상황 보안
                     Thread.sleep(100);
                     processedData.add(key);

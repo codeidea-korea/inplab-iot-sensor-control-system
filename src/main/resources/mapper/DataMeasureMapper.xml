@@ -210,23 +210,20 @@
     </delete>
     
     <insert id="insertDataMeasure" parameterType="java.util.Map">
-        INSERT INTO tb_dps_basecollection ( real_value
-								          , collect_date
-								          , calc_value
-								          , raw_value
-								          , sensor_id
-								          , num
-								          , zone_id
-								          , type
-								        ) VALUES (
-								        	#{real_value}
-								        	, #{collect_date}
-								        	, #{calc_value}
-								        	, #{raw_value}
-								        	, #{sensor_id}
-								        	, #{num}
-								        	, #{zone_id}
-								        	, #{type}
-								        )
+        INSERT INTO tb_measure_details (mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data, net_err_yn, net_err_cnt, alarm_lvl_cd, reg_dt)
+        SELECT
+            (SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_measure_details),
+            b.sens_no,
+            b.sens_chnl_id,
+            TO_TIMESTAMP(#{collect_date}, 'YYYY/MM/DD HH24:MI:SS'),
+            CAST(#{raw_value} AS DOUBLE PRECISION),
+            CAST(COALESCE(#{calc_value}, #{real_value}) AS DOUBLE PRECISION),
+            'N',
+            0,
+            'ARM009',
+            now()
+        FROM tb_logr_idx_map b
+        WHERE #{zone_id} = ltrim(b.logr_no, 'L0')
+        AND #{sensor_id} = b.logr_idx_no
     </insert>
 </mapper>
