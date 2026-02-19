@@ -49,8 +49,8 @@
             resultType="com.safeone.dashboard.dto.MeasureDetailsDto">
         select * from (
         SELECT tsinfo.sens_nm,
-        tsinfo.sect_no,
-        tsinfo.maint_sts_cd,
+        MAX(tsinfo.sect_no) AS sect_no,
+        MAX(tsinfo.maint_sts_cd) AS maint_sts_cd,
         MAX(tst.sens_tp_nm) AS sens_tp_nm,
         MAX(tst.senstype_no) AS senstype_no,
         MAX(tsi.formul_data) AS formul_data,
@@ -85,8 +85,8 @@
 
     <select id="selectListTotal" parameterType="java.util.Map" resultType="int">
         select count(A.*) from (SELECT tsinfo.sens_nm,
-        tsinfo.sect_no,
-        tsinfo.maint_sts_cd,
+        MAX(tsinfo.sect_no) AS sect_no,
+        MAX(tsinfo.maint_sts_cd) AS maint_sts_cd,
         MAX(tst.sens_tp_nm) AS sens_tp_nm,
         MAX(tst.senstype_no) AS senstype_no,
         MAX(tsi.formul_data) AS formul_data,
