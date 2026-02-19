@@ -61,6 +61,13 @@
         <!--                </otherwise>-->
         <!--            </choose>-->
         <!--        </trim>-->
+        <trim prefix="order by">
+            <choose>
+                <otherwise>
+                    tsd.sms_trans_dt DESC
+                </otherwise>
+            </choose>
+        </trim>
     </sql>
 
     <!--    create table tb_sms_details-->
