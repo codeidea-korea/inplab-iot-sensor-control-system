@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -49,5 +50,13 @@ public class UserManagementService implements JqGridService<UserManagementDto> {
     @Override
     public int delete(Map param) {
         return mapper.deleteUserManagement(param);
+    }
+
+    public int checkDuplicatedId(String usrId) {
+        // 기존 Mapper가 Map 형식을 받도록 되어 있으므로, Map에 담아서 전달합니다.
+        Map<String, Object> param = new HashMap<>();
+        param.put("usr_id", usrId);
+
+        return mapper.selectByUserId(param);
     }
 }

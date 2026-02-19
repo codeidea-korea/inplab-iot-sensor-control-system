@@ -58,6 +58,7 @@
                 $("#form-submit-btn").show();
                 $("#usr_id").attr('readonly', false);
                 $("#usr_nm").attr('readonly', false);
+                $('#idCheckBtn').show();
             }
 
             $('.modifyBtn').on('click', () => {
@@ -82,6 +83,7 @@
                 $("#deleteBtn").show();
                 $("#form-submit-btn").hide();
                 $("#form-update-btn").show();
+                $('#idCheckBtn').hide();
 
                 $("#usr_id").val(data.usr_id);
                 $("#usr_nm").val(data.usr_nm);
@@ -99,6 +101,7 @@
             }
 
             function resetForm() {
+                isIdChecked = false;
                 $('#usr_id').val('');
                 $('#usr_pwd').val('');
                 $('#usr_pwd_confm').val('');
@@ -107,6 +110,45 @@
                 $('#e_mail').val('');
                 $('#usr_flag').val('');
             }
+
+            let isIdChecked = false;
+
+            $('#usr_id').on('input', function(){
+               isIdChecked = false;
+            });
+
+            $('#idCheckBtn').on('click', function(){
+
+                const usrId = $('#usr_id').val().trim();
+
+                if (usrId.length < 8) {
+                    alert('사용자ID는 최소 8자 이상 입력해 주세요.');
+                    $('#usr_id').focus();
+                    return;
+                }
+
+                $.ajax({
+                    url: '/operation-configuration-setting/user-management/check-id',
+                    type: 'POST',
+                    data: {
+                        usr_id: usrId
+                    },
+                    success: function(res){
+                        if(res){
+                            alert('사용 가능한 아이디입니다.');
+                            isIdChecked = true;
+                        } else {
+                            alert('이미 사용중인 ID입니다.');
+                            isIdChecked = false;
+                            $('#usr_id').val('').focus();
+                        }
+                    },
+                    error: function(err){
+                        alert('중복 확인 중 오류가 발생했습니다.');
+                    }
+                });
+
+            });
 
             $("#form-submit-btn").on('click', () => {
                 if (validated(true) === false) {
@@ -171,6 +213,13 @@
                 }
 
                 if (insert) {
+
+                    if (!isIdChecked) {
+                        alert('아이디 중복확인을 진행해 주세요.');
+                        $('#idCheckBtn').focus();
+                        return false;
+                    }
+
                     if (/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]+$/.test($('#usr_pwd').val()) === false) {
                         alert('비밀번호는 영문자, 숫자, 특수문자 최소 1자 이상 입력해 주세요.');
                         return false;
@@ -262,6 +311,41 @@
         .ui-jqgrid tr.jqgrow td {
             text-align: center !important;
         }
+        /* 테이블 셀 안에서 인풋과 버튼을 나란히 배치 */
+        .td-input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 인풋과 버튼 사이 간격 */
+            width: 100%;
+        }
+
+        /* 인풋창이 남은 공간을 꽉 채우도록 설정 */
+        .td-input-wrap > input {
+            flex: 1;
+            width: auto !important; /* 기존 width: 100% 덮어쓰기 */
+        }
+
+        /* 요청하신 버튼 디자인 적용 */
+        .td-input-wrap > a {
+            height: 2.8rem;
+            padding: 0 2rem;
+            background-color: #6975ac; /* 요청하신 색상 */
+            font-weight: 500;
+            font-size: 1.4rem;
+            line-height: 1;
+            color: #fff;
+            border-radius: 99px; /* 둥근 모서리 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+            text-decoration: none;
+        }
+
+        .td-input-wrap > a:hover {
+            background-color: #586499; /* 호버 시 살짝 어둡게 (선택사항) */
+        }
     </style>
 </head>
 
@@ -303,7 +387,12 @@
                     <tbody>
                     <tr>
                         <th class="required_th">사용자ID</th>
-                        <td><input type="text" id="usr_id" placeholder="Ex) 최소 8자 이상" class="required"/></td>
+                        <td>
+                            <div class="td-input-wrap">
+                                <input type="text" id="usr_id" placeholder="Ex) 최소 8자 이상" class="required"/>
+                                <a id="idCheckBtn">중복확인</a>
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <th class="required_th">비밀번호</th>

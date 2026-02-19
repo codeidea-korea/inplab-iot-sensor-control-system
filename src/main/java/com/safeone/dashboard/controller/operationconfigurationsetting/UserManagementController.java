@@ -65,4 +65,12 @@ public class UserManagementController extends JqGridAbstract<UserManagementDto> 
         }
         return userManagementService.update(param);
     }
+
+    @ResponseBody
+    @PostMapping("/check-id")
+    public boolean checkId(HttpServletRequest request, @RequestParam Map<String, Object> param){
+        String usrId = param.get("usr_id").toString();
+        int count = userManagementService.checkDuplicatedId(usrId);
+        return count == 0;
+    }
 }
