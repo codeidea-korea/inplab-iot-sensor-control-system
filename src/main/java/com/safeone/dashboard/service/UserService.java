@@ -59,7 +59,12 @@ public class UserService implements JqGridService<UserDto> {
   }
 
   public UserDto getUserLogin(Map param) {
+    mapper.expireUserIfNeeded(param);
     return mapper.selectUserLogin(param);
+  }
+
+  public String getLoginDenyReason(Map param) {
+    return mapper.selectLoginDenyReason(param);
   }
 
   public boolean updateUserPassword(Map param) {

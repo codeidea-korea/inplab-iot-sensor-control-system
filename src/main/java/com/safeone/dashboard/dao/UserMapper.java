@@ -15,6 +15,8 @@ public interface UserMapper {
     int deleteUser(Map param);
     int isUserName(Map param);
     int isUserIdExists(Map param);
+    int expireUserIfNeeded(Map param);
+    String selectLoginDenyReason(Map param);
     UserDto selectUserLogin(Map param);
     int updatePassword(Map param);
 }

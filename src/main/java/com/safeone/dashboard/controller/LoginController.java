@@ -51,6 +51,7 @@ public class LoginController {
     @RequestMapping(value = "/process", method = RequestMethod.POST)
     public String loginProcess(HttpServletRequest request, HttpServletResponse response, Model model, @RequestParam Map param) {
         String returnPage = "/error";
+        String errorMessage = "아이디 또는 비밀번호를 확인해주세요.";
         Map<String, Object> loginLog = new HashMap<>();
         try {
             HttpSession session = request.getSession();
@@ -60,12 +61,16 @@ public class LoginController {
             try {
                 log.info("Login - " + param);
 
-                UserDto result = userService.getUserLogin(param);
-                loginLog.put("usr_id", result.getUsr_id());
+                String userId = param.get("userId") == null ? "" : param.get("userId").toString();
+                String userPw = param.get("userPw") == null ? "" : param.get("userPw").toString();
+
+                loginLog.put("usr_id", userId);
                 loginLog.put("login_ip", HttpUtils.getRemoteAddr(request));
                 loginLog.put("login_pc_name", getBrowser(request));
                 loginLog.put("status", "N");
-                if (CommonUtils.isMatch(param.get("userPw").toString(), result.getUsr_pwd())) {
+
+                UserDto result = userService.getUserLogin(param);
+                if (result != null && CommonUtils.isMatch(userPw, result.getUsr_pwd())) {
                     result.setUsr_pwd(null);
                     session.setAttribute("login", result);
                     loginLog.put("status", "Y");
@@ -85,6 +90,13 @@ public class LoginController {
 //                        returnPage =  "redirect:/config/vehicle";
 //                    else
 //                        returnPage = "redirect:/dashboard";
+                } else if (result == null) {
+                    String denyReason = userService.getLoginDenyReason(param);
+                    if ("EXPIRED".equals(denyReason)) {
+                        errorMessage = "사용 기간이 만료된 계정입니다.";
+                    } else if ("DISABLED".equals(denyReason)) {
+                        errorMessage = "사용이 중지된 계정입니다.";
+                    }
                 }
             } catch (HttpClientErrorException | HttpServerErrorException ex) {
                 System.out.println(ex.getStatusCode());
@@ -95,6 +107,9 @@ public class LoginController {
             e.printStackTrace();
         }
         loginLogService.create(loginLog);
+        if ("/error".equals(returnPage)) {
+            model.addAttribute("errorMessage", errorMessage);
+        }
         return returnPage;
     }
 

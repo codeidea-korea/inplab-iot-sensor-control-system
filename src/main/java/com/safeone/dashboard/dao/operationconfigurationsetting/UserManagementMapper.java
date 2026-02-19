@@ -8,6 +8,8 @@ import java.util.Map;
 
 @Repository
 public interface UserManagementMapper {
+    int updateExpiredUsersUseYn();
+
     int selectUserManagementListTotal(Map param);
 
     List<UserManagementDto> selectUserManagementList(Map param);

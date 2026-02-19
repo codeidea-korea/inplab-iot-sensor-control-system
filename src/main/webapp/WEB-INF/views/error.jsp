@@ -7,12 +7,17 @@
 </head>
 <body>
 <script>
+    <c:set var="alertMessage" value="${errorMessage}"/>
+    <c:if test="${empty alertMessage}">
+        <c:set var="alertMessage" value="로그인을 실패하였습니다."/>
+    </c:if>
+
     try {
         localStorage.setItem('loginSuccess', false);
         localStorage.setItem('autoLogin', false);
     } catch(e) { }
 
-    alert('로그인을 실패하였습니다.');
+    alert('<c:out value="${alertMessage}"/>');
     location.href= '/';
 </script>
 </body>

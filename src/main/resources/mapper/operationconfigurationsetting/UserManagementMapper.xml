@@ -57,6 +57,20 @@
         </trim>
     </sql>
 
+    <update id="updateExpiredUsersUseYn">
+        UPDATE tb_user_info
+        SET use_yn = 'N',
+            mod_dt = now()
+        WHERE COALESCE(use_yn, 'Y') = 'Y'
+          AND (
+            CASE
+                WHEN length(regexp_replace(COALESCE(usr_exp_ymd, ''), '[^0-9]', '', 'g')) = 8
+                    THEN to_date(regexp_replace(usr_exp_ymd, '[^0-9]', '', 'g'), 'YYYYMMDD')
+                ELSE NULL
+            END
+          ) &lt; current_date
+    </update>
+
     <select id="selectUserManagementList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.operationconfigurationsetting.UserManagementDto">
         SELECT tui.usr_id
@@ -114,6 +128,16 @@
         usr_org = #{usr_org},
         usr_flag = #{usr_flag},
         usr_exp_ymd = #{usr_exp_ymd},
+        use_yn = CASE
+                     WHEN (
+                         CASE
+                             WHEN length(regexp_replace(COALESCE(#{usr_exp_ymd}, ''), '[^0-9]', '', 'g')) = 8
+                                 THEN to_date(regexp_replace(#{usr_exp_ymd}, '[^0-9]', '', 'g'), 'YYYYMMDD')
+                             ELSE NULL
+                         END
+                     ) &lt; current_date THEN 'N'
+                     ELSE 'Y'
+                 END,
         mod_dt = now()
         WHERE usr_id = #{usr_id}
     </update>

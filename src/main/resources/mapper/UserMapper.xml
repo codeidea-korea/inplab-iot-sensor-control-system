@@ -158,6 +158,18 @@
         <if test="usr_exp_ymd != null">
             , usr_exp_ymd = #{usr_exp_ymd}
         </if>
+        <if test="usr_exp_ymd != null and (use_yn == null or use_yn == '')">
+            , use_yn = CASE
+                           WHEN (
+                               CASE
+                                   WHEN length(regexp_replace(COALESCE(#{usr_exp_ymd}, ''), '[^0-9]', '', 'g')) = 8
+                                       THEN to_date(regexp_replace(#{usr_exp_ymd}, '[^0-9]', '', 'g'), 'YYYYMMDD')
+                                   ELSE NULL
+                               END
+                           ) &lt; current_date THEN 'N'
+                           ELSE 'Y'
+                       END
+        </if>
         where usr_id = #{usr_id}
     </update>
 
@@ -171,9 +183,62 @@
         where usr_id = #{usr_id}
     </select>
 
+    <update id="expireUserIfNeeded" parameterType="java.util.Map">
+        UPDATE tb_user_info
+        SET use_yn = 'N',
+            mod_dt = now()
+        WHERE usr_id = #{userId}
+          AND COALESCE(use_yn, 'Y') = 'Y'
+          AND (
+            CASE
+                WHEN length(regexp_replace(COALESCE(usr_exp_ymd, ''), '[^0-9]', '', 'g')) = 8
+                    THEN to_date(regexp_replace(usr_exp_ymd, '[^0-9]', '', 'g'), 'YYYYMMDD')
+                ELSE NULL
+            END
+          ) &lt; current_date
+    </update>
+
+    <select id="selectLoginDenyReason" parameterType="java.util.Map" resultType="string">
+        SELECT CASE
+                   WHEN count(*) = 0 THEN 'NOT_FOUND'
+                   WHEN max(
+                       CASE
+                           WHEN (
+                               CASE
+                                   WHEN length(regexp_replace(COALESCE(usr_exp_ymd, ''), '[^0-9]', '', 'g')) = 8
+                                       THEN to_date(regexp_replace(usr_exp_ymd, '[^0-9]', '', 'g'), 'YYYYMMDD')
+                                   ELSE NULL
+                               END
+                           ) &lt; current_date THEN 1
+                           ELSE 0
+                       END
+                   ) = 1 THEN 'EXPIRED'
+                   WHEN max(
+                       CASE
+                           WHEN COALESCE(use_yn, 'Y') &lt;&gt; 'Y' THEN 1
+                           ELSE 0
+                       END
+                   ) = 1 THEN 'DISABLED'
+                   ELSE NULL
+               END AS deny_reason
+        FROM tb_user_info
+        WHERE usr_id = #{userId}
+    </select>
+
     <select id="selectUserLogin" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.UserDto">
-        select * from tb_user_info
-        where usr_id = #{userId}
+        SELECT T.*
+        FROM (
+            SELECT t.*,
+                   CASE
+                       WHEN length(regexp_replace(COALESCE(t.usr_exp_ymd, ''), '[^0-9]', '', 'g')) = 8
+                           THEN to_date(regexp_replace(t.usr_exp_ymd, '[^0-9]', '', 'g'), 'YYYYMMDD')
+                       ELSE NULL
+                   END AS exp_dt
+            FROM tb_user_info t
+            WHERE t.usr_id = #{userId}
+        ) T
+        WHERE COALESCE(T.use_yn, 'Y') = 'Y'
+          AND (T.exp_dt IS NULL OR T.exp_dt >= current_date)
     </select>
 
     <update id="updatePassword" parameterType="java.util.Map">

@@ -45,6 +45,9 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-security"
     compileOnly 'org.projectlombok:lombok:1.18.34'
     runtimeOnly 'org.postgresql:postgresql'
+    // macOS에서 Netty DNS native resolver 로딩 실패 경고 방지
+    runtimeOnly group: 'io.netty', name: 'netty-resolver-dns-native-macos', classifier: 'osx-aarch_64'
+    runtimeOnly group: 'io.netty', name: 'netty-resolver-dns-native-macos', classifier: 'osx-x86_64'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

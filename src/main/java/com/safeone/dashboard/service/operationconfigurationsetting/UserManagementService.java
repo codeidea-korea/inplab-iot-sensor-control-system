@@ -20,11 +20,13 @@ public class UserManagementService implements JqGridService<UserManagementDto> {
 
     @Override
     public List<UserManagementDto> getList(Map param) {
+        syncExpiredUsers();
         return mapper.selectUserManagementList(param);
     }
 
     @Override
     public int getTotalCount(Map param) {
+        syncExpiredUsers();
         return mapper.selectUserManagementListTotal(param);
     }
 
@@ -58,5 +60,9 @@ public class UserManagementService implements JqGridService<UserManagementDto> {
         param.put("usr_id", usrId);
 
         return mapper.selectByUserId(param);
+    }
+
+    private void syncExpiredUsers() {
+        mapper.updateExpiredUsersUseYn();
     }
 }
