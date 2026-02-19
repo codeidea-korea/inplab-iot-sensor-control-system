@@ -1255,7 +1255,7 @@
                     <div class="title">
                         <span>현장 현황</span>
                     </div>
-                    <div class="rain-info" style="display: none">
+                    <div class="rain-info">
                         <img src="images/weather/rain_ic.png"/>
                     </div>
                 </div>
