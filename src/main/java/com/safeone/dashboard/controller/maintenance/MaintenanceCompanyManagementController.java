@@ -64,6 +64,12 @@ public class MaintenanceCompanyManagementController extends JqGridAbstract<Maint
         return maintenanceCompanyManagementService.getAll();
     }
 
+    @ResponseBody
+    @GetMapping("/next-id")
+    public String getNextId() {
+        return maintenanceCompanyManagementService.getNextPartnerCompId();
+    }
+
     @Override
     protected String setViewPage() {
         return "maintenance/company-management";

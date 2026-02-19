@@ -459,14 +459,224 @@
 
             const $rightGrid = $("#right-jq-grid");
             const rightPath = "/measure-details-data"
+
+            const RIGHT_GRID_VALUE_COLUMNS = [
+                'raw_data',
+                'formul_data',
+                'raw_data_x',
+                'formul_data_x',
+                'raw_data_y',
+                'formul_data_y',
+                'raw_data_z',
+                'formul_data_z'
+            ];
+
+            const RIGHT_GRID_DEFAULT_LABELS = {
+                meas_dt: '계측일시',
+                raw_data: 'Raw Data',
+                formul_data: '보정(Deg)',
+                raw_data_x: 'Raw Data(X)',
+                formul_data_x: 'X 보정(Deg)',
+                raw_data_y: 'Raw Data(Y)',
+                formul_data_y: 'Y 보정(Deg)',
+                raw_data_z: 'Raw Data(Z)',
+                formul_data_z: 'Z 보정(Deg)'
+            };
+
+            let selectedChartSensor = null;
+            let rightGridBaseParams = {
+                sens_no: '',
+                meas_dt_start: '',
+                meas_dt_end: ''
+            };
+
+            function getRightGridBaseParamsIfReady() {
+                if (!rightGridBaseParams.sens_no) {
+                    return {};
+                }
+                return {
+                    sens_no: rightGridBaseParams.sens_no,
+                    meas_dt_start: rightGridBaseParams.meas_dt_start,
+                    meas_dt_end: rightGridBaseParams.meas_dt_end
+                };
+            }
+
+            function applyRightGridBaseParams() {
+                const postData = $rightGrid.jqGrid('getGridParam', 'postData') || {};
+                $rightGrid.jqGrid('setGridParam', {
+                    page: 1,
+                    postData: {
+                        ...postData,
+                        ...getRightGridBaseParamsIfReady()
+                    }
+                });
+            }
+
+            function collectRightGridSearchParams() {
+                const searchFieldNames = [
+                    'meas_dt',
+                    'raw_data',
+                    'formul_data',
+                    'raw_data_x',
+                    'formul_data_x',
+                    'raw_data_y',
+                    'formul_data_y',
+                    'raw_data_z',
+                    'formul_data_z'
+                ];
+
+                const searchParams = {};
+                searchFieldNames.forEach(function (fieldName) {
+                    searchParams[fieldName] = '';
+                });
+
+                const $toolbar = $rightGrid.closest(".ui-jqgrid").find(".ui-jqgrid-hdiv .ui-search-toolbar");
+                searchFieldNames.forEach(function (fieldName) {
+                    const $field = $toolbar.find("#gs_" + fieldName).first();
+                    if ($field.length > 0) {
+                        searchParams[fieldName] = String($field.val() || '').trim();
+                    }
+                });
+
+                return searchParams;
+            }
+
+            function performRightGridSearch() {
+                const postData = $rightGrid.jqGrid('getGridParam', 'postData') || {};
+                $rightGrid.jqGrid('setGridParam', {
+                    search: true,
+                    page: 1,
+                    postData: {
+                        ...postData,
+                        ...getRightGridBaseParamsIfReady(),
+                        ...collectRightGridSearchParams()
+                    }
+                }).trigger('reloadGrid', [{page: 1}]);
+            }
+
+            function setRightGridColumnLabel(columnName, label) {
+                $rightGrid.jqGrid('setLabel', columnName, label);
+            }
+
+            function getUnitBySensorTypeName(sensorTypeName) {
+                return /경사/.test(sensorTypeName || '') ? 'deg' : 'mm';
+            }
+
+            function applyRightGridColumnConfig(sensor) {
+                Object.keys(RIGHT_GRID_DEFAULT_LABELS).forEach((columnName) => {
+                    setRightGridColumnLabel(columnName, RIGHT_GRID_DEFAULT_LABELS[columnName]);
+                });
+
+                $rightGrid.jqGrid('showCol', RIGHT_GRID_VALUE_COLUMNS);
+
+                if (!sensor) {
+                    return;
+                }
+
+                const sensorTypeName = String(sensor.sens_tp_nm || '');
+                const sensorName = String(sensor.sens_nm || '채널');
+                const unit = getUnitBySensorTypeName(sensorTypeName);
+                const isDisplacement = sensorTypeName.includes('변위');
+                const isRainGauge = sensorTypeName.includes('강우');
+                const isInclinometer = sensorTypeName.includes('경사');
+                const isGnss = /gnss/i.test(sensorTypeName);
+
+                let visibleColumns = [...RIGHT_GRID_VALUE_COLUMNS];
+
+                if (isDisplacement || isRainGauge) {
+                    visibleColumns = ['raw_data', 'formul_data'];
+                    setRightGridColumnLabel('raw_data', sensorName + ' RawData');
+                    setRightGridColumnLabel('formul_data', sensorName + ' (' + unit + ')');
+                } else if (isInclinometer) {
+                    visibleColumns = ['raw_data_x', 'formul_data_x', 'raw_data_y', 'formul_data_y'];
+                    setRightGridColumnLabel('raw_data_x', sensorName + '-X RawData');
+                    setRightGridColumnLabel('formul_data_x', sensorName + '-X (' + unit + ')');
+                    setRightGridColumnLabel('raw_data_y', sensorName + '-Y RawData');
+                    setRightGridColumnLabel('formul_data_y', sensorName + '-Y (' + unit + ')');
+                } else if (isGnss) {
+                    visibleColumns = ['raw_data_x', 'formul_data_x', 'raw_data_y', 'formul_data_y', 'raw_data_z', 'formul_data_z'];
+                    setRightGridColumnLabel('raw_data_x', sensorName + '-X RawData');
+                    setRightGridColumnLabel('formul_data_x', sensorName + '-X (' + unit + ')');
+                    setRightGridColumnLabel('raw_data_y', sensorName + '-Y RawData');
+                    setRightGridColumnLabel('formul_data_y', sensorName + '-Y (' + unit + ')');
+                    setRightGridColumnLabel('raw_data_z', sensorName + '-Z RawData');
+                    setRightGridColumnLabel('formul_data_z', sensorName + '-Z (' + unit + ')');
+                } else {
+                    setRightGridColumnLabel('raw_data', sensorName + ' RawData');
+                    setRightGridColumnLabel('formul_data', sensorName + ' (' + unit + ')');
+                    setRightGridColumnLabel('raw_data_x', sensorName + '-X RawData');
+                    setRightGridColumnLabel('formul_data_x', sensorName + '-X (' + unit + ')');
+                    setRightGridColumnLabel('raw_data_y', sensorName + '-Y RawData');
+                    setRightGridColumnLabel('formul_data_y', sensorName + '-Y (' + unit + ')');
+                    setRightGridColumnLabel('raw_data_z', sensorName + '-Z RawData');
+                    setRightGridColumnLabel('formul_data_z', sensorName + '-Z (' + unit + ')');
+                }
+
+                const hideColumns = RIGHT_GRID_VALUE_COLUMNS.filter((columnName) => !visibleColumns.includes(columnName));
+                if (hideColumns.length > 0) {
+                    $rightGrid.jqGrid('hideCol', hideColumns);
+                }
+            }
+
+            window.applyMeasureDetailsRightGridColumnConfig = applyRightGridColumnConfig;
+
+            function initRightGridFilterToolbar() {
+                if ($rightGrid.data('toolbar_created')) {
+                    return;
+                }
+
+                $rightGrid.jqGrid('filterToolbar', {
+                    stringResult: false,
+                    searchOnEnter: true,
+                    defaultSearch: "cn",
+                    ignoreCase: true,
+                    beforeSearch: function () {
+                        performRightGridSearch();
+                        return false;
+                    }
+                });
+
+                $rightGrid.closest(".ui-jqgrid")
+                    .find(".ui-search-toolbar input, .ui-search-toolbar select")
+                    .off("keydown.measureDetailsEnter")
+                    .on("keydown.measureDetailsEnter", function (e) {
+                        if (e.key === "Enter" || e.keyCode === 13) {
+                            e.preventDefault();
+                            performRightGridSearch();
+                            return false;
+                        }
+                    });
+
+                $rightGrid.closest(".ui-jqgrid").find('.clearsearchclass').off('click').on('click', function () {
+                    const $this = $(this);
+                    const $inputTd = $this.closest('td').prev('td');
+                    const $select = $inputTd.find('select');
+                    const $input = $inputTd.find('input');
+
+                    if ($select.length > 0) {
+                        $select.val('');
+                    }
+                    if ($input.length > 0) {
+                        $input.val('');
+                    }
+
+                    performRightGridSearch();
+                });
+
+                $rightGrid.data('toolbar_created', true);
+            }
+
             initGrid($rightGrid, rightPath, $('#right-grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
                 custom: {
-                    useFilterToolbar: true,
+                    useFilterToolbar: false,
                     multiSelect: true,
                 }
-            }, null, {
+            }, () => {
+                initRightGridFilterToolbar();
+                applyRightGridColumnConfig(selectedChartSensor);
+            }, {
                 meas_dt: {
                     formatter: (cellValue, _options, _rowObject) => {
                         return moment(cellValue).format("YYYY-MM-DD HH:mm:ss");
@@ -518,13 +728,20 @@
                     alert('조회 가능 기간은 최대 2일입니다.');
                     return;
                 } else {
+                    selectedChartSensor = targetArr[0];
+                    applyRightGridColumnConfig(targetArr[0]);
+
+                    rightGridBaseParams = {
+                        sens_no: targetArr[0].sens_no,
+                        meas_dt_start: $('#start-date_left').val(),
+                        meas_dt_end: $('#end-date_left').val()
+                    };
+
                     $rightGrid.setGridParam({
                         page: 1,
                         postData: {
                             ...$rightGrid.jqGrid('getGridParam', 'postData'),
-                            sens_no: targetArr[0].sens_no,
-                            meas_dt_start: $('#start-date_left').val(),
-                            meas_dt_end: $('#end-date_left').val()
+                            ...rightGridBaseParams
                         }
                     }).trigger('reloadGrid', [{page: 1}]);
                     $("#district_nm").text($('#district-select option:selected').text());
@@ -556,32 +773,43 @@
                 return diffDays >= 2;
             }
 
+            function formatLocalDateTime(date) {
+                const pad = (n) => n.toString().padStart(2, '0');
+                const year = date.getFullYear();
+                const month = pad(date.getMonth() + 1);
+                const day = pad(date.getDate());
+                const hours = pad(date.getHours());
+                const minutes = pad(date.getMinutes());
+                return year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
+            }
+
+            function toChartStartDateTime(dateText) {
+                if (!dateText) {
+                    return '';
+                }
+                return dateText + "T00:00";
+            }
+
+            function toChartEndDateTime(dateText) {
+                if (!dateText) {
+                    return '';
+                }
+                return dateText + "T23:59";
+            }
+
+            const chartToday = new Date();
+            const chartEndDate = new Date(chartToday);
+            chartEndDate.setHours(23, 59, 0, 0);
+
+            const chartStartDate = new Date(chartToday);
+            chartStartDate.setMonth(chartStartDate.getMonth() - 1);
+            chartStartDate.setHours(0, 0, 0, 0);
+
+            $('#start-date').val(formatLocalDateTime(chartStartDate));
+            $('#end-date').val(formatLocalDateTime(chartEndDate));
+
             $("#view-chart").click(() => {
                 const targetArr = getSelectedCheckData($leftGrid);
-
-                const startD = new Date($('#start-date_left').val());
-                const endD = new Date($('#end-date_left').val());
-
-                function formatLocal(date) {
-                    const pad = (n) => (n < 10 ? "0" + n : n);
-                    return (
-                        date.getFullYear() +
-                        "-" +
-                        pad(date.getMonth() + 1) +
-                        "-" +
-                        pad(date.getDate()) +
-                        "T" +
-                        pad(date.getHours()) +
-                        ":" +
-                        pad(date.getMinutes())
-                    );
-                }
-
-                startD.setHours(0, 0, 0, 0);
-                $('#start-date').val(formatLocal(startD));
-
-                endD.setHours(23, 59, 0, 0);
-                $('#end-date').val(formatLocal(endD));
 
                 if (targetArr.length > 1) {
                     alert('조회할 데이터를 1건만 선택해주세요.');
@@ -589,19 +817,52 @@
                 } else if (targetArr.length === 0) {
                     alert('조회할 데이터를 선택해주세요.');
                     return;
-                } else if(diffYn(startD, endD)) {
-                    alert('조회 가능 기간은 최대 2일입니다.');
-                    return;
                 }
+
+                selectedChartSensor = targetArr[0];
+                const currentStartDate = $('#start-date_left').val();
+                const currentEndDate = $('#end-date_left').val();
+
+                if (currentStartDate) {
+                    $('#start-date').val(toChartStartDateTime(currentStartDate));
+                }
+                if (currentEndDate) {
+                    $('#end-date').val(toChartEndDateTime(currentEndDate));
+                }
+
+                const selectedDistrictNo = targetArr[0].district_no || $('#district-select').val();
+                const selectedDistrictNm = targetArr[0].district_nm || $('#district-select option:selected').text();
+                const selectedSensorTypeNo = targetArr[0].senstype_no;
+                const selectedSensorNo = targetArr[0].sens_no;
+
                 popFancy('#chart-popup')
-                setChartModal(targetArr[0].district_nm, targetArr[0].senstype_no, targetArr[0].sens_no)
-                $("#graph-search-btn").trigger('click');
+                setChartModal({
+                    district_no: selectedDistrictNo,
+                    district_nm: selectedDistrictNm,
+                    senstype_no: selectedSensorTypeNo,
+                    sens_no: selectedSensorNo
+                }).then(() => {
+                    if (selectedDistrictNo) {
+                        $("#chart-district-select").val(selectedDistrictNo);
+                    }
+                    if (selectedSensorTypeNo) {
+                        $("#sensor-type-select").val(selectedSensorTypeNo);
+                    }
+                    if (selectedSensorNo) {
+                        $("#sensor-name-select").val(selectedSensorNo).trigger('change');
+                    }
+                    $("#graph-search-btn").trigger('click');
+                });
             });
 
             const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
 
-            async function setChartModal(district_nm, senstype_no, sens_no) {
+            async function setChartModal(selected) {
                 let district_no = '';
+                const districtNo = selected && selected.district_no ? selected.district_no : '';
+                const districtNm = selected && selected.district_nm ? selected.district_nm : '';
+                const sensorTypeNo = selected && selected.senstype_no ? selected.senstype_no : '';
+                const sensorNo = selected && selected.sens_no ? selected.sens_no : '';
 
                 await $.ajax({
                     url: '/adminAdd/districtInfo/all',
@@ -616,11 +877,16 @@
                                 "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
                             )
                         })
-                        $("#chart-district-select option").filter(function () {
-                            return $(this).text() === district_nm;
-                        }).prop('selected', true);
 
-                        district_no = $("#chart-district-select").val();
+                        if (districtNo) {
+                            $("#chart-district-select").val(districtNo);
+                        } else if (districtNm) {
+                            $("#chart-district-select option").filter(function () {
+                                return $(this).text() === districtNm;
+                            }).prop('selected', true);
+                        }
+
+                        district_no = $("#chart-district-select").val() || districtNo;
                     }
                 });
 
@@ -637,14 +903,13 @@
                                 "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "</option>"
                             )
                         })
-                        $("#sensor-type-select").val(senstype_no);
+                        if (sensorTypeNo) {
+                            $("#sensor-type-select").val(sensorTypeNo);
+                        }
                     }
                 });
 
-                await getSensors(district_no, senstype_no);
-                $("#sensor-name-select option").filter(function () {
-                    return $(this).text().includes(sens_no);
-                }).prop('selected', true);
+                await getSensors(district_no, sensorTypeNo, sensorNo);
             }
 
             $("#chart-district-select").on('change', (e) => {
@@ -665,7 +930,7 @@
                 getSensors(district_no, senstype_no);
             });
 
-            async function getSensors(district_no, senstype_no) {
+            async function getSensors(district_no, senstype_no, preferredSensorNo) {
                 await $.ajax({
                     url: '/modify/sensor/all' + '?district_no=' + district_no + '&senstype_no=' + senstype_no,
                     type: 'GET',
@@ -678,7 +943,18 @@
                             $("#sensor-name-select").append(
                                 "<option value='" + item.sens_no + "'>" + item.sens_nm + "(" + item.sens_no + ")" + "</option>"
                             )
-                        })
+                        });
+
+                        if (preferredSensorNo) {
+                            $("#sensor-name-select").val(preferredSensorNo);
+                            if (!$("#sensor-name-select").val()) {
+                                $("#sensor-name-select option").filter(function () {
+                                    return $(this).text().includes(preferredSensorNo);
+                                }).prop('selected', true);
+                            }
+                        } else if (res.length > 0) {
+                            $("#sensor-name-select").val(res[0].sens_no);
+                        }
                     }
                 });
             }
@@ -686,10 +962,7 @@
             $("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
-                chartDataArray.length = 0;
-
-                const startD = new Date($('#start-date').val());
-                const endD = new Date($('#end-date').val());
+                const selectSensor = $("#sensor-name-select").val();
 
                 let selectType = '';
                 if($("#select-condition").val() === "minute"){
@@ -700,18 +973,16 @@
                     selectType = 'day';
                 }
 
-                let targetArr = getSelectedCheckData($leftGrid);
+                if (!selectSensor) {
+                    alert('센서명을 선택해주세요.');
+                    return;
+                }
 
-                const case_ = ['', 'X', 'Y', 'Z'];
-
-                targetArr = case_.flatMap((item) => {
-                    return targetArr.map((data) => {
-                        return {
-                            ...data,
-                            sens_chnl_id: item
-                        };
-                    });
-                });
+                const case_ = ['', 'X', 'Y'];
+                const targetArr = case_.map((sensChnlId) => ({
+                    sens_no: selectSensor,
+                    sens_chnl_id: sensChnlId
+                }));
 
                 chartDataArray.length = 0; // 배열 초기화
                 const requests = targetArr.map((item) => {
@@ -1178,6 +1449,9 @@
                     alert('센서를 선택해주세요.');
                     return;
                 }
+                if (typeof window.applyMeasureDetailsRightGridColumnConfig === 'function') {
+                    window.applyMeasureDetailsRightGridColumnConfig(selectedSensor[0]);
+                }
                 addEmptyRow(selectedSensor, $rightGrid)
             });
 
@@ -1226,6 +1500,211 @@
                 });
             });
 
+            function normalizeHeaderKey(header) {
+                return String(header || '')
+                    .toLowerCase()
+                    .replace(/\s+/g, '')
+                    .replace(/[()_\-\/]/g, '');
+            }
+
+            function detectAxisFromHeader(header, normalizedHeader) {
+                const upperHeader = String(header || '').toUpperCase();
+                const normalized = String(normalizedHeader || '');
+
+                if (
+                    upperHeader.includes('(X') ||
+                    upperHeader.includes('-X') ||
+                    upperHeader.includes(' X ') ||
+                    upperHeader.includes('X채널') ||
+                    normalized.includes('xrawdata') ||
+                    normalized.includes('x보정') ||
+                    normalized.includes('xdeg') ||
+                    normalized.includes('xmm')
+                ) {
+                    return 'x';
+                }
+
+                if (
+                    upperHeader.includes('(Y') ||
+                    upperHeader.includes('-Y') ||
+                    upperHeader.includes(' Y ') ||
+                    upperHeader.includes('Y채널') ||
+                    normalized.includes('yrawdata') ||
+                    normalized.includes('y보정') ||
+                    normalized.includes('ydeg') ||
+                    normalized.includes('ymm')
+                ) {
+                    return 'y';
+                }
+
+                if (
+                    upperHeader.includes('(Z') ||
+                    upperHeader.includes('-Z') ||
+                    upperHeader.includes(' Z ') ||
+                    upperHeader.includes('Z채널') ||
+                    normalized.includes('zrawdata') ||
+                    normalized.includes('z보정') ||
+                    normalized.includes('zdeg') ||
+                    normalized.includes('zmm')
+                ) {
+                    return 'z';
+                }
+
+                return '';
+            }
+
+            function parseNullableNumber(value) {
+                if (value === null || value === undefined || value === '') {
+                    return null;
+                }
+
+                const parsed = parseFloat(String(value).replace(/,/g, ''));
+                return Number.isNaN(parsed) ? null : parsed;
+            }
+
+            function toMeasureDateTimeToken(value) {
+                if (value === null || value === undefined || value === '') {
+                    return null;
+                }
+
+                if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value.getTime())) {
+                    return moment(value).format('YYYY-MM-DD-HH-mm-ss');
+                }
+
+                if (typeof value === 'number') {
+                    const parsedDate = XLSX.SSF.parse_date_code(value);
+                    if (parsedDate && parsedDate.y) {
+                        const pad = (n) => String(n).padStart(2, '0');
+                        return parsedDate.y + '-' +
+                            pad(parsedDate.m) + '-' +
+                            pad(parsedDate.d) + '-' +
+                            pad(parsedDate.H || 0) + '-' +
+                            pad(parsedDate.M || 0) + '-' +
+                            pad(parsedDate.S || 0);
+                    }
+                }
+
+                const text = String(value).trim();
+                if (!text) {
+                    return null;
+                }
+
+                if (/^\d+(\.\d+)?$/.test(text)) {
+                    const serialDate = XLSX.SSF.parse_date_code(Number(text));
+                    if (serialDate && serialDate.y) {
+                        const pad = (n) => String(n).padStart(2, '0');
+                        return serialDate.y + '-' +
+                            pad(serialDate.m) + '-' +
+                            pad(serialDate.d) + '-' +
+                            pad(serialDate.H || 0) + '-' +
+                            pad(serialDate.M || 0) + '-' +
+                            pad(serialDate.S || 0);
+                    }
+                }
+
+                if (/^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$/.test(text)) {
+                    return text;
+                }
+
+                const formats = [
+                    'YYYY-MM-DD HH:mm:ss',
+                    'YYYY-MM-DD HH:mm',
+                    'YYYY/MM/DD HH:mm:ss',
+                    'YYYY/MM/DD HH:mm',
+                    'YYYY-MM-DDTHH:mm:ss',
+                    'YYYY-MM-DDTHH:mm'
+                ];
+
+                const m = moment(text, formats, true);
+                if (m.isValid()) {
+                    return m.format('YYYY-MM-DD-HH-mm-ss');
+                }
+
+                const looseMoment = moment(text, formats, false);
+                if (looseMoment.isValid()) {
+                    return looseMoment.format('YYYY-MM-DD-HH-mm-ss');
+                }
+
+                const normalized = text.replace('T', ' ').replace(/\./g, '-');
+                const parts = normalized.split(' ');
+                if (parts.length >= 2) {
+                    const datePart = parts[0].replace(/\//g, '-');
+                    const timePart = parts[1].replace(/:/g, '-');
+                    const timeTokens = timePart.split('-').filter(Boolean);
+
+                    if (timeTokens.length === 1) {
+                        timeTokens.push('00', '00');
+                    } else if (timeTokens.length === 2) {
+                        timeTokens.push('00');
+                    }
+
+                    if (timeTokens.length >= 3) {
+                        return datePart + '-' +
+                            String(timeTokens[0]).padStart(2, '0') + '-' +
+                            String(timeTokens[1]).padStart(2, '0') + '-' +
+                            String(timeTokens[2]).padStart(2, '0');
+                    }
+                }
+
+                return null;
+            }
+
+            function mapExcelRowToMeasureData(item) {
+                const mapped = {
+                    meas_dt: null,
+                    raw_data: null,
+                    formul_data: null,
+                    raw_data_x: null,
+                    formul_data_x: null,
+                    raw_data_y: null,
+                    formul_data_y: null,
+                    raw_data_z: null,
+                    formul_data_z: null
+                };
+
+                Object.keys(item || {}).forEach((header) => {
+                    const value = item[header];
+                    if (value === null || value === undefined || value === '') {
+                        return;
+                    }
+
+                    const normalizedHeader = normalizeHeaderKey(header);
+
+                    if (normalizedHeader.includes('계측일시') || normalizedHeader.includes('measdt')) {
+                        mapped.meas_dt = toMeasureDateTimeToken(value);
+                        return;
+                    }
+
+                    if (normalizedHeader.includes('rawdata')) {
+                        const axis = detectAxisFromHeader(header, normalizedHeader);
+                        const numberValue = parseNullableNumber(value);
+                        if (axis) {
+                            mapped['raw_data_' + axis] = numberValue;
+                        } else {
+                            mapped.raw_data = numberValue;
+                        }
+                        return;
+                    }
+
+                    if (
+                        normalizedHeader.includes('보정') ||
+                        normalizedHeader.includes('formuldata') ||
+                        normalizedHeader.includes('deg') ||
+                        normalizedHeader.includes('mm')
+                    ) {
+                        const axis = detectAxisFromHeader(header, normalizedHeader);
+                        const numberValue = parseNullableNumber(value);
+                        if (axis) {
+                            mapped['formul_data_' + axis] = numberValue;
+                        } else {
+                            mapped.formul_data = numberValue;
+                        }
+                    }
+                });
+
+                return mapped;
+            }
+
             // 버튼 클릭 시 파일 입력창 열기
             $('#upload-excel').click(function (e) {
                 const selectedRow = getSelectedCheckData($leftGrid);
@@ -1254,47 +1733,15 @@
                     // 첫 번째 시트의 데이터를 JSON 형태로 변환
                     const sheetName = workbook.SheetNames[0];  // 첫 번째 시트 이름 가져오기
                     const sheet = workbook.Sheets[sheetName];
-                    let jsonData = XLSX.utils.sheet_to_json(sheet);
+                    const rawRows = XLSX.utils.sheet_to_json(sheet, {defval: null, raw: false});
+                    const jsonData = rawRows
+                        .map(mapExcelRowToMeasureData)
+                        .filter((row) => row.meas_dt);
 
-                    jsonData.forEach((item) => {
-                        var parts = item['계측일시'].split(" ");
-                        var date = parts[0];
-                        var time = parts[1].replace(/:/g, '-'); // ':'를 '-'로 대체
-
-                        item.meas_dt = date + '-' + time;
-                        item.raw_data = item['Raw Data'];
-                        item.formul_data = item['보정(Deg)'];
-                        item.raw_data_x = item['Raw Data(X)'];
-                        item.formul_data_x = item['X 보정(Deg)'];
-                        item.raw_data_y = item['Raw Data(Y)'];
-                        item.formul_data_y = item['Y 보정(Deg)'];
-                        item.raw_data_z = item['Raw Data(Z)'];
-                        item.formul_data_z = item['Z 보정(Deg)'];
-
-                        // 숫자형 데이터 파싱 (빈 값은 0.0으로 처리)
-                        item.raw_data = parseFloat(item['Raw Data']) || null;
-                        item.formul_data = parseFloat(item['보정(Deg)']) || null;
-                        item.raw_data_x = parseFloat(item['Raw Data(X)']) || null;
-                        item.formul_data_x = parseFloat(item['X 보정(Deg)']) || null;
-                        item.raw_data_y = parseFloat(item['Raw Data(Y)']) || null;
-                        item.formul_data_y = parseFloat(item['Y 보정(Deg)']) || null;
-                        item.raw_data_z = parseFloat(item['Raw Data(Z)']) || null;
-                        item.formul_data_z = parseFloat(item['Z 보정(Deg)']) || null;
-
-
-                        delete item['계측일시'];
-                        delete item['Raw Data'];
-                        delete item['보정(Deg)'];
-                        delete item['Raw Data(X)'];
-                        delete item['X 보정(Deg)'];
-                        delete item['Raw Data(Y)'];
-                        delete item['Y 보정(Deg)'];
-                        delete item['Raw Data(Z)'];
-                        delete item['Z 보정(Deg)'];
-                        delete item['__EMPTY'];
-                        delete item['__EMPTY_1'];
-                        delete item['__EMPTY_2'];
-                    });
+                    if (jsonData.length === 0) {
+                        alert('업로드할 계측 데이터가 없습니다. 엑셀 헤더 및 계측일시 값을 확인해 주세요.');
+                        return;
+                    }
 
                     const selectedRow = getSelectedCheckData($leftGrid);
 

@@ -243,6 +243,10 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
         return mapper.getAllSensorInfo(param);
     }
 
+    public List<Map<String, Object>> getSensorTypesByLogrNo(Map<String, Object> param) {
+        return mapper.getSensorTypesByLogrNo(param);
+    }
+
     public void logrInfoInsert(Map<String, Object> param) {
         /* send_chnl_id > cnt가 1이면 X, 2면 Y, 3이면 Z */
         /* logr_chnl_seq > cnt가 1이면 0, 2면 1, 3이면 2 */

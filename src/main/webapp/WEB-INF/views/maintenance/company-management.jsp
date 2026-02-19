@@ -171,6 +171,18 @@
                 $("#form-submit-btn").show();
                 $("#deleteBtn").hide()
                 $("#form-update-btn").hide();
+                $("#partner_comp_id").attr('readonly', true);
+
+                $.ajax({
+                    url: '/maintenance/company-management/next-id',
+                    type: 'GET',
+                    success: function (res) {
+                        $('#partner_comp_id').val(res);
+                    },
+                    error: function () {
+                        $('#partner_comp_id').val('');
+                    }
+                });
             }
 
             function resetForm() {

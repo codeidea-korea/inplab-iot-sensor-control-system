@@ -29,10 +29,7 @@ public class MaintenanceCompanyManagementService implements JqGridService<Mainte
 
     @Override
     public boolean create(Map param) {
-        String biggestIdString = mapper.getBiggestId(); // C01, C02, C03, ...
-        int biggestId = Integer.parseInt(biggestIdString.substring(1));
-        String partner_comp_id = "C" + String.format("%02d", biggestId + 1);
-        param.put("partner_comp_id", partner_comp_id);
+        param.put("partner_comp_id", getNextPartnerCompId());
         return mapper.insertMaintenanceCompanyManagement(param) > 0;
     }
 
@@ -54,5 +51,11 @@ public class MaintenanceCompanyManagementService implements JqGridService<Mainte
 
     public List<MaintenanceCompanyManagementDto> getAll() {
         return mapper.selectAllMaintenanceCompanyManagementList();
+    }
+
+    public String getNextPartnerCompId() {
+        Integer biggestIdNumber = mapper.getBiggestIdNumber();
+        int biggestId = biggestIdNumber == null ? 0 : biggestIdNumber;
+        return "C" + String.format("%02d", biggestId + 1);
     }
 }

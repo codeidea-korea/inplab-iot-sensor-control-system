@@ -149,8 +149,9 @@
         WHERE partner_comp_id = #{partner_comp_id}
     </delete>
 
-    <select id="getBiggestId" resultType="java.lang.String">
-        SELECT max(partner_comp_id)
+    <select id="getBiggestIdNumber" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(SUBSTRING(partner_comp_id FROM 2)::int), 0)
         FROM tb_maintcomp_info
+        WHERE partner_comp_id ~ '^C[0-9]+$'
     </select>
 </mapper>

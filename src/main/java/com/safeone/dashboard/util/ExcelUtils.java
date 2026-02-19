@@ -33,22 +33,30 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExcelUtils {
     public static void downloadExcel(HttpServletRequest request, HttpServletResponse response, List<?> list, Map<String, FieldDetails> columnData, String fileName) {
-        String[] fieldset = new String[columnData.size()];
-        String[] headerset = new String[columnData.size()];
-
-        int index = 0;
+        List<String> fieldList = new ArrayList<>();
+        List<String> headerList = new ArrayList<>();
         for (Map.Entry<String, FieldDetails> entry : columnData.entrySet()) {
             String[] excArray = {"hidden", "password"};
             String type = entry.getValue().type;
             String lowerType = NVL(type).toString().toLowerCase();
 
-            if (!Arrays.asList(excArray).contains(lowerType)) {
-
-                fieldset[index] = entry.getKey();
-                headerset[index] = entry.getValue().title;
-                index++;
+            boolean excluded = false;
+            String[] typeTokens = lowerType.split(";");
+            for (String token : typeTokens) {
+                if (Arrays.asList(excArray).contains(token.trim())) {
+                    excluded = true;
+                    break;
+                }
             }
+            if (excluded) {
+                continue;
+            }
+
+            fieldList.add(entry.getKey());
+            headerList.add(entry.getValue().title);
         }
+        String[] fieldset = fieldList.toArray(new String[0]);
+        String[] headerset = headerList.toArray(new String[0]);
         downloadExcel(request, response, list, fieldset, headerset, fileName);
     }
 

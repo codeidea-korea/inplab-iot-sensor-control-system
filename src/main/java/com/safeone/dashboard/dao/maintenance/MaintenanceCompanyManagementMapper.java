@@ -16,6 +16,6 @@ public interface MaintenanceCompanyManagementMapper {
 
     List<MaintenanceCompanyManagementDto> selectAllMaintenanceCompanyManagementList();
 
-    String getBiggestId();
+    Integer getBiggestIdNumber();
 }
     

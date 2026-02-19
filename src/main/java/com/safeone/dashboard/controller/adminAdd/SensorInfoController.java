@@ -110,6 +110,18 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
     }
 
     @ResponseBody
+    @GetMapping("/all-by-logr-no-and-senstype-no")
+    public List<SensorInfoDto> getAllSensorInfoByLogrNo(@RequestParam Map<String, Object> param) {
+        return sensorInfoService.getAllSensorInfo(param);
+    }
+
+    @ResponseBody
+    @GetMapping("/sensor-types-by-logr-no")
+    public List<Map<String, Object>> getSensorTypesByLogrNo(@RequestParam Map<String, Object> param) {
+        return sensorInfoService.getSensorTypesByLogrNo(param);
+    }
+
+    @ResponseBody
     @GetMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         boolean exists = commonCodeEditService.isLogrIdxNoExists(param);

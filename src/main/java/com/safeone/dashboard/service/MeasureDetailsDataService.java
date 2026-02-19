@@ -167,10 +167,30 @@ public class MeasureDetailsDataService implements JqGridService<MeasureDetailsDa
     }
 
     private String formattedDateTime(String formattedDateTime) {
-        String[] parts = formattedDateTime.split("-");
-        String date = parts[0] + "-" + parts[1] + "-" + parts[2]; // 날짜 부분
-        String time = parts[3] + ":" + parts[4] + ":" + parts[5]; // 시간 부분
-        return date + " " + time; // 최종 문자열 조합
+        String raw = formattedDateTime == null ? "" : formattedDateTime.trim();
+        if (raw.isEmpty()) {
+            return raw;
+        }
+
+        String normalized = raw
+                .replace("T", "-")
+                .replace(" ", "-")
+                .replace(":", "-")
+                .replace("/", "-")
+                .replace(".", "-");
+        String[] parts = normalized.split("-");
+        if (parts.length < 5) {
+            throw new IllegalArgumentException("Invalid meas_dt format: " + formattedDateTime);
+        }
+
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+        int day = Integer.parseInt(parts[2]);
+        int hour = Integer.parseInt(parts[3]);
+        int minute = Integer.parseInt(parts[4]);
+        int second = parts.length > 5 ? Integer.parseInt(parts[5]) : 0;
+
+        return String.format("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second);
     }
 
     public void deleteRow(Map m) {

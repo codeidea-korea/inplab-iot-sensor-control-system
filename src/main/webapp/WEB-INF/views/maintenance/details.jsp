@@ -180,7 +180,7 @@
                     }
                 });
 
-                initDistrict();
+                initLogger();
                 initMaintComp();
 
                 let imageStorage = {};
@@ -208,17 +208,17 @@
                 function initModifyForm(data) {
                     $("#form_sub_title").html('상세정보');
 
-                    $('#district_no, #sens_nm, #senstype_no').prop('disabled', true);
+                    $('#logr_no, #sens_nm, #senstype_no').prop('disabled', true);
                     $('.disabled-select').css('background-color', 'lightgray');
 
                     $("#deleteBtn").show();
                     $("#form-submit-btn").hide();
                     $("#form-update-btn").show();
-                    $('#district_no').val(data.district_no);
+                    $('#logr_no').val(data.logr_no);
 
                     getAllSensorTypes(() => {
                         $('#senstype_no').val(data.senstype_no);
-                        getAllSensorInfo(data.district_no, data.senstype_no, () => {
+                        getAllSensorInfo(data.logr_no, data.senstype_no, () => {
                             $('#sens_nm').val(data.sens_no);
                         });
                     });
@@ -239,18 +239,24 @@
                     data.maint_pic_path4 && setInitialPhoto(4, data.maint_pic_path4);
                 }
 
-                $('#district_no').on('change', () => {
+                let isAutoFindingSensorType = false;
+
+                $('#logr_no').on('change', () => {
                     emptySensorInfo();
                     emptySensorTypes()
-                    const selectedDistrictNo = $('#district_no').val();
-                    if (selectedDistrictNo) {
-                        getAllSensorTypes();
+                    const selectedLogrNo = $.trim($('#logr_no').val() || '');
+                    if (selectedLogrNo) {
+                        getSensorTypesByLogrNo(selectedLogrNo, (sensorTypes) => {
+                            if (sensorTypes && sensorTypes.length > 0) {
+                                $('#senstype_no').val(sensorTypes[0].senstype_no).trigger('change');
+                            }
+                        });
                     }
                 })
 
                 function resetForm() {
                     $('#mgnt_no').val('');
-                    $('#district_no').val('');
+                    $('#logr_no').val('');
                     $('#sens_nm').val('');
                     $('#senstype_no').val('');
                     $('#maint_accpt_ymd').val('');
@@ -272,7 +278,7 @@
                 }
 
                 function initInsertForm() {
-                    $('#district_no, #sens_nm, #senstype_no').prop('disabled', false);
+                    $('#logr_no, #sens_nm, #senstype_no').prop('disabled', false);
                     $('.disabled-select').css('background-color', 'white');
 
                     $("#form_sub_title").html('신규등록');
@@ -283,10 +289,14 @@
 
                 $('#senstype_no').on('change', () => {
                     emptySensorInfo();
-                    const selectedSensTypeNo = $('#senstype_no').find(':selected').val();
-                    const selectedDistrictNo = $('#district_no').find(':selected').val();
-                    if (selectedSensTypeNo && selectedDistrictNo) {
-                        getAllSensorInfo(selectedDistrictNo, selectedSensTypeNo);
+                    const selectedSensTypeNo = $.trim($('#senstype_no').find(':selected').val() || '');
+                    const selectedLogrNo = $.trim($('#logr_no').find(':selected').val() || '');
+                    if (selectedSensTypeNo && selectedLogrNo) {
+                        getAllSensorInfo(selectedLogrNo, selectedSensTypeNo, (res) => {
+                            if (!res || res.length === 0) {
+                                findFirstSensorTypeWithData(selectedLogrNo, selectedSensTypeNo);
+                            }
+                        });
                     }
                 })
 
@@ -305,25 +315,88 @@
                                         "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "</option>"
                                 )
                             })
-                            callback && callback();
+                            callback && callback(res);
                         }
                     });
                 }
 
-                function getAllSensorInfo(districtNo, senstypeNo, callback) {
+                function getSensorTypesByLogrNo(logrNo, callback) {
                     $.ajax({
-                        url: '/adminAdd/sensorInfo/all-by-district-no-and-senstype-no',
+                        url: '/adminAdd/sensorInfo/sensor-types-by-logr-no',
                         type: 'GET',
-                        data: {district_no: districtNo, senstype_no: senstypeNo},
+                        data: {logr_no: logrNo},
+                        success: function (res) {
+                            emptySensorTypes();
+                            res.forEach((item) => {
+                                $('#senstype_no').append(
+                                    item.sens_abbr ? "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "(" + item.sens_abbr + ")" + "</option>" :
+                                        "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "</option>"
+                                )
+                            })
+                            callback && callback(res);
+                        },
+                        error: function () {
+                            emptySensorTypes();
+                            getAllSensorTypes((fallbackTypes) => {
+                                callback && callback(fallbackTypes || []);
+                            });
+                        }
+                    });
+                }
+
+                function getAllSensorInfo(logrNo, senstypeNo, callback) {
+                    $.ajax({
+                        url: '/adminAdd/sensorInfo/all-by-logr-no-and-senstype-no',
+                        type: 'GET',
+                        data: {logr_no: logrNo, senstype_no: senstypeNo},
                         success: function (res) {
                             res.forEach((item) => {
                                 $('#sens_nm').append(
                                     "<option data-senstypeno=" + item.senstype_no + " value='" + item.sens_no + "'>" + item.sens_nm + "</option>"
                                 )
                             })
-                            callback && callback();
+                            callback && callback(res);
                         },
                     });
+                }
+
+                function findFirstSensorTypeWithData(logrNo, currentSensTypeNo) {
+                    if (isAutoFindingSensorType) {
+                        return;
+                    }
+
+                    const candidateTypeNos = $('#senstype_no option')
+                        .map(function () {
+                            return $.trim($(this).val() || '');
+                        })
+                        .get()
+                        .filter((typeNo) => typeNo && typeNo !== currentSensTypeNo);
+
+                    if (candidateTypeNos.length === 0) {
+                        return;
+                    }
+
+                    isAutoFindingSensorType = true;
+                    const tryNext = (idx) => {
+                        if (idx >= candidateTypeNos.length) {
+                            isAutoFindingSensorType = false;
+                            emptySensorInfo();
+                            return;
+                        }
+
+                        const typeNo = candidateTypeNos[idx];
+                        emptySensorInfo();
+                        getAllSensorInfo(logrNo, typeNo, (res) => {
+                            if (res && res.length > 0) {
+                                $('#senstype_no').val(typeNo);
+                                isAutoFindingSensorType = false;
+                                return;
+                            }
+                            tryNext(idx + 1);
+                        });
+                    };
+
+                    tryNext(0);
                 }
 
                 function initMaintComp() {
@@ -343,14 +416,14 @@
                     });
                 }
 
-                function initDistrict() {
+                function initLogger() {
                     $.ajax({
-                        url: '/adminAdd/districtInfo/all',
+                        url: '/adminAdd/common/code/loggerInfo',
                         type: 'GET',
                         success: function (res) {
                             res.forEach((item) => {
-                                $('#district_no').append(
-                                    "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
+                                $('#logr_no').append(
+                                    "<option value='" + item.code + "'>" + item.name + "</option>"
                                 )
                             })
                         },
@@ -420,8 +493,8 @@
                 }
 
                 function validate() {
-                    if (!$('#district_no').val()) {
-                        alert('현장명을 선택해주세요.');
+                    if (!$('#logr_no').val()) {
+                        alert('로거를 선택해주세요.');
                         return false;
                     }
 
@@ -481,7 +554,7 @@
                         url: '/maintenance/details/add',
                         type: 'POST',
                         data: {
-                            district_no: $('#district_no').val(),
+                            logr_no: $('#logr_no').val(),
                             sens_no: $('#sens_nm').val(),
                             maint_accpt_ymd: $('#maint_accpt_ymd').val().replaceAll('-', ''),
                             maint_str_ymd: $('#maint_str_ymd').val().replaceAll('-', ''),
@@ -625,10 +698,10 @@
                     <input type="hidden" id="mgnt_no"/>
                     <tbody>
                     <tr>
-                        <th>현장명</th>
+                        <th>로거명</th>
                         <td class="disabled-select">
-                            <select id="district_no">
-                                <option value="">Ex) 이월지구</option>
+                            <select id="logr_no">
+                                <option value="">Ex) 로거 선택</option>
                             </select>
                         </td>
                     </tr>

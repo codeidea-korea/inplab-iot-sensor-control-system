@@ -3,17 +3,27 @@
 
 <mapper namespace="com.safeone.dashboard.dao.sensorinitialsetting.SensorInitialSettingMapper">
     <sql id="rowSearch">
+        <if test="district_nm != null and district_nm != ''">
+            and dist.district_nm = #{district_nm}
+        </if>
         <if test="sens_tp_nm != null and sens_tp_nm != ''">
-            and tst.sens_tp_nm ilike '%' || #{sens_tp_nm} || '%'
+            and tst.sens_tp_nm = #{sens_tp_nm}
         </if>
         <if test="sens_nm != null and sens_nm != ''">
             and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'
         </if>
         <if test="sens_chnl_id != null and sens_chnl_id != ''">
-            and tsi.sens_chnl_id ilike '%' || #{sens_chnl_id} || '%'
+            and (
+                tsi.sens_chnl_id ilike '%' || #{sens_chnl_id} || '%'
+                or tsinfo.sens_nm ilike '%' || #{sens_chnl_id} || '%'
+                or concat(tsinfo.sens_nm, '-', coalesce(tsi.sens_chnl_id, '')) ilike '%' || #{sens_chnl_id} || '%'
+            )
         </if>
         <if test="formul_data != null and formul_data != ''">
-            and tsi.formul_data ilike '%' || #{formul_data} || '%'
+            and cast(tsi.formul_data as text) ilike '%' || #{formul_data} || '%'
+        </if>
+        <if test="real_data != null and real_data != ''">
+            and cast(tmd.formul_data as text) ilike '%' || #{real_data} || '%'
         </if>
         <if test="init_apply_dt_start != null and init_apply_dt_start != '' and init_apply_dt_end != null and init_apply_dt_end != ''">
             and tsi.init_apply_dt::timestamp between concat(#{init_apply_dt_start},' 00:00:00')::timestamp and
@@ -24,13 +34,19 @@
             concat(#{last_apply_dt_end},' 23:59:59')::timestamp
         </if>
         <if test="emer_status != null and emer_status != ''">
-            and tsi.emer_status ilike '%' || #{emer_status} || '%'
+            and tsi.emer_status = #{emer_status}
+        </if>
+        <if test="sens_status != null and sens_status != ''">
+            and tcc.code_nm = #{sens_status}
         </if>
     </sql>
 
     <sql id="rowOrder">
         <trim prefix="order by">
             <choose>
+                <when test="'district_nm' == sidx and sidx != ''">
+                    dist.district_nm ${sord}
+                </when>
                 <when test="'sens_tp_nm' == sidx and sidx != ''">
                     tst.sens_tp_nm ${sord}
                 </when>
@@ -51,6 +67,9 @@
                 </when>
                 <when test="'emer_status' == sidx and sidx != ''">
                     tsi.emer_status ${sord}
+                </when>
+                <when test="'sens_status' == sidx and sidx != ''">
+                    tcc.code_nm ${sord}
                 </when>
                 <otherwise>
                     tst.senstype_no, tsi.sens_no, tsi.sens_chnl_id asc
@@ -97,9 +116,12 @@
             tsi.sens_no,
             tsinfo.sens_nm,
             tmd.formul_data AS real_data,
-            dist.district_nm  FROM tb_sensor_init tsi
+            dist.district_nm,
+            tcc.code_nm AS sens_status
+        FROM tb_sensor_init tsi
         LEFT JOIN tb_sensor_info tsinfo ON tsi.sens_no = tsinfo.sens_no
         LEFT JOIN tb_sensor_type tst ON tsinfo.senstype_no = tst.senstype_no
+        LEFT JOIN tb_common_code tcc ON tsinfo.maint_sts_cd = tcc.code_id
 
         LEFT JOIN LATERAL (
             SELECT tdi.district_nm
@@ -140,6 +162,23 @@
         from tb_sensor_init tsi
         left join tb_sensor_info tsinfo on tsi.sens_no = tsinfo.sens_no
         left join tb_sensor_type tst on tsinfo.senstype_no = tst.senstype_no
+        left join tb_common_code tcc on tsinfo.maint_sts_cd = tcc.code_id
+        left join lateral (
+            select tdi.district_nm
+            from tb_logr_idx_map tlim
+            inner join tb_logger_info tli on tlim.logr_no = tli.logr_no
+            inner join tb_district_info tdi on tli.district_no = tdi.district_no
+            where tlim.sens_no = tsi.sens_no
+            limit 1
+        ) dist on true
+        left join lateral (
+            select sens_no, formul_data, sens_chnl_id
+            from tb_measure_details tmd2
+            where tmd2.sens_no = tsi.sens_no
+            and tmd2.sens_chnl_id = tsi.sens_chnl_id
+            order by tmd2.meas_dt desc
+            limit 1
+        ) tmd on true
 
         WHERE 1 = 1
         AND tsi.sens_no IN (

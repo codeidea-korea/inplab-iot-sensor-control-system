@@ -96,6 +96,7 @@
         , tmd.district_no
         , tdi.district_nm
         , tmd.sens_no
+        , tsi.logr_no
         , tsi.sens_nm
         , tmd.maint_rslt_cd
         , tcc.code_nm
@@ -154,7 +155,15 @@
                , #{maint_accpt_ymd}
                , #{maint_str_ymd}
                , #{maint_end_ymd}
-               , #{district_no}
+               , COALESCE(
+                    #{district_no},
+                    (SELECT district_no FROM tb_logger_info WHERE logr_no = #{logr_no} LIMIT 1),
+                    (SELECT tli.district_no
+                     FROM tb_sensor_info tsi2
+                     JOIN tb_logger_info tli ON tsi2.logr_no = tli.logr_no
+                     WHERE tsi2.sens_no = #{sens_no}
+                     LIMIT 1)
+                 )
                , #{sens_no}
                , #{maint_rslt_cd}
                , #{maint_dtls}
