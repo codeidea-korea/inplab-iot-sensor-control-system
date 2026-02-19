@@ -31,10 +31,10 @@ public class MaintenanceCompanyManagementDto implements Serializable {
     @FieldLabel(title = "대표연락처")
     private String maint_rep_ph;
 
-    @FieldLabel(title = "등록일시", type = "range")
+    @FieldLabel(title = "등록일자", type = "range")
     private String reg_dt;
 
-    @FieldLabel(title = "수정일시", type = "range")
+    @FieldLabel(title = "수정일자", type = "range")
     private String mod_dt;
 
 }
