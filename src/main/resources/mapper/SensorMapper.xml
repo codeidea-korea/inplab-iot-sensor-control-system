@@ -216,7 +216,7 @@
     </select>
 
     <select id="selectSensorList" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT
+        SELECT DISTINCT
             c.district_nm,
             a.sens_no,
             a.senstype_no,
@@ -240,7 +240,8 @@
         JOIN tb_district_info c ON b.district_no = c.district_no
         JOIN tb_sensor_type d ON a.senstype_no = d.senstype_no
         JOIN tb_sensor_chnl e ON a.sens_no = e.sens_no
-        LEFT JOIN tb_sensor_init tsi ON a.sens_no = tsi.sens_no
+
+        LEFT JOIN tb_sensor_init tsi ON a.sens_no = tsi.sens_no AND e.sens_chnl_id = tsi.sens_chnl_id
         LEFT JOIN LATERAL (
             SELECT
                 m.sens_no,
