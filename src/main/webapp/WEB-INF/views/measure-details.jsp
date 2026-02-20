@@ -116,7 +116,7 @@
         #contents .contents-re {
             padding: 3rem;
             width: 90rem !important;
-            flex: 0 0 30rem !important;
+            flex: 0 0 20rem !important;
         }
 
         #contents .contents-re.cctv_area {
@@ -329,6 +329,11 @@
                 const column = data.model.find(col => col.name === 'district_nm');
                 if (column) {
                     column.hidden = true;
+                }
+                const dateColumn = data.model.find(col => col.name === 'last_apply_dt');
+                if (dateColumn) {
+                    dateColumn.width = 150;
+                    dateColumn.fixed = true;
                 }
             });
 
