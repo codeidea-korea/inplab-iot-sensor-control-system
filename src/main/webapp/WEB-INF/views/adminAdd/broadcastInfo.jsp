@@ -494,7 +494,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">전광판 <span id="form_sub_title"></span></div>
+        <div class="layer-base-title">방송 장비 <span id="form_sub_title"></span></div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
