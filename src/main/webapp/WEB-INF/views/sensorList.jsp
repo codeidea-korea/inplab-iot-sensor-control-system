@@ -438,7 +438,7 @@
 
             // 시작일 = 한 달 전 00:00 (한국시간 기준)
             const startDate = new Date(today);
-            startDate.setMonth(startDate.getMonth() - 1);
+            startDate.setDate(startDate.getDate() - 2);
             startDate.setHours(0, 0, 0, 0);
 
             $('#start-date').val(formatLocalDateTime(startDate));
@@ -992,9 +992,9 @@
                 <div style="display:flex;">
                     <p class="search-top-label">조회조건</p>
                     <select id="select-condition">
+                        <option value="minute">상세</option>
                         <option value="daily">일별</option>
                         <option value="hourly">시간별</option>
-                        <option value="minute">상세</option>
                     </select>
                 </div>
                 <div class="btn-group3">
