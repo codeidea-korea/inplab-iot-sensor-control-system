@@ -1167,8 +1167,9 @@
                 else if (level === "ARM003") text = "경계", step = "step3";
                 else if (level === "ARM004") text = "심각", step = "step4";
 
+
                 let contents = "";
-                contents += '<div class="right-alarm_re" ' + step + '>';
+                contents += '<div class="right-alarm_re" ' + step + ' data-assetid="' + res[idx].sens_no + '">';
                 contents += '  <button type="button" class="close-alarm">';
                 contents += '    <img src="/images/close-alarm.png" alt="close">';
                 contents += '  </button>';
@@ -1184,10 +1185,30 @@
 
                 const $node = $(contents);
 
-                // 닫기 버튼
-                $node.find(".close-alarm").on("click", function () {
+                $node.find(".close-alarm").on("click", function (e) {
+                    e.stopPropagation();
                     updateAlarmViewFlag(res[idx].mgnt_no)
                     $node.fadeOut(200, () => $node.remove());
+                });
+
+
+                $node.on("click", function (e) {
+                    e.stopPropagation();
+
+                    let clickAssetId = res[idx].sens_no || res[idx].asset_id;
+
+                    console.log("추출된 센서 ID (clickAssetId):", clickAssetId);
+
+                    if (clickAssetId) {
+                        if (typeof window.triggerChartSearch === "function") {
+                            window.triggerChartSearch(clickAssetId);
+                        } else {
+                            console.error("🚨 에러: window.triggerChartSearch 함수가 정의되지 않았습니다!");
+                        }
+                    } else {
+                        alert("차트를 띄우기 위한 센서 정보(ID)가 없습니다.");
+                    }
+                    updateAlarmViewFlag(res[idx].mgnt_no)
                 });
 
                 wrapper.append($node);

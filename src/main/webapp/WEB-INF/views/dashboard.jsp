@@ -607,11 +607,29 @@
         let sensNo = ''
         let chartRequestSeq = 0;
 
+
+        window.triggerChartSearch = function(assetId) {
+            console.log("=== [2] 브릿지 함수 실행 ===");
+            console.log("전달받은 센서 ID:", assetId);
+
+            // 버튼 속성에 ID 강제 덮어쓰기
+            $("#graph-search-btn").attr("data-sens-no", assetId);
+
+            $("#graph-search-btn").click();  // 조회 버튼 강제 클릭
+
+            if (typeof window.openSensorPopup === "function") {
+                window.openSensorPopup();
+            } else {
+                popFancy('#chart-popup', {dragToClose: false, touch: false});
+            }
+        };
+
         $(document).on('overlay_click', function (e, data) {
             if ($("#wrap").hasClass("editMode"))
                 return;
             if (data.type === 'sensor') {                // 센서 선택시
-                sensNo = $(data.htmlContent).attr('assetid');
+                let clickedAssetId = $(data.htmlContent).attr('assetid');
+                $("#graph-search-btn").attr("data-sens-no", clickedAssetId);
                 $("#graph-search-btn").click();
                 openSensorPopup();
             } else if (data.type === 'cctv') {           // cctv 선택시
@@ -625,10 +643,14 @@
         });
 
         $("#graph-search-btn").click(() => {
+            let currentSensNo = $("#graph-search-btn").attr("data-sens-no");
+            myChart.data.labels = [];
+            myChart.data.datasets = [];
+            myChart.update();
             const case_ = ['', 'X', 'Y', 'Z'];
             let checkedData = case_.flatMap((item) => {
                 return {
-                    sens_no: sensNo,
+                    sens_no: currentSensNo,
                     sens_chnl_id: item
                 };
             });
@@ -864,7 +886,11 @@
         }
 
 
-        function openSensorPopup() {
+        /*function openSensorPopup() {
+            popFancy('#chart-popup', {dragToClose: false, touch: false});
+        }*/
+
+        window.openSensorPopup = function() {
             popFancy('#chart-popup', {dragToClose: false, touch: false});
         }
 
@@ -996,7 +1022,6 @@
                 $('.site-status-list select.selectZone option[value=' + zoneId + ']').prop('selected', true);
                 $('.site-status-list select.selectZone').trigger('change');
             }
-            // window.vworld.setPanBy(coords, 18);
         });
 
         // 지구현황 - 자산종류 선택시 (전체 show, hide)
