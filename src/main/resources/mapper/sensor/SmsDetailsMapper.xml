@@ -49,6 +49,11 @@
         <if test="sms_rslt_yn != null and sms_rslt_yn != ''">
             and tsd.sms_rslt_yn ilike '%' || #{sms_rslt_yn} || '%'
         </if>
+
+        <if test="start_date != null and start_date != '' and end_date != null and end_date != ''">
+            and tsd.sms_trans_dt::timestamp between concat(#{start_date}, ' 00:00:00')::timestamp
+            and concat(#{end_date}, ' 23:59:59')::timestamp
+        </if>
     </sql>
 
     <sql id="rowOrder">

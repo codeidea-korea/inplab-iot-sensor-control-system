@@ -286,20 +286,33 @@
                    downloadExcel('alarm-list', $grid, path);
                });
 
-               $("#open-modal").click(() => {
-                       const targetArr = getSelectedCheckData($grid);
+                $("#open-modal").click(() => {
+                        const targetArr = getSelectedCheckData($grid);
 
                        if (targetArr.length > 1) {
                            alert('데이터를 1건만 선택해주세요.');
                            return;
-                       } else if (targetArr.length === 0) {
-                           alert('조회할 데이터를 선택해주세요.');
-                           return;
-                       }
+                        } else if (targetArr.length === 0) {
+                            alert('조회할 데이터를 선택해주세요.');
+                            return;
+                        }
 
-                       popFancy('#lay-sensor-message')
-                   }
-               );
+                        const startDateValue = $('#start-date').val();
+                        const endDateValue = $('#end-date').val();
+                        const $smsModal = $('#lay-sensor-message');
+
+                        $smsModal.attr('data-start-date', startDateValue);
+                        $smsModal.attr('data-end-date', endDateValue);
+                        $('#sms-start-date').val(startDateValue);
+                        $('#sms-end-date').val(endDateValue);
+
+                        if (typeof window.reloadSmsDetailsGridByDate === 'function') {
+                            window.reloadSmsDetailsGridByDate();
+                        }
+
+                        popFancy('#lay-sensor-message')
+                    }
+                );
 
            })
 

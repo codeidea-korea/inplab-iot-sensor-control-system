@@ -7,6 +7,30 @@
 
 <script>
     $(document).ready(function () {
+        function formatDateOnly(date) {
+            const pad = (n) => n.toString().padStart(2, '0');
+            const year = date.getFullYear();
+            const month = pad(date.getMonth() + 1);
+            const day = pad(date.getDate());
+            return year + "-" + month + "-" + day;
+        }
+
+        const today = new Date();
+        const endDate = new Date(today);
+        const startDate = new Date(today);
+        startDate.setMonth(startDate.getMonth() - 1);
+
+        const $smsModal = $('#lay-sensor-message');
+        const parentStartDate = $('#start-date').val();
+        const parentEndDate = $('#end-date').val();
+        const initialStartDate = $smsModal.attr('data-start-date') || parentStartDate || formatDateOnly(startDate);
+        const initialEndDate = $smsModal.attr('data-end-date') || parentEndDate || formatDateOnly(endDate);
+
+        $('#sms-start-date').val(initialStartDate);
+        $('#sms-end-date').val(initialEndDate);
+        $smsModal.attr('data-start-date', initialStartDate);
+        $smsModal.attr('data-end-date', initialEndDate);
+
         window.jqgridOption = {
             multiselect: true,
             multiboxonly: false,
@@ -280,6 +304,10 @@
                 url: path + '/list',
                 mtype: "GET",
                 datatype: "json",
+                postData: {
+                    start_date: $('#sms-start-date').val(),
+                    end_date: $('#sms-end-date').val()
+                },
                 colModel: columnData.model,
                 formatter: "actions",
                 sortIconsBeforeText: true,
@@ -407,6 +435,33 @@
 
             $grid.jqGrid(jqGridOption);
             $grid.jqGrid('filterToolbar');
+
+            function reloadWithDateRange() {
+                const startDateValue = $('#sms-start-date').val();
+                const endDateValue = $('#sms-end-date').val();
+
+                $smsModal.attr('data-start-date', startDateValue);
+                $smsModal.attr('data-end-date', endDateValue);
+
+                $grid.setGridParam({
+                    page: 1,
+                    search: true,
+                    postData: Object.assign({}, $grid.jqGrid('getGridParam', 'postData'), {
+                        start_date: startDateValue,
+                        end_date: endDateValue
+                    })
+                }).trigger('reloadGrid', [{ page: 1 }]);
+            }
+
+            window.reloadSmsDetailsGridByDate = reloadWithDateRange;
+
+            $('#sms-search-btn').off('click').on('click', function () {
+                reloadWithDateRange();
+            });
+
+            $('#sms-start-date, #sms-end-date').off('change').on('change', function () {
+                reloadWithDateRange();
+            });
 
             $('.ui-search-toolbar input').on('keyup', function (e) {
                 if (e.keyCode === 13)
