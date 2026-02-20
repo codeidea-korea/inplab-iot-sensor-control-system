@@ -17,7 +17,7 @@ public class LogrIdxMapDto implements Serializable {
     @FieldLabel(title="현장명")
     String district_nm;
 
-    @FieldLabel(title="현장 TYPE명")
+    @FieldLabel(title="센서타입명")
     String senstype_nm;
 
     @FieldLabel(title="센서 ID")
