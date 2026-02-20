@@ -852,6 +852,24 @@
                 const allValues = data.flatMap(d => d.map(p => p.formul_data));
                 const absMax = Math.max(...allValues.map(v => Math.abs(v || 0)));
 
+                let selectedSensorType = $("#sensor-type-select option:selected").text();
+
+                const unitMap = {
+                    '지표경사계': 'mm',
+                    '지표변위계': 'mm',
+                    '강우량계': 'mm',
+                };
+
+                if (selectedSensorType === '선택' || selectedSensorType === '') {
+                    selectedSensorType = 'Value';
+                } else {
+                    const unit = unitMap[selectedSensorType];
+
+                    if (unit) {
+                        selectedSensorType = selectedSensorType + '(' + unit + ')';
+                    }
+                }
+
                 myChart.options.scales.y = {
                     beginAtZero: false,
                     suggestedMin: -absMax,
@@ -863,7 +881,7 @@
                     },
                     title: {
                         display: true,
-                        text: 'Value',
+                        text: selectedSensorType,
                         color: '#555'
                     }
                 };
