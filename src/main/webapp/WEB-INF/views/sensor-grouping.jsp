@@ -461,6 +461,7 @@
                         const yId = axisMap[sensorItem[0].senstype_no] || 'y' + i;
                         const color = getRandomHSL();
                         const senstype = senstypeList[sensorItem[0].senstype_no];
+                        const isRain = sensorItem[0].sens_nm.includes('RAIN');
 
                         if (!axisMap[sensorItem[0].senstype_no]) {
                             const vals = sensorItem.map(p => p.formul_data);
@@ -488,7 +489,7 @@
                                     font: { size: 10 }
                                 },
 
-                                min: -absMax,
+                                min: isRain ? 0 : -absMax,
                                 max: absMax,
 
                                 grid: {
@@ -501,7 +502,7 @@
                             axisMap[sensorItem[0].senstype_no] = yId;
                         }
 
-                        const isRain = sensorItem[0].sens_nm.includes('RAIN');
+
 
                         datasets.push({
                             label: sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? "-" + sensorItem[0].sens_chnl_id : ""),
@@ -540,14 +541,18 @@
                                         meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
 
                                         const activeDatasets = ci.data.datasets.filter((d, idx) => !ci.getDatasetMeta(idx).hidden);
+
                                         Object.keys(ci.options.scales).forEach(yId => {
                                             if (yId === 'x') return;
-                                            const vals = activeDatasets
-                                                .filter(d => d.yAxisID === yId)
-                                                .flatMap(d => d.data.map(p => p.y));
+
+                                            const activeForAxis = activeDatasets.filter(d => d.yAxisID === yId);
+                                            const vals = activeForAxis.flatMap(d => d.data.map(p => p.y));
+
                                             if (vals.length) {
                                                 const absMax = Math.max(...vals.map(v => Math.abs(v || 0))) || 1;
-                                                ci.options.scales[yId].min = -absMax;
+                                                const isRainAxis = activeForAxis.some(d => d.type === 'bar');
+
+                                                ci.options.scales[yId].min = isRainAxis ? 0 : -absMax; // 강우량계면 0으로 고정
                                                 ci.options.scales[yId].max = absMax;
                                             }
                                         });
