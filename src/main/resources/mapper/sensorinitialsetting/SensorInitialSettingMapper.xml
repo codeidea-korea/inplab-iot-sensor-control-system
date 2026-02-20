@@ -107,7 +107,7 @@
 <!--        </if>-->
 
          SELECT
-            tsi.formul_data AS formul_data,
+            TO_CHAR(ROUND(tsi.init_raw_data::numeric, 2), 'FM9999999999999999990.00') AS formul_data,
             tsi.init_apply_dt,
             tst.sens_tp_nm,
             tsi.last_apply_dt,
@@ -115,7 +115,7 @@
             COALESCE(tsi.sens_chnl_id, '') AS sens_chnl_id,  tsi.sens_chnl_id AS og_sens_chnl_id,
             tsi.sens_no,
             tsinfo.sens_nm,
-            tmd.formul_data AS real_data,
+            TO_CHAR(ROUND(tmd.raw_data::numeric, 2), 'FM9999999999999999990.00') AS real_data,
             dist.district_nm,
             tcc.code_nm AS sens_status
         FROM tb_sensor_init tsi
@@ -132,7 +132,7 @@
             LIMIT 1
         ) dist ON TRUE
         LEFT JOIN LATERAL (
-            SELECT sens_no, formul_data, sens_chnl_id
+            SELECT sens_no, formul_data,raw_data, sens_chnl_id
             FROM tb_measure_details tmd2
             WHERE tmd2.sens_no = tsi.sens_no
             AND tmd2.sens_chnl_id = tsi.sens_chnl_id
@@ -197,7 +197,7 @@
         UPDATE tb_sensor_init
         SET
         <if test="formul_data != null and formul_data != ''">
-            formul_data = #{formul_data}::float ,
+            init_raw_data = #{formul_data}::float ,
         </if>
         emer_status = #{emer_status}
         , init_apply_dt = now()

@@ -74,7 +74,7 @@
                 const sensorStatusStr = makeJqGridSelectByName(statusRes[0]);
 
                 $(window).on('beforeLoadGrid', (e, data) => {
-                    const column = data.model.find(col => col.name === 'real_data');
+                    const column = data.model.find(col => col.name === 'real_data' || col.name === 'formul_data');
                     if (column) {
                         column.align = 'right';
                     }
