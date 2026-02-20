@@ -150,6 +150,20 @@
         .cctv_area .graph-area { width: 100%; height: 100%; }
         #myChart { width: 100% !important; height: 100% !important; display: block; }
 
+        #select-condition {
+            width: 150px;
+            height: 3.6rem;
+            padding: 0 1rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            display: inline-block;
+            vertical-align: top;
+        }
+
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
@@ -270,7 +284,7 @@
 
             // 시작일 = 한 달 전 00:00 (한국시간 기준)
             const startDate = new Date(today);
-            startDate.setMonth(startDate.getMonth() - 1);
+            startDate.setDate(startDate.getDate() - 7);
             startDate.setHours(0, 0, 0, 0);
 
             $('#start-date').val(formatLocalDateTime(startDate));
@@ -309,7 +323,17 @@
 
             $("#graph-search-btn").click(() => {
                 let checkedData = getSelectedCheckData($grid);
-                const selectType = 'minute';
+
+                let selectType = 'hour';
+                const conditionVal = $("#select-condition").val();
+                if (conditionVal === "minute") {
+                    selectType = 'minute';
+                } else if (conditionVal === "daily") {
+                    selectType = 'day';
+                } else if (conditionVal === "hourly") {
+                    selectType = 'hour';
+                }
+
                 if (checkedData.length === 0) {
                     alert('선택된 데이터가 없습니다.');
                     return;
@@ -441,6 +465,15 @@
                         else if (diffDays > 30) xUnit = 'day';
                         else if (diffDays > 1) xUnit = 'hour';
                         else xUnit = 'minute';
+                    }
+
+                    const aggregationType = $("#select-condition").val();
+                    if (aggregationType === "hourly") {
+                        xUnit = 'hour';
+                    } else if (aggregationType === "daily") {
+                        xUnit = 'day';
+                    } else if (aggregationType === "minute") {
+                        xUnit = 'minute';
                     }
 
                     const scales = {
@@ -671,6 +704,14 @@
                             <div>
                                 <p class="search-top-label">~</p>
                                 <input id="end-date" type="datetime-local"/>
+                            </div>
+                            <div style="display:flex;">
+                                <p class="search-top-label">조회조건</p>
+                                <select id="select-condition">
+                                    <option value="hourly">시간별</option>
+                                    <option value="minute">상세</option>
+                                    <option value="daily">일별</option>
+                                </select>
                             </div>
                             <div class="btn-group">
                                 <a id="graph-search-btn" data-fancybox data-src="">조회</a>
