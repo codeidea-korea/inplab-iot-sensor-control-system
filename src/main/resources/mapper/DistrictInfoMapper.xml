@@ -143,7 +143,7 @@
         , COALESCE(to_char(to_date(NULLIF(z.meas_str_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_str_ymd
         , COALESCE(to_char(to_date(NULLIF(z.meas_end_ymd, ''), 'YYYYMMDD'), 'YYYY-MM-DD'), '') AS meas_end_ymd
         , z.dist_offi_nm
-        , fn_common(z.dist_type_cd ,'현장구분') as dist_type_cd_nm
+        , fn_common(z.dist_type_cd ,'현장구분'::varchar) as dist_type_cd_nm
         , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.inst_comp_id1) as inst_comp_id1_nm
         , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.meas_comp_id1) as meas_comp_id1_nm
         FROM tb_district_info z
