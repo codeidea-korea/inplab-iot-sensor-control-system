@@ -6,6 +6,12 @@
 <head>
     <jsp:include page="../common/include_head.jsp" flush="true"/>
     <style>
+
+        td[aria-describedby="jq-grid_formul_data"] {
+            text-align: right !important;
+            padding-right: 10px !important;
+        }
+
         .layer-base-conts table td:first-child {
             border-left: 1px solid rgba(0, 0, 0, 0.2);
         }
