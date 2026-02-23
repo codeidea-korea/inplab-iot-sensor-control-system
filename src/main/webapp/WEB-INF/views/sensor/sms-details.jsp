@@ -53,22 +53,32 @@
     <div class="layer-base-btns">
         <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
     </div>
-    <div class="layer-base-title">문자 전송 상세내역</div>
-    <div class="sms-detail-search">
-        <div class="search-top">
-            <div>
-                <p class="search-top-label">조회기간</p>
-                <input id="sms-start-date" type="date"/>
+
+    <div class="layer-base-title" style="display: flex; justify-content: space-between; align-items: center; padding-right: 5rem;">
+        <span>문자 전송 상세내역</span>
+
+        <div class="sms-detail-search" style="margin-bottom: 0; display: flex; align-items: center; gap: 10px;">
+
+            <div class="search-top" style="margin-bottom: 0; display: flex; align-items: center; gap: 5px;">
+                <div style="display: flex; align-items: center;">
+                    <p class="search-top-label" style="margin: 0;">조회기간</p>
+                    <input id="sms-start-date" type="date"/>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <p class="search-top-label" style="margin: 0;">~</p>
+                    <input id="sms-end-date" type="date"/>
+                </div>
             </div>
-            <div>
-                <p class="search-top-label">~</p>
-                <input id="sms-end-date" type="date"/>
+
+            <div class="search-top_">
+                <a id="sms-search-btn" class="btns" style="cursor: pointer; padding: 0 1.5rem; height: 3.6rem; line-height: 3.6rem; display: inline-block; margin-top: 20px;">조회</a>
             </div>
-        </div>
-        <div class="search-top_">
-            <a id="sms-search-btn" class="btns">조회</a>
+
         </div>
     </div>
+
+
+
     <div class="layer-base-conts min bTable" style="width: 100%">
         <div class="flex-item" style="width: 50%">
             <jsp:include page="./sms-details-grid.jsp" flush="true"/>

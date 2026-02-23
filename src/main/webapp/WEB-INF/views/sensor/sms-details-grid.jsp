@@ -445,7 +445,7 @@
 
                 $grid.setGridParam({
                     page: 1,
-                    search: true,
+                    search: false,
                     postData: Object.assign({}, $grid.jqGrid('getGridParam', 'postData'), {
                         start_date: startDateValue,
                         end_date: endDateValue
