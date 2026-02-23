@@ -81,14 +81,16 @@
          sens_chnl_id,
          raw_data,
          formul_data,
-         reg_dt)
+         reg_dt,
+         net_err_yn)
         VALUES ((SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_measure_details),
                 #{sens_no},
                 #{meas_dt}::timestamp,
                 #{sens_chnl_id},
                 #{raw_data}::double precision,
                 #{formul_data}::double precision,
-                now())
+                now(),
+                'N' )
     </insert>
 
     <update id="update" parameterType="java.util.Map">
