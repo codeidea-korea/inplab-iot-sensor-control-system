@@ -16,6 +16,11 @@
             left: calc(50% - 15px);
             top: calc(50% - 27px);
         }
+
+        td[aria-describedby$="_dist_addr"] {
+            text-align: left !important;
+            padding-left: 10px !important; 
+        }
     </style>
     <script>
         $('.deleteBtn').hide();
