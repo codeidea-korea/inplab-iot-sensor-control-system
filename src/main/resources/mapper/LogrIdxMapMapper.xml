@@ -216,6 +216,7 @@
             , mapping_dt = now()
             , logr_idx_no = #{logr_idx_no}
         where sens_no = #{sens_no}
+            and logr_no = #{logr_no}
             and logr_chnl_seq = CAST (#{logr_chnl_seq} AS INTEGER);
     </update>
 </mapper>

@@ -145,26 +145,34 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
             }
         }
 
-        // 2) 정렬: 센서 타입 → 센서 번호 → 채널 순서
+        // 2) 정렬: 로거 → 센서 타입 → 센서 번호 → 채널 순서
         logrList.sort(Comparator
-                .comparing(LogrIdxMapDto::getSenstype_no, Comparator.nullsLast(String::compareTo))
+                .comparing(LogrIdxMapDto::getLogr_no, Comparator.nullsLast(String::compareTo))
+                .thenComparing(LogrIdxMapDto::getSenstype_no, Comparator.nullsLast(String::compareTo))
                 .thenComparing(LogrIdxMapDto::getSens_no, Comparator.nullsLast(String::compareTo))
                 .thenComparing(d -> parseIntOr(String.valueOf(d.getLogr_chnl_seq()), 0))
         );
 
-        // ★ 3) used 제거, 타입별 커서로 초기화에서부터 부여
-        Map<String, Integer> nextIdxByType = new HashMap<>();
+        // ★ 3) used 제거, 로거+타입별 커서로 초기화에서부터 부여
+        Map<String, Integer> nextIdxByLogrAndType = new HashMap<>();
 
         for (LogrIdxMapDto logr : logrList) {
+            String logrNo = nullToEmpty(logr.getLogr_no());
             String typeNo = logr.getSenstype_no();
+            if (isEmpty(logrNo)) {
+                log.warn("로거 정보가 없는 매핑은 자동 인덱스 대상에서 제외합니다. sens_no={}, ch_seq={}",
+                        logr.getSens_no(), logr.getLogr_chnl_seq());
+                continue;
+            }
             if (isEmpty(typeNo) || !typeRange.containsKey(typeNo)) {
                 // 타입 범위가 없으면 스킵(또는 예외)
                 continue;
             }
 
             Range r = typeRange.get(typeNo);
-            // 타입별 커서를 range.start에서 시작
-            int next = nextIdxByType.getOrDefault(typeNo, r.start);
+            String cursorKey = logrNo + "|" + typeNo;
+            // 로거+타입별 커서를 range.start에서 시작
+            int next = nextIdxByLogrAndType.getOrDefault(cursorKey, r.start);
 
             if (next > r.end) {
                 throw new IllegalStateException(String.format(
@@ -177,10 +185,10 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
             logr.setLogr_idx_no(zpad3(next));
 
             // 다음 커서로 이동
-            nextIdxByType.put(typeNo, next + 1);
+            nextIdxByLogrAndType.put(cursorKey, next + 1);
 
             // TODO: DB 반영
-             mapper.updateLogrIdx(logr);
+            mapper.updateLogrIdx(logr);
         }
     }
 
