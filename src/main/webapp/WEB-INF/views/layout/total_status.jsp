@@ -152,55 +152,7 @@
         ];
 
         let alarmGridBaseQuery = {};
-        let alarmGridDefaultDistrictNm = '';
-        let suppressAlarmGridDistrictFetch = false;
         const alarmGridKeyArray = ['sens_no', 'sens_chnl_id', 'meas_dt'];
-
-        const getDashboardSelectedDistrict = () => {
-            const $zoneSelect = $('.site-status-list select.selectZone');
-            if ($zoneSelect.length === 0) {
-                return { districtNo: '', districtNm: '' };
-            }
-
-            const districtNo = String($zoneSelect.val() || '').trim();
-            const districtNm = districtNo ? String($zoneSelect.find('option:selected').text() || '').trim() : '';
-
-            if (!districtNo || districtNm === '현장 선택' || districtNm === '전체현장') {
-                return { districtNo: '', districtNm: '' };
-            }
-
-            return { districtNo, districtNm };
-        };
-
-        const applyAlarmGridDistrictFilter = (districtNm) => {
-            if (!districtNm) {
-                return;
-            }
-
-            const $g = $("#gridAlarm");
-            if (!$g.length || !$g[0] || !$g[0].grid) {
-                return;
-            }
-
-            const colModel = $g.jqGrid('getGridParam', 'colModel') || [];
-            const districtColIndex = colModel.findIndex(col => col.name === 'district_nm');
-            if (districtColIndex < 0) {
-                return;
-            }
-
-            const $view = $g.closest(".ui-jqgrid-view");
-            const $districtSelect = $view.find('.ui-search-toolbar th').eq(districtColIndex).find('select');
-            if ($districtSelect.length === 0) {
-                return;
-            }
-
-            if ($districtSelect.find('option').filter(function () { return $(this).val() === districtNm; }).length === 0) {
-                $districtSelect.append($('<option>', { value: districtNm, text: districtNm }));
-            }
-
-            suppressAlarmGridDistrictFetch = true;
-            $districtSelect.val(districtNm).trigger('change');
-        };
 
         const replaceAlarmGridRows = (rows) => {
             const $g = $('#gridAlarm');
@@ -267,11 +219,6 @@
             }
 
             $districtSelect.off('change.alarmGridDistrictFetch').on('change.alarmGridDistrictFetch', function () {
-                if (suppressAlarmGridDistrictFetch) {
-                    suppressAlarmGridDistrictFetch = false;
-                    return;
-                }
-
                 reloadAlarmGridByDistrictNm(String($(this).val() || '').trim());
             });
         };
@@ -322,7 +269,6 @@
                     $thead.append($searchRow);
 
                     bindAlarmGridDistrictSelectFetch();
-                    applyAlarmGridDistrictFilter(alarmGridDefaultDistrictNm);
                 }).catch((fail) => {
                     console.log('getDistinct fail > ', fail);
                 });
@@ -350,14 +296,10 @@
                 alarmLevel = 'ARM004';
             }
 
-            const selectedDistrict = getDashboardSelectedDistrict();
-            alarmGridDefaultDistrictNm = selectedDistrict.districtNm || '';
+            // 종합현황 알람팝업은 항상 "전체현장" 기준으로 오픈 (현장현황 상세와 분리)
             alarmGridBaseQuery = { alarmLevel: alarmLevel };
-            if (selectedDistrict.districtNo) {
-                alarmGridBaseQuery.district_no = selectedDistrict.districtNo;
-            }
 
-            getAlarmByLevel(Object.assign({ limit, offset, alarmLevel }, selectedDistrict.districtNo ? { district_no: selectedDistrict.districtNo } : {})).then((res) => {
+            getAlarmByLevel({limit, offset, alarmLevel}).then((res) => {
                 let rows = res || [];
 
                 // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
@@ -373,7 +315,7 @@
                         $g.jqGrid('addRowData', row.id, row);
                     });
 
-                    // 알람 단계 클릭 시 기존 검색조건을 초기화하고, 대시보드에서 현장 선택된 경우 해당 현장으로 기본 적용
+                    // 알람 단계 클릭 시 종합현황 팝업 검색조건은 초기화하고 "전체현장" 기준으로 재조회
                     const $view = $g.closest('.ui-jqgrid-view');
                     $view.find('.ui-search-toolbar input').val('');
                     $view.find('.ui-search-toolbar select').val('');
@@ -383,8 +325,6 @@
                         postData: { filters: '' },
                         page: 1
                     }).trigger('reloadGrid');
-
-                    applyAlarmGridDistrictFilter(alarmGridDefaultDistrictNm);
                 } else {
                     // 최초 생성
                     setJqGridTable(rows, column_l, header_l, gridComplete_l, null, keyArray, gridId, limit, offset, getAlarmByLevel, null, null);
