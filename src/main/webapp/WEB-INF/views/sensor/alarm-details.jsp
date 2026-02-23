@@ -171,7 +171,7 @@
 
                        });
 
-                       $('.clearsearchclass').off('click').on('click', function () {
+                       $('#gview_jq-grid .clearsearchclass').off('click').on('click', function () {
                            var $this = $(this);
 
                            var $inputTd = $this.closest('td').prev('td');

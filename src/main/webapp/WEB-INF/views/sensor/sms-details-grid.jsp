@@ -468,7 +468,19 @@
                     $(window).trigger('reloadGrid');
             });
 
-            $('.ui-jqgrid-htable .clearsearchclass').off().on('click', function () {
+            /*$('.ui-jqgrid-htable .clearsearchclass').off().on('click', function () {
+                $(this).closest('tr').find('select option:eq(0)').prop('selected', true);
+                var postData = $grid.jqGrid('getGridParam', 'postData');
+                $.each(_names, function (idx, name) {
+                    delete postData[name]; // 사용되었던 컬럼명 검색 조건 모두 삭제
+                });
+                $grid.jqGrid('setGridParam', { postData: postData, page: 1, search: false });
+                $grid[0].clearToolbar();
+                reloadJqGrid($grid);
+            });*/
+
+            // 선택자 앞에 '#gview_' + gridId 를 추가하여 부모 화면과의 충돌을 완벽히 차단합니다.
+            $('#gview_' + gridId + ' .clearsearchclass').off().on('click', function () {
                 $(this).closest('tr').find('select option:eq(0)').prop('selected', true);
                 var postData = $grid.jqGrid('getGridParam', 'postData');
                 $.each(_names, function (idx, name) {
