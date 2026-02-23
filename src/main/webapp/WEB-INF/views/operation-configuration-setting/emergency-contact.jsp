@@ -7,229 +7,278 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script>
         $(function () {
-            const $grid = $("#jq-grid");
-            const path = "/operation-configuration-setting/emergency-contact";
-            initGrid($grid,path,$('#grid-wrapper'), {                   
-                    multiselect: true,
-                    multiboxonly: false,
-                    custom: {
-                        useFilterToolbar: true,
-                    }
-                },
-                null,               
-                {                  
-                    emerg_recv_ph: {  
-                        formatter: function (cellValue) {
-                            return getFormattedPhoneNumber(cellValue);
+            $.when(
+                $.get('/adminAdd/common/code/districtInfoList')
+            ).done(function(distRes){
+
+                function makeJqGridSelectByName(list){
+                    var str = ':전체';
+                    $.each(list, function(i,v){
+
+                        str += ";" + v.name + ":" + v.name;
+                    });
+                    return str;
+                }
+
+                var distStr = makeJqGridSelectByName(distRes);
+
+                const $grid = $("#jq-grid");
+                const path = "/operation-configuration-setting/emergency-contact";
+                initGrid($grid,path,$('#grid-wrapper'), {
+                        multiselect: true,
+                        multiboxonly: false,
+                        custom: {
+                            useFilterToolbar: false,
+                        },
+                        loadComplete : function(){
+                            var $grid = $("#jq-grid");
+                            if ($grid.data('toolbar_created')) return;
+
+
+                            $grid.jqGrid('setColProp', 'district_nm', {
+                                stype: 'select',
+                                searchoptions: { value: distStr, sopt: ['eq'] }
+                            });
+
+                            $grid.jqGrid('filterToolbar', {
+                                stringResult: false,
+                                searchOnEnter: true,
+                                defaultSearch: "eq",
+                                ignoreCase: true
+                            });
+
+                            $('.clearsearchclass').off('click').on('click', function () {
+                                var $this = $(this);
+
+                                var $inputTd = $this.closest('td').prev('td');
+                                var $select = $inputTd.find('select');
+                                var $input = $inputTd.find('input');
+
+                                if ($select.length > 0) $select.val('');
+                                if ($input.length > 0) $input.val('');
+
+                                $grid[0].triggerToolbar();
+                            });
+
+
+                            $grid.data('toolbar_created', true);
                         }
                     },
-                    emerg_tel: {
-                        formatter: function (cellValue) {
-                            return getFormattedPhoneNumber(cellValue);
+                    null,
+                    {
+                        emerg_recv_ph: {
+                            formatter: function (cellValue) {
+                                return getFormattedPhoneNumber(cellValue);
+                            }
+                        },
+                        emerg_tel: {
+                            formatter: function (cellValue) {
+                                return getFormattedPhoneNumber(cellValue);
+                            }
                         }
-                    }
-                })
-
-            $.ajax({
-                url: '/adminAdd/districtInfo/all',
-                type: 'GET',
-                success: function (res) {
-                    res.forEach((item) => {
-                        $('#district_no').append(
-                            "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
-                        )
                     })
-                }
-            });
 
-            $('.insertBtn').on('click', () => {
-                resetForm();
-                initInsertForm();
-                popFancy('#lay-form-write');
-            });
-
-            $('.modifyBtn').on('click', () => {
-                const targetArr = getSelectedCheckData($grid);
-                if (targetArr.length > 1) {
-                    alert('수정할 데이터를 1건만 선택해주세요.');
-                    return;
-                } else if (targetArr.length === 0) {
-                    alert('수정할 데이터를 선택해주세요.');
-                    return;
-                }
-                resetForm();
-                initModifyForm(targetArr[0]);
-                popFancy('#lay-form-write');
-            });
-
-            function initModifyForm(data) {
-                $("#form_sub_title").html('상세 정보');
-
-                $("#deleteBtn").show()
-                $("#form-update-btn").show();
-
-                $("#form-submit-btn").hide();
-
-                $('#mgnt_no').val(data.mgnt_no);
-                $('#district_no').val(data.district_no);
-                $('#partner_comp').val(data.partner_comp_id);
-                $('#emerg_chgr_nm').val(data.emerg_chgr_nm);
-                $('#emerg_chgr_role').val(data.emerg_chgr_role);
-                $('#emerg_recv_ph').val(data.emerg_recv_ph);
-                $('#emerg_tel').val(data.emerg_tel);
-                $('#e_mail').val(data.e_mail);
-            }
-
-            $('.excelBtn').on('click', function () {
-                downloadExcel('emergency contact', $grid, path);
-            });
-
-            function initInsertForm() {
-                $("#form_sub_title").html('신규 등록');
-                $("#deleteBtn").hide()
-                $("#form-update-btn").hide();
-                $("#form-submit-btn").show();
-            }
-
-            function resetForm() {
-                $('#district_no').val('');
-                $('#partner_comp').val('');
-                $('#emerg_chgr_nm').val('');
-                $('#emerg_chgr_role').val('');
-                $('#emerg_recv_ph').val('');
-                $('#emerg_tel').val('');
-                $('#e_mail').val('');
-            }
-
-            // Phone number: digits only
-            function normalizePhoneNumber(value) {
-                return (value || '').toString().replace(/[^0-9]/g, '');
-            }
-            $('#emerg_recv_ph, #emerg_tel').on('input', function () {
-                this.value = normalizePhoneNumber(this.value).slice(0, 11);
-            });
-
-            $("#form-submit-btn").on('click', () => {
-                if (validated() === false) {
-                    return;
-                }
                 $.ajax({
-                    url: '/operation-configuration-setting/emergency-contact/add',
-                    type: 'POST',
-                    data: {
-                        district_no: $('#district_no').val(),
-                        partner_comp_id: $('#partner_comp').val(),
-                        emerg_chgr_nm: $('#emerg_chgr_nm').val(),
-                        emerg_chgr_role: $('#emerg_chgr_role').val(),
-                        emerg_recv_ph: normalizePhoneNumber($('#emerg_recv_ph').val()),
-                        emerg_tel: normalizePhoneNumber($('#emerg_tel').val()),
-                        e_mail: $('#e_mail').val()
-                    },
-                    success: function (_res) {
-                        popFancyClose('#lay-form-write');
-                        reloadJqGrid($grid);
-                    },
-                    error: function (xhr) {
-                        const message = (xhr.responseJSON && xhr.responseJSON.message)
-                            ? xhr.responseJSON.message
-                            : '저장에 실패했습니다.';
-                        alert(message);
+                    url: '/adminAdd/districtInfo/all',
+                    type: 'GET',
+                    success: function (res) {
+                        res.forEach((item) => {
+                            $('#district_no').append(
+                                "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
+                            )
+                        })
                     }
                 });
-            });
 
-            $("#form-update-btn").on('click', () => {
-                if (validated() === false) {
-                    return;
-                }
-                $.ajax({
-                    url: '/operation-configuration-setting/emergency-contact/mod',
-                    type: 'POST',
-                    data: {
-                        mgnt_no: $('#mgnt_no').val(),
-                        district_no: $('#district_no').val(),
-                        partner_comp_id: $('#partner_comp').val(),
-                        emerg_chgr_nm: $('#emerg_chgr_nm').val(),
-                        emerg_chgr_role: $('#emerg_chgr_role').val(),
-                        emerg_recv_ph: normalizePhoneNumber($('#emerg_recv_ph').val()),
-                        emerg_tel: normalizePhoneNumber($('#emerg_tel').val()),
-                        e_mail: $('#e_mail').val()
-                    },
-                    success: function (_res) {
-                        popFancyClose('#lay-form-write');
-                        reloadJqGrid($grid);
-                    },
-                    error: function (xhr) {
-                        const message = (xhr.responseJSON && xhr.responseJSON.message)
-                            ? xhr.responseJSON.message
-                            : '수정에 실패했습니다.';
-                        alert(message);
-                    }
+                $('.insertBtn').on('click', () => {
+                    resetForm();
+                    initInsertForm();
+                    popFancy('#lay-form-write');
                 });
-            });
 
-            function validated() {
-                if ($('#district_no').val() === '') {
-                    alert('관리 현장을 선택해 주세요.');
-                    return false;
+                $('.modifyBtn').on('click', () => {
+                    const targetArr = getSelectedCheckData($grid);
+                    if (targetArr.length > 1) {
+                        alert('수정할 데이터를 1건만 선택해주세요.');
+                        return;
+                    } else if (targetArr.length === 0) {
+                        alert('수정할 데이터를 선택해주세요.');
+                        return;
+                    }
+                    resetForm();
+                    initModifyForm(targetArr[0]);
+                    popFancy('#lay-form-write');
+                });
+
+                function initModifyForm(data) {
+                    $("#form_sub_title").html('상세 정보');
+
+                    $("#deleteBtn").show()
+                    $("#form-update-btn").show();
+
+                    $("#form-submit-btn").hide();
+
+                    $('#mgnt_no').val(data.mgnt_no);
+                    $('#district_no').val(data.district_no);
+                    $('#partner_comp').val(data.partner_comp_id);
+                    $('#emerg_chgr_nm').val(data.emerg_chgr_nm);
+                    $('#emerg_chgr_role').val(data.emerg_chgr_role);
+                    $('#emerg_recv_ph').val(data.emerg_recv_ph);
+                    $('#emerg_tel').val(data.emerg_tel);
+                    $('#e_mail').val(data.e_mail);
                 }
 
-                if ($('#partner_comp').val() === '') {
-                    alert('소속 기관을 입력해 주세요.');
-                    return false;
+                $('.excelBtn').on('click', function () {
+                    downloadExcel('emergency contact', $grid, path);
+                });
+
+                function initInsertForm() {
+                    $("#form_sub_title").html('신규 등록');
+                    $("#deleteBtn").hide()
+                    $("#form-update-btn").hide();
+                    $("#form-submit-btn").show();
                 }
 
-                if ($('#emerg_chgr_nm').val() === '') {
-                    alert('이름을 입력해 주세요.');
-                    return false;
+                function resetForm() {
+                    $('#district_no').val('');
+                    $('#partner_comp').val('');
+                    $('#emerg_chgr_nm').val('');
+                    $('#emerg_chgr_role').val('');
+                    $('#emerg_recv_ph').val('');
+                    $('#emerg_tel').val('');
+                    $('#e_mail').val('');
                 }
 
-                if ($('#emerg_chgr_role').val() === '') {
-                    alert('역할을 입력해 주세요.');
-                    return false;
+                // Phone number: digits only
+                function normalizePhoneNumber(value) {
+                    return (value || '').toString().replace(/[^0-9]/g, '');
                 }
+                $('#emerg_recv_ph, #emerg_tel').on('input', function () {
+                    this.value = normalizePhoneNumber(this.value).slice(0, 11);
+                });
 
-                if ($('#emerg_recv_ph').val() === '') {
-                    alert('연락처 1을 입력해 주세요.');
-                    return false;
-                }
-
-                return true;
-            }
-
-            $("#excelBtn").click(() => {
-                downloadExcel('emergency contact', $grid, path);
-            });
-
-            $('#deleteBtn').on('click', () => {
-                confirm('삭제하시겠습니까?', () => {
+                $("#form-submit-btn").on('click', () => {
+                    if (validated() === false) {
+                        return;
+                    }
                     $.ajax({
-                        url: '/operation-configuration-setting/emergency-contact/del',
+                        url: '/operation-configuration-setting/emergency-contact/add',
                         type: 'POST',
                         data: {
-                            mgnt_no: $('#mgnt_no').val(),
+                            district_no: $('#district_no').val(),
+                            partner_comp_id: $('#partner_comp').val(),
+                            emerg_chgr_nm: $('#emerg_chgr_nm').val(),
+                            emerg_chgr_role: $('#emerg_chgr_role').val(),
+                            emerg_recv_ph: normalizePhoneNumber($('#emerg_recv_ph').val()),
+                            emerg_tel: normalizePhoneNumber($('#emerg_tel').val()),
+                            e_mail: $('#e_mail').val()
                         },
                         success: function (_res) {
                             popFancyClose('#lay-form-write');
                             reloadJqGrid($grid);
                         },
-                        error: function (_err) {
-                            alert('삭제에 실패했습니다. 다시 시도해 주세요.');
+                        error: function (xhr) {
+                            const message = (xhr.responseJSON && xhr.responseJSON.message)
+                                ? xhr.responseJSON.message
+                                : '저장에 실패했습니다.';
+                            alert(message);
                         }
                     });
-                })
-            });
+                });
 
+                $("#form-update-btn").on('click', () => {
+                    if (validated() === false) {
+                        return;
+                    }
+                    $.ajax({
+                        url: '/operation-configuration-setting/emergency-contact/mod',
+                        type: 'POST',
+                        data: {
+                            mgnt_no: $('#mgnt_no').val(),
+                            district_no: $('#district_no').val(),
+                            partner_comp_id: $('#partner_comp').val(),
+                            emerg_chgr_nm: $('#emerg_chgr_nm').val(),
+                            emerg_chgr_role: $('#emerg_chgr_role').val(),
+                            emerg_recv_ph: normalizePhoneNumber($('#emerg_recv_ph').val()),
+                            emerg_tel: normalizePhoneNumber($('#emerg_tel').val()),
+                            e_mail: $('#e_mail').val()
+                        },
+                        success: function (_res) {
+                            popFancyClose('#lay-form-write');
+                            reloadJqGrid($grid);
+                        },
+                        error: function (xhr) {
+                            const message = (xhr.responseJSON && xhr.responseJSON.message)
+                                ? xhr.responseJSON.message
+                                : '수정에 실패했습니다.';
+                            alert(message);
+                        }
+                    });
+                });
+
+                function validated() {
+                    if ($('#district_no').val() === '') {
+                        alert('관리 현장을 선택해 주세요.');
+                        return false;
+                    }
+
+                    if ($('#partner_comp').val() === '') {
+                        alert('소속 기관을 입력해 주세요.');
+                        return false;
+                    }
+
+                    if ($('#emerg_chgr_nm').val() === '') {
+                        alert('이름을 입력해 주세요.');
+                        return false;
+                    }
+
+                    if ($('#emerg_chgr_role').val() === '') {
+                        alert('역할을 입력해 주세요.');
+                        return false;
+                    }
+
+                    if ($('#emerg_recv_ph').val() === '') {
+                        alert('연락처 1을 입력해 주세요.');
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                $("#excelBtn").click(() => {
+                    downloadExcel('emergency contact', $grid, path);
+                });
+
+                $('#deleteBtn').on('click', () => {
+                    confirm('삭제하시겠습니까?', () => {
+                        $.ajax({
+                            url: '/operation-configuration-setting/emergency-contact/del',
+                            type: 'POST',
+                            data: {
+                                mgnt_no: $('#mgnt_no').val(),
+                            },
+                            success: function (_res) {
+                                popFancyClose('#lay-form-write');
+                                reloadJqGrid($grid);
+                            },
+                            error: function (_err) {
+                                alert('삭제에 실패했습니다. 다시 시도해 주세요.');
+                            }
+                        });
+                    })
+                });
+            })
         });
+
         function getFormattedPhoneNumber(phoneNumber) {
-            if (!phoneNumber) return ""; 
+            if (!phoneNumber) return "";
 
             const cleanNum = phoneNumber.toString().replace(/[^0-9]/g, "");
 
             if (cleanNum.length === 11) {
                 return cleanNum.replace(/(\d{3})(\d{4})(\d{4})/, "$1-$2-$3");
             }
-           
+
             if (cleanNum.length === 10) {
                 if (cleanNum.startsWith("02")) {
                     return cleanNum.replace(/(\d{2})(\d{4})(\d{4})/, "$1-$2-$3");
