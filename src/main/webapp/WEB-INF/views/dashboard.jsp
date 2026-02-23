@@ -276,6 +276,63 @@
         .site-zone-list .site-zone-conts li > div > p.check-box {
             margin: 0;
         }
+
+        #chart-district-select,
+        #sensor-name-select,
+        #sensor-type-select,
+        #select-condition {
+            width: 150px;
+            height: 3.6rem;
+            padding: 0 1rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        #chart-popup .modal-header input[type="datetime-local"] {
+            width: 100%;
+            height: 3.6rem;
+            padding: 0 2rem;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-weight: 300;
+            font-size: 1.5rem;
+            line-height: 3.4rem;
+            color: #47474c;
+            text-align: center;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        #chart-popup .filter-area .search-top-label {
+            padding: 0;
+        }
+
+        #chart-popup .filter-area {
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        #chart-popup .filter-area > div {
+            align-items: center;
+            gap: 10px;
+        }
+
+        #chart-popup .filter-area > div .search-top-label {
+            min-width: 58px;
+            margin-right: 0 !important;
+            white-space: nowrap;
+        }
+
+        #chart-popup .filter-area > div .search-top-label.range-sep {
+            min-width: 14px;
+            justify-content: center;
+        }
     </style>
 </head>
 <script type="text/javascript" src="/admin_add.js"></script>
@@ -623,13 +680,108 @@
         let sensNo = ''
         let chartRequestSeq = 0;
 
+        async function getDashboardChartSensors(districtNo, sensorTypeNo, preferredSensorNo) {
+            $("#sensor-name-select").empty().append("<option value=''>선택</option>");
+
+            if (!districtNo || !sensorTypeNo) {
+                return;
+            }
+
+            await $.ajax({
+                url: '/modify/sensor/all' + '?district_no=' + districtNo + '&senstype_no=' + sensorTypeNo,
+                type: 'GET',
+                success: (res) => {
+                    $("#sensor-name-select").empty().append("<option value=''>선택</option>");
+                    res.forEach((item) => {
+                        $("#sensor-name-select").append(
+                            "<option value='" + item.sens_no + "'>" + item.sens_nm + "(" + item.sens_no + ")" + "</option>"
+                        );
+                    });
+
+                    if (preferredSensorNo) {
+                        $("#sensor-name-select").val(preferredSensorNo);
+                    }
+                }
+            });
+        }
+
+        async function setDashboardChartModal(selection = {}) {
+            const selectedDistrictNo = String(selection.districtNo || $('.site-status-list select.selectZone').val() || '').trim();
+            const selectedSensorTypeNo = String(selection.sensorTypeNo || '').trim();
+            const selectedSensorNo = String(selection.sensorNo || '').trim();
+
+            await $.ajax({
+                url: '/adminAdd/districtInfo/all',
+                type: 'GET',
+                success: (res) => {
+                    $("#chart-district-select").empty().append("<option value=''>선택</option>");
+                    res.forEach((item) => {
+                        $("#chart-district-select").append(
+                            "<option value='" + item.district_no + "'>" + item.district_nm + "</option>"
+                        );
+                    });
+                    if (selectedDistrictNo) {
+                        $("#chart-district-select").val(selectedDistrictNo);
+                    }
+                }
+            });
+
+            await $.ajax({
+                url: '/sensor-type',
+                type: 'GET',
+                success: (res) => {
+                    $("#sensor-type-select").empty().append("<option value=''>선택</option>");
+                    res.forEach((item) => {
+                        $("#sensor-type-select").append(
+                            "<option value='" + item.senstype_no + "'>" + item.sens_tp_nm + "</option>"
+                        );
+                    });
+                    if (selectedSensorTypeNo) {
+                        $("#sensor-type-select").val(selectedSensorTypeNo);
+                    }
+                }
+            });
+
+            await getDashboardChartSensors($("#chart-district-select").val(), $("#sensor-type-select").val(), selectedSensorNo);
+        }
+
+        async function openDashboardChartPopupWithSelection(selection = {}) {
+            const sensorNo = String(selection.sensorNo || '').trim();
+            if (!sensorNo) {
+                alert('센서 정보가 없습니다.');
+                return;
+            }
+
+            $("#graph-search-btn").attr("data-sens-no", sensorNo);
+            openSensorPopup();
+
+            try {
+                await setDashboardChartModal(selection);
+            } catch (e) {
+                console.error('setDashboardChartModal fail', e);
+            }
+
+            $("#graph-search-btn").trigger('click');
+        }
+
 
         window.triggerChartSearch = function(assetId) {
             console.log("=== [2] 브릿지 함수 실행 ===");
             console.log("전달받은 센서 ID:", assetId);
 
+            const $assetRow = $('.site-zone-list .site-zone-conts li[asset_type="sensor"][asset_id="' + assetId + '"]').first();
+            if ($assetRow.length) {
+                openDashboardChartPopupWithSelection({
+                    districtNo: String($('.site-status-list select.selectZone').val() || '').trim(),
+                    sensorTypeNo: String($assetRow.closest('li[kind]').attr('kind') || '').trim(),
+                    sensorNo: String(assetId || '').trim()
+                });
+                return;
+            }
+
             // 버튼 속성에 ID 강제 덮어쓰기
             $("#graph-search-btn").attr("data-sens-no", assetId);
+            $("#sensor-name-select").val('');
 
             $("#graph-search-btn").click();  // 조회 버튼 강제 클릭
 
@@ -645,9 +797,15 @@
                 return;
             if (data.type === 'sensor') {                // 센서 선택시
                 let clickedAssetId = $(data.htmlContent).attr('assetid');
-                $("#graph-search-btn").attr("data-sens-no", clickedAssetId);
-                $("#graph-search-btn").click();
-                openSensorPopup();
+                const zoneId = data.zone_id || $('.site-status-list select.selectZone').val();
+                const $assetRow = $('.site-zone-list .site-zone-conts li[asset_type="sensor"][asset_id="' + clickedAssetId + '"]').first();
+                const sensorTypeNo = String($assetRow.closest('li[kind]').attr('kind') || '').trim();
+
+                openDashboardChartPopupWithSelection({
+                    districtNo: zoneId,
+                    sensorTypeNo: sensorTypeNo,
+                    sensorNo: clickedAssetId
+                });
             } else if (data.type === 'cctv') {           // cctv 선택시
                 openCctvPopup(data);
             } else {
@@ -659,7 +817,14 @@
         });
 
         $("#graph-search-btn").click(() => {
-            let currentSensNo = $("#graph-search-btn").attr("data-sens-no");
+            const selectedSensorNo = String($("#sensor-name-select").val() || '').trim();
+            let currentSensNo = selectedSensorNo || String($("#graph-search-btn").attr("data-sens-no") || '').trim();
+            if (!currentSensNo) {
+                alert('센서를 선택해주세요.');
+                return;
+            }
+
+            $("#graph-search-btn").attr("data-sens-no", currentSensNo);
             myChart.data.labels = [];
             myChart.data.datasets = [];
             myChart.update();
@@ -672,9 +837,18 @@
             });
             const startDateTime = $('#start-date').val();
             const endDateTime = $('#end-date').val();
+            let selectType = 'minute';
+            if ($("#select-condition").length > 0) {
+                const condition = $("#select-condition").val();
+                if (condition === 'hourly') {
+                    selectType = 'hour';
+                } else if (condition === 'daily') {
+                    selectType = 'day';
+                }
+            }
             const requestSeq = ++chartRequestSeq;
             const requests = checkedData.map((item) => {
-                return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id);
+                return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id, selectType);
             });
             Promise.all(requests).then((results) => {
                 if (requestSeq !== chartRequestSeq) {
@@ -705,10 +879,23 @@
             });
         });
 
-        function getChartData(sens_no, startDateTime, endDateTime, sensChnlId) {
+        $(document).on('change', '#chart-district-select', async (e) => {
+            const districtNo = String(e.target.value || '').trim();
+            const sensorTypeNo = String($("#sensor-type-select").val() || '').trim();
+            await getDashboardChartSensors(districtNo, sensorTypeNo);
+        });
+
+        $(document).on('change', '#sensor-type-select', async (e) => {
+            const districtNo = String($("#chart-district-select").val() || '').trim();
+            const sensorTypeNo = String(e.target.value || '').trim();
+            await getDashboardChartSensors(districtNo, sensorTypeNo);
+        });
+
+        function getChartData(sens_no, startDateTime, endDateTime, sensChnlId, selectType) {
+            const selectTypeParam = selectType ? "&selectType=" + encodeURIComponent(selectType) : "";
             return new Promise((resolve) => {
                 $.ajax({
-                    url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId,
+                    url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + selectTypeParam,
                     type: 'GET',
                     success: function (res) {
                         if (Array.isArray(res)) {
@@ -1075,8 +1262,21 @@
         });
 
         $(document).on('click', 'i.fa-eye', function (e) {
-            const selectAssetId = $(this).closest('li').attr('asset_id');
-            const selectAssetType = $(this).closest('li').attr('asset_type');
+            const $assetRow = $(this).closest('li[asset_id]');
+            const selectAssetId = $assetRow.attr('asset_id');
+            const selectAssetType = $assetRow.attr('asset_type');
+
+            if (selectAssetType === 'sensor') {
+                const districtNo = String($('.site-status-list select.selectZone').val() || '').trim();
+                const sensorTypeNo = String($assetRow.closest('li[kind]').attr('kind') || '').trim();
+                openDashboardChartPopupWithSelection({
+                    districtNo: districtNo,
+                    sensorTypeNo: sensorTypeNo,
+                    sensorNo: selectAssetId
+                });
+                return;
+            }
+
             const data = window.vworld.overlays.find(d => isTargetOverlay(d, selectAssetId, selectAssetType));
             $(document).trigger('overlay_click', data);
         });
@@ -1493,12 +1693,40 @@
         <div class="modal-header" style="margin-bottom: 10px">
             <div class="filter-area" style="margin-right: 150px; margin-bottom: 10px">
                 <div style="display:flex;">
+                    <p class="search-top-label" style="margin-right: 13px;">현장명</p>
+                    <select id="chart-district-select" style="width:150px;height:3.6rem;">
+                        <option value="">선택</option>
+                    </select>
+                </div>
+                <div style="display:flex;">
+                    <p class="search-top-label">센서타입</p>
+                    <select id="sensor-type-select" style="width:150px;height:3.6rem;">
+                        <option value="">선택</option>
+                    </select>
+                </div>
+                <div style="display:flex;">
+                    <p class="search-top-label">센서명</p>
+                    <select id="sensor-name-select" style="width:150px;height:3.6rem;">
+                        <option value="">선택</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-area" style="margin-right: 150px; margin-bottom: 10px">
+                <div style="display:flex;">
                     <p class="search-top-label">조회기간</p>
                     <input id="start-date" type="datetime-local"/>
                 </div>
                 <div style="display:flex;">
-                    <p class="search-top-label">~</p>
+                    <p class="search-top-label range-sep">~</p>
                     <input id="end-date" type="datetime-local"/>
+                </div>
+                <div style="display:flex;">
+                    <p class="search-top-label">조회조건</p>
+                    <select id="select-condition" style="width:150px;height:3.6rem;">
+                        <option value="minute">상세</option>
+                        <option value="daily">일별</option>
+                        <option value="hourly">시간별</option>
+                    </select>
                 </div>
                 <div class="btn-group3">
                     <a id="graph-search-btn" data-fancybox data-src="">조회</a>
