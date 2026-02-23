@@ -287,6 +287,12 @@
                            ON mg.sens_no = tai.sens_no
                                AND mg.sens_chnl_id = tai.sens_chnl_id
         WHERE mg.alarm_level = #{alarmLevel}
+        <if test="district_no != null and district_no != ''">
+            AND mg.district_no = #{district_no}
+        </if>
+        <if test="district_nm != null and district_nm != ''">
+            AND tdi.district_nm = #{district_nm}
+        </if>
         ORDER BY mg.reg_dt DESC, mg.sens_no, mg.sens_chnl_id
         <if test="limit != null">
             LIMIT #{limit}::int

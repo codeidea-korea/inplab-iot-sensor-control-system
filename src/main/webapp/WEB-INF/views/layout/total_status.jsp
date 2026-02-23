@@ -151,7 +151,133 @@
             '', '현장명','센서명','센서채널명','알람 상태','계측값','센서상태'
         ];
 
+        let alarmGridBaseQuery = {};
+        let alarmGridDefaultDistrictNm = '';
+        let suppressAlarmGridDistrictFetch = false;
+        const alarmGridKeyArray = ['sens_no', 'sens_chnl_id', 'meas_dt'];
+
+        const getDashboardSelectedDistrict = () => {
+            const $zoneSelect = $('.site-status-list select.selectZone');
+            if ($zoneSelect.length === 0) {
+                return { districtNo: '', districtNm: '' };
+            }
+
+            const districtNo = String($zoneSelect.val() || '').trim();
+            const districtNm = districtNo ? String($zoneSelect.find('option:selected').text() || '').trim() : '';
+
+            if (!districtNo || districtNm === '현장 선택' || districtNm === '전체현장') {
+                return { districtNo: '', districtNm: '' };
+            }
+
+            return { districtNo, districtNm };
+        };
+
+        const applyAlarmGridDistrictFilter = (districtNm) => {
+            if (!districtNm) {
+                return;
+            }
+
+            const $g = $("#gridAlarm");
+            if (!$g.length || !$g[0] || !$g[0].grid) {
+                return;
+            }
+
+            const colModel = $g.jqGrid('getGridParam', 'colModel') || [];
+            const districtColIndex = colModel.findIndex(col => col.name === 'district_nm');
+            if (districtColIndex < 0) {
+                return;
+            }
+
+            const $view = $g.closest(".ui-jqgrid-view");
+            const $districtSelect = $view.find('.ui-search-toolbar th').eq(districtColIndex).find('select');
+            if ($districtSelect.length === 0) {
+                return;
+            }
+
+            if ($districtSelect.find('option').filter(function () { return $(this).val() === districtNm; }).length === 0) {
+                $districtSelect.append($('<option>', { value: districtNm, text: districtNm }));
+            }
+
+            suppressAlarmGridDistrictFetch = true;
+            $districtSelect.val(districtNm).trigger('change');
+        };
+
+        const replaceAlarmGridRows = (rows) => {
+            const $g = $('#gridAlarm');
+            if (!$g.length || !$g[0] || !$g[0].grid) {
+                return;
+            }
+
+            const addData = actFormattedData(rows || [], alarmGridKeyArray);
+            const currentFilters = $g.jqGrid('getGridParam', 'postData')?.filters;
+
+            $g.jqGrid('clearGridData', true);
+            addData.forEach(row => {
+                $g.jqGrid('addRowData', row.id, row);
+            });
+
+            $g.jqGrid('setGridParam', {
+                search: !!currentFilters,
+                postData: { filters: currentFilters || '' },
+                page: 1
+            }).trigger('reloadGrid');
+        };
+
+        const reloadAlarmGridByDistrictNm = (districtNm) => {
+            const alarmLevel = alarmGridBaseQuery?.alarmLevel;
+            if (!alarmLevel) {
+                return;
+            }
+
+            offset = 0;
+            alarmGridBaseQuery = { alarmLevel: alarmLevel };
+            if (districtNm) {
+                alarmGridBaseQuery.district_nm = districtNm;
+            }
+
+            const req = { limit, offset, alarmLevel };
+            if (districtNm) {
+                req.district_nm = districtNm;
+            }
+
+            getAlarmByLevel(req).then((res) => {
+                replaceAlarmGridRows(res || []);
+            }).catch((fail) => {
+                console.log('reloadAlarmGridByDistrictNm fail > ', fail);
+            });
+        };
+
+        const bindAlarmGridDistrictSelectFetch = () => {
+            const $g = $('#gridAlarm');
+            if (!$g.length || !$g[0] || !$g[0].grid) {
+                return;
+            }
+
+            const colModel = $g.jqGrid('getGridParam', 'colModel') || [];
+            const districtColIndex = colModel.findIndex(col => col.name === 'district_nm');
+            if (districtColIndex < 0) {
+                return;
+            }
+
+            const $districtSelect = $g.closest('.ui-jqgrid-view')
+                .find('.ui-search-toolbar th').eq(districtColIndex)
+                .find('select');
+            if ($districtSelect.length === 0) {
+                return;
+            }
+
+            $districtSelect.off('change.alarmGridDistrictFetch').on('change.alarmGridDistrictFetch', function () {
+                if (suppressAlarmGridDistrictFetch) {
+                    suppressAlarmGridDistrictFetch = false;
+                    return;
+                }
+
+                reloadAlarmGridByDistrictNm(String($(this).val() || '').trim());
+            });
+        };
+
         const getAlarmByLevel = (obj) => {
+            const requestData = Object.assign({}, alarmGridBaseQuery, obj);
             return new Promise((resolve, reject) => {
                 $.ajax({
                     type: 'GET',
@@ -159,7 +285,7 @@
                     dataType: 'json',
                     contentType: 'application/json; charset=utf-8',
                     async: true,
-                    data: obj
+                    data: requestData
                 }).done(function (res) {
                     resolve(res);
                 }).fail(function (fail) {
@@ -194,6 +320,9 @@
                         $searchRow.append($cell);
                     });
                     $thead.append($searchRow);
+
+                    bindAlarmGridDistrictSelectFetch();
+                    applyAlarmGridDistrictFilter(alarmGridDefaultDistrictNm);
                 }).catch((fail) => {
                     console.log('getDistinct fail > ', fail);
                 });
@@ -221,13 +350,20 @@
                 alarmLevel = 'ARM004';
             }
 
-            getAlarmByLevel({limit, offset, alarmLevel}).then((res) => {
+            const selectedDistrict = getDashboardSelectedDistrict();
+            alarmGridDefaultDistrictNm = selectedDistrict.districtNm || '';
+            alarmGridBaseQuery = { alarmLevel: alarmLevel };
+            if (selectedDistrict.districtNo) {
+                alarmGridBaseQuery.district_no = selectedDistrict.districtNo;
+            }
+
+            getAlarmByLevel(Object.assign({ limit, offset, alarmLevel }, selectedDistrict.districtNo ? { district_no: selectedDistrict.districtNo } : {})).then((res) => {
                 let rows = res || [];
 
                 // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
                 const gridId = 'gridAlarm';
                 const $g = $('#' + gridId);
-                const keyArray = ['sens_no', 'sens_chnl_id', 'meas_dt'];
+                const keyArray = alarmGridKeyArray;
 
                 if ($g[0] && $g[0].grid) {
                     // 기존 그리드 재사용: 데이터만 교체
@@ -237,7 +373,7 @@
                         $g.jqGrid('addRowData', row.id, row);
                     });
 
-                    // 알람 단계 클릭 시에는 현장명 포함 기존 검색조건을 유지하지 않고 "전체" 기준으로 재조회
+                    // 알람 단계 클릭 시 기존 검색조건을 초기화하고, 대시보드에서 현장 선택된 경우 해당 현장으로 기본 적용
                     const $view = $g.closest('.ui-jqgrid-view');
                     $view.find('.ui-search-toolbar input').val('');
                     $view.find('.ui-search-toolbar select').val('');
@@ -247,6 +383,8 @@
                         postData: { filters: '' },
                         page: 1
                     }).trigger('reloadGrid');
+
+                    applyAlarmGridDistrictFilter(alarmGridDefaultDistrictNm);
                 } else {
                     // 최초 생성
                     setJqGridTable(rows, column_l, header_l, gridComplete_l, null, keyArray, gridId, limit, offset, getAlarmByLevel, null, null);
