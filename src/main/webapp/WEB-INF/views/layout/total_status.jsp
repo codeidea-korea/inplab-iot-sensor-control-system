@@ -1286,11 +1286,9 @@
 
                     let clickAssetId = res[idx].sens_no || res[idx].asset_id;
 
-                    console.log("추출된 센서 ID (clickAssetId):", clickAssetId);
-
                     if (clickAssetId) {
                         if (typeof window.triggerChartSearch === "function") {
-                            window.triggerChartSearch(clickAssetId);
+                            window.triggerChartSearch(clickAssetId, res[idx]);
                         } else {
                             console.error("🚨 에러: window.triggerChartSearch 함수가 정의되지 않았습니다!");
                         }
@@ -1310,13 +1308,7 @@
         $.ajax({
             url: '/updateViewFlag',
             type: 'POST',
-            data: { mgntNo: mgntNo, view_flag: 'Y' },
-            success: function (res) {
-                console.log('✅ view_flag 업데이트 완료:', res);
-            },
-            error: function (xhr, status, err) {
-                console.error('❌ view_flag 업데이트 실패:', err);
-            }
+            data: { mgntNo: mgntNo, view_flag: 'Y' }
         });
     }
 

@@ -765,7 +765,7 @@
         }
 
 
-        window.triggerChartSearch = function(assetId) {
+        /*window.triggerChartSearch = function(assetId) {
             console.log("=== [2] 브릿지 함수 실행 ===");
             console.log("전달받은 센서 ID:", assetId);
 
@@ -780,7 +780,7 @@
             }
 
             // 버튼 속성에 ID 강제 덮어쓰기
-            $("#graph-search-btn").attr("data-sens-no", assetId);
+            //$("#graph-search-btn").attr("data-sens-no", assetId);
             $("#sensor-name-select").val('');
 
             $("#graph-search-btn").click();  // 조회 버튼 강제 클릭
@@ -790,6 +790,65 @@
             } else {
                 popFancy('#chart-popup', {dragToClose: false, touch: false});
             }
+        };*/
+
+        // 수정 1. 괄호 안에 rowData 파라미터를 추가했습니다.
+        window.triggerChartSearch = function(assetId, rowData) {
+
+            const $assetRow = $('.site-zone-list .site-zone-conts li[asset_type="sensor"][asset_id="' + assetId + '"]').first();
+
+            if (rowData) {
+                if (rowData.district_nm) {
+                    if ($("#chart-district-select option:contains('" + rowData.district_nm + "')").length === 0) {
+                        $("#chart-district-select").append('<option value="temp_dist">' + rowData.district_nm + '</option>');
+                    }
+                    $("#chart-district-select option:contains('" + rowData.district_nm + "')").prop('selected', true);
+                }
+
+                if (rowData.sens_tp_nm) {
+                    if ($("#sensor-type-select option:contains('" + rowData.sens_tp_nm + "')").length === 0) {
+                        $("#sensor-type-select").append('<option value="temp_type">' + rowData.sens_tp_nm + '</option>');
+                    }
+                    $("#sensor-type-select option:contains('" + rowData.sens_tp_nm + "')").prop('selected', true);
+                }
+
+                let sensorNameLabel = rowData.sens_nm ? rowData.sens_nm + "(" + assetId + ")" : assetId;
+                if ($("#sensor-name-select option[value='" + assetId + "']").length === 0) {
+                    $("#sensor-name-select").append('<option value="' + assetId + '">' + sensorNameLabel + '</option>');
+                }
+                $("#sensor-name-select").val(assetId);
+            }
+            else {
+
+                if ($("#sensor-name-select option[value='" + assetId + "']").length === 0) {
+                    $("#sensor-name-select").append('<option value="' + assetId + '">' + assetId + '</option>');
+                }
+                $("#sensor-name-select").val(assetId);
+            }
+
+            if ($assetRow.length) {
+                openDashboardChartPopupWithSelection({
+                    districtNo: String($('.site-status-list select.selectZone').val() || '').trim(),
+                    sensorTypeNo: String($assetRow.closest('li[kind]').attr('kind') || '').trim(),
+                    sensorNo: String(assetId || '').trim()
+                });
+                return;
+            }
+
+            if (typeof selectArrary !== 'undefined') {
+                selectArrary = [{ sens_no: assetId, sens_chnl_nm: '' }];
+            }
+
+
+            if (typeof window.openSensorPopup === "function") {
+                window.openSensorPopup();
+            } else {
+                popFancy('#chart-popup', {dragToClose: false, touch: false});
+            }
+
+            setTimeout(function() {
+                $("#graph-search-btn").click();
+            }, 100);
         };
 
         $(document).on('overlay_click', function (e, data) {
