@@ -490,9 +490,9 @@
                 SELECT
                     a.sens_no,
                     CASE
-                        WHEN COALESCE(lmd.err_cnt, 999999) >= a.nonrecv_limit_min THEN '미수신'
+                        WHEN BOOL_OR(COALESCE(lmd.err_cnt, 999999) >= a.nonrecv_limit_min) THEN '미수신'
                         ELSE '수신'
-                        END AS comm_status
+                    END AS comm_status
                 FROM tb_sensor_info a
                          JOIN tb_sensor_chnl e
                               ON a.sens_no = e.sens_no
@@ -511,7 +511,7 @@
                         LIMIT 1
                 ) AS lmd ON TRUE
             WHERE 1=1 and a.sens_disp_yn ='Y'
-            group by a.sens_no, comm_status
+            GROUP BY a.sens_no
         )
         SELECT
             COUNT(*)                                                     AS allCnt,

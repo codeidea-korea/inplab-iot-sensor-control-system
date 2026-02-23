@@ -202,6 +202,8 @@
 
         // 각 알람 현황 클릭시
         $('.overall-status-area .donutty-area li').off().on('click', function () {
+            offset = 0;
+
             let status = $(this).attr('level');
             let alarmLevel;
 
@@ -234,11 +236,15 @@
                     addData.forEach(row => {
                         $g.jqGrid('addRowData', row.id, row);
                     });
-                    // 기존에 필터가 걸려있으면 유지
-                    const currentFilters = $g.jqGrid('getGridParam', 'postData').filters;
+
+                    // 알람 단계 클릭 시에는 현장명 포함 기존 검색조건을 유지하지 않고 "전체" 기준으로 재조회
+                    const $view = $g.closest('.ui-jqgrid-view');
+                    $view.find('.ui-search-toolbar input').val('');
+                    $view.find('.ui-search-toolbar select').val('');
+
                     $g.jqGrid('setGridParam', {
-                        search: !!currentFilters,
-                        postData: { filters: currentFilters || '' },
+                        search: false,
+                        postData: { filters: '' },
                         page: 1
                     }).trigger('reloadGrid');
                 } else {
@@ -1502,4 +1508,3 @@
 
     </div>
 </div>
-

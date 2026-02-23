@@ -260,6 +260,22 @@
             background: #fff !important;
             color: #000;
         }
+
+        .site-zone-list .site-zone-conts li > div {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .site-zone-list .site-zone-conts li > div > i.fa-eye {
+            display: inline-flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .site-zone-list .site-zone-conts li > div > p.check-box {
+            margin: 0;
+        }
     </style>
 </head>
 <script type="text/javascript" src="/admin_add.js"></script>
@@ -1030,9 +1046,10 @@
             let $this = $(this);
             let toggleFunction = function ($this) {
                 $.each($this.closest('li').find('.site-zone-conts li'), function () {
+                    const assetType = $(this).attr('asset_type');
                     $(this).find('p.check-box input').prop('checked', checked);
 
-                    markerVisible($(this).attr('asset_id'), checked);
+                    markerVisible($(this).attr('asset_id'), checked, assetType);
                 });
             }
             if (window.vworld.getZoom() < MARKER_CHANGE_LEVEL) {
@@ -1046,31 +1063,43 @@
 
         $(document).on('click', '.site-zone-list li .site-zone-conts p.check-box span', function (e) {
             const selectAssetId = $(this).closest('li').attr('asset_id');
+            const selectAssetType = $(this).closest('li').attr('asset_type');
             const checked = !$(this).closest('p.check-box').find('input').is(':checked');
             if (window.vworld.getZoom() < MARKER_CHANGE_LEVEL) {
                 window.vworld.setPanBy(window.vworld.getCenter(), 18, function () {
-                    markerVisible(selectAssetId, checked);
+                    markerVisible(selectAssetId, checked, selectAssetType);
                 });
             } else {
-                markerVisible(selectAssetId, checked);
+                markerVisible(selectAssetId, checked, selectAssetType);
             }
         });
 
         $(document).on('click', 'i.fa-eye', function (e) {
             const selectAssetId = $(this).closest('li').attr('asset_id');
-            const data = window.vworld.overlays.find(d => d.asset_id === selectAssetId);
+            const selectAssetType = $(this).closest('li').attr('asset_type');
+            const data = window.vworld.overlays.find(d => isTargetOverlay(d, selectAssetId, selectAssetType));
             $(document).trigger('overlay_click', data);
         });
 
         $('.site-zone-list p.check-box input').prop('checked', true);
 
-        function markerVisible(asset_id, visible) {
+        function isTargetOverlay(overlay, assetId, assetType) {
+            if (typeof overlay['asset_id'] === 'undefined' || overlay.asset_id !== assetId) {
+                return false;
+            }
+
+            if (!assetType) {
+                return true;
+            }
+
+            return overlay.asset_category === assetType;
+        }
+
+        function markerVisible(asset_id, visible, assetType) {
             $.each(window.vworld.overlays, function () {
-                if (typeof this['asset_id'] != 'undefined') {
-                    if (this.asset_id === asset_id) {
-                        window.vworld.visibleOverlay(this.uid, visible);
-                        return false;
-                    }
+                if (isTargetOverlay(this, asset_id, assetType)) {
+                    window.vworld.visibleOverlay(this.uid, visible);
+                    return false;
                 }
             });
         }
@@ -1123,10 +1152,10 @@
                         const status = window.markers.risks.find(r => r.zone_id === districtNo && r.asset_id === sensor.sens_no);
                         const fcStep = !!status?.risk_level ? 'fc_step' + status.risk_level : '';
                         const html =
-                            '<li ' + fcStep + ' asset_id="' + sensor.sens_no + '">' +
+                            '<li ' + fcStep + ' asset_id="' + sensor.sens_no + '" asset_type="sensor">' +
                             '    <a href="javascript:void(0);" data-coords="' + sensor.sens_lon + ',' + sensor.sens_lat + '">' + sensor.sens_nm + '</a>' +
                             '    <div>' +
-                            '        <i class="fa-regular fa-eye"></i>　' +
+                            '        <i class="fa-regular fa-eye"></i>' +
                             '        <p class="check-box" notxt="" small="">' +
                             '            <input type="checkbox" id="check_cctv01_' + _idx + '" name="check_cctv01_' + _idx + '" value="" checked>' +
                             '            <label for="check_cctv01_' + _idx + '">' +
@@ -1141,12 +1170,10 @@
                     $.each(res.cctvs, (_idx, cctv) => {
                         const fcStep = ''
                         const html =
-                            '<li ' + fcStep + ' asset_id="' + cctv.cctv_no + '">' +
+                            '<li ' + fcStep + ' asset_id="' + cctv.cctv_no + '" asset_type="cctv">' +
                             '    <a href="javascript:void(0);" data-coords="' + cctv.cctv_lon + ',' + cctv.cctv_lat + '">' + cctv.cctv_nm + '</a>' +
                             '    <div>' +
-                            '       <div>'+
-                            '        <i class="fa-regular fa-eye"></i>　' +
-                            '          </div>'+
+                            '        <i class="fa-regular fa-eye"></i>' +
                             '        <p class="check-box" notxt="" small="">' +
                             '            <input type="checkbox" id="check_conts01_' + _idx + '" name="check_conts01_' + _idx + '" value="" checked>' +
                             '            <label for="check_conts01_' + _idx + '">' +
@@ -1195,21 +1222,25 @@
             $.each(sensors, (_idx, sensor) => {
                 let img;
                 let type = 'sensor';
-                if (sensor.sens_tp_nm === '구조물경사계') {
+                const sensorTypeName = (sensor.sens_tp_nm || '').trim();
+
+                if (sensorTypeName.indexOf('구조물경사계') > -1) {
                     img = 'icon_sensor_tm.png';
-                } else if (sensor.sens_tp_nm === '강우량계') {
+                } else if (/(강우량계|강우계|우량계|강수량계)/.test(sensorTypeName)) {
                     img = 'icon_sensor_p.png';
-                } else if (sensor.sens_tp_nm === '지표변위계') {
+                } else if (sensorTypeName.indexOf('지표변위계') > -1) {
                     img = 'icon_sensor_s.png';
-                } else if (sensor.sens_tp_nm === 'CCTV') {
+                } else if (sensorTypeName.indexOf('지표경사계') > -1) {
+                    img = 'icon_sensor_tm.png';
+                } else if (sensorTypeName === 'CCTV') {
                     img = 'icon_cctv.png';
                     type = 'cctv';
-                } else if (sensor.sens_tp_nm === '재난방송') {
+                } else if (sensorTypeName.indexOf('재난방송') > -1) {
                     img = 'icon_speaker.png';
                     type = 'speaker';
-                } else if (sensor.sens_tp_nm === '전광판') {
+                } else if (sensorTypeName.indexOf('전광판') > -1) {
                     img = 'icon_text.png';
-                } else if (sensor.sens_tp_nm.indexOf('지하수위계') > -1) {
+                } else if (sensorTypeName.indexOf('지하수위계') > -1) {
                     img = 'icon_sensor_ttw.png';
                 } else {
                     img = 'icon_sensor_tm.png';
@@ -1225,6 +1256,7 @@
                         type: type,
                         asset_id: sensor.sens_no,
                         zone_id: districtNo,
+                        asset_category: 'sensor'
                     });
                 window.markers.assets.push(sensorMaker);
             });
@@ -1245,6 +1277,7 @@
                         type: type,
                         asset_id: cctv.cctv_no,
                         zone_id: districtNo,
+                        asset_category: 'cctv',
                         etc1: cctv.etc1
                     });
                 window.markers.assets.push(cctvMaker);

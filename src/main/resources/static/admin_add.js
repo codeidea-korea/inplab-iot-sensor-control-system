@@ -175,6 +175,30 @@ const setFilterControls = (col, index, distinctDistrict, distinctSensType, filte
                 }).trigger("reloadGrid");
             });
             $cell.append($select);
+        } else if (col.name === "alarm_lvl_cd") {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            $select.append('<option value="ARM001">관심</option>');
+            $select.append('<option value="ARM002">주의</option>');
+            $select.append('<option value="ARM003">경계</option>');
+            $select.append('<option value="ARM004">심각</option>');
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "eq",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($select);
         } else if (col.name === "maint_sts_cd") {
             let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
             $select.append('<option value="MTN001">정상</option>');
