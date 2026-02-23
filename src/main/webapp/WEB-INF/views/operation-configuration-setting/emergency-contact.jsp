@@ -314,7 +314,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>연라처 2</th>
+                        <th>연락처 2</th>
                         <td><input type="text" id="emerg_tel" placeholder="Ex) 01012341234 (“-” 없이 숫자만 입력)"/></td>
                     </tr>
                     <tr>
