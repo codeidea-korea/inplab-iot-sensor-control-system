@@ -227,7 +227,7 @@
                 // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
                 const gridId = 'gridAlarm';
                 const $g = $('#' + gridId);
-                const keyArray = ['district_nm', 'sens_chnl_nm'];
+                const keyArray = ['sens_no', 'sens_chnl_id', 'meas_dt'];
 
                 if ($g[0] && $g[0].grid) {
                     // 기존 그리드 재사용: 데이터만 교체
