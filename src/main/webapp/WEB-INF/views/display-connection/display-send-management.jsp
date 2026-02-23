@@ -511,8 +511,7 @@
 
             try {
                 const originalName = imageFile.name || "image.png";
-                const extension = originalName.includes(".") ? originalName.split(".").pop() : "png";
-                fileName = "dispbd_" + Date.now() + "_" + Math.floor(Math.random() * 1000) + "." + extension;
+                fileName = originalName;
                 base64Image = await readFileAsBase64(imageFile);
             } catch (_error) {
                 alert('이미지 파일을 읽는 중 오류가 발생했습니다.');
@@ -840,7 +839,7 @@
             </div>
             <div class="btn-btm">
                 <input type="button" id="form-submit-btn" blue value="저장"/>
-                <button type="button" data-fancybox-close>닫기</button>
+                <button type="button" data-fancybox-close>취소</button>
             </div>
         </div>
     </div>

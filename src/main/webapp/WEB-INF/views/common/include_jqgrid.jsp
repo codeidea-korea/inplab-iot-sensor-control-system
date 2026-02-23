@@ -533,9 +533,19 @@
     });
 
     function downloadExcel(fileName, $grid = $('.jqGrid')) {
-        //20231228 urlParameters 추가
-        const gridData = $grid.getGridParam('postData');
-        const urlParameters = Object.entries(gridData).map(e => e.join('=')).join('&');
+        // Include current sort state so Excel order matches the grid.
+        const gridData = Object.assign({}, $grid.getGridParam('postData') || {});
+        const currentSortName = $grid.getGridParam('sortname');
+        const currentSortOrder = $grid.getGridParam('sortorder');
+
+        if (currentSortName) {
+            gridData.sidx = currentSortName;
+        }
+        if (currentSortOrder) {
+            gridData.sord = currentSortOrder;
+        }
+
+        const urlParameters = $.param(gridData);
 
         var url = "${path}/excel/" + fileName + '?' + urlParameters;
 
@@ -552,4 +562,3 @@
         iframe.src = url;
     }
 </script>
-

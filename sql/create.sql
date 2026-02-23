@@ -769,7 +769,7 @@ CREATE TABLE "tb_emerg_contact" (
                                     emerg_chgr_nm varchar not null,
                                     emerg_recv_ph varchar not null,
                                     emerg_tel varchar default '',
-                                    partner_comp_id varchar(3) not null,
+                                    partner_comp_id varchar not null,
                                     emerg_chgr_role varchar default '',
                                     e_mail varchar default '',
                                     reg_dt timestamp not null,
@@ -782,7 +782,7 @@ COMMENT ON COLUMN "tb_emerg_contact".district_no IS '현장_id';
 COMMENT ON COLUMN "tb_emerg_contact".emerg_chgr_nm IS '담당자명';
 COMMENT ON COLUMN "tb_emerg_contact".emerg_recv_ph IS '휴대전화';
 COMMENT ON COLUMN "tb_emerg_contact".emerg_tel IS '일반전화';
-COMMENT ON COLUMN "tb_emerg_contact".partner_comp_id IS '협력사_id, 시공사/계측사';
+COMMENT ON COLUMN "tb_emerg_contact".partner_comp_id IS '소속기관명(legacy column name: partner_comp_id)';
 COMMENT ON COLUMN "tb_emerg_contact".emerg_chgr_role IS '역할';
 COMMENT ON COLUMN "tb_emerg_contact".e_mail IS 'e-메일';
 COMMENT ON COLUMN "tb_emerg_contact".reg_dt IS '등록일시';
