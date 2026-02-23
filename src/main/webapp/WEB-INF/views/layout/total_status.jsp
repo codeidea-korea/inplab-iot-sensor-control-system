@@ -473,7 +473,8 @@
                 // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
                 const gridId = 'gridSensor';
                 const $g = $('#' + gridId);
-                const keyArray = ['district_nm', 'sens_chnl_nm'];
+                // 센서 목록은 sens_no 기준으로 유니크 처리해야 동일 현장명 중복 시 누락되지 않음
+                const keyArray = ['sens_no'];
 
                 if ($g[0] && $g[0].grid) {
                     // 기존 그리드 재사용: 데이터만 교체
@@ -529,20 +530,21 @@
                 hidden: false,
                 formatter: checkboxFormatter
             },
-            {name: 'district_nm', index: 'district_nm', width: 100, align: 'center', hidden: false},
-            {name: 'cctv_nm', index: 'cctv_nm', align: 'center', hidden: false},
-            {name: 'partner_comp_nm', index: 'partner_comp_nm', align: 'center', hidden: false},
-            {name: 'partner_comp_user_nm', index: 'partner_comp_user_nm', width: 100, align: 'center', hidden: false},
+            {name: 'district_nm', index: 'district_nm', width: 120, align: 'center', hidden: false},
+            {name: 'cctv_nm', index: 'cctv_nm', width: 180, align: 'center', hidden: false},
+            {name: 'partner_comp_nm', index: 'partner_comp_nm', width: 140, align: 'center', hidden: false},
+            {name: 'partner_comp_user_nm', index: 'partner_comp_user_nm', width: 110, align: 'center', hidden: false},
             {
                 name: 'partner_comp_user_phone',
                 index: 'partner_comp_user_phone',
-                width: 100,
+                width: 140,
                 align: 'center',
                 hidden: false
             },
             {
                 name: 'rtsp_status',
                 index: 'rtsp_status',
+                width: 100,
                 align: 'center',
                 hidden: false,
                 formatter: (cellValue, _options, _rowObject) => {
@@ -556,6 +558,7 @@
             {
                 name: 'maint_sts_cd',
                 index: 'maint_sts_cd',
+                width: 100,
                 align: 'center',
                 hidden: false,
                 formatter: (cellValue, _options, _rowObject) => {
@@ -648,7 +651,8 @@
                 // --- 그리드가 이미 있으면 재사용 / 없으면 생성 ---
                 const gridId = 'gridCCTV';
                 const $g = $('#' + gridId);
-                const keyArray = ['district_nm'];
+                // CCTV 목록은 cctv_no 기준으로 유니크 처리해야 동일 현장 다건 누락 방지
+                const keyArray = ['cctv_no'];
 
                 if ($g[0] && $g[0].grid) {
                     // 기존 그리드 재사용: 데이터만 교체
@@ -679,7 +683,8 @@
                     const $wrap = $g.closest('.bTable');
                     const $cont = $g.closest('.layer-base-conts');
                     const h = Math.max(300, ($cont.innerHeight() || 520) - 120);
-                    $g.jqGrid('setGridWidth', $wrap.width());
+                    // 열 간격/폭이 상태별(전체/정상/에러) 전환 시 깨지지 않도록 고정폭 기준으로 재계산
+                    $g.jqGrid('setGridWidth', $wrap.width(), false);
                     $g.jqGrid('setGridHeight', h);
                 }
             });

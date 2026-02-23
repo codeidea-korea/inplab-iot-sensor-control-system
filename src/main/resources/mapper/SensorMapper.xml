@@ -494,7 +494,7 @@
                         ELSE '수신'
                     END AS comm_status
                 FROM tb_sensor_info a
-                         JOIN tb_sensor_chnl e
+                         LEFT JOIN tb_sensor_chnl e
                               ON a.sens_no = e.sens_no
                          LEFT JOIN LATERAL (
                     SELECT
@@ -510,7 +510,7 @@
                     ORDER BY m.meas_dt DESC
                         LIMIT 1
                 ) AS lmd ON TRUE
-            WHERE 1=1 and a.sens_disp_yn ='Y'
+            WHERE 1=1
             GROUP BY a.sens_no
         )
         SELECT

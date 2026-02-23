@@ -175,6 +175,52 @@ const setFilterControls = (col, index, distinctDistrict, distinctSensType, filte
                 }).trigger("reloadGrid");
             });
             $cell.append($select);
+        } else if (col.name === "comm_status") {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            $select.append('<option value="수신">수신</option>');
+            $select.append('<option value="미수신">미수신</option>');
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "eq",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($select);
+        } else if (col.name === "sens_status") {
+            let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
+            $select.append('<option value="MTN001">정상</option>');
+            $select.append('<option value="MTN002">망실</option>');
+            $select.append('<option value="MTN003">점검</option>');
+            $select.append('<option value="MTN004">철거</option>');
+            $select.on("change", function () {
+                const colName = $(`#${gridId}`).jqGrid("getGridParam", "colModel")[index].name;
+                const searchValue = $(this).val();
+                filters.rules = filters.rules.filter(rule => rule.field !== colName);
+                if (searchValue) {
+                    filters.rules.push({
+                        field: colName,
+                        op: "eq",
+                        data: searchValue
+                    });
+                }
+                $(`#${gridId}`).jqGrid("setGridParam", {
+                    postData: { filters: JSON.stringify(filters) },
+                    search: true,
+                    page: 1
+                }).trigger("reloadGrid");
+            });
+            $cell.append($select);
         } else if (col.name === "alarm_lvl_cd") {
             let $select = $('<select style="width: 98%; box-sizing: border-box;"><option value="">전체</option></select>');
             $select.append('<option value="ARM001">관심</option>');
