@@ -18,7 +18,7 @@
         const today = new Date();
         const endDate = new Date(today);
         const startDate = new Date(today);
-        startDate.setMonth(startDate.getMonth() - 1);
+        startDate.setDate(startDate.getDate() - 1);
 
         const $smsModal = $('#lay-sensor-message');
         const parentStartDate = $('#start-date').val();

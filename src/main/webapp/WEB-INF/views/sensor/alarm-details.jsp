@@ -350,7 +350,7 @@
 
             // 시작일 = 한 달 전
             const startDate = new Date(today);
-            startDate.setMonth(startDate.getMonth() - 1);
+            startDate.setDate(startDate.getDate() - 1);
 
             $('#start-date').val(formatDateOnly(startDate));
             $('#end-date').val(formatDateOnly(endDate));

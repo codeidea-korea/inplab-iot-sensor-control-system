@@ -284,7 +284,7 @@
 
             // 시작일 = 한 달 전 00:00 (한국시간 기준)
             const startDate = new Date(today);
-            startDate.setDate(startDate.getDate() - 7);
+            startDate.setDate(startDate.getDate() - 1);
             startDate.setHours(0, 0, 0, 0);
 
             $('#start-date').val(formatLocalDateTime(startDate));
