@@ -630,7 +630,7 @@
                 <input type="button" red value="삭제" id="del_displayBoard"/>
                 <input type="button" blue value="수정" id="udt_displayBoard"/>
                 <input type="button" blue value="저장" id="ins_displayBoard"/>
-                <button type="button" data-fancybox-close>취소</button>
+                <button type="button" data-fancybox-close>닫기</button>
             </div>
         </div>
     </div>
