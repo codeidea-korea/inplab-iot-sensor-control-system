@@ -334,6 +334,7 @@ ${district}
                     listPathUrl: "/alarmDataByLevel",
                     risk_level: level,
                     zone_id: zone_id,
+                    district_no: "${district.district_no}",
                     view_flag: 'Y'
                 }, res, true, null, null);
 
@@ -343,6 +344,7 @@ ${district}
                             listPathUrl: "/alarmDataByLevel",
                             risk_level: level,
                             zone_id: zone_id,
+                            district_no: "${district.district_no}",
                             view_flag: 'Y'
                         };
 
@@ -552,7 +554,7 @@ ${district}
         });
 
         // 알림현황 카운트
-        function loadAlarmCount(param) {
+        function loadAlarmCount() {
             $.get('/alarmList/alarmCount', param, function (res) {
                 // console.log(res);
                 let totalLength = 314.1592653589793;
