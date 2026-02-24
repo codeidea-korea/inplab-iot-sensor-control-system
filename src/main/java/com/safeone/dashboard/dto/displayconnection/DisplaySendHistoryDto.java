@@ -23,7 +23,7 @@ public class DisplaySendHistoryDto implements Serializable {
     @FieldLabel(title = "전광판위치")
     private String dispbd_nm;
 
-    @FieldLabel(title = "이벤트 구분")
+    @FieldLabel(title = "이벤트 구분", type = ":;1:평시;2:긴급;3:센서경보")
     private String dispbd_evnt_flag;
 
     @FieldLabel(title = "전송 그룹")

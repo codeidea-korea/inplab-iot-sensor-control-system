@@ -155,6 +155,36 @@
         text-decoration: none;
     }
 
+    /* Prevent native select text from clipping in the send panel. */
+    #event-select {
+        height: 3rem;
+        min-height: 3rem;
+        line-height: 3rem;
+        box-sizing: border-box;
+        vertical-align: middle;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    /* Some native select rendering overlaps the bottom cell border; draw the last row line on top. */
+    #display-send-form-table tbody tr:last-child th,
+    #display-send-form-table tbody tr:last-child td {
+        position: relative;
+        border-bottom: 0 !important;
+    }
+
+    #display-send-form-table tbody tr:last-child th::after,
+    #display-send-form-table tbody tr:last-child td::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background: rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+    }
+
     #lay-form-write,
     #lay-form-detail {
         width: 560px;
@@ -256,6 +286,87 @@
 
         window.renderDisplayDetailButtons = () => {};
 
+        const groupOptionsByEvent = {
+            "1": [],
+            "2": [],
+            "3": []
+        };
+
+        function setGroupOptions($select, groups, preferredValue) {
+            const list = Array.isArray(groups) ? groups : [];
+            const currentValue = preferredValue !== undefined
+                ? String(preferredValue || '')
+                : String($select.val() || '');
+
+            $select.empty().append("<option value=''>선택</option>");
+
+            list.forEach((item) => {
+                if (!item || !item.img_grp_nm) {
+                    return;
+                }
+                $select.append(
+                    "<option value='" + item.img_grp_nm + "'>" + item.img_grp_nm + "</option>"
+                );
+            });
+
+            let nextValue = '';
+            if (currentValue && list.some((item) => String(item.img_grp_nm) === currentValue)) {
+                nextValue = currentValue;
+            } else if (list.length > 0 && list[0].img_grp_nm) {
+                nextValue = String(list[0].img_grp_nm);
+            }
+
+            $select.val(nextValue);
+            return nextValue;
+        }
+
+        function setDisplaySendGroupOptionsByEvent(eventFlag) {
+            return setGroupOptions($("#dispbd_group"), groupOptionsByEvent[String(eventFlag)]);
+        }
+
+        function setRegisterGroupOptionsByEvent(eventFlag) {
+            return setGroupOptions($("#send_group"), groupOptionsByEvent[String(eventFlag)]);
+        }
+
+        function loadGroupOptionsByEvent(eventFlag) {
+            return $.ajax({
+                url: '/display-connection/display-send-management/group',
+                type: 'GET',
+                data: {
+                    dispbd_evnt_flag: String(eventFlag)
+                }
+            });
+        }
+
+        function initializeGroupSelectors() {
+            $.when(
+                loadGroupOptionsByEvent(1),
+                loadGroupOptionsByEvent(2),
+                loadGroupOptionsByEvent(3)
+            ).done(function (normalRes, emerRes, sensorRes) {
+                groupOptionsByEvent["1"] = Array.isArray(normalRes[0]) ? normalRes[0] : [];
+                groupOptionsByEvent["2"] = Array.isArray(emerRes[0]) ? emerRes[0] : [];
+                groupOptionsByEvent["3"] = Array.isArray(sensorRes[0]) ? sensorRes[0] : [];
+
+                const normalGroup = setGroupOptions($("#normal-group"), groupOptionsByEvent["1"]);
+                const emerGroup = setGroupOptions($("#emer-group"), groupOptionsByEvent["2"]);
+                const sensorGroup = setGroupOptions($("#sensor-group"), groupOptionsByEvent["3"]);
+
+                setGridData($normalGrid, normalGroup, 1);
+                setGridData($emerGrid, emerGroup, 2);
+                setGridData($sensorGrid, sensorGroup, 3);
+
+                setDisplaySendGroupOptionsByEvent($("#event-select").val());
+
+                setTimeout(() => {
+                    reloadAllImageGrids();
+                    $(window).trigger('resize');
+                }, 100);
+            }).fail(function () {
+                alert('전송그룹 목록을 불러오는 중 오류가 발생했습니다.');
+            });
+        }
+
         $.ajax({
             url: '/adminAdd/districtInfo/all',
             type: 'GET',
@@ -270,54 +381,25 @@
                 alert('알 수 없는 오류가 발생했습니다.');
             }
         });
-
-        $.ajax({
-            url: '/display-connection/display-send-management/group',
-            type: 'GET',
-            success: function (res) {
-                res.forEach((item) => {
-                    $('#normal-group, #emer-group, #sensor-group').append(
-                        "<option value='" + item.img_grp_nm + "'>" + item.img_grp_nm + "</option>"
-                    );
-
-                    $('#dispbd_group').append(
-                        "<option value='" + item.img_grp_nm + "'>" + item.img_grp_nm + "</option>"
-                    );
-
-                    $('#send_group').append(
-                        "<option value='" + item.img_grp_nm + "'>" + item.img_grp_nm + "</option>"
-                    );
-                });
-            },
-            complete: function (res) {
-                $('#normal-group, #emer-group, #sensor-group').val(res.responseJSON[0].img_grp_nm);
-
-                setTimeout(() => {
-                    setGridData($normalGrid, res.responseJSON[0].img_grp_nm, 0);
-                    setGridData($emerGrid, res.responseJSON[0].img_grp_nm, 1);
-                    setGridData($sensorGrid, res.responseJSON[0].img_grp_nm, 2);
-                    reloadAllImageGrids();
-                    $(window).trigger('resize');
-                }, 100);
-            },
-            error: function () {
-                alert('알 수 없는 오류가 발생했습니다.');
-            }
-        });
+        initializeGroupSelectors();
 
         $("#normal-group").on('change', function () {
-            setGridData($normalGrid, $("#normal-group").val(), 0);
+            setGridData($normalGrid, $("#normal-group").val(), 1);
             reloadAllImageGrids();
         });
 
         $("#emer-group").on('change', function () {
-            setGridData($emerGrid, $("#emer-group").val(), 1);
+            setGridData($emerGrid, $("#emer-group").val(), 2);
             reloadAllImageGrids();
         });
 
         $("#sensor-group").on('change', function () {
-            setGridData($sensorGrid, $("#sensor-group").val(), 2);
+            setGridData($sensorGrid, $("#sensor-group").val(), 3);
             reloadAllImageGrids();
+        });
+
+        $("#event-select").on('change', function () {
+            setDisplaySendGroupOptionsByEvent($(this).val());
         });
 
         $("#district-no").on('change', () => {
@@ -388,13 +470,14 @@
 
         $(".insert-btn").click((e) => {
             const eventFlag = e.target.dataset.image;
-            if (eventFlag === '0') {
+            if (eventFlag === '1') {
                 $('#event_flag').val('평시');
-            } else if (eventFlag === '1') {
+            } else if (eventFlag === '2') {
                 $('#event_flag').val('긴급');
             } else {
                 $('#event_flag').val('센서 경보');
             }
+            setRegisterGroupOptionsByEvent(eventFlag);
             popFancy('#lay-form-write');
             enforceModalNoScroll('#lay-form-write');
         })
@@ -411,7 +494,7 @@
                 return;
             }
 
-            const eventMap = {"0": "평시", "1": "긴급", "2": "센서경보"};
+            const eventMap = {"1": "평시", "2": "긴급", "3": "센서경보"};
             $("#detail_mgnt_no").val(resolvedMgntNo);
             $("#detail_event_flag").val(eventMap[rowData.dispbd_evnt_flag] || rowData.dispbd_evnt_flag);
             $("#detail-modal-title").text((eventMap[rowData.dispbd_evnt_flag] || rowData.dispbd_evnt_flag) + " 이미지 상세정보");
@@ -496,11 +579,11 @@
             let fileName;
 
             if (eventFlagCode === '평시') {
-                eventFlag = 0;
-            } else if (eventFlagCode === '긴급') {
                 eventFlag = 1;
-            } else {
+            } else if (eventFlagCode === '긴급') {
                 eventFlag = 2;
+            } else {
+                eventFlag = 3;
             }
 
             const imageFile = $("#image_file")[0].files[0];
@@ -540,9 +623,11 @@
             }
 
             $.ajax({
-                url: '/display-connection/display-img-management/add',
+                url: '/display-connection/display-img-management/add-json',
                 type: 'POST',
-                data: {
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
                     img_grp_nm: $("#send_group").val(),
                     img_file_path: base64Image,
                     dispbd_evnt_flag: eventFlag,
@@ -554,15 +639,18 @@
                     font_size: "24",
                     font_color: "#FFFFFF",
                     dispbd_imgfile_nm: fileName
-                },
+                }),
                 success: function (_res) {
                     alert('이미지가 등록되었습니다.');
                     popFancyClose('#lay-form-write');
                     reloadAllImageGrids();
                 },
                 error: function (err) {
+                    const message = err?.responseJSON?.message;
                     if (err?.responseJSON?.trace?.toString()?.includes('Duplicate')) {
                         alert('해당 그룹에 이미지가 등록되어 있습니다.');
+                    } else if (message) {
+                        alert(message);
                     } else {
                         alert('알 수 없는 오류가 발생했습니다.');
                     }
@@ -597,7 +685,7 @@
                     img_effect_cd: $("#detail_effect").val(),
                     img_disp_min: detailEffectSeconds,
                     use_yn: $("#detail_use_yn").val(),
-                    dispbd_evnt_flag: {"평시": "0", "긴급": "1", "센서경보": "2"}[$("#detail_event_flag").val()] || "",
+                    dispbd_evnt_flag: {"평시": "1", "긴급": "2", "센서경보": "3"}[$("#detail_event_flag").val()] || "",
                     img_grp_nm: $("#detail_img_grp_nm").val(),
                     dispbd_imgfile_nm: $("#detail_dispbd_imgfile_nm").val()
                 },
@@ -663,7 +751,7 @@
                             <select id="normal-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
-                            <a data-image="0" class="insert-btn">등록</a>
+                            <a data-image="1" class="insert-btn">등록</a>
                         </div>
                     </div>
                 </div>
@@ -682,7 +770,7 @@
                 </div>
                 <div class="contents-in">
                     <div class="bTable">
-                        <table>
+                        <table id="display-send-form-table">
                             <colgroup>
                                 <col width="130"/>
                                 <col width="*"/>
@@ -716,8 +804,8 @@
                                 <th>이벤트 구분</th>
                                 <td>
                                     <select id="event-select">
-                                        <option value="0">평시</option>
-                                        <option value="1">긴급</option>
+                                        <option value="1">평시</option>
+                                        <option value="2">긴급</option>
                                     </select>
                                 </td>
                             </tr>
@@ -735,7 +823,7 @@
                             <select id="emer-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
-                            <a data-image="1" class="insert-btn">등록</a>
+                            <a data-image="2" class="insert-btn">등록</a>
                         </div>
                     </div>
                 </div>
@@ -762,7 +850,7 @@
                             <select id="sensor-group" style="margin-left: 10px">
                                 <option value="">선택</option>
                             </select>
-                            <a data-image="2" class="insert-btn">등록</a>
+                            <a data-image="3" class="insert-btn">등록</a>
                         </div>
                     </div>
                 </div>
