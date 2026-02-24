@@ -835,8 +835,16 @@
                 return;
             }
 
-            if (typeof selectArrary !== 'undefined') {
+            /*if (typeof selectArrary !== 'undefined') {
                 selectArrary = [{ sens_no: assetId, sens_chnl_nm: '' }];
+            }*/
+
+            if (typeof selectArrary !== 'undefined') {
+                let channelNm = '';
+                if(rowData){
+                    channelNm = rowData.sens_chnl_id || rowData.sens_chnl_nm || '';
+                }
+                selectArrary = [{ sens_no: assetId, sens_chnl_nm: channelNm }];
             }
 
 
@@ -887,7 +895,8 @@
             myChart.data.labels = [];
             myChart.data.datasets = [];
             myChart.update();
-            const case_ = ['', 'X', 'Y', 'Z'];
+            //const case_ = ['', 'X', 'Y', 'Z'];
+            const case_ = ['X', 'Y', 'Z', ''];
             let checkedData = case_.flatMap((item) => {
                 return {
                     sens_no: currentSensNo,
@@ -909,7 +918,8 @@
             const requests = checkedData.map((item) => {
                 return getChartData(item.sens_no, startDateTime, endDateTime, item.sens_chnl_id, selectType);
             });
-            Promise.all(requests).then((results) => {
+
+            /*Promise.all(requests).then((results) => {
                 if (requestSeq !== chartRequestSeq) {
                     return;
                 }
@@ -931,6 +941,50 @@
 
                 try {
                     updateChart(validResults);
+                } catch (e) {
+                    console.error('chart render error', e);
+                    alert('조회 데이터 표시 중 오류가 발생했습니다.');
+                }
+            });*/
+
+            Promise.all(requests).then((results) => {
+                if (requestSeq !== chartRequestSeq) {
+                    return;
+                }
+
+                const hasError = results.some((item) => !item.ok);
+                const validResults = results
+                    .map((item) => item.data)
+                    .filter((item) => Array.isArray(item) && item.length > 0);
+
+
+                const uniqueResults = [];
+                const seenSignatures = new Set();
+
+                validResults.forEach(dataArr => {
+
+                    const firstPoint = dataArr[0];
+                    const sig = firstPoint.meas_dt + "_" + firstPoint.formul_data;
+
+                    if (!seenSignatures.has(sig)) {
+                        seenSignatures.add(sig);
+                        uniqueResults.push(dataArr);
+                    }
+                });
+
+                chartDataArray.length = 0;
+                uniqueResults.forEach((item) => chartDataArray.push(item));
+
+                if (uniqueResults.length === 0) {
+                    myChart.data.labels = [];
+                    myChart.data.datasets = [];
+                    myChart.update();
+                    alert(hasError ? '조회할 수 없는 데이터 입니다.' : '조회 결과가 존재하지 않습니다.');
+                    return;
+                }
+
+                try {
+                    updateChart(uniqueResults);
                 } catch (e) {
                     console.error('chart render error', e);
                     alert('조회 데이터 표시 중 오류가 발생했습니다.');
