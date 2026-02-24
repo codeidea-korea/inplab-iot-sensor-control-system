@@ -177,6 +177,14 @@ public class ExcelUtils {
         defaultCellFormat.setWrap(true);
         defaultCellFormat.setBorder(Border.ALL, BorderLineStyle.NONE);
         defaultCellFormat.setVerticalAlignment(VerticalAlignment.CENTRE);
+        defaultCellFormat.setAlignment(Alignment.CENTRE);
+
+        WritableCellFormat rightCellFormat = new WritableCellFormat();
+        rightCellFormat.setWrap(true);
+        rightCellFormat.setBorder(Border.ALL, BorderLineStyle.NONE);
+        rightCellFormat.setVerticalAlignment(VerticalAlignment.CENTRE);
+        rightCellFormat.setAlignment(Alignment.RIGHT);
+
 
         boolean bGroupHeader = false;
         for (int cols = 0; cols < fieldset.length; cols++) {
@@ -265,7 +273,14 @@ public class ExcelUtils {
 
                 for (int cols = 0; cols < fieldset.length; cols++) {
                     String cellValue = NVL(data.get(fieldset[cols])).toString();
-                    Label label = new Label(cols, (row % 65535) + 1, cellValue, defaultCellFormat);
+
+                    WritableCellFormat currentFormat = defaultCellFormat;
+                    if(headerset[cols] != null && headerset[cols].contains("계측값")){
+                        currentFormat = rightCellFormat;
+                    }
+
+
+                    Label label = new Label(cols, (row % 65535) + 1, cellValue, currentFormat);
                     sheet.addCell(label);
 
                     // 열 너비를 자동으로 설정하기 위해 최대 길이를 계산
@@ -303,6 +318,9 @@ public class ExcelUtils {
 
         WritableCellFormat cellFormat = new WritableCellFormat();
         cellFormat.setBorder(Border.ALL, BorderLineStyle.NONE);
+        cellFormat.setAlignment(Alignment.CENTRE);
+
+        cellFormat.setVerticalAlignment(VerticalAlignment.CENTRE);
 
         for (int row = 0; row < _List.size(); row++) {
             if (row % 65530 == 0) {
