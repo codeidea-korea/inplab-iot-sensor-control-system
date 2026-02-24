@@ -233,7 +233,7 @@
                 ELSE '수신'
             END AS comm_status,
             lmd.raw_data AS raw_data,
-            (CAST(lmd.raw_data AS DOUBLE PRECISION) - CAST(tsi.init_raw_data AS DOUBLE PRECISION)) AS disp_val,
+            (conv.conv_lmd - conv.conv_tsi) AS disp_val,
             lmd.formul_data
         FROM tb_sensor_info a
         JOIN tb_logger_info b ON a.logr_no = b.logr_no
@@ -257,6 +257,26 @@
             ORDER BY m.meas_dt DESC
             LIMIT 1
         ) AS lmd ON TRUE
+            LEFT JOIN LATERAL (
+            SELECT
+            -- 1. 현재 원시 데이터(lmd.raw_data)에 보정식 적용
+            CASE
+            WHEN d.senstype_no = '015' THEN COALESCE(lmd.raw_data::numeric, 0)
+            WHEN d.senstype_no = '016' THEN COALESCE(lmd.raw_data::numeric, 0) / 100.0
+            WHEN d.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(lmd.raw_data::numeric, 0)) / 1000.0
+            WHEN d.senstype_no IN ('001', '002') THEN COALESCE(lmd.raw_data::numeric, 0) * 0.5
+            ELSE COALESCE(lmd.raw_data::numeric, 0)
+            END AS conv_lmd,
+
+            -- 2. 초기 원시 데이터(tsi.init_raw_data)에 동일한 보정식 적용
+            CASE
+            WHEN d.senstype_no = '015' THEN COALESCE(tsi.init_raw_data::numeric, 0)
+            WHEN d.senstype_no = '016' THEN COALESCE(tsi.init_raw_data::numeric, 0) / 100.0
+            WHEN d.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(tsi.init_raw_data::numeric, 0)) / 1000.0
+            WHEN d.senstype_no IN ('001', '002') THEN COALESCE(tsi.init_raw_data::numeric, 0) * 0.5
+            ELSE COALESCE(tsi.init_raw_data::numeric, 0)
+            END AS conv_tsi
+        ) conv ON TRUE
         LEFT JOIN (
             SELECT sens_no, maint_rslt_cd
             FROM tb_maint_details
