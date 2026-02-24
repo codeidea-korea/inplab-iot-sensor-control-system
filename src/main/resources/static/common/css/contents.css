@@ -1146,7 +1146,7 @@ select:-ms-expand {
     position: absolute;
     left: 0;
     top: 0;
-    z-index: 8;
+    z-index: 1000;
 }
 
 #header > * {
@@ -1424,6 +1424,7 @@ select:-ms-expand {
     top: calc(100% - 1rem);
     border-radius: 1.2rem;
     display: none;
+    z-index: 1001;
 }
 
 #header .login-info:before {

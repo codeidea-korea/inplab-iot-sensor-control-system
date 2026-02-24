@@ -1219,7 +1219,7 @@
             display: "flex",
             flexDirection: "column",
             gap: "10px",
-            zIndex: 2147483647
+            zIndex: 999
         });
 
         $("body").append(container);
