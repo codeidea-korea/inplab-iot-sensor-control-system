@@ -508,7 +508,7 @@
                 }).prop('selected', true);
             }
 
-            $("#graph-search-btn").click(() => {
+            /*$("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
                 let selectSensor = $("#sensor-name-select").val();
@@ -552,6 +552,72 @@
                 });
 
                 // 차트 업데이트
+                Promise.all(requests)
+                    .then((responses) => {
+                        const hasError = responses.some((item) => !item.ok);
+                        const validData = responses
+                            .map((item) => item.data)
+                            .filter((item) => Array.isArray(item) && item.length > 0);
+
+                        if (validData.length === 0) {
+                            alert(hasError ? '조회할 수 없는 데이터 입니다.' : '조회 결과가 존재하지 않습니다.');
+                            return;
+                        }
+
+                        chartDataArray.length = 0;
+                        validData.forEach((item) => chartDataArray.push(item));
+                        updateChart(chartDataArray);
+                    })
+                    .catch((e) => {
+                        console.log('error', e);
+                        alert('조회할 수 없는 데이터 입니다.');
+                    });
+            });*/
+
+            $("#graph-search-btn").click(() => {
+                const startDateTime = $('#start-date').val();
+                const endDateTime = $('#end-date').val();
+                let selectSensor = $("#sensor-name-select").val();
+
+                let selectType = '';
+                if($("#select-condition").val() === "minute"){
+                    selectType = 'minute'
+                }else if($("#select-condition").val() === "hourly"){
+                    selectType = 'hour';
+                }else{
+                    selectType = 'day';
+                }
+
+                const baseArray = [...selectArrary];
+                chartDataArray.length = 0;
+                const requests = [];
+
+                baseArray.forEach((item) => {
+                    const targetSensor = (!selectSensor || selectSensor === 'null' || selectSensor === '')
+                        ? item.sens_no
+                        : selectSensor;
+
+
+                    let isXYType = false;
+                    if (item.sens_chnl_nm && (item.sens_chnl_nm.toUpperCase().endsWith('-X') || item.sens_chnl_nm.toUpperCase().endsWith('-Y'))) {
+                        isXYType = true;
+                    }
+
+                    if (isXYType) {
+                        requests.push(getChartData(targetSensor, startDateTime, endDateTime, 'X', selectType));
+                        requests.push(getChartData(targetSensor, startDateTime, endDateTime, 'Y', selectType));
+                    } else {
+                        // 단일 센서: 기존처럼 1번만 요청
+                        let singleChnlId = '';
+                        if (item.sens_chnl_nm) {
+                            const temp = item.sens_chnl_nm.split("-").pop();
+                            if (temp.length === 1) singleChnlId = temp;
+                        }
+                        requests.push(getChartData(targetSensor, startDateTime, endDateTime, singleChnlId, selectType));
+                    }
+                });
+
+                // 차트 업데이트 (기존과 동일)
                 Promise.all(requests)
                     .then((responses) => {
                         const hasError = responses.some((item) => !item.ok);
