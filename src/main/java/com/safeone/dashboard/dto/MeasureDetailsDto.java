@@ -11,7 +11,7 @@ public class MeasureDetailsDto implements Serializable {
     @FieldLabel(title = "현장명", width = 150)
     private String district_nm;
 
-    @FieldLabel(title = "센서타입", width = 150)
+    @FieldLabel(title = "센서타입", width = 150, type = "selectable")
     private String sens_tp_nm;
 
     @FieldLabel(title = "센서명", width = 150)

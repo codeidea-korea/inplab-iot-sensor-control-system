@@ -360,102 +360,36 @@
             const $leftGrid = $("#left-jq-grid");
             const leftPath = "/measure-details"
 
-            $.when(
-                $.get('/adminAdd/common/code/sensorType'),
-                $.get('/adminAdd/common/code/sectList')
-            ).done(function(typeRes, sectRes){
-
-                function makeJqGridSelect(list){
-                    var str = ':전체';
-                    $.each(list, function(i,v){
-                        if(v.sect_no !== undefined){
-                            str += ";" + v.sect_no + ":" + v.sect_no;
-                        }
-                    });
-                    return str;
+            initGrid($leftGrid, leftPath, $('#left-grid-wrapper'), {
+                multiselect: true,
+                multiboxonly: false,
+                custom: {
+                    useFilterToolbar: true,
                 }
-
-                function makeJqGridSelectByName(list){
-                    var str = ':전체';
-                    $.each(list, function(i,v){
-
-                        str += ";" + v.name + ":" + v.name;
-                    });
-                    return str;
-                }
-
-
-                var typeStr = makeJqGridSelectByName(typeRes[0]);
-                var sectStr = makeJqGridSelect(sectRes[0]);
-
-                initGrid($leftGrid, leftPath, $('#left-grid-wrapper'), {
-                    multiselect: true,
-                    multiboxonly: false,
-                    custom: {
-                        useFilterToolbar: false,
-                    },
-                    loadComplete : function(){
-                        var $grid = $(this);
-                        if ($grid.data('toolbar_created')) return;
-
-
-
-                        $grid.jqGrid('setColProp', 'sens_tp_nm', {
-                            stype: 'select',
-                            searchoptions: { value: typeStr, sopt: ['eq'] }
-                        });
-
-                        $grid.jqGrid('setColProp','sect_no',{
-                            stype: 'select',
-                            searchoptions: { value: sectStr, sopt: ['eq'] }
-                        });
-
-                        $grid.jqGrid('filterToolbar', {
-                            stringResult: false,
-                            searchOnEnter: true,
-                            defaultSearch: "eq",
-                            ignoreCase: true
-
-                        });
-
-                        $('.clearsearchclass').off('click').on('click', function () {
-                            var $this = $(this);
-
-                            var $inputTd = $this.closest('td').prev('td');
-                            var $select = $inputTd.find('select');
-                            var $input = $inputTd.find('input');
-
-                            if ($select.length > 0) $select.val('');
-                            if ($input.length > 0) $input.val('');
-
-                            $grid[0].triggerToolbar();
-                        });
-
-                        $grid.data('toolbar_created', true);
-                    }
-                }, () => {
-                    const allRowIds = $leftGrid.jqGrid('getDataIDs');
-                    allRowIds.forEach(rowId => {
-                        $leftGrid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
-                    });
-                }, {
-                    maint_sts_cd: {
-                        formatter: (cellValue, _options, _rowObject) => {
-                            let value = '';
-                            if (cellValue === 'MTN001') {
-                                value = '정상';
-                            } else if (cellValue === 'MTN002') {
-                                value = '망실';
-                            } else if (cellValue === 'MTN003') {
-                                value = '점검';
-                            } else if (cellValue === 'MTN004') {
-                                value = '철거';
-                            }
-                            return value
+            }, () => {
+                const allRowIds = $leftGrid.jqGrid('getDataIDs');
+                allRowIds.forEach(rowId => {
+                    $leftGrid.jqGrid('setCell', rowId, 'district_nm', $('#district-select option:selected').text());
+                });
+            }, {
+                maint_sts_cd: {
+                    formatter: (cellValue, _options, _rowObject) => {
+                        let value = '';
+                        if (cellValue === 'MTN001') {
+                            value = '정상';
+                        } else if (cellValue === 'MTN002') {
+                            value = '망실';
+                        } else if (cellValue === 'MTN003') {
+                            value = '점검';
+                        } else if (cellValue === 'MTN004') {
+                            value = '철거';
                         }
+                        return value
                     }
-                }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거"})
-            })
+                }
+            }, {maint_sts_cd: "MTN001:정상;MTN002:망실;MTN003:점검;MTN004:철거",
+                sens_tp_nm: "변위계:변위계;토양함수비:토양함수비;거리측정기:거리측정기;GNSS:GNSS;지표변위계:지표변위계;적설계:적설계;" +
+                    "지하수위계:지하수위계;경사계:경사계;간극수압계:간극수압계;진동계:진동계;지중경사계:지중경사계;하중계:하중계;구조물경사계:구조물경사계;지표경사계:지표경사계;강우량계:강우량계;수위계:수위계"})
 
 
 

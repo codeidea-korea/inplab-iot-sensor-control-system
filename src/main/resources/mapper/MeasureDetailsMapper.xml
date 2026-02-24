@@ -4,7 +4,7 @@
 <mapper namespace="com.safeone.dashboard.dao.MeasureDetailsMapper">
     <sql id="rowSearch">
         <if test="sens_tp_nm != null and sens_tp_nm != ''">
-            and A.sens_tp_nm ilike '%' || #{sens_tp_nm} || '%'
+            and A.sens_tp_nm = #{sens_tp_nm}
         </if>
         <if test="sens_nm != null and sens_nm != ''">
             and A.sens_nm ilike '%' || #{sens_nm} || '%'
