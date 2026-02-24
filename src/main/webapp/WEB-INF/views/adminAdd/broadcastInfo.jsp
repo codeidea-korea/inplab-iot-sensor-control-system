@@ -426,7 +426,7 @@
                     });
 
                     setBroadcast(res1.rows[0]);
-                    $("#form_sub_title").html('상세 정보');
+                    $("#form_sub_title").html('상세정보');
                     $('#ins_broadcast').hide();
                     $('#udt_broadcast').show();
                     $('#del_broadcast').show();
@@ -494,7 +494,7 @@
         <div class="layer-base-btns">
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
-        <div class="layer-base-title">방송 장비 <span id="form_sub_title"></span></div>
+        <div class="layer-base-title">방송장비 <span id="form_sub_title"></span></div>
         <div class="layer-base-conts">
             <div class="bTable">
                 <table>
@@ -586,7 +586,7 @@
                 <input type="button" red value="삭제" id="del_broadcast"/>
                 <input type="button" blue value="수정" id="udt_broadcast"/>
                 <input type="button" blue value="저장" id="ins_broadcast"/>
-                <button type="button" data-fancybox-close>취소</button>
+                <button type="button" data-fancybox-close>닫기</button>
             </div>
         </div>
     </div>
