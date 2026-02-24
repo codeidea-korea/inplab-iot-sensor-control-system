@@ -120,8 +120,8 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
         return message;
     }
 
-    public void mapping() throws Exception {
-        List<LogrIdxMapDto> logrList = mapper.selectLogrIdxMapList(null);
+    public void mapping(Map<String, Object> param) throws Exception {
+        List<LogrIdxMapDto> logrList = mapper.selectLogrIdxMapList(param);
         List<SensorTypeDto> sensorTypeList = sensorTypeService.getList(null);
 
         // 1) 타입별 range/채널/약어 맵 구성

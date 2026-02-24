@@ -38,6 +38,32 @@
                 transform: rotate(360deg);
             }
         }
+
+        .btn-group .logger-filter-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 8px;
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .btn-group .logger-filter-inline .logger-filter-label {
+            display: inline-block;
+            color: #fff;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 1.6rem;
+        }
+
+        .btn-group .logger-filter-inline select {
+            min-width: 220px;
+            height: 34px;
+            border: 1px solid #cfd6de;
+            border-radius: 4px;
+            padding: 0 8px;
+            background: #fff;
+        }
     </style>
     <script>
         var _popupClearData;
@@ -117,10 +143,26 @@
 
             // 매핑
             $('.mappingBtn').on('click', function (e) {
+                const $grid = $("#jq-grid");
+                if (!$grid.length || !$grid[0] || !$grid[0].grid) {
+                    alert('목록이 아직 로드되지 않았습니다.');
+                    return;
+                }
+
+                const records = Number($grid.jqGrid('getGridParam', 'records') || 0);
+                if (records === 0) {
+                    alert('현재 목록에 매핑할 데이터가 없습니다.');
+                    return;
+                }
+
+                const currentPostData = Object.assign({}, $grid.jqGrid('getGridParam', 'postData') || {});
+                currentPostData.logr_no = $('#logr-filter-no').val() || '';
+
                 confirm('등록된 센서별로 센서 타입에 해당하는 로거 인덱스가 순차적으로 부여됩니다.<br>기존에 등록되있던 로거 인덱스는 복구가 불가합니다.<br>매핑하시겠습니까?', function () {
                     $.ajax({
                         url: '/adminAdd/logrIdxMap/mapping',
                         type: 'GET',
+                        data: currentPostData,
                         beforeSend: function () {
                             $('#loading').show();
                         },
@@ -262,6 +304,8 @@
                 $.get('/adminAdd/common/code/loggerInfo'),
                 $.get('/adminAdd/common/code/sectList')
             ).done(function(distRes, typeRes, loggerRes, sectRes){
+                const $grid = $("#jq-grid");
+                const $logrFilter = $('#logr-filter-no');
 
                 function makeJqGridSelect(list){
                     var str = ':전체';
@@ -287,14 +331,20 @@
                 var loggerStr = makeJqGridSelectByName(loggerRes[0]);
                 var sectStr = makeJqGridSelect(sectRes[0]);
 
-                initGrid($("#jq-grid"), "/adminAdd/logrIdxMap", $('#grid-wrapper'),{
+                $logrFilter.empty().append('<option value="">전체</option>');
+                $.each(loggerRes[0], function(_i, v) {
+                    $logrFilter.append(
+                        $('<option></option>').val(v.code).text(v.name)
+                    );
+                });
+
+                initGrid($grid, "/adminAdd/logrIdxMap", $('#grid-wrapper'),{
                     multiselect: true,
                     multiboxonly: true,
                     custom: {
                         useFilterToolbar: false 
                     },
                     loadComplete : function(){
-                        var $grid = $("#jq-grid");
                         if ($grid.data('toolbar_created')) return;
 
                         $grid.jqGrid('setColProp','district_nm', {
@@ -341,6 +391,29 @@
                         $grid.data('toolbar_created', true);
                     }
                 });
+
+                const originalBeforeRequest = $grid.jqGrid('getGridParam', 'beforeRequest');
+                $grid.jqGrid('setGridParam', {
+                    beforeRequest: function () {
+                        if (typeof originalBeforeRequest === 'function') {
+                            originalBeforeRequest.call(this);
+                        }
+                        const gridPostData = $grid.jqGrid('getGridParam', 'postData') || {};
+                        gridPostData.logr_no = $logrFilter.val() || '';
+                    }
+                });
+
+                $logrFilter.off('change').on('change', function () {
+                    const selectedLogrNo = $(this).val() || '';
+                    const postData = Object.assign({}, $grid.jqGrid('getGridParam', 'postData') || {});
+                    postData.logr_no = selectedLogrNo;
+
+                    $grid.jqGrid('setGridParam', {
+                        postData: postData,
+                        page: 1
+                    });
+                    reloadJqGrid($grid);
+                });
             }).fail(function() {
                 alert("데이터 로딩 실패");
             });
@@ -370,6 +443,12 @@
                     <form id="uploadForm" style="display:none;">
                         <input type="file" id="file" name="file" accept=".xlsx" onchange="uploadFile()">
                     </form>
+                    <span class="logger-filter-inline">
+                        <span class="logger-filter-label">로거명:</span>
+                        <select id="logr-filter-no">
+                            <option value="">전체</option>
+                        </select>
+                    </span>
                     <a class="mappingBtn">매핑</a>
                 </div>
                 <div id="grid-wrapper" class="contents-in">

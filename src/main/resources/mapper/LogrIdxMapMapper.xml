@@ -15,6 +15,9 @@
         <if test="logr_nm != null and logr_nm != ''">
             and MG.logr_nm ilike '%' || #{logr_nm} || '%'
         </if>
+        <if test="logr_no != null and logr_no != ''">
+            and MG.logr_no = #{logr_no}
+        </if>
         <if test="sens_chnl_nm != null and sens_chnl_nm != ''">
             and MG.sens_chnl_nm ilike '%' || #{sens_chnl_nm} || '%'
         </if>
