@@ -519,10 +519,7 @@
             TO_CHAR(TO_DATE(a.inst_ymd, 'YYYYMMDD'), 'YYYY-MM-DD') AS inst_ymd,
             md.meas_dt AS latest_meas_dt,
             COALESCE(m.maint_rslt_cd, 'MTN001') AS sens_status,
-            CASE
-            WHEN COALESCE(EXTRACT(EPOCH FROM (now() - md.meas_dt)) / 60, 999999) >= a.nonrecv_limit_min THEN '미수신'
-            ELSE '수신'
-            END AS comm_status,
+            comm.comm_status,
             md.formul_data
         FROM tb_sensor_info a
         JOIN tb_logger_info b ON a.logr_no = b.logr_no
@@ -535,6 +532,23 @@
             ORDER BY m.meas_dt DESC
             LIMIT 1
         ) md ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT
+                CASE
+                    WHEN COALESCE(BOOL_OR(COALESCE(lmd.err_cnt, 999999) >= a.nonrecv_limit_min), TRUE) THEN '미수신'
+                    ELSE '수신'
+                END AS comm_status
+            FROM tb_sensor_chnl ch
+            LEFT JOIN LATERAL (
+                SELECT EXTRACT(EPOCH FROM (now() - m3.meas_dt)) / 60 - 1 AS err_cnt
+                FROM tb_measure_details m3
+                WHERE m3.sens_no = ch.sens_no
+                  AND m3.sens_chnl_id = ch.sens_chnl_id
+                ORDER BY m3.meas_dt DESC
+                LIMIT 1
+            ) lmd ON TRUE
+            WHERE ch.sens_no = a.sens_no
+        ) comm ON TRUE
         LEFT JOIN LATERAL (
             SELECT maint_rslt_cd
             FROM tb_maint_details m2

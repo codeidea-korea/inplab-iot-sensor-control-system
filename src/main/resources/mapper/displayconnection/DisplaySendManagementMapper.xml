@@ -102,16 +102,21 @@
     <select id="selectDisplayGroupList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.displayconnection.DisplayGroupDto">
         SELECT
-        MIN(tdm.mgnt_no) as mgnt_no
-        , tdm.img_grp_nm
-        , '' as img_grp_comment
-        , 'Y' as use_yn
-        , MIN(tdm.reg_dt) as reg_dt
-        , MAX(tdm.mod_dt) as mod_dt
-        FROM tb_dispbd_mapping tdm
+        MIN(MG.mgnt_no)::text as mgnt_no
+        , MG.img_grp_nm
+        , COALESCE(MAX(MG.img_grp_comment), '') as img_grp_comment
+        , COALESCE(MAX(MG.use_yn), 'Y') as use_yn
+        , MIN(MG.reg_dt) as reg_dt
+        , MAX(MG.mod_dt) as mod_dt
+        FROM tb_dispbd_group_new MG
         WHERE 1=1
-        GROUP BY tdm.img_grp_nm
-        ORDER BY tdm.img_grp_nm
+        <if test="dispbd_evnt_flag != null and dispbd_evnt_flag != ''">
+            AND MG.dispbd_evnt_flag = #{dispbd_evnt_flag}
+        </if>
+        AND COALESCE(MG.img_grp_nm, '') != ''
+        AND MG.img_grp_nm != '기본그룹'
+        GROUP BY MG.dispbd_evnt_flag, MG.img_grp_nm
+        ORDER BY MG.img_grp_nm
     </select>
 
     <update id="updateDisplaySendManagement" parameterType="java.util.Map">

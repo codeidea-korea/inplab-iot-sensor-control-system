@@ -29,7 +29,7 @@ public class DisplaySendManagementDto implements Serializable {
     @FieldLabel(title="전송그룹", type = "hidden")
     private String img_grp_nm;
 
-    @FieldLabel(title="표시시간", type = "hidden")
+    @FieldLabel(title="표시시간(Sec)")
     private String img_disp_min;
 
     @FieldLabel(title="사용여부")

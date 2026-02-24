@@ -46,6 +46,53 @@ public class EmergencyContactController extends JqGridAbstract<EmergencyContactD
         return "operation-configuration-setting/emergency-contact";
     }
 
+    @Override
+    public List<Map<Object, Object>> getDownloadExcelDataList(
+            Map<String, com.safeone.dashboard.util.ExcelUtils.FieldDetails> result,
+            List<Map<Object, Object>> list
+    ) {
+        List<Map<Object, Object>> excelList = super.getDownloadExcelDataList(result, list);
+
+        for (Map<Object, Object> row : excelList) {
+            row.put("emerg_recv_ph", formatPhoneNumber(row.get("emerg_recv_ph")));
+            row.put("emerg_tel", formatPhoneNumber(row.get("emerg_tel")));
+        }
+
+        return excelList;
+    }
+
+    private String formatPhoneNumber(Object phoneNumber) {
+        if (phoneNumber == null) {
+            return "";
+        }
+
+        String cleanNum = phoneNumber.toString().replaceAll("[^0-9]", "");
+        if (cleanNum.isEmpty()) {
+            return "";
+        }
+
+        if (cleanNum.length() == 11) {
+            return cleanNum.replaceFirst("(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3");
+        }
+
+        if (cleanNum.length() == 10) {
+            if (cleanNum.startsWith("02")) {
+                return cleanNum.replaceFirst("(\\d{2})(\\d{4})(\\d{4})", "$1-$2-$3");
+            }
+            return cleanNum.replaceFirst("(\\d{3})(\\d{3})(\\d{4})", "$1-$2-$3");
+        }
+
+        if (cleanNum.length() == 9 && cleanNum.startsWith("02")) {
+            return cleanNum.replaceFirst("(\\d{2})(\\d{3})(\\d{4})", "$1-$2-$3");
+        }
+
+        if (cleanNum.length() == 8) {
+            return cleanNum.replaceFirst("(\\d{4})(\\d{4})", "$1-$2");
+        }
+
+        return cleanNum;
+    }
+
     @ResponseBody
     @PostMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {

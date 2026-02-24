@@ -535,8 +535,8 @@
     function downloadExcel(fileName, $grid = $('.jqGrid')) {
         // Include current sort state so Excel order matches the grid.
         const gridData = Object.assign({}, $grid.getGridParam('postData') || {});
-        const currentSortName = $grid.getGridParam('sortname');
-        const currentSortOrder = $grid.getGridParam('sortorder');
+        const currentSortName = gridData.sidx || $grid.getGridParam('sortname');
+        const currentSortOrder = gridData.sord || $grid.getGridParam('sortorder');
 
         if (currentSortName) {
             gridData.sidx = currentSortName;

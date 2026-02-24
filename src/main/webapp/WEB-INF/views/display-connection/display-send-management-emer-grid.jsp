@@ -67,6 +67,20 @@
                 return cellvalue.toLocaleString("ko-KR");
             }
 
+            function colorSwatchFormatter(cellValue) {
+                if (typeof cellValue === 'undefined' || cellValue === null || String(cellValue).trim() === '') {
+                    return '';
+                }
+
+                const color = String(cellValue).trim();
+                const isHexColor = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(color);
+                if (!isHexColor) {
+                    return color;
+                }
+
+                return "<span title='" + color + "' style='display:inline-block;width:14px;height:14px;vertical-align:middle;border:1px solid rgba(0,0,0,0.25);border-radius:2px;background:" + color + ";'></span>";
+            }
+
             let flagCellEdit = false;
             if (typeof window.jqgridOption == 'undefined') {
                 window.jqgridOption = {};
@@ -241,6 +255,12 @@
                 if (_types[idx].indexOf('timestamp') > -1) {
                     column.sorttype = 'date';
                     column.formatter = timestampFormat;
+                }
+
+                if (_names[idx] === 'img_bg_color' || _names[idx] === 'font_color') {
+                    column.formatter = function (cellValue) {
+                        return colorSwatchFormatter(cellValue);
+                    };
                 }
 
                 if (_names[idx] === 'detail') {
