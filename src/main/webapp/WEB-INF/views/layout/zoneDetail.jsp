@@ -16,6 +16,8 @@ ${district}
     .device-list table thead th {
         position: sticky;
         top: 0;
+        z-index: 2;
+        background: #2f3c49;
     }
 
     .site-status-details_re .conts {
