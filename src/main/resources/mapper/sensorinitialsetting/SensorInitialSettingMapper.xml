@@ -34,6 +34,31 @@
             concat(#{last_apply_dt_end},' 23:59:59')::timestamp
         </if>
         <if test="emer_status != null and emer_status != ''">
+            <!--AND <![CDATA[
+                (CASE
+                    WHEN (tai."4th_lvl_min"::numeric != 0 OR tai."4th_lvl_max"::numeric != 0) AND
+                    ((COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) < tai."4th_lvl_min"::numeric OR
+                    (COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) > tai."4th_lvl_max"::numeric)
+                    THEN tai."4th_lvl_nm"
+
+                    WHEN (tai."3rd_lvl_min"::numeric != 0 OR tai."3rd_lvl_max"::numeric != 0) AND
+                    ((COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) < tai."3rd_lvl_min"::numeric OR
+                    (COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) > tai."3rd_lvl_max"::numeric)
+                    THEN tai."3rd_lvl_nm"
+
+                    WHEN (tai."2nd_lvl_min"::numeric != 0 OR tai."2nd_lvl_max"::numeric != 0) AND
+                    ((COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) < tai."2nd_lvl_min"::numeric OR
+                    (COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) > tai."2nd_lvl_max"::numeric)
+                    THEN tai."2nd_lvl_nm"
+
+                    WHEN (tai."1st_lvl_min"::numeric != 0 OR tai."1st_lvl_max"::numeric != 0) AND
+                    ((COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) < tai."1st_lvl_min"::numeric OR
+                    (COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) > tai."1st_lvl_max"::numeric)
+                    THEN tai."1st_lvl_nm"
+
+                    ELSE '정상'
+                END)
+            ]]> = #{emer_status} -->
             and tsi.emer_status = #{emer_status}
         </if>
         <if test="sens_status != null and sens_status != ''">
@@ -111,13 +136,39 @@
             tsi.init_apply_dt,
             tst.sens_tp_nm,
             tsi.last_apply_dt,
-            tsi.emer_status,
+            <![CDATA[
+                    CASE
+                        -- 4차 (심각)
+                        WHEN (tai."4th_lvl_min"::numeric != 0 OR tai."4th_lvl_max"::numeric != 0) AND
+                        (calc.calc_val < tai."4th_lvl_min"::numeric OR calc.calc_val > tai."4th_lvl_max"::numeric)
+                        THEN tai."4th_lvl_nm"
+
+                        -- 3차 (경계)
+                        WHEN (tai."3rd_lvl_min"::numeric != 0 OR tai."3rd_lvl_max"::numeric != 0) AND
+                        (calc.calc_val < tai."3rd_lvl_min"::numeric OR calc.calc_val > tai."3rd_lvl_max"::numeric)
+                        THEN tai."3rd_lvl_nm"
+
+                        -- 2차 (주의)
+                        WHEN (tai."2nd_lvl_min"::numeric != 0 OR tai."2nd_lvl_max"::numeric != 0) AND
+                        (calc.calc_val < tai."2nd_lvl_min"::numeric OR calc.calc_val > tai."2nd_lvl_max"::numeric)
+                        THEN tai."2nd_lvl_nm"
+
+                        -- 1차 (관심)
+                        WHEN (tai."1st_lvl_min"::numeric != 0 OR tai."1st_lvl_max"::numeric != 0) AND
+                        (calc.calc_val < tai."1st_lvl_min"::numeric OR calc.calc_val > tai."1st_lvl_max"::numeric)
+                        THEN tai."1st_lvl_nm"
+
+                        ELSE '정상'
+                    END AS emer_status,
+            ]]>
             COALESCE(tsi.sens_chnl_id, '') AS sens_chnl_id,  tsi.sens_chnl_id AS og_sens_chnl_id,
             tsi.sens_no,
             tsinfo.sens_nm,
             TO_CHAR(ROUND(tmd.raw_data::numeric, 2), 'FM9999999999999999990.00') AS real_data,
             dist.district_nm,
-            tcc.code_nm AS sens_status
+            tcc.code_nm AS sens_status,
+            TO_CHAR(ROUND(conv.conv_tsi::numeric, 2), 'FM9999999999999999990.00') AS formul_data2,
+            TO_CHAR(ROUND(conv.conv_tmd::numeric, 2), 'FM9999999999999999990.00') AS real_data2
         FROM tb_sensor_init tsi
         LEFT JOIN tb_sensor_info tsinfo ON tsi.sens_no = tsinfo.sens_no
         LEFT JOIN tb_sensor_type tst ON tsinfo.senstype_no = tst.senstype_no
@@ -139,6 +190,44 @@
             ORDER BY tmd2.meas_dt DESC
             LIMIT 1
         ) tmd ON TRUE
+
+        LEFT JOIN LATERAL (
+            SELECT
+            -- 1. 현재 원시 데이터(tmd.raw_data)에 보정식 적용
+            CASE
+            WHEN tst.senstype_no = '015' THEN COALESCE(tmd.raw_data::numeric, 0)
+            WHEN tst.senstype_no = '016' THEN COALESCE(tmd.raw_data::numeric, 0) / 100.0
+            WHEN tst.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(tmd.raw_data::numeric, 0)) / 1000.0
+            WHEN tst.senstype_no IN ('001', '002') THEN COALESCE(tmd.raw_data::numeric, 0) * 0.5
+            ELSE COALESCE(tmd.raw_data::numeric, 0)
+            END AS conv_tmd,
+
+            -- 2. 초기 원시 데이터(tsi.init_raw_data)에 동일한 보정식 적용
+            CASE
+            WHEN tst.senstype_no = '015' THEN COALESCE(tsi.init_raw_data::numeric, 0)
+            WHEN tst.senstype_no = '016' THEN COALESCE(tsi.init_raw_data::numeric, 0) / 100.0
+            WHEN tst.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(tsi.init_raw_data::numeric, 0)) / 1000.0
+            WHEN tst.senstype_no IN ('001', '002') THEN COALESCE(tsi.init_raw_data::numeric, 0) * 0.5
+            ELSE COALESCE(tsi.init_raw_data::numeric, 0)
+            END AS conv_tsi
+        ) conv ON TRUE
+
+        LEFT JOIN LATERAL (
+            SELECT
+            -- 3. 알람 판별용 계산값 (현재 보정값 - 초기 보정값)
+            (conv.conv_tmd - conv.conv_tsi) AS calc_val,
+
+            -- 4. 화면 표출용 '절대 수치' 계산 (수식의 + InitVal + Offset 적용)
+            CASE
+            WHEN tst.senstype_no IN ('015', '016', '013', '017')
+            THEN conv.conv_tmd + conv.conv_tsi /* + COALESCE(tsinfo.offset, 0) */
+            ELSE conv.conv_tmd
+            END AS display_val
+        ) calc ON TRUE
+
+        LEFT JOIN tb_alarm_info tai
+            ON tai.sens_no = tsi.sens_no
+            AND COALESCE(tai.sens_chnl_id, '') = COALESCE(tsi.sens_chnl_id,'')
 
         WHERE 1 = 1
             AND tsi.sens_no IN (
@@ -179,6 +268,10 @@
             order by tmd2.meas_dt desc
             limit 1
         ) tmd on true
+
+        LEFT JOIN tb_alarm_info tai
+            ON tai.sens_no = tsi.sens_no
+            AND COALESCE(tai.sens_chnl_id, '') = COALESCE(tsi.sens_chnl_id,'')
 
         WHERE 1 = 1
         AND tsi.sens_no IN (
