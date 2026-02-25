@@ -26,6 +26,9 @@ public class AlertStandardManagementDto implements Serializable {
     @FieldLabel(title = "채널명")
     private String sens_chnl_nm;
 
+    @FieldLabel(title = "sens_chnl_id", type = "hidden")
+    private String sens_chnl_id;
+
     @FieldLabel(title = "1차 최소", type="editable")
     private String min1;
 

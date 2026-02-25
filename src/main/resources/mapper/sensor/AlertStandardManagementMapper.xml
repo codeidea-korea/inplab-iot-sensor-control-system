@@ -146,7 +146,7 @@
           , "4th_lvl_max" = #{max4}:: double precision
           , lvl_apply_dt = now()
         where sens_no = #{sens_no}
-          and sens_chnl_id = #{sens_chnl_id}
+          and coalesce(sens_chnl_id, '') = coalesce(#{sens_chnl_id}, '')
     </update>
 
     <insert id="insertAlarm" parameterType="java.util.Map">

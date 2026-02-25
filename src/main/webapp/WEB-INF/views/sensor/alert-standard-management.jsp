@@ -7,6 +7,7 @@
     <script type="text/javascript" src="/jqgrid.js"></script>
      <script>
         $(function () {
+            const $grid = $("#jq-grid");
             $.when(
                 $.get('/adminAdd/common/code/districtInfoList'),
                 $.get('/adminAdd/common/code/sensorType'),
@@ -24,7 +25,6 @@
                 var distStr = makeJqGridSelectByName(distRes[0]);
                 var typeStr = makeJqGridSelectByName(typeRes[0]);
 
-                const $grid = $("#jq-grid");
                 const path = "/sensor/alert-standard-management"
 
                 initGrid($grid, path, $('#grid-wrapper'), {
