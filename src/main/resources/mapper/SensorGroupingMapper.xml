@@ -16,6 +16,9 @@
             <when test="selectType != null and selectType == 'month'">
                 DATE_TRUNC('month', tmd.meas_dt)
             </when>
+            <when test="selectType != null and selectType == 'minute' and minute_bucket != null and minute_bucket == 'raw'">
+                tmd.meas_dt
+            </when>
             <otherwise>
                 DATE_TRUNC('minute', tmd.meas_dt)
             </otherwise>
@@ -33,13 +36,24 @@
         </choose>
     </sql>
 
+    <sql id="chartMeasureBaseExpr">
+        <choose>
+            <when test="measure_base != null and measure_base == 'raw'">
+                tmd.raw_data
+            </when>
+            <otherwise>
+                tmd.formul_data
+            </otherwise>
+        </choose>
+    </sql>
+
     <sql id="chartDiffExpr">
         <choose>
             <when test="diff_direction != null and diff_direction == 'init_minus_meas'">
-                (<include refid="chartInitBaseExpr"/> - tmd.formul_data)
+                (<include refid="chartInitBaseExpr"/> - <include refid="chartMeasureBaseExpr"/>)
             </when>
             <otherwise>
-                (tmd.formul_data - <include refid="chartInitBaseExpr"/>)
+                (<include refid="chartMeasureBaseExpr"/> - <include refid="chartInitBaseExpr"/>)
             </otherwise>
         </choose>
     </sql>

@@ -290,7 +290,93 @@
             $('#start-date').val(formatLocalDateTime(startDate));
             $('#end-date').val(formatLocalDateTime(endDate));
 
+            const isVisibleAlarmLevel = (value) => Number.isFinite(value) && Math.abs(value) !== 10000;
             const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
+            const groupAlarmLabelOverlayPlugin = {
+                id: 'groupAlarmLabelOverlay',
+                afterDatasetsDraw(chart, _args, pluginOptions) {
+                    const items = (pluginOptions && Array.isArray(pluginOptions.items)) ? pluginOptions.items : [];
+                    if (!items.length) return;
+
+                    const xScale = chart.scales.x;
+                    const {ctx, chartArea} = chart;
+                    if (!xScale || !chartArea) return;
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(chartArea.left, chartArea.top, chartArea.right - chartArea.left, chartArea.bottom - chartArea.top);
+                    ctx.clip();
+
+                    // Draw alarm lines directly in canvas for multi-axis stability (grouping chart).
+                    const drawnLineKeys = new Set();
+                    items.forEach((item) => {
+                        const yScale = chart.scales[item.yScaleID];
+                        if (!yScale) return;
+
+                        const y = yScale.getPixelForValue(item.yValue);
+                        if (!Number.isFinite(y)) return;
+
+                        const key = String(item.yScaleID) + '|' + Number(item.yValue).toFixed(6) + '|' + (item.borderColor || '');
+                        if (drawnLineKeys.has(key)) return;
+                        drawnLineKeys.add(key);
+
+                        ctx.save();
+                        ctx.strokeStyle = item.borderColor || '#666';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 4]);
+                        ctx.beginPath();
+                        ctx.moveTo(chartArea.left, y);
+                        ctx.lineTo(chartArea.right, y);
+                        ctx.stroke();
+                        ctx.restore();
+                    });
+
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    ctx.font = '10px sans-serif';
+
+                    items.forEach((item) => {
+                        const yScale = chart.scales[item.yScaleID];
+                        if (!yScale) return;
+
+                        const rawX = Number(item.xValue);
+                        const baseX = Number.isFinite(rawX) ? xScale.getPixelForValue(rawX) : chartArea.left;
+                        const baseY = yScale.getPixelForValue(item.yValue);
+                        if (!Number.isFinite(baseX) || !Number.isFinite(baseY)) return;
+
+                        const xAdjust = Number(item.xAdjust || 0);
+                        const yAdjust = Number(item.yAdjust || 0);
+                        const lines = Array.isArray(item.content) ? item.content.map(v => String(v)) : [String(item.content ?? '')];
+                        const lineHeight = 11;
+                        const padX = 4;
+                        const padY = 3;
+                        const boxWidth = Math.max(...lines.map(line => ctx.measureText(line).width), 0) + padX * 2;
+                        const boxHeight = (lines.length * lineHeight) + padY * 2;
+
+                        let x = baseX + xAdjust;
+                        let yTop = (baseY + yAdjust) - (boxHeight / 2);
+
+                        x = Math.max(chartArea.left + 2, Math.min(x, chartArea.right - boxWidth - 2));
+                        yTop = Math.max(chartArea.top + 2, Math.min(yTop, chartArea.bottom - boxHeight - 2));
+
+                        ctx.fillStyle = item.backgroundColor || 'rgba(255,255,255,0.9)';
+                        ctx.fillRect(x, yTop, boxWidth, boxHeight);
+                        ctx.strokeStyle = item.borderColor || 'rgba(0,0,0,0.15)';
+                        ctx.lineWidth = 0.8;
+                        ctx.strokeRect(x, yTop, boxWidth, boxHeight);
+
+                        ctx.fillStyle = '#222';
+                        lines.forEach((line, idx) => {
+                            ctx.fillText(line, x + padX, yTop + padY + (lineHeight / 2) + (idx * lineHeight));
+                        });
+                    });
+
+                    ctx.restore();
+                }
+            };
 
             $.ajax({
                 url: '/adminAdd/districtInfo/all',
@@ -384,7 +470,7 @@
             function getChartData(sens_no, startDateTime, endDateTime, sensChnlId, selectType) {
                 return new Promise((resolve) => {
                     $.ajax({
-                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + "&selectType=" + selectType,
+                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + "&selectType=" + selectType + "&init_base=raw&measure_base=raw&diff_direction=init_minus_meas&minute_bucket=raw",
                         type: 'GET',
                         success: function (res) {
                             if (Array.isArray(res)) {
@@ -444,6 +530,12 @@
                         '001': '강우량계',
                         '015': 'GPS'
                     };
+                    const unitMap = {
+                        '구조물경사계': 'mm',
+                        '지표경사계': 'mm',
+                        '지표변위계': 'mm',
+                        '강우량계': 'mm'
+                    };
 
 
                     let minDate = Infinity, maxDate = -Infinity;
@@ -493,12 +585,35 @@
                     data.forEach((sensorItem, i) => {
                         const yId = axisMap[sensorItem[0].senstype_no] || 'y' + i;
                         const color = getRandomHSL();
-                        const senstype = senstypeList[sensorItem[0].senstype_no];
-                        const isRain = sensorItem[0].sens_nm.includes('RAIN');
+                        const senstype = senstypeList[sensorItem[0].senstype_no] || sensorItem[0].senstype_no;
+                        const isRain = sensorItem[0].senstype_no === '001' || (senstype || '').includes('강우');
 
                         if (!axisMap[sensorItem[0].senstype_no]) {
-                            const vals = sensorItem.map(p => p.formul_data);
-                            const absMax = Math.max(...vals.map(v => Math.abs(v || 0))) || 1; // 0 방지
+                            const sameTypeSeries = data.filter(series =>
+                                series && series.length > 0 && series[0].senstype_no === sensorItem[0].senstype_no
+                            );
+                            const vals = sameTypeSeries
+                                .flatMap(series => series.map(p => Number(p.formul_data)))
+                                .filter(v => Number.isFinite(v));
+                            const alarmVals = sameTypeSeries
+                                .flatMap(series => ([
+                                    Number(series[0].lvl_min1),
+                                    Number(series[0].lvl_min2),
+                                    Number(series[0].lvl_min3),
+                                    Number(series[0].lvl_min4),
+                                    Number(series[0].lvl_max1),
+                                    Number(series[0].lvl_max2),
+                                    Number(series[0].lvl_max3),
+                                    Number(series[0].lvl_max4)
+                                ]))
+                                .filter(isVisibleAlarmLevel);
+                            const axisCandidates = [...vals, ...alarmVals, 0];
+                            const absMax = Math.max(...axisCandidates.map(v => Math.abs(v || 0)), 0.1);
+                            const axisPadding = Math.max(absMax * 0.1, 0.1);
+                            let yAxisTitle = senstype;
+                            if (unitMap[senstype]) {
+                                yAxisTitle = senstype + ' (' + unitMap[senstype] + ')';
+                            }
 
                             scales[yId] = {
                                 id: yId,
@@ -517,13 +632,13 @@
                                 },
                                 title: {
                                     display: true,
-                                    text: senstype,
+                                    text: yAxisTitle,
                                     color: '#000',
                                     font: { size: 10 }
                                 },
 
-                                min: isRain ? 0 : -absMax,
-                                max: absMax,
+                                min: isRain ? 0 : -(absMax + axisPadding),
+                                max: absMax + axisPadding,
 
                                 grid: {
                                     color: ctx => ctx.tick.value === 0 ? 'rgba(255,0,0,0.6)' : 'rgba(0,0,0,0.05)',
@@ -542,8 +657,18 @@
                             type: isRain ? 'bar' : 'line',
                             data: sensorItem.map(p => ({
                                 x: new Date(p.meas_dt),
-                                y: p.formul_data
+                                y: Number.isFinite(Number(p.formul_data)) ? Number(p.formul_data) : null
                             })),
+                            alarmLevels: [
+                                Number(sensorItem[0].lvl_min1),
+                                Number(sensorItem[0].lvl_min2),
+                                Number(sensorItem[0].lvl_min3),
+                                Number(sensorItem[0].lvl_min4),
+                                Number(sensorItem[0].lvl_max1),
+                                Number(sensorItem[0].lvl_max2),
+                                Number(sensorItem[0].lvl_max3),
+                                Number(sensorItem[0].lvl_max4)
+                            ],
                             borderColor: color,
                             backgroundColor: color,
                             fill: false,
@@ -555,8 +680,10 @@
                         });
                     });
 
+                    const alarmLabelItems = buildAlarmLabelItems(data, minDate, axisMap);
                     const ctx = document.getElementById('myChart').getContext('2d');
                     chartInstance = new Chart(ctx, {
+                        plugins: [groupAlarmLabelOverlayPlugin],
                         type: 'line',
                         data: { datasets },
                         options: {
@@ -579,14 +706,21 @@
                                             if (yId === 'x') return;
 
                                             const activeForAxis = activeDatasets.filter(d => d.yAxisID === yId);
-                                            const vals = activeForAxis.flatMap(d => d.data.map(p => p.y));
+                                            const vals = activeForAxis
+                                                .flatMap(d => d.data.map(p => Number(p.y)))
+                                                .filter(v => Number.isFinite(v));
+                                            const alarmVals = activeForAxis
+                                                .flatMap(d => Array.isArray(d.alarmLevels) ? d.alarmLevels : [])
+                                                .filter(isVisibleAlarmLevel);
 
-                                            if (vals.length) {
-                                                const absMax = Math.max(...vals.map(v => Math.abs(v || 0))) || 1;
+                                            if (vals.length || alarmVals.length) {
+                                                const axisCandidates = [...vals, ...alarmVals, 0];
+                                                const absMax = Math.max(...axisCandidates.map(v => Math.abs(v || 0)), 0.1);
+                                                const axisPadding = Math.max(absMax * 0.1, 0.1);
                                                 const isRainAxis = activeForAxis.some(d => d.type === 'bar');
 
-                                                ci.options.scales[yId].min = isRainAxis ? 0 : -absMax; // 강우량계면 0으로 고정
-                                                ci.options.scales[yId].max = absMax;
+                                                ci.options.scales[yId].min = isRainAxis ? 0 : -(absMax + axisPadding); // 강우량계면 0으로 고정
+                                                ci.options.scales[yId].max = absMax + axisPadding;
                                             }
                                         });
 
@@ -604,7 +738,8 @@
                                         mode: 'xy'
                                     }
                                 },
-                                annotation: { annotations: buildAnnotations(data, minDate) }
+                                annotation: { annotations: buildAnnotations(data, minDate, maxDate, axisMap) },
+                                groupAlarmLabelOverlay: { items: alarmLabelItems }
                             }
                         }
                     });
@@ -617,10 +752,72 @@
             }
 
             // --- 별도 함수로 분리: annotation 생성 ---
-            function buildAnnotations(data, minDate) {
+            function buildAnnotations(data, minDate, maxDate, axisMap) {
                 const annotations = {};
                 data.forEach((sensorItem, i) => {
-                    const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
+                    const colors = ['#c88a55', '#4ea96d', '#c9a100', '#4f6ed8'];
+                    const minLevels = [
+                        parseFloat(sensorItem[0].lvl_min1),
+                        parseFloat(sensorItem[0].lvl_min2),
+                        parseFloat(sensorItem[0].lvl_min3),
+                        parseFloat(sensorItem[0].lvl_min4)
+                    ];
+                    const maxLevels = [
+                        parseFloat(sensorItem[0].lvl_max1),
+                        parseFloat(sensorItem[0].lvl_max2),
+                        parseFloat(sensorItem[0].lvl_max3),
+                        parseFloat(sensorItem[0].lvl_max4)
+                    ];
+                    const yScaleId = (axisMap && axisMap[sensorItem[0].senstype_no]) ? axisMap[sensorItem[0].senstype_no] : ('y' + i);
+                    const firstTs = sensorItem[0]?.meas_dt ? new Date(sensorItem[0].meas_dt).getTime() : minDate;
+                    const lastTs = sensorItem[sensorItem.length - 1]?.meas_dt ? new Date(sensorItem[sensorItem.length - 1].meas_dt).getTime() : firstTs;
+                    const lineXMin = Number.isFinite(minDate) ? minDate : firstTs;
+                    const lineXMax = Number.isFinite(maxDate) ? maxDate : lastTs;
+
+                    const addAlarmAnnotation = (levelValue, idx, levelType) => {
+                        if (!isVisibleAlarmLevel(levelValue)) {
+                            return;
+                        }
+
+                        const lineId = 'line-' + levelType + '-' + sensorItem[0].sens_no + '-' + (sensorItem[0].sens_chnl_id || 'none') + '-' + idx + '-' + i;
+                        annotations[lineId] = {
+                            type: 'line',
+                            xScaleID: 'x',
+                            yScaleID: yScaleId,
+                            xMin: lineXMin,
+                            xMax: lineXMax,
+                            yMin: levelValue,
+                            yMax: levelValue,
+                            borderColor: colors[idx],
+                            borderWidth: 2,
+                            borderDash: [5, 4],
+                            drawTime: 'afterDraw',
+                            z: 5
+                        };
+
+                    };
+
+                    minLevels.forEach((minLevel, idx) => addAlarmAnnotation(minLevel, idx, 'min'));
+                    maxLevels.forEach((maxLevel, idx) => addAlarmAnnotation(maxLevel, idx, 'max'));
+                });
+                return annotations;
+            }
+
+            function buildAlarmLabelItems(data, minDate, axisMap) {
+                const items = [];
+                data.forEach((sensorItem, i) => {
+                    if (!sensorItem || sensorItem.length === 0) {
+                        return;
+                    }
+
+                    const colors = ['#f0dfd1', '#d4eddc', '#f4e7a3', '#cfd8fb'];
+                    const lineColors = ['#c88a55', '#4ea96d', '#c9a100', '#4f6ed8'];
+                    const minLevels = [
+                        parseFloat(sensorItem[0].lvl_min1),
+                        parseFloat(sensorItem[0].lvl_min2),
+                        parseFloat(sensorItem[0].lvl_min3),
+                        parseFloat(sensorItem[0].lvl_min4)
+                    ];
                     const maxLevels = [
                         parseFloat(sensorItem[0].lvl_max1),
                         parseFloat(sensorItem[0].lvl_max2),
@@ -630,39 +827,41 @@
                     const firstTs = sensorItem[0]?.meas_dt
                         ? new Date(sensorItem[0].meas_dt).getTime()
                         : minDate;
+                    if (!Number.isFinite(firstTs)) {
+                        return;
+                    }
 
-                    maxLevels.forEach((maxLevel, idx) => {
-                        if (isNaN(maxLevel)) return;
+                    const yScaleId = (axisMap && axisMap[sensorItem[0].senstype_no]) ? axisMap[sensorItem[0].senstype_no] : ('y' + i);
+                    const labelTextBase = sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? '-' + sensorItem[0].sens_chnl_id : '');
+                    const labelXOffset = 72 + ((i % 6) * 18);
+                    const labelYOffsetSeed = (Math.floor(i / 6) % 4) * 6;
 
-                        const lineId = `line-${sensorItem[0].sens_no}-${sensorItem[0].sens_chnl_id || 'none'}-${idx}`;
-                        annotations[lineId] = {
-                            type: 'line',
-                            yMin: maxLevel,
-                            yMax: maxLevel,
-                            borderColor: colors[idx],
-                            borderWidth: 1.5,
-                            borderDash: [5, 4],
-                            yScaleID: 'y' + i
-                        };
+                    const pushLabel = (levelValue, idx, levelType) => {
+                        if (!isVisibleAlarmLevel(levelValue)) {
+                            return;
+                        }
 
-                        const labelId = `label-${sensorItem[0].sens_no}-${sensorItem[0].sens_chnl_id || 'none'}-${idx}`;
-                        annotations[labelId] = {
-                            type: 'label',
+                        const directionOffset = (i % 2 === 0 ? 1 : -1) * (6 + labelYOffsetSeed);
+                        const levelStackOffset = (idx + 1) * 10;
+                        items.push({
                             xValue: firstTs,
-                            yValue: maxLevel,
+                            yValue: levelValue,
+                            yScaleID: yScaleId,
+                            xAdjust: labelXOffset + (idx * 6),
+                            yAdjust: (levelType === 'min' ? -(8 + levelStackOffset) : (8 + levelStackOffset)) + directionOffset,
                             backgroundColor: colors[idx],
+                            borderColor: lineColors[idx],
                             content: [
-                                sensorItem[0].sens_nm +
-                                (sensorItem[0].sens_chnl_id ? '-' + sensorItem[0].sens_chnl_id : '') +
-                                ' ' + (idx + 1) + '차 경고'
-                            ],
-                            font: { size: 8 },
-                            xScaleID: 'x',
-                            yScaleID: 'y' + i
-                        };
-                    });
+                                labelTextBase,
+                                (idx + 1) + '차 ' + (levelType === 'min' ? '최소' : '최대') + ' 경고'
+                            ]
+                        });
+                    };
+
+                    minLevels.forEach((level, idx) => pushLabel(level, idx, 'min'));
+                    maxLevels.forEach((level, idx) => pushLabel(level, idx, 'max'));
                 });
-                return annotations;
+                return items;
             }
         })
         });
