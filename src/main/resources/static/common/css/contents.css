@@ -4449,3 +4449,24 @@ div.site-status-toggle.active > button.show {
     white-space: nowrap;
     cursor: pointer;
 }
+
+.ui-search-toolbar select {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+
+    background: #fff url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 5px center !important;
+    background-size: 14px !important;
+
+    padding-right: 25px !important;
+    cursor: pointer !important;
+}
+
+.ui-search-toolbar select::-ms-expand {
+    display: none !important;
+}
+
+.ui-search-toolbar th:has(select) .clearsearchclass,
+.ui-search-toolbar td:has(select) .clearsearchclass {
+    display: none !important;
+}
