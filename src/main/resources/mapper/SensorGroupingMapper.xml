@@ -33,6 +33,17 @@
         </choose>
     </sql>
 
+    <sql id="chartDiffExpr">
+        <choose>
+            <when test="diff_direction != null and diff_direction == 'init_minus_meas'">
+                (<include refid="chartInitBaseExpr"/> - tmd.formul_data)
+            </when>
+            <otherwise>
+                (tmd.formul_data - <include refid="chartInitBaseExpr"/>)
+            </otherwise>
+        </choose>
+    </sql>
+
     <sql id="rowSearch">
         <if test="sens_nm != null and sens_nm != ''">
             and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'
@@ -151,9 +162,9 @@
             tsi.sens_nm,
             tmd.sens_chnl_id,
             tsi.senstype_no,
-            max(tmd.formul_data - <include refid="chartInitBaseExpr"/>) as max_data,
-            min(tmd.formul_data - <include refid="chartInitBaseExpr"/>) as min_data,
-            AVG(tmd.formul_data - <include refid="chartInitBaseExpr"/>) AS formul_data,
+            max(<include refid="chartDiffExpr"/>) as max_data,
+            min(<include refid="chartDiffExpr"/>) as min_data,
+            AVG(<include refid="chartDiffExpr"/>) AS formul_data,
             <include refid="timeBucketExpr"/> AS meas_dt,
             MAX(tai."1st_lvl_min") AS lvl_min1,
             MAX(tai."2nd_lvl_min") AS lvl_min2,
