@@ -855,6 +855,32 @@
             }
 
             setTimeout(function() {
+
+                function formatLocalDateTime(date) {
+                    const pad = (n) => n.toString().padStart(2, '0');
+                    const year = date.getFullYear();
+                    const month = pad(date.getMonth() + 1);
+                    const day = pad(date.getDate());
+                    const hours = pad(date.getHours());
+                    const minutes = pad(date.getMinutes());
+                    return year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
+                }
+
+                const today = new Date();
+
+                // 2. 종료일 설정 = 오늘 23:59
+                const endDate = new Date(today);
+                endDate.setHours(23, 59, 0, 0);
+
+                // 3. 시작일 설정 = 7일 전 00:00 (숫자 '7'을 바꾸면 기간 조절 가능)
+                const startDate = new Date(today);
+                startDate.setDate(startDate.getDate() - 2);
+                startDate.setHours(0, 0, 0, 0);
+
+                // 4. 날짜 input 태그에 값 세팅 (HTML의 id와 정확히 일치)
+                $('#start-date').val(formatLocalDateTime(startDate));
+                $('#end-date').val(formatLocalDateTime(endDate));
+
                 $("#graph-search-btn").click();
             }, 100);
         };
@@ -1137,6 +1163,17 @@
                 dynamicUnit = 'day';
             } else if (diffDays > (2 / 24)) {
                 dynamicUnit = 'hour';
+            }
+
+            if ($("#select-condition").length > 0) {
+                const condition = $("#select-condition").val();
+                if (condition === 'hourly') {
+                    dynamicUnit = 'hour';
+                } else if (condition === 'daily') {
+                    dynamicUnit = 'day';
+                } else if (condition === 'minute') {
+                    dynamicUnit = 'minute';
+                }
             }
 
             data.forEach((item) => {
