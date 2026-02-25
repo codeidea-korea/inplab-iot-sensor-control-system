@@ -1040,7 +1040,7 @@
                 const axisSpan = Math.max(baseMax - baseMin, 0.1);
                 const axisPadding = Math.max(axisSpan * 0.1, 0.1);
 
-                let selectedSensorType = $("#sensor-type-select option:selected").text();
+                let selectedSensorType = ($("#sensor-type-select option:selected").text() || '').trim();
 
                 const unitMap = {
                     '지표경사계': 'mm',
@@ -1051,19 +1051,31 @@
                 const sensorTypeRaw = selectedSensorType;
                 let yAxisTitle = (sensorTypeRaw === '선택' || sensorTypeRaw === '') ? 'Value' : sensorTypeRaw;
                 const unit = unitMap[sensorTypeRaw];
-                const isDisplacementDiffType = sensorTypeRaw.includes('변위') || sensorTypeRaw.includes('경사');
+                const isRainType = sensorTypeRaw.includes('강우');
 
-                if (isDisplacementDiffType) {
-                    yAxisTitle = unit ? '변위차(' + unit + ')' : '변위차';
-                } else if (unit) {
-                    yAxisTitle = sensorTypeRaw + '(' + unit + ')';
+                if (unit) {
+                    yAxisTitle = sensorTypeRaw + ' (' + unit + ')';
                 }
+
+                const lineAbsMax = Math.max(...axisCandidates.map(v => Math.abs(v || 0)), 0.1);
+                const linePadding = Math.max(lineAbsMax * 0.1, 0.1);
+                const lineMin = isRainType ? 0 : -(lineAbsMax + linePadding);
+                const lineMax = lineAbsMax + linePadding;
 
                 myChart.options.scales.y = {
                     beginAtZero: false,
-                    suggestedMin: baseMin - axisPadding,
-                    suggestedMax: baseMax + axisPadding,
-                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    suggestedMin: lineMin,
+                    suggestedMax: lineMax,
+                    grid: {
+                        color: function (ctx) {
+                            const tickValue = Number(ctx && ctx.tick ? ctx.tick.value : NaN);
+                            return tickValue === 0 ? 'rgba(255,0,0,0.35)' : 'rgba(0,0,0,0.05)';
+                        },
+                        lineWidth: function (ctx) {
+                            const tickValue = Number(ctx && ctx.tick ? ctx.tick.value : NaN);
+                            return tickValue === 0 ? 1.2 : 1;
+                        }
+                    },
                     ticks: {
                         color: '#555',
                         callback: v => Number(v.toFixed(2))
