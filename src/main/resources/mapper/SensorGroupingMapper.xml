@@ -22,6 +22,17 @@
         </choose>
     </sql>
 
+    <sql id="chartInitBaseExpr">
+        <choose>
+            <when test="init_base != null and init_base == 'raw'">
+                COALESCE(tsit.init_raw_data, 0)
+            </when>
+            <otherwise>
+                COALESCE(tsit.formul_data, 0)
+            </otherwise>
+        </choose>
+    </sql>
+
     <sql id="rowSearch">
         <if test="sens_nm != null and sens_nm != ''">
             and tsinfo.sens_nm ilike '%' || #{sens_nm} || '%'
@@ -140,10 +151,14 @@
             tsi.sens_nm,
             tmd.sens_chnl_id,
             tsi.senstype_no,
-            max(tmd.formul_data - coalesce(tsit.formul_data, 0)) as max_data,
-            min(tmd.formul_data - coalesce(tsit.formul_data, 0)) as min_data,
-            AVG(tmd.formul_data - COALESCE(tsit.formul_data, 0)) AS formul_data,
+            max(tmd.formul_data - <include refid="chartInitBaseExpr"/>) as max_data,
+            min(tmd.formul_data - <include refid="chartInitBaseExpr"/>) as min_data,
+            AVG(tmd.formul_data - <include refid="chartInitBaseExpr"/>) AS formul_data,
             <include refid="timeBucketExpr"/> AS meas_dt,
+            MAX(tai."1st_lvl_min") AS lvl_min1,
+            MAX(tai."2nd_lvl_min") AS lvl_min2,
+            MAX(tai."3rd_lvl_min") AS lvl_min3,
+            MAX(tai."4th_lvl_min") AS lvl_min4,
             MAX(tai."1st_lvl_max") AS lvl_max1,
             MAX(tai."2nd_lvl_max") AS lvl_max2,
             MAX(tai."3rd_lvl_max") AS lvl_max3,
@@ -151,12 +166,12 @@
         FROM tb_measure_details tmd
                  LEFT JOIN tb_alarm_info tai
                            ON tai.sens_no = tmd.sens_no
-                               AND tai.sens_chnl_id = tmd.sens_chnl_id
+                               AND COALESCE(tai.sens_chnl_id, '') = COALESCE(tmd.sens_chnl_id, '')
                  LEFT JOIN tb_sensor_info tsi
                            ON tmd.sens_no = tsi.sens_no
                  LEFT JOIN tb_sensor_init tsit
                            ON tsit.sens_no = tmd.sens_no
-                               AND tsit.sens_chnl_id = tmd.sens_chnl_id
+                               AND COALESCE(tsit.sens_chnl_id, '') = COALESCE(tmd.sens_chnl_id, '')
         WHERE tmd.meas_dt BETWEEN (#{start_date_time}::timestamp) AND (#{end_date_time}::timestamp)
           AND tmd.sens_no = #{sens_no}
         <if test="sens_chnl_id != null and sens_chnl_id != ''">
