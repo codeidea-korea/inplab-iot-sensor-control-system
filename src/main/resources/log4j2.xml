@@ -5,7 +5,7 @@
         <Property name="logErrorFileName">daily-error-log</Property>
         <Property name="BASE_DIR">/logs</Property>
         <Property name="consoleLayout">%style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable</Property>
-        <Property name="fileLayout">%d [%t] %-5level %c(%M:%L) - %m%n</Property>
+        <Property name="fileLayout">%d [%t] %-5level %c(%M:%L) - %m%n%throwable{full}</Property>
         <property name="LOG_LEVEL" value="DEBUG"/>
     </Properties>
 
