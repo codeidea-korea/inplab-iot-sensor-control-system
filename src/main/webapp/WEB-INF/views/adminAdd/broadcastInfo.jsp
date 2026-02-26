@@ -492,7 +492,7 @@
     </div>
     <div id="lay-form-write08" class="layer-base">
         <div class="layer-base-btns">
-            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
+            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="취소"></a>
         </div>
         <div class="layer-base-title">방송장비 <span id="form_sub_title"></span></div>
         <div class="layer-base-conts">
@@ -586,14 +586,14 @@
                 <input type="button" red value="삭제" id="del_broadcast"/>
                 <input type="button" blue value="수정" id="udt_broadcast"/>
                 <input type="button" blue value="저장" id="ins_broadcast"/>
-                <button type="button" data-fancybox-close>닫기</button>
+                <button type="button" data-fancybox-close>취소</button>
             </div>
         </div>
     </div>
 
     <div id="lay-form-address" class="layer-base">
         <div class="layer-base-btns">
-            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
+            <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="취소"></a>
         </div>
         <div class="layer-base-title">위치 찾기</div>
         <div class="layer-base-conts">
