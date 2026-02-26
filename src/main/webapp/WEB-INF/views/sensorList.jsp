@@ -1043,7 +1043,7 @@
                 let selectedSensorType = ($("#sensor-type-select option:selected").text() || '').trim();
 
                 const unitMap = {
-                    '지표경사계': 'mm',
+                    '지표경사계': 'deg',
                     '지표변위계': 'mm',
                     '강우량계': 'mm',
                 };
