@@ -41,6 +41,18 @@ public class DisplayBoardMapper {
         return sqlSession.selectList("all", param);
     }
 
+    public Map<String, Object> getDisplayBoardConnection(Map<String, Object> param) {
+        return sqlSession.selectOne("getDisplayBoardConnection", param);
+    }
+
+    public Map<String, Object> getSimulationImageByGroup(Map<String, Object> param) {
+        return sqlSession.selectOne("getSimulationImageByGroup", param);
+    }
+
+    public Map<String, Object> getSimulationImageByMgntNo(Map<String, Object> param) {
+        return sqlSession.selectOne("getSimulationImageByMgntNo", param);
+    }
+
     public int sendHistory(Map<String, Object> param) {
         return sqlSession.insert("sendHistory", param);
     }

@@ -11,13 +11,17 @@ import com.safeone.dashboard.dto.UdtAdminAddDisplayBoardDto;
 import com.safeone.dashboard.dto.displayconnection.DisplayBoardDto;
 import com.safeone.dashboard.service.DisplayBoardService;
 import com.safeone.dashboard.util.CommonUtils;
+import com.safeone.dashboard.util.DisplayUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.Resource;
+import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +34,15 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
 
     @Resource(name = "displayBoardMapper")
     private final DisplayBoardMapper displayBoardMapper;
+
+    @Value("${display.simulator.ip:127.0.0.1}")
+    private String simulatorIp;
+
+    @Value("${display.simulator.port:8000}")
+    private int simulatorPort;
+
+    @Value("${display.simulator.image-base-url:http://127.0.0.1:8080}")
+    private String simulatorImageBaseUrl;
 
     public ObjectNode getDisplayBoard(GetAdminAddDisplayBoardDto getAdminAddDisplayBoardDto) {
         ObjectMapper om = new ObjectMapper();
@@ -144,6 +157,133 @@ public class DisplayBoardServiceImpl implements DisplayBoardService {
     @Override
     public List<DisplayBoardDto> all(Map<String, Object> param) {
         return displayBoardMapper.all(param);
+    }
+
+    @Override
+    public Map<String, Object> getSimulatorImageData(Map<String, Object> param) {
+        Map<String, Object> row = displayBoardMapper.getSimulationImageByGroup(param);
+        return toSimulatorImageResponse(row);
+    }
+
+    @Override
+    public Map<String, Object> getSimulatorImageDataByMgntNo(String mgntNo) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("mgnt_no", mgntNo);
+        Map<String, Object> row = displayBoardMapper.getSimulationImageByMgntNo(param);
+        return toSimulatorImageResponse(row);
+    }
+
+    private Map<String, Object> toSimulatorImageResponse(Map<String, Object> row) {
+        if (row == null || row.get("img_file_path") == null) {
+            return null;
+        }
+
+        String raw = String.valueOf(row.get("img_file_path"));
+        String contentType = "image/jpeg";
+        String base64 = raw;
+        if (raw.startsWith("data:")) {
+            int commaIdx = raw.indexOf(',');
+            int semicolonIdx = raw.indexOf(';');
+            if (semicolonIdx > 5) {
+                contentType = raw.substring(5, semicolonIdx);
+            }
+            if (commaIdx > -1 && commaIdx + 1 < raw.length()) {
+                base64 = raw.substring(commaIdx + 1);
+            }
+        }
+
+        byte[] bytes;
+        try {
+            bytes = Base64.getDecoder().decode(base64);
+        } catch (IllegalArgumentException e) {
+            log.warn("simulator image base64 decode failed.", e);
+            return null;
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("contentType", contentType);
+        result.put("bytes", bytes);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> sendTest(Map<String, Object> param) {
+        Map<String, Object> result = new HashMap<>();
+        Object dispbdNo = param.get("dispbd_no");
+        if (dispbdNo == null || dispbdNo.toString().trim().isEmpty()) {
+            result.put("success", false);
+            result.put("message", "전광판 정보가 없습니다.");
+            return result;
+        }
+
+        try {
+            new DisplayUtils(simulatorIp, simulatorPort);
+            DisplayUtils.ElectronicDisplay ed = new DisplayUtils.ElectronicDisplay();
+
+            Map<String, Object> selectedImage = displayBoardMapper.getSimulationImageByGroup(param);
+            if (selectedImage == null || selectedImage.get("mgnt_no") == null) {
+                result.put("success", false);
+                result.put("message", "선택한 이벤트/그룹에 전송할 이미지가 없습니다.");
+                return result;
+            }
+
+            boolean emergency = "2".equals(String.valueOf(param.get("dispbd_evnt_flag")));
+            byte[] scenario = parseScenarioBytes("01:01:04:04:05:04:00:00:18:01:01:00:00:63:0C:1F:17:3B:00");
+            String imageKey = String.valueOf(selectedImage.get("mgnt_no"));
+            String testUrl = simulatorImageBaseUrl
+                    + "/adminAdd/displayBoard/sim-image/"
+                    + imageKey
+                    + ".jpg";
+            byte[] url = testUrl.getBytes(Charset.forName("KSC5601"));
+
+            if (emergency) {
+                DisplayUtils.deleteAllEmergencyPhrases(ed);
+                pauseBetweenCommands(200);
+                DisplayUtils.addEmergencyImageScenario(ed, scenario, url);
+                pauseBetweenCommands(200);
+                DisplayUtils.downloadEmergencyImage(ed);
+                pauseBetweenCommands(300);
+                DisplayUtils.displayModeSetting(ed, DisplayUtils.EMG);
+            } else {
+                DisplayUtils.deleteAllPeacetimePhrases(ed);
+                pauseBetweenCommands(200);
+                DisplayUtils.addPeacetimeImageScenario(ed, scenario, url);
+                pauseBetweenCommands(200);
+                DisplayUtils.downloadPeacetimeImage(ed);
+                pauseBetweenCommands(300);
+                DisplayUtils.displayModeSetting(ed, DisplayUtils.NOR);
+            }
+
+            result.put("success", true);
+            result.put("message", "시뮬레이터 테스트 전송 성공 (" + simulatorIp + ":" + simulatorPort + ")");
+            result.put("sim_image_mgnt_no", imageKey);
+            result.put("sim_image_url", testUrl);
+        } catch (Exception e) {
+            log.error("display-send-management test send failed. param={}", param, e);
+            result.put("success", false);
+            result.put("message", "시뮬레이터 테스트 전송 실패 (" + simulatorIp + ":" + simulatorPort + ")");
+            result.put("sim_image_mgnt_no", null);
+            result.put("sim_image_url", null);
+        }
+
+        return result;
+    }
+
+    private byte[] parseScenarioBytes(String hexByColon) {
+        String[] tokens = hexByColon.split(":");
+        byte[] out = new byte[tokens.length];
+        for (int i = 0; i < tokens.length; i++) {
+            out[i] = (byte) Integer.parseInt(tokens[i], 16);
+        }
+        return out;
+    }
+
+    private void pauseBetweenCommands(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override

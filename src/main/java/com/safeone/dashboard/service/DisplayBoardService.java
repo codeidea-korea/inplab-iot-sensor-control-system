@@ -22,6 +22,12 @@ public interface DisplayBoardService {
 
   List<DisplayBoardDto> all(Map<String, Object> param);
 
+  Map<String, Object> getSimulatorImageData(Map<String, Object> param);
+
+  Map<String, Object> getSimulatorImageDataByMgntNo(String mgntNo);
+
+  Map<String, Object> sendTest(Map<String, Object> param);
+
   int sendHistory(Map<String, Object> param);
 
   String getMaxDispbdNo();

@@ -62,6 +62,46 @@
         WHERE A.district_no = #{district_no}
     </select>
 
+    <select id="getDisplayBoardConnection" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT A.dispbd_no
+             , A.dispbd_ip
+             , A.dispbd_port
+        FROM tb_dispboard_info_new A
+        WHERE A.dispbd_no = #{dispbd_no}
+    </select>
+
+    <select id="getSimulationImageByGroup" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT tdm.mgnt_no
+             , tdm.dispbd_imgfile_nm
+             , COALESCE(tdi.img_file_path, tbi.img_file_path) AS img_file_path
+        FROM tb_dispbd_mapping tdm
+                 LEFT OUTER JOIN tb_dispbd_image_new tdi
+                                 ON tdm.dispbd_imgfile_nm = tdi.dispbd_imgfile_nm
+                 LEFT OUTER JOIN tb_dispbd_image tbi
+                                 ON tdm.dispbd_evnt_flag = tbi.dispbd_evnt_flag
+                                     AND tdm.img_grp_nm = tbi.img_grp_nm
+                                     AND tdm.dispbd_imgfile_nm = tbi.dispbd_imgfile_nm
+        WHERE tdm.dispbd_evnt_flag = #{dispbd_evnt_flag}
+          AND tdm.img_grp_nm = #{img_grp_nm}
+        ORDER BY tdm.mgnt_no::integer DESC
+            LIMIT 1
+    </select>
+
+    <select id="getSimulationImageByMgntNo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        SELECT tdm.mgnt_no
+             , tdm.dispbd_imgfile_nm
+             , COALESCE(tdi.img_file_path, tbi.img_file_path) AS img_file_path
+        FROM tb_dispbd_mapping tdm
+                 LEFT OUTER JOIN tb_dispbd_image_new tdi
+                                 ON tdm.dispbd_imgfile_nm = tdi.dispbd_imgfile_nm
+                 LEFT OUTER JOIN tb_dispbd_image tbi
+                                 ON tdm.dispbd_evnt_flag = tbi.dispbd_evnt_flag
+                                     AND tdm.img_grp_nm = tbi.img_grp_nm
+                                     AND tdm.dispbd_imgfile_nm = tbi.dispbd_imgfile_nm
+        WHERE tdm.mgnt_no::text = #{mgnt_no}
+        LIMIT 1
+    </select>
+
     <sql id="getDisplayBoardList-where">
         /* getDisplayBoardList-where */
         LEFT OUTER JOIN tb_district_info B ON A.district_no = B.district_no

@@ -445,25 +445,53 @@
                 alert('전송그룹을 선택해주세요.');
                 return;
             }
+
+            const payload = {
+                dispbd_no: $("#dispbd_nm").val(),
+                district_no: $("#district-no").val(),
+                dispbd_evnt_flag: $("#event-select").val(),
+                img_grp_nm: $("#dispbd_group").val()
+            };
+
+            const saveHistory = (resultYn, testMessage) => {
+                $.ajax({
+                    url: '/adminAdd/displayBoard/send-history',
+                    type: 'POST',
+                    dataType: 'json',
+                    async: true,
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({
+                        ...payload,
+                        dispbd_rslt_yn: resultYn
+                    }),
+                    success: function (_res) {
+                        alert((testMessage || '시뮬레이터 테스트를 완료했습니다.') + '\n전송 이력이 저장되었습니다.');
+                        $historyGrid.trigger('reloadGrid');
+                    },
+                    error: function (_err) {
+                        alert((testMessage || '시뮬레이터 테스트를 완료했습니다.') + '\n이력 저장 중 오류가 발생했습니다.');
+                    }
+                });
+            };
+
             $.ajax({
-                url: '/adminAdd/displayBoard/send-history',
+                url: '/adminAdd/displayBoard/send-test',
                 type: 'POST',
                 dataType: 'json',
                 async: true,
                 contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify({
-                    dispbd_no: $("#dispbd_nm").val(),
-                    district_no: $("#district-no").val(),
-                    dispbd_evnt_flag: $("#event-select").val(),
-                    img_grp_nm: $("#dispbd_group").val(),
-                    dispbd_rslt_yn: 'Y'
-                }),
-                success: function (_res) {
-                    alert('전송 이력이 저장되었습니다.');
-                    $historyGrid.trigger('reloadGrid');
+                data: JSON.stringify(payload),
+                success: function (res) {
+                    const success = !!res?.success;
+                    const baseMessage = res?.message || (success ? '시뮬레이터 테스트 전송 성공' : '시뮬레이터 테스트 전송 실패');
+                    const debugInfo = res?.sim_image_mgnt_no && res?.sim_image_url
+                        ? ('\n이미지키: ' + res.sim_image_mgnt_no + '\n이미지URL: ' + res.sim_image_url)
+                        : '';
+                    const message = baseMessage + debugInfo;
+                    saveHistory(success ? 'Y' : 'N', message);
                 },
                 error: function (_err) {
-                    alert('알 수 없는 오류가 발생했습니다.');
+                    saveHistory('N', '시뮬레이터 테스트 전송 실패');
                 }
             });
         })

@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
@@ -35,29 +37,38 @@ public class DisplayUtils {
     }
 
     public static void sendCommand(ElectronicDisplay ed) throws UnknownHostException {
-        try (Socket socket = new Socket(serverAddress, serverPort);
-             OutputStream out = socket.getOutputStream();
-             InputStream in = socket.getInputStream()) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(serverAddress, serverPort), 3000);
+            socket.setSoTimeout(3000);
 
-            log.info("TCP Socket connected - " + serverAddress + ":" + serverPort);
-            out.write(ed.commandData, 0, ed.length);
-            log.info("request - " + toHex(ed.commandData, ed.length));
-            out.flush();
+            try (OutputStream out = socket.getOutputStream();
+                 InputStream in = socket.getInputStream()) {
 
-            byte[] responseBuffer = new byte[1024];
-            int bytesRead = in.read(responseBuffer);
-            if (bytesRead != -1) {
-                log.info("Response - ");
-                for (int i = 0; i < bytesRead; i++) {
-                    log.info(String.format("%02x ", responseBuffer[i]));
+                log.info("TCP Socket connected - " + serverAddress + ":" + serverPort);
+                out.write(ed.commandData, 0, ed.length);
+                log.info("request - " + toHex(ed.commandData, ed.length));
+                out.flush();
+
+                byte[] responseBuffer = new byte[1024];
+                try {
+                    int bytesRead = in.read(responseBuffer);
+                    if (bytesRead != -1) {
+                        log.info("Response - ");
+                        for (int i = 0; i < bytesRead; i++) {
+                            log.info(String.format("%02x ", responseBuffer[i]));
+                        }
+                    } else {
+                        log.info("No response from server.");
+                    }
+                } catch (SocketTimeoutException timeoutException) {
+                    log.info("No ACK within timeout, continuing as sent command.");
                 }
-            } else {
-                log.info("No response from server.");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new UnknownHostException();
+            UnknownHostException wrapped = new UnknownHostException("display connect/send failed: " + serverAddress + ":" + serverPort + " - " + e.getMessage());
+            wrapped.initCause(e);
+            throw wrapped;
         }
     }
 

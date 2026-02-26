@@ -8,6 +8,7 @@ import com.safeone.dashboard.dto.UdtAdminAddDisplayBoardDto;
 import com.safeone.dashboard.dto.displayconnection.DisplayBoardDto;
 import com.safeone.dashboard.service.DisplayBoardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -76,6 +77,36 @@ public class AddDisplayBoardController {
     @PostMapping(value = "/send-history", produces = MediaType.APPLICATION_JSON_VALUE)
     public int sendHistory(@RequestBody Map<String, Object> param) {
         return displayBoardService.sendHistory(param);
+    }
+
+    @PostMapping(value = "/send-test", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> sendTest(@RequestBody Map<String, Object> param) {
+        return displayBoardService.sendTest(param);
+    }
+
+    @GetMapping(value = "/sim-image")
+    public ResponseEntity<byte[]> simulatorImage(@RequestParam Map<String, Object> param) {
+        Map<String, Object> image = displayBoardService.getSimulatorImageData(param);
+        return toImageResponse(image);
+    }
+
+    @GetMapping(value = "/sim-image/{mgntNo}.jpg")
+    public ResponseEntity<byte[]> simulatorImageByMgntNo(@PathVariable("mgntNo") String mgntNo) {
+        Map<String, Object> image = displayBoardService.getSimulatorImageDataByMgntNo(mgntNo);
+        return toImageResponse(image);
+    }
+
+    private ResponseEntity<byte[]> toImageResponse(Map<String, Object> image) {
+        if (image == null || image.get("bytes") == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String contentType = String.valueOf(image.getOrDefault("contentType", "image/jpeg"));
+        byte[] bytes = (byte[]) image.get("bytes");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(bytes);
     }
 
 
