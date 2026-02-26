@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-    
+
 <mapper namespace="com.safeone.dashboard.dao.DataMeasureMapper">
     <sql id="rowSearch">
-		<if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
-			and to_date(MG.collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
-		</if>
+        <if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
+            and to_date(MG.collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
+        </if>
         <if test="x_raw_data != null and x_raw_data != ''">
             and MG.x_raw_data ilike '%' || #{x_raw_data} || '%'
         </if>
@@ -48,86 +48,86 @@
     <select id="selectDataMeasureList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.DataMeasureDto">
         SELECT MG.*
         FROM (
-				SELECT TO_CHAR(TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
-					 , EXTRACT(epoch FROM TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
-					 , MAX(a.x_raw_data) as x_raw_data
-					 , MAX(a.x_deg) as x_deg
-					 , MAX(a.y_raw_data) as y_raw_data
-					 , MAX(a.y_deg) as y_deg
-			FROM (
-				(
-			    SELECT bc.collect_date
-						, COALESCE(bc.raw_value, '0') as x_raw_data
-						, COALESCE(bc.real_value, '0') as x_deg
-						, '0' y_raw_data
-						, '0' y_deg
-				FROM tb_dps_basecollection bc
-				WHERE bc.sensor_id = #{x_sensor_id}
-				AND bc.zone_id = #{x_zone_id}
-				ORDER BY bc.collect_date DESC)
-				UNION ALL
-				(SELECT bc.collect_date
-						, '0' x_raw_data
-						, '0' x_deg
-						, COALESCE(bc.raw_value, '0') as y_raw_data
-						, COALESCE(bc.real_value, '0') as y_deg
-				FROM tb_dps_basecollection bc
-				WHERE bc.sensor_id = #{y_sensor_id}
-				AND bc.zone_id = #{y_zone_id}
-				ORDER BY bc.collect_date DESC)
-			) a
-			GROUP BY a.collect_date
+        SELECT TO_CHAR(TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
+        , EXTRACT(epoch FROM TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
+        , MAX(a.x_raw_data) as x_raw_data
+        , MAX(a.x_deg) as x_deg
+        , MAX(a.y_raw_data) as y_raw_data
+        , MAX(a.y_deg) as y_deg
+        FROM (
+        (
+        SELECT bc.collect_date
+        , COALESCE(bc.raw_value, '0') as x_raw_data
+        , COALESCE(bc.real_value, '0') as x_deg
+        , '0' y_raw_data
+        , '0' y_deg
+        FROM tb_dps_basecollection bc
+        WHERE bc.sensor_id = #{x_sensor_id}
+        AND bc.zone_id = #{x_zone_id}
+        ORDER BY bc.collect_date DESC)
+        UNION ALL
+        (SELECT bc.collect_date
+        , '0' x_raw_data
+        , '0' x_deg
+        , COALESCE(bc.raw_value, '0') as y_raw_data
+        , COALESCE(bc.real_value, '0') as y_deg
+        FROM tb_dps_basecollection bc
+        WHERE bc.sensor_id = #{y_sensor_id}
+        AND bc.zone_id = #{y_zone_id}
+        ORDER BY bc.collect_date DESC)
+        ) a
+        GROUP BY a.collect_date
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
 
-         <if test="page != null and page > 0">
-             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
-         </if>
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
     </select>
 
     <select id="selectDataMeasureListTotal" parameterType="java.util.Map" resultType="int">
-    	-- selectDataMeasureListTotal
-		SELECT COUNT(*)
-		FROM (SELECT TO_CHAR(TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
-					 , EXTRACT(epoch FROM TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
-					 , MAX(a.x_raw_data) as x_raw_data
-					 , MAX(a.x_deg) as x_deg
-					 , MAX(a.y_raw_data) as y_raw_data
-					 , MAX(a.y_deg) as y_deg
-			FROM (
-				(SELECT bc.collect_date
-						, bc.raw_value as x_raw_data
-						, bc.real_value as x_deg
-						, '0' as y_raw_data
-						, '0' as y_deg
-				FROM tb_dps_basecollection bc
-				WHERE bc.sensor_id = #{x_sensor_id}
-				AND bc.zone_id = #{x_zone_id}
-				ORDER BY bc.collect_date DESC)
-				UNION ALL 
-				(SELECT bc.collect_date
-						, '0' as x_raw_data
-						, '0' as x_deg
-						, bc.raw_value as y_raw_data
-						, bc.real_value as y_deg
-				FROM tb_dps_basecollection bc
-				WHERE bc.sensor_id = #{y_sensor_id}
-				AND bc.zone_id = #{y_zone_id}
-				ORDER BY bc.collect_date DESC)
-			) a
-		GROUP BY a.collect_date
+        -- selectDataMeasureListTotal
+        SELECT COUNT(*)
+        FROM (SELECT TO_CHAR(TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
+        , EXTRACT(epoch FROM TO_TIMESTAMP(a.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
+        , MAX(a.x_raw_data) as x_raw_data
+        , MAX(a.x_deg) as x_deg
+        , MAX(a.y_raw_data) as y_raw_data
+        , MAX(a.y_deg) as y_deg
+        FROM (
+        (SELECT bc.collect_date
+        , bc.raw_value as x_raw_data
+        , bc.real_value as x_deg
+        , '0' as y_raw_data
+        , '0' as y_deg
+        FROM tb_dps_basecollection bc
+        WHERE bc.sensor_id = #{x_sensor_id}
+        AND bc.zone_id = #{x_zone_id}
+        ORDER BY bc.collect_date DESC)
+        UNION ALL
+        (SELECT bc.collect_date
+        , '0' as x_raw_data
+        , '0' as x_deg
+        , bc.raw_value as y_raw_data
+        , bc.real_value as y_deg
+        FROM tb_dps_basecollection bc
+        WHERE bc.sensor_id = #{y_sensor_id}
+        AND bc.zone_id = #{y_zone_id}
+        ORDER BY bc.collect_date DESC)
+        ) a
+        GROUP BY a.collect_date
 
-		) MG
+        ) MG
         WHERE 1=1
         <include refid="rowSearch"/>
     </select>
-    
+
     <sql id="otherRowSearch">
-		<if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
-			and to_date(MG.collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
-		</if>
+        <if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
+            and to_date(MG.collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
+        </if>
         <if test="raw_data != null and raw_data != ''">
             and MG.raw_data ilike '%' || #{raw_data} || '%'
         </if>
@@ -154,76 +154,84 @@
             </choose>
         </trim>
     </sql>
-    
+
     <select id="selectOtherDataMeasureList" parameterType="java.util.Map" resultType="com.safeone.dashboard.dto.OtherDataMeasureDto">
         SELECT MG.*
         FROM (
-				SELECT TO_CHAR(TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
-						, EXTRACT(epoch FROM TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
-						, bc.raw_value as raw_data
-						, bc.real_value as deg
-				FROM tb_dps_basecollection bc
-				WHERE 1=1
-				AND bc.sensor_id = #{sensor_id}
-				AND bc.zone_id = #{zone_id}
+        SELECT TO_CHAR(TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
+        , EXTRACT(epoch FROM TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
+        , bc.raw_value as raw_data
+        , bc.real_value as deg
+        FROM tb_dps_basecollection bc
+        WHERE 1=1
+        AND bc.sensor_id = #{sensor_id}
+        AND bc.zone_id = #{zone_id}
         ) MG
         WHERE 1=1
         <include refid="otherRowSearch"/>
         <include refid="otherRowOrder"/>
         LIMIT 5
-<!--         <if test="page != null and page > 0"> -->
-<!--             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int -->
-<!--         </if> -->
+        <!--         <if test="page != null and page > 0"> -->
+        <!--             limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int -->
+        <!--         </if> -->
     </select>
 
     <select id="selectOtherDataMeasureListTotal" parameterType="java.util.Map" resultType="int">
-		SELECT COUNT(*)
-		FROM (
-				SELECT TO_CHAR(TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
-						, EXTRACT(epoch FROM TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
-						, bc.raw_value as raw_data
-						, bc.real_value as deg
-				FROM tb_dps_basecollection bc
-				WHERE bc.sensor_id = #{sensor_id}
-				AND bc.zone_id = #{zone_id}
-				ORDER BY bc.collect_date DESC
-		LIMIT 5
-		) MG
+        SELECT COUNT(*)
+        FROM (
+        SELECT TO_CHAR(TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as collect_date
+        , EXTRACT(epoch FROM TO_TIMESTAMP(bc.collect_date , 'YYYY/MM/DD HH24:MI:SS') AT TIME ZONE 'KST')::INTEGER as timestamp
+        , bc.raw_value as raw_data
+        , bc.real_value as deg
+        FROM tb_dps_basecollection bc
+        WHERE bc.sensor_id = #{sensor_id}
+        AND bc.zone_id = #{zone_id}
+        ORDER BY bc.collect_date DESC
+        LIMIT 5
+        ) MG
         WHERE 1=1
         <include refid="otherRowSearch"/>
     </select>
-    
-<!--     del 테스트 -->
+
+    <!--     del 테스트 -->
     <delete id="deleteDataMeasure" parameterType="java.util.Map">
         DELETE FROM tb_dps_basecollection
-         WHERE sensor_id = #{sensor_id}
-           and zone_id = #{zone_id}
+        WHERE sensor_id = #{sensor_id}
+        and zone_id = #{zone_id}
         <if test="raw_value != null and raw_value != ''">
             and raw_value ilike '%' || #{raw_value} || '%'
         </if>
         <if test="real_value != null and real_value != ''">
             and real_value ilike '%' || #{real_value} || '%'
         </if>
-		<if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
-			and to_date(collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
-		</if>
+        <if test="collect_date_start != null and collect_date_start != '' and collect_date_end != null and collect_date_end != ''">
+            and to_date(collect_date, 'YYYY-MM-DD') between #{collect_date_start}::date and #{collect_date_end}::date
+        </if>
     </delete>
-    
+
+    <!-- (2026-02-26) tb_dps_basecollection → tb_measure_details 직접 insert
+         data_diff 계산: TTW=(raw_value-init_raw_data)/100 (소수점2자리), TTM=(32767-(raw_value-init_raw_data))/1000 (소수점3자리) -->
     <insert id="insertDataMeasure" parameterType="java.util.Map">
-        INSERT INTO tb_measure_details (mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data, net_err_yn, net_err_cnt, alarm_lvl_cd, reg_dt)
+        INSERT INTO tb_measure_details (mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data, data_diff, net_err_yn, net_err_cnt, alarm_lvl_cd, reg_dt)
         SELECT
-            (SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_measure_details),
-            b.sens_no,
-            b.sens_chnl_id,
-            TO_TIMESTAMP(#{collect_date}, 'YYYY/MM/DD HH24:MI:SS'),
-            CAST(#{raw_value} AS DOUBLE PRECISION),
-            CAST(COALESCE(#{calc_value}, #{real_value}) AS DOUBLE PRECISION),
-            'N',
-            0,
-            'ARM009',
-            now()
+                (SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_measure_details),
+                b.sens_no,
+                b.sens_chnl_id,
+                TO_TIMESTAMP(#{collect_date}, 'YYYY/MM/DD HH24:MI:SS'),
+                CAST(#{raw_value} AS DOUBLE PRECISION),
+                CAST(COALESCE(#{calc_value}, #{real_value}) AS DOUBLE PRECISION),
+                CASE
+                    WHEN #{type} = '3' THEN ROUND(((CAST(#{raw_value} AS DOUBLE PRECISION) - COALESCE(tsi.init_raw_data, 0)) / 100.0)::numeric, 2)
+                    WHEN #{type} = '2' THEN ROUND(((32767 - (CAST(#{raw_value} AS DOUBLE PRECISION) - COALESCE(tsi.init_raw_data, 0))) / 1000.0)::numeric, 3)
+                    ELSE ROUND((CAST(#{raw_value} AS DOUBLE PRECISION) - COALESCE(tsi.init_raw_data, 0))::numeric, 3)
+                    END,
+                'N',
+                0,
+                'ARM009',
+                now()
         FROM tb_logr_idx_map b
-        WHERE #{zone_id} = ltrim(b.logr_no, 'L0')
-        AND #{sensor_id} = b.logr_idx_no
+                 JOIN tb_sensor_init tsi ON tsi.sens_no = b.sens_no AND tsi.sens_chnl_id = b.sens_chnl_id
+        WHERE b.logr_no = #{zone_id}
+          AND b.logr_idx_no = #{sensor_id}
     </insert>
 </mapper>

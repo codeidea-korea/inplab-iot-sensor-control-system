@@ -2,7 +2,7 @@ package com.safeone.dashboard.config.component;
 
 import com.safeone.dashboard.dto.RawData;
 import com.safeone.dashboard.service.CalcService;
-import com.safeone.dashboard.service.DataMeasureService;
+import com.safeone.dashboard.service.DataMeasureService; // (2026-02-26) - REST 호출 대신 직접 DB insert 방식으로 변경
 import com.safeone.dashboard.service.ZoneService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ public class LoggerCollectComponent {
     private ZoneService zoneService;
 
     @Autowired
-    private DataMeasureService dataMeasureService;
+    private DataMeasureService dataMeasureService; // (2026-02-26)
 
     @Value("${dev}")
     private String devFlag;
@@ -54,7 +54,7 @@ public class LoggerCollectComponent {
     public void init() {
         if (devFlag.equals("true"))
             return;
-            
+
         if (!getDataFromTCP.isAlive()) {
             getDataFromTCP.start();
             startScheduledDataRemoval();
@@ -113,16 +113,16 @@ public class LoggerCollectComponent {
                     // 서버 소켓을 생성하고 포트에 바인딩합니다.
                     ServerSocket serverSocket = new ServerSocket(PORT);
                     System.out.println("Server is waiting for client connection...");
-    
+
                     // 클라이언트가 접속할 때까지 기다립니다.
                     Socket clientSocket = serverSocket.accept();
                     System.out.println("Client connected: " + clientSocket.getInetAddress());
-    
+
                     // 새로운 스레드를 생성하여 클라이언트 연결을 처리합니다.
                     new Thread(() -> handleClient(clientSocket)).start();
-    
+
                     // 서버 소켓을 닫습니다.
-                    serverSocket.close();                    
+                    serverSocket.close();
                 } catch (Exception e) {
                     log.error("Error in server: " + e.getMessage());
                 }
@@ -143,7 +143,7 @@ public class LoggerCollectComponent {
             // 클라이언트로부터 여러 줄의 문자열 데이터를 읽어 들입니다.
             String line;
             String data = "";
-            
+
             while ((line = inputReader.readLine()) != null) {
                 log.info("Received from client: " + line);
                 data += line+"|";
@@ -162,7 +162,7 @@ public class LoggerCollectComponent {
             System.err.println("Error handling client: " + e.getMessage());
         }
     }
-    
+
     private void processData(String data) {
         log.info("SensorData : " + data);
         try {
@@ -171,7 +171,7 @@ public class LoggerCollectComponent {
             for (RawData parserData : parser_data) {
                 String key = parserData.getCollect_date() + parserData.getZone_id() + parserData.getSensor_id();
                 if (!processedData.contains(key)) {
-                    // tb_measure_details에 직접 insert (tb_logr_idx_map 매핑 사용)
+                    // (2026-02-26) - REST 호출(6060포트) 제거, tb_measure_details에 직접 insert (tb_logr_idx_map 매핑 사용)
                     Map<String, String> map = new HashMap<>();
                     map.put("zone_id", parserData.getZone_id());
                     map.put("sensor_id", parserData.getSensor_id());
