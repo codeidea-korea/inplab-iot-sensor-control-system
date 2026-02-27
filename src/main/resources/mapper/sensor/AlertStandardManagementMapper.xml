@@ -151,7 +151,7 @@
 
     <insert id="insertAlarm" parameterType="java.util.Map">
         insert into tb_alarm_info
-            (sens_no, district_no, sens_chnl_id)
-        values (#{sens_no}, #{district_no}, #{sens_chnl_id})
+            (sens_no, district_no, sens_chnl_id, sens_chnl_nm)
+        values (#{sens_no}, #{district_no}, #{sens_chnl_id}, #{sens_chnl_nm})
     </insert>
 </mapper>

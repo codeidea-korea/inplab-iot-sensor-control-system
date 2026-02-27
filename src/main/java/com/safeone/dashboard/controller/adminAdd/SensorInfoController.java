@@ -178,11 +178,19 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
 
         /* chnlCnt만큼 경보기준/초기치 생성 */
         IntStream.rangeClosed(1, chnlCnt).forEach(ch -> {
-            String mappedId = mapChannelId(ch);
 
             Map<String, Object> perChParam = new HashMap<>(param);
-            perChParam.put("sens_chnl_id", mappedId);
-            perChParam.put("sens_chnl_nm", param.get("sens_chnl_nm").toString() + "-" + mappedId);
+
+            if (chnlCnt == 1) {
+                // 단일 센서인 경우 (TTW, RAIN 등)
+                perChParam.put("sens_chnl_id", ""); // DB 설정에 따라 "", "1", null 중 선택
+                perChParam.put("sens_chnl_nm", param.get("sens_chnl_nm").toString()); // "-X"를 붙이지 않음
+            } else {
+                // 다채널 센서인 경우 (채널 2개 이상)
+                String mappedId = mapChannelId(ch);
+                perChParam.put("sens_chnl_id", mappedId);
+                perChParam.put("sens_chnl_nm", param.get("sens_chnl_nm").toString() + "-" + mappedId);
+            }
 
             sensorInitialSettingService.create(perChParam);
             alertStandardManagementService.create(perChParam);
