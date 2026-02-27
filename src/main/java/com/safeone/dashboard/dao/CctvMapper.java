@@ -20,6 +20,10 @@ public class CctvMapper {
         return sqlSession.selectList("getCctvList", map);
     }
 
+    public List<HashMap<String, Object>> getCctvRtspCheckList(Map<String, Object> map) {
+        return sqlSession.selectList("getCctvRtspCheckList", map);
+    }
+
     public int getCctvListTotalCnt(Map<String, Object> map) {
         return sqlSession.selectOne("getCctvListTotalCnt", map);
     }
@@ -30,6 +34,10 @@ public class CctvMapper {
 
     public int udtCctv(Map<String, Object> map) {
         return sqlSession.update("udtCctv", map);
+    }
+
+    public int udtRtspConnStatus(Map<String, Object> map) {
+        return sqlSession.update("udtRtspConnStatus", map);
     }
 
     public int delCctv(Map<String, Object> map) {

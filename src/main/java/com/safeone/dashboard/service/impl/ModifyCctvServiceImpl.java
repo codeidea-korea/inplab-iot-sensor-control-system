@@ -46,11 +46,8 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
         map.put("del_yn", "N");
         List<CctvListDto> list = cctvListMapper.selectCctvList(map);
         for (CctvListDto dto : list) {
-            if (dto.getCctv_ip() == null || dto.getWeb_port() == null || dto.getCctv_conn_id() == null || dto.getCctv_conn_pwd() == null) {
-                dto.setRtsp_status("N");
-            } else {
-                dto.setRtsp_status("Y");
-            }
+            String connYn = dto.getRtsp_conn_yn();
+            dto.setRtsp_status("Y".equalsIgnoreCase(connYn) ? "Y" : "N");
         }
         int totalCnt = cctvListMapper.selectCctvListTotal(map);
         an = om.valueToTree(list);
@@ -62,6 +59,7 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
 
         return on;
     }
+
 
     @Override
     public String operation(Map<String, Object> param) {
