@@ -101,6 +101,7 @@
         SELECT
             tsinfo.sens_nm,
             MAX(tst.sens_tp_nm) AS sens_tp_nm,
+            MAX(tst.sens_chnl_cnt) AS sens_chnl_cnt,
             MAX(tsi.formul_data) AS formul_data,
             MIN(tsi.init_apply_dt) AS init_apply_dt,
             MAX(tsi.last_apply_dt) AS last_apply_dt,

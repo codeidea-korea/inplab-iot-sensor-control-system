@@ -46,4 +46,7 @@ public class SensorGroupingDto implements Serializable {
 
     @FieldLabel(title = "센서타입 no", type = "hidden")
     private String senstype_no;
+
+    @FieldLabel(title = "채널수", type = "hidden")
+    private String sens_chnl_cnt;
 }
