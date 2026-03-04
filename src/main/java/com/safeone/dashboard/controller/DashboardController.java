@@ -26,8 +26,6 @@ import java.util.Map;
 @Controller
 public class DashboardController {
     @Autowired
-    private AreaService areaService;
-    @Autowired
     private AlarmListService alarmService;
     @Autowired
     private AssetListService assetService;
@@ -55,13 +53,6 @@ public class DashboardController {
 //        model.addAttribute("assetKind", (new Gson()).toJson(commonCodeService.getAssetKindList()));
         model.addAttribute("areaInfo", (new Gson()).toJson(newDashboardService.getDistrictInfo()));
         return "dashboard";
-    }
-
-    @ResponseBody
-    @GetMapping(value="/getAreaList", produces="application/json; charset=utf8")
-    public Object getAreaList() {
-        Map param = new HashMap();
-        return areaService.getList(param);
     }
 
     @ResponseBody
@@ -128,13 +119,6 @@ public class DashboardController {
     @GetMapping(value = "/detailSystemCount", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getDetailSystemCountByStatus(@RequestParam Map param) {
         return dashboardService.selectDetailSystemCountByStatus(param);
-    }
-
-    @GetMapping(value = "/popup/sensorInfo")
-    public String popupSensorInfo(Model model, @RequestParam Map param) {        
-        model.addAttribute("asset", assetService.selectAssetInfo(param.get("asset_id").toString()));
-        // model.addAttribute("chart", dashboardService.selectSensorChartData(param));
-        return "layout/sensorInfo";
     }
 
     @GetMapping(value = "/popup/zoneDetail")

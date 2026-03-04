@@ -28,9 +28,9 @@ public class AssetListService implements JqGridService<AssetListDto> {
 		return mapper.selectEquipmentList(param);
 	}
 
-    public Map selectAssetInfo(String assetId) {
-    	return mapper.selectAssetInfo(assetId);
-    }
+//    public Map selectAssetInfo(String assetId) {
+//    	return mapper.selectAssetInfo(assetId);
+//    }
 
     @Override
     public int getTotalCount(Map param) {

@@ -17,9 +17,9 @@
     </select>
     
     <select id="selectAreaList" resultType="java.util.Map">
-	    SELECT a.area_id as code
-	    		, a.name 
-	    FROM tb_area a
+	    SELECT a.district_no as code
+	    		, a.district_nm
+	    FROM tb_district_info a
     </select>
     
     <select id="selectSensorList" resultType="java.util.Map">

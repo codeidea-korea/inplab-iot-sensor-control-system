@@ -26,5 +26,5 @@ public interface AssetListMapper {
     int insertManage(Map param);
     int deleteManage(Map param);
 
-    Map selectAssetInfo(String assetId);
+//    Map selectAssetInfo(String assetId);
 }

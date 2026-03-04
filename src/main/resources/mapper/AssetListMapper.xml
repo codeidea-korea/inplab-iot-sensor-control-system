@@ -425,42 +425,42 @@
          WHERE asset_id = #{asset_id}
     </delete>
 
-    <select id="selectAssetInfo" parameterType="String" resultType="java.util.Map">
-        select
-            ta.asset_id,
-            ta.asset_kind_id,
-            ta."name",
-            ta.etc1,
-            ta.etc2,
-            ta.etc3,
-            to_char(ta.install_date, 'YYYY-MM-DD') as install_date,
-            ta.area_id,
-            ta.zone_id,
-            ta.x,
-            ta.y,
-            ta.z,
-            ta.status,
-            tak.name as asset_kind_name,
-            tak.description as asset_kind_desc,
-            tak.etc1 as asset_kind_etc1,
-            taa.name as area_name,
-            taa.etc1 as area_etc1,
-            taa.etc2 as area_etc2,
-            taa.file1 as area_file1,
-            taa.constructor,
-            taa.measure1,
-            taa.measure2,
-            taa.type as area_type,
-            tz.name as zone_name,
-            tz.etc1 as zone_etc1,
-            tz.lat as zone_lat,
-            tz.lng as zone_lng,
-            tz.file1 as zone_file1,
-            tz.file2 as zone_file2
-        from tb_asset ta 
-            left outer join tb_asset_kind tak on ta.asset_kind_id = tak.asset_kind_id  
-            left outer join tb_area taa on ta.area_id = taa.area_id 
-            left outer join tb_zone tz on ta.zone_id = tz.zone_id 
-        where ta.asset_id = #{assetId}
-    </select>
+<!--    <select id="selectAssetInfo" parameterType="String" resultType="java.util.Map">-->
+<!--        select-->
+<!--            ta.asset_id,-->
+<!--            ta.asset_kind_id,-->
+<!--            ta."name",-->
+<!--            ta.etc1,-->
+<!--            ta.etc2,-->
+<!--            ta.etc3,-->
+<!--            to_char(ta.install_date, 'YYYY-MM-DD') as install_date,-->
+<!--            ta.area_id,-->
+<!--            ta.zone_id,-->
+<!--            ta.x,-->
+<!--            ta.y,-->
+<!--            ta.z,-->
+<!--            ta.status,-->
+<!--            tak.name as asset_kind_name,-->
+<!--            tak.description as asset_kind_desc,-->
+<!--            tak.etc1 as asset_kind_etc1,-->
+<!--            tdi.district_nm as area_name,-->
+<!--            tdi.etc1 as area_etc1,-->
+<!--            tdi.etc2 as area_etc2,-->
+<!--            tdi.file1 as area_file1,-->
+<!--            tdi.constructor,-->
+<!--            tdi.measure1,-->
+<!--            tdi.measure2,-->
+<!--            tdi.type as area_type-->
+<!--&lt;!&ndash;            tz.name as zone_name,&ndash;&gt;-->
+<!--&lt;!&ndash;            tz.etc1 as zone_etc1,&ndash;&gt;-->
+<!--&lt;!&ndash;            tz.lat as zone_lat,&ndash;&gt;-->
+<!--&lt;!&ndash;            tz.lng as zone_lng,&ndash;&gt;-->
+<!--&lt;!&ndash;            tz.file1 as zone_file1,&ndash;&gt;-->
+<!--&lt;!&ndash;            tz.file2 as zone_file2&ndash;&gt;-->
+<!--        from tb_asset ta -->
+<!--            left outer join tb_asset_kind tak on ta.asset_kind_id = tak.asset_kind_id  -->
+<!--            left outer join tb_district_info tdi on ta.area_id = tdi.area_id-->
+<!--&lt;!&ndash;            left outer join tb_zone tz on ta.zone_id = tz.zone_id &ndash;&gt;-->
+<!--        where ta.asset_id = #{assetId}-->
+<!--    </select>-->
 </mapper>

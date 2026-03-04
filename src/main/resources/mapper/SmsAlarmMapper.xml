@@ -97,23 +97,21 @@
             ta.asset_kind_id,
             tak2."name" as asset_kind_name,
             ta.name as asset_name,
-            tz.name as zone_name,
-            ta2.name as area_name,
-            ta2.etc2 as address,
-            ta2.constructor,
-            ta2.measure1,
-            ta2.measure2,
-            ta2.type,
+            ta2.district_nm as area_name,
+            ta2.dist_road_addr as address,
+            ta2.inst_comp_id1,
+            ta2.meas_comp_id1,
+            ta2.meas_comp_id2,
+            ta2.dist_type_cd,
             tak.risk_level,
             fn_common(tak.risk_level::integer, '위험레벨') as risk_name,
             tak.description,
             tak.name as alarm_name
-        from tb_asset ta , tb_asset_kind tak2, tb_zone tz, tb_area ta2, tb_alarm_kind tak
+        from tb_asset ta , tb_asset_kind tak2, tb_district_info ta2, tb_alarm_kind tak
         where ta.asset_id = #{asset_id}
             and ta.zone_id = tz.zone_id 
             and ta.asset_kind_id = tak2.asset_kind_id 
             and tak.alarm_kind_id = #{alarm_kind_id}
-            and tz.area_id = ta2.area_id 
     </select>
 
     <select id="selectSmsCountPerDay" parameterType="string" resultType="int">
