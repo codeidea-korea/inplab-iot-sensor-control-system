@@ -574,7 +574,7 @@
                     });
             });*/
 
-            $("#graph-search-btn").click(() => {
+            /*$("#graph-search-btn").click(() => {
                 const startDateTime = $('#start-date').val();
                 const endDateTime = $('#end-date').val();
                 let selectSensor = $("#sensor-name-select").val();
@@ -618,6 +618,75 @@
                 });
 
                 // 차트 업데이트 (기존과 동일)
+                Promise.all(requests)
+                    .then((responses) => {
+                        const hasError = responses.some((item) => !item.ok);
+                        const validData = responses
+                            .map((item) => item.data)
+                            .filter((item) => Array.isArray(item) && item.length > 0);
+
+                        if (validData.length === 0) {
+                            alert(hasError ? '조회할 수 없는 데이터 입니다.' : '조회 결과가 존재하지 않습니다.');
+                            return;
+                        }
+
+                        chartDataArray.length = 0;
+                        validData.forEach((item) => chartDataArray.push(item));
+                        updateChart(chartDataArray);
+                    })
+                    .catch((e) => {
+                        console.log('error', e);
+                        alert('조회할 수 없는 데이터 입니다.');
+                    });
+            });*/
+            $("#graph-search-btn").click(() => {
+                const startDateTime = $('#start-date').val();
+                const endDateTime = $('#end-date').val();
+
+
+                let selectSensor = $("#sensor-name-select").val();
+                if (!selectSensor) {
+                    if (selectArrary && selectArrary.length > 0) {
+                        selectSensor = selectArrary[0].sens_no;
+                    } else {
+                        alert('조회할 센서를 선택해주세요.');
+                        return;
+                    }
+                }
+
+
+                let selectSensorType = $("#sensor-type-select option:selected").text() || '';
+                if (!selectSensorType || selectSensorType === '선택' || selectSensorType === '') {
+                    if (selectArrary && selectArrary.length > 0) {
+                        selectSensorType = selectArrary[0].sens_tp_nm;
+                    }
+                }
+
+                let selectType = '';
+                if($("#select-condition").val() === "minute"){
+                    selectType = 'minute'
+                }else if($("#select-condition").val() === "hourly"){
+                    selectType = 'hour';
+                }else{
+                    selectType = 'day';
+                }
+
+                chartDataArray.length = 0;
+                const requests = [];
+
+
+                if (selectSensorType.includes('지표경사')) {
+                    requests.push(getChartData(selectSensor, startDateTime, endDateTime, 'X', selectType));
+                    requests.push(getChartData(selectSensor, startDateTime, endDateTime, 'Y', selectType));
+                } else if (selectSensorType.toUpperCase().includes('GNSS')) {
+                    requests.push(getChartData(selectSensor, startDateTime, endDateTime, 'X', selectType));
+                    requests.push(getChartData(selectSensor, startDateTime, endDateTime, 'Y', selectType));
+                    requests.push(getChartData(selectSensor, startDateTime, endDateTime, 'Z', selectType));
+                } else {
+                    requests.push(getChartData(selectSensor, startDateTime, endDateTime, '', selectType));
+                }
+
+                
                 Promise.all(requests)
                     .then((responses) => {
                         const hasError = responses.some((item) => !item.ok);
