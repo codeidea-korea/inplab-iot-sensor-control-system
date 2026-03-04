@@ -31,8 +31,7 @@
             and COALESCE(A.formul_data_z::varchar, '') ilike '%' || #{formul_data_z} || '%'
         </if>
         <if test="meas_dt_start != null and meas_dt_start != '' and meas_dt_end != null and meas_dt_end != ''">
-            and A.meas_dt::timestamp between concat(#{meas_dt_start},' 00:00:00')::timestamp and
-            concat(#{meas_dt_end},' 23:59:59')::timestamp
+            and A.meas_dt::timestamp between #{meas_dt_start}::timestamp and #{meas_dt_end}::timestamp
         </if>
     </sql>
 

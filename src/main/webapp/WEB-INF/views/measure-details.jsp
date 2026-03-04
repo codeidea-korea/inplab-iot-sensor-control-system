@@ -312,6 +312,23 @@
         .ui-jqgrid .ui-jqgrid-hbox {
             padding-right: 0px;
         }
+
+        #district-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 12px;
+            padding-right: 3rem;
+        }
+
+
+        #district-select::-ms-expand {
+            display: none;
+        }
     </style>
     <script type="text/javascript" src="/jqgrid.js"></script>
     <script src="jquery.loading.js"></script>
@@ -344,8 +361,10 @@
             const start = new Date(today);
             start.setDate(start.getDate() - 1);
 
-            $('#start-date_left').val(formatDateOnly(start));
-            $('#end-date_left').val(formatDateOnly(end));
+            //$('#start-date_left').val(formatDateOnly(start));
+            //$('#end-date_left').val(formatDateOnly(end));
+            $('#start-date_left').val(formatLocalDateTime(start));
+            $('#end-date_left').val(formatLocalDateTime(end));
 
             $('.tab-button').click(function () {
                 $('.tab-button').removeClass('active');
@@ -674,8 +693,8 @@
 
                     rightGridBaseParams = {
                         sens_no: targetArr[0].sens_no,
-                        meas_dt_start: $('#start-date_left').val(),
-                        meas_dt_end: $('#end-date_left').val()
+                        meas_dt_start: $('#start-date_left').val().replace('T', ' ') ,
+                        meas_dt_end: $('#end-date_left').val().replace('T', ' ')
                     };
 
                     $rightGrid.setGridParam({
@@ -724,7 +743,7 @@
                 return year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
             }
 
-            function toChartStartDateTime(dateText) {
+            /*function toChartStartDateTime(dateText) {
                 if (!dateText) {
                     return '';
                 }
@@ -735,6 +754,23 @@
                 if (!dateText) {
                     return '';
                 }
+                return dateText + "T23:59";
+            }*/
+            function toChartStartDateTime(dateText) {
+                if (!dateText) {
+                    return '';
+                }
+
+                if (dateText.includes('T')) return dateText;
+                return dateText + "T00:00";
+            }
+
+            function toChartEndDateTime(dateText) {
+                if (!dateText) {
+                    return '';
+                }
+       
+                if (dateText.includes('T')) return dateText;
                 return dateText + "T23:59";
             }
 
@@ -1972,25 +2008,29 @@
         </h2>
         <div id="contents">
             <div class="contents-re">
-                <div class="contents-header">
-                    <h3 class="txt">센서 계측 현황</h3>
-                    <div class="search-top">
-                        <p class="search-top-label">현장명</p>
-                        <select id="district-select">
+                <div class="contents-header" style="justify-content: flex-start;">
+
+                    <h3 class="txt" style="width: auto; margin-right: 2rem;">센서 계측 현황</h3>
+
+                    <div class="search-top" style="display: grid; grid-template-columns: 80px auto; row-gap: 1rem; align-items: center; margin-left: 0;">
+
+                        <p class="search-top-label" style="padding: 0; margin: 0;">현장명</p>
+                        <select id="district-select" style="width: 150px;">
                             <option value="">선택</option>
                         </select>
-                        <div>
-                            <p class="search-top-label">조회기간</p>
-                            <input id="start-date_left" type="date"/>
+
+                        <p class="search-top-label" style="padding: 0; margin: 0;">조회기간</p>
+                        <div style="display: flex; align-items: center;">
+                            <input id="start-date_left" type="datetime-local" style="width: 220px;"/>
+                            <p class="search-top-label" style="padding: 0 1rem; margin: 0;">~</p>
+                            <input id="end-date_left" type="datetime-local" style="width: 220px;"/>
                         </div>
-                        <div>
-                            <p class="search-top-label">~</p>
-                            <input id="end-date_left" type="date"/>
-                        </div>
+
                     </div>
-                    <div class="search-top_" style="width: 80px">
+
+                    <div class="search-top_" style="width: 80px; margin-left: 1rem;">
                         <div class="btn-group">
-                            <a id="search-btn">조회</a>
+                            <a id="search-btn" style="cursor: pointer;">조회</a>
                         </div>
                     </div>
                 </div>
