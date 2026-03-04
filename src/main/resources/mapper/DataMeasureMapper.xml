@@ -210,10 +210,10 @@
     </delete>
 
     <!-- (2026-02-26) tb_dps_basecollection → tb_measure_details 직접 insert
-         data_diff 계산: TTW=(raw_value-init_raw_data)/100 (소수점2자리), TTM=(32767-(raw_value-init_raw_data))/1000 (소수점3자리) -->
+         data_diff 계산: TTW=(raw_value-init_raw_data)/100 (소수점2자리), TTM=(32767-raw_value)/1000-(32767-init_raw_data)/1000 (소수점3자리) -->
     <insert id="insertDataMeasure" parameterType="java.util.Map">
         INSERT INTO tb_measure_details (mgnt_no, sens_no, sens_chnl_id, meas_dt, raw_data, formul_data, data_diff, net_err_yn, net_err_cnt, alarm_lvl_cd, reg_dt)
-        SELECT
+            SELECT
                 (SELECT COALESCE(MAX(mgnt_no), 0) + 1 FROM tb_measure_details),
                 b.sens_no,
                 b.sens_chnl_id,
@@ -222,16 +222,16 @@
                 CAST(COALESCE(#{calc_value}, #{real_value}) AS DOUBLE PRECISION),
                 CASE
                     WHEN #{type} = '3' THEN ROUND(((CAST(#{raw_value} AS DOUBLE PRECISION) - COALESCE(tsi.init_raw_data, 0)) / 100.0)::numeric, 2)
-                    WHEN #{type} = '2' THEN ROUND(((32767 - (CAST(#{raw_value} AS DOUBLE PRECISION) - COALESCE(tsi.init_raw_data, 0))) / 1000.0)::numeric, 3)
+                    WHEN #{type} = '2' THEN ROUND(((32767 - CAST(#{raw_value} AS DOUBLE PRECISION)) / 1000.0 - (32767 - COALESCE(tsi.init_raw_data, 0)) / 1000.0)::numeric, 3)
                     ELSE ROUND((CAST(#{raw_value} AS DOUBLE PRECISION) - COALESCE(tsi.init_raw_data, 0))::numeric, 3)
-                    END,
+                END,
                 'N',
                 0,
                 'ARM009',
                 now()
         FROM tb_logr_idx_map b
-                 JOIN tb_sensor_init tsi ON tsi.sens_no = b.sens_no AND tsi.sens_chnl_id = b.sens_chnl_id
+            JOIN tb_sensor_init tsi ON tsi.sens_no = b.sens_no AND tsi.sens_chnl_id = b.sens_chnl_id
         WHERE b.logr_no = #{zone_id}
-          AND b.logr_idx_no = #{sensor_id}
+            AND b.logr_idx_no = #{sensor_id}
     </insert>
 </mapper>

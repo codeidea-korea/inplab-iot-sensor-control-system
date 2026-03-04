@@ -1,20 +1,13 @@
 package com.safeone.dashboard.scheduler;
 
-import java.io.IOException;
-import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.safeone.dashboard.dto.AssetListDto;
 import com.safeone.dashboard.dto.SmsAlarmListDto;
 import com.safeone.dashboard.service.AlarmListService;
 import com.safeone.dashboard.service.AlarmSchedulerService;
@@ -31,7 +24,7 @@ public class AlarmScheduler {
     private final AlarmListService alarmListService;
     private final AssetListService assetListService;
     private static String lastCollectTime = null;
-    private final static long DELAY_MS = 60 * 1000; // 60초
+    private final static long DELAY_MS = 5 * 60 * 1000; // 5분
     private final Environment env;
     private final SmsService smsService;
     private final SmsAlarmService smsAlarmService;
@@ -68,59 +61,13 @@ public class AlarmScheduler {
     }
 
     /**
-     * CCTV 통신 장애 스케쥴러(1분)
-     * socket 통신으로 확인
-     * 장애시, 해당 자산의 상태값은 비정상(2)으로 update
-     * url 잘못된 경우 또한 비정상 처리
+     * CCTV 통신 상태는 tb_cctv_info 기준으로 갱신됨.
+     * 기존 tb_asset / tb_alarm_kind 기반 로직은 사용하지 않음.
+     * 실제 업데이트는 CctvRtspStatusScheduler에서 수행.
      */
 //    @Scheduled(fixedDelay = DELAY_MS)
     public void insertCCTVDelayScheduler() {
-        if (env.getProperty("dev").equalsIgnoreCase("true"))   // 개발모드이면 실행안함
-            return;
-
-        String regex = "rtsp://([^:/]+):(\\d+)";
-        Map<String, Object> map = new HashMap<>();
-        map.put("asset_kind_id", "8");
-        List<AssetListDto> list = assetListService.getList(map);
-        Map m = alarmSchedulerService.selectCCTVAlarm();
-
-        for (AssetListDto assetListDto : list) {
-            String url = assetListDto.getEtc1();
-            Map<String, Object> param = new HashMap<>();
-            param.put("asset_id", assetListDto.getAsset_id());
-            param.put("status_hid", "2");
-            m.put("asset_id", assetListDto.getAsset_id());
-
-            if (!url.contains("rtsp://")) {
-                if (m.get("use_flag").equals("Y")) {
-                    alarmListService.create(m);
-                }
-                assetListService.update(param);
-                continue;
-            }
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(url);
-
-            if (!matcher.find()) {
-                if (m.get("use_flag").equals("Y")) {
-                    alarmListService.create(m);
-                }
-                assetListService.update(param);
-                continue;
-            }
-
-            String ipAddress = matcher.group(1);
-            int port = Integer.parseInt(matcher.group(2));
-
-            try (Socket socket = new Socket(ipAddress, port)) {
-                param.put("status_hid", "1");
-            } catch (IOException e) {
-                if (m.get("use_flag").equals("Y")) {
-                    alarmListService.create(m);
-                }
-            }
-            assetListService.update(param);
-        }
+        // Deprecated: kept for backward compatibility only.
     }
 
     private void sendAlarmSMS(Map param, String title) {

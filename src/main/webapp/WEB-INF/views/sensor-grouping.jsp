@@ -294,13 +294,56 @@
             const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
             const groupAlarmLabelOverlayPlugin = {
                 id: 'groupAlarmLabelOverlay',
-                afterDatasetsDraw(chart, _args, pluginOptions) {
+                afterDraw(chart, _args, pluginOptions) {
                     const items = (pluginOptions && Array.isArray(pluginOptions.items)) ? pluginOptions.items : [];
                     if (!items.length) return;
 
                     const xScale = chart.scales.x;
                     const {ctx, chartArea} = chart;
                     if (!xScale || !chartArea) return;
+                    const totalRangeMs = Number(pluginOptions && pluginOptions.totalRangeMs);
+                    const compactThreshold = Number(pluginOptions && pluginOptions.compactThreshold);
+                    const compactMaxPerLane = Math.max(1, Number(pluginOptions && pluginOptions.compactMaxPerLane) || 2);
+                    const visibleMin = Number(xScale.min);
+                    const visibleMax = Number(xScale.max);
+                    const visibleRangeMs = Number.isFinite(visibleMin) && Number.isFinite(visibleMax)
+                        ? Math.abs(visibleMax - visibleMin)
+                        : NaN;
+                    const zoomRatio = (Number.isFinite(totalRangeMs) && totalRangeMs > 0 && Number.isFinite(visibleRangeMs))
+                        ? (visibleRangeMs / totalRangeMs)
+                        : 1;
+                    const useCompactMode = zoomRatio >= (Number.isFinite(compactThreshold) ? compactThreshold : 0.72);
+                    let renderItems = items;
+                    if (useCompactMode) {
+                        const laneGroups = {};
+                        items.forEach((item) => {
+                            const laneKey = String(item.laneKey || (String(item.levelType || '') + '|' + String(item.levelIndex || '')));
+                            if (!laneGroups[laneKey]) laneGroups[laneKey] = [];
+                            laneGroups[laneKey].push(item);
+                        });
+
+                        renderItems = [];
+                        Object.keys(laneGroups).forEach((laneKey) => {
+                            const laneItems = laneGroups[laneKey]
+                                .slice()
+                                .sort((a, b) => Number(a.slotIndex || 0) - Number(b.slotIndex || 0));
+                            const visibleItems = laneItems.slice(0, compactMaxPerLane);
+                            visibleItems.forEach((it) => renderItems.push(it));
+
+                            const hiddenCount = laneItems.length - visibleItems.length;
+                            if (hiddenCount > 0) {
+                                const anchor = visibleItems[visibleItems.length - 1] || laneItems[0];
+                                renderItems.push({
+                                    ...anchor,
+                                    xAdjust: Number(anchor.xAdjust || 0) + 52,
+                                    content: ['외 ' + hiddenCount + '개'],
+                                    backgroundColor: 'rgba(245,245,245,0.92)',
+                                    borderColor: anchor.borderColor || 'rgba(0,0,0,0.2)',
+                                    preserveRow: true
+                                });
+                            }
+                        });
+                    }
 
                     ctx.save();
                     ctx.beginPath();
@@ -309,7 +352,7 @@
 
                     // Draw alarm lines directly in canvas for multi-axis stability (grouping chart).
                     const drawnLineKeys = new Set();
-                    items.forEach((item) => {
+                    renderItems.forEach((item) => {
                         const yScale = chart.scales[item.yScaleID];
                         if (!yScale) return;
 
@@ -337,35 +380,134 @@
                     ctx.textBaseline = 'middle';
                     ctx.textAlign = 'left';
                     ctx.font = '10px sans-serif';
+                    const placedRects = [];
+                    const labelInset = 2;
+                    const scanStep = 10;
+                    const maxScanRadius = 220;
 
-                    items.forEach((item) => {
+                    const intersects = (a, b) => {
+                        return !(
+                            a.right <= b.left ||
+                            a.left >= b.right ||
+                            a.bottom <= b.top ||
+                            a.top >= b.bottom
+                        );
+                    };
+
+                    const clampRect = (x, yTop, width, height) => {
+                        const clampedX = Math.max(
+                            chartArea.left + labelInset,
+                            Math.min(x, chartArea.right - width - labelInset)
+                        );
+                        const clampedY = Math.max(
+                            chartArea.top + labelInset,
+                            Math.min(yTop, chartArea.bottom - height - labelInset)
+                        );
+
+                        return {
+                            x: clampedX,
+                            yTop: clampedY,
+                            left: clampedX,
+                            top: clampedY,
+                            right: clampedX + width,
+                            bottom: clampedY + height
+                        };
+                    };
+
+                    const hasCollision = (candidate) => placedRects.some((rect) => intersects(candidate, rect));
+
+                    const findNonOverlappingRect = (x, yTop, width, height) => {
+                        const preferred = clampRect(x, yTop, width, height);
+                        if (!hasCollision(preferred)) {
+                            return preferred;
+                        }
+
+                        const directions = [
+                            [0, -1], [0, 1], [1, 0], [-1, 0],
+                            [1, -1], [1, 1], [-1, -1], [-1, 1]
+                        ];
+
+                        for (let radius = scanStep; radius <= maxScanRadius; radius += scanStep) {
+                            for (let d = 0; d < directions.length; d += 1) {
+                                const direction = directions[d];
+                                const candidate = clampRect(
+                                    x + (direction[0] * radius),
+                                    yTop + (direction[1] * radius),
+                                    width,
+                                    height
+                                );
+                                if (!hasCollision(candidate)) {
+                                    return candidate;
+                                }
+                            }
+                        }
+
+                        return preferred;
+                    };
+                    const findNonOverlappingRectOnRow = (x, yTop, width, height) => {
+                        const preferred = clampRect(x, yTop, width, height);
+                        if (!hasCollision(preferred)) {
+                            return preferred;
+                        }
+
+                        const rowStep = 14;
+                        const maxShift = Math.max(0, chartArea.right - chartArea.left - width - (labelInset * 2));
+                        for (let shift = rowStep; shift <= maxShift; shift += rowStep) {
+                            const rightCandidate = clampRect(x + shift, yTop, width, height);
+                            if (!hasCollision(rightCandidate)) {
+                                return rightCandidate;
+                            }
+                        }
+                        for (let shift = rowStep; shift <= maxShift; shift += rowStep) {
+                            const leftCandidate = clampRect(x - shift, yTop, width, height);
+                            if (!hasCollision(leftCandidate)) {
+                                return leftCandidate;
+                            }
+                        }
+
+                        return preferred;
+                    };
+
+                    renderItems.forEach((item) => {
                         const yScale = chart.scales[item.yScaleID];
                         if (!yScale) return;
 
                         const rawX = Number(item.xValue);
-                        const baseX = Number.isFinite(rawX) ? xScale.getPixelForValue(rawX) : chartArea.left;
+                        const lockToYAxis = Boolean(item.lockToYAxis);
+                        const baseX = lockToYAxis
+                            ? chartArea.left
+                            : (Number.isFinite(rawX) ? xScale.getPixelForValue(rawX) : chartArea.left);
                         const baseY = yScale.getPixelForValue(item.yValue);
                         if (!Number.isFinite(baseX) || !Number.isFinite(baseY)) return;
 
                         const xAdjust = Number(item.xAdjust || 0);
                         const yAdjust = Number(item.yAdjust || 0);
                         const lines = Array.isArray(item.content) ? item.content.map(v => String(v)) : [String(item.content ?? '')];
-                        const lineHeight = 11;
-                        const padX = 4;
-                        const padY = 3;
+                        const fontMetrics = ctx.measureText('M');
+                        const measuredLineHeight = Number(fontMetrics.actualBoundingBoxAscent || 0) + Number(fontMetrics.actualBoundingBoxDescent || 0);
+                        const lineHeight = Math.max(9, Math.ceil(measuredLineHeight || 10));
+                        const padX = 2;
+                        const padY = 1;
                         const boxWidth = Math.max(...lines.map(line => ctx.measureText(line).width), 0) + padX * 2;
                         const boxHeight = (lines.length * lineHeight) + padY * 2;
 
-                        let x = baseX + xAdjust;
-                        let yTop = (baseY + yAdjust) - (boxHeight / 2);
+                        const targetX = baseX + xAdjust;
+                        const targetYTop = (baseY + yAdjust) - (boxHeight / 2);
+                        const useFixedRow = Boolean(item.preserveRow);
+                        const rect = useFixedRow
+                            ? findNonOverlappingRectOnRow(targetX, targetYTop, boxWidth, boxHeight)
+                            : findNonOverlappingRect(targetX, targetYTop, boxWidth, boxHeight);
+                        const x = rect.x;
+                        const yTop = rect.yTop;
+                        placedRects.push(rect);
 
-                        x = Math.max(chartArea.left + 2, Math.min(x, chartArea.right - boxWidth - 2));
-                        yTop = Math.max(chartArea.top + 2, Math.min(yTop, chartArea.bottom - boxHeight - 2));
-
+                        ctx.save();
+                        ctx.globalAlpha = 0.65;
                         ctx.fillStyle = item.backgroundColor || 'rgba(255,255,255,0.9)';
                         ctx.fillRect(x, yTop, boxWidth, boxHeight);
+                        ctx.restore();
                         ctx.strokeStyle = item.borderColor || 'rgba(0,0,0,0.15)';
-                        ctx.lineWidth = 0.8;
+                        ctx.lineWidth = 0.5;
                         ctx.strokeRect(x, yTop, boxWidth, boxHeight);
 
                         ctx.fillStyle = '#222';
@@ -427,15 +569,20 @@
                     alert('조회기간을 입력해주세요.');
                     return;
                 } else {
-                    const case_ = ['', 'X', 'Y', 'Z'];
+                    const channelIdsByCount = (count) => {
+                        if (count === 1) return [''];
+                        if (count === 2) return ['X', 'Y'];
+                        if (count === 3) return ['X', 'Y', 'Z'];
+                        return [''];
+                    };
 
-                    checkedData = case_.flatMap((item) => {
-                        return checkedData.map((data) => {
-                            return {
-                                ...data,
-                                sens_chnl_id: item
-                            };
-                        });
+                    checkedData = checkedData.flatMap((data) => {
+                        const channelCount = Number(data.sens_chnl_cnt);
+                        const channelIds = channelIdsByCount(channelCount);
+                        return channelIds.map((channelId) => ({
+                            ...data,
+                            sens_chnl_id: channelId
+                        }));
                     });
 
                     const startDateTime = $('#start-date').val();
@@ -489,7 +636,7 @@
             function getChartData(sens_no, startDateTime, endDateTime, sensChnlId, selectType) {
                 return new Promise((resolve) => {
                     $.ajax({
-                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + "&selectType=" + selectType + "&init_base=raw&measure_base=raw&diff_direction=init_minus_meas&minute_bucket=raw",
+                        url: '/sensor-grouping/chart' + '?sens_no=' + sens_no + '&start_date_time=' + startDateTime + '&end_date_time=' + endDateTime + "&sens_chnl_id=" + sensChnlId + "&selectType=" + selectType + "&diff_direction=init_minus_meas&minute_bucket=raw",
                         type: 'GET',
                         success: function (res) {
                             if (Array.isArray(res)) {
@@ -747,6 +894,12 @@
                                     }
                                 },
                                 zoom: {
+                                    limits: {
+                                        x: {
+                                            min: 'original',
+                                            max: 'original'
+                                        }
+                                    },
                                     pan: { enabled: true, mode: 'xy' },
                                     zoom: {
                                         drag: {
@@ -758,7 +911,12 @@
                                     }
                                 },
                                 annotation: { annotations: buildAnnotations(data, minDate, maxDate, axisMap) },
-                                groupAlarmLabelOverlay: { items: alarmLabelItems }
+                                groupAlarmLabelOverlay: {
+                                    items: alarmLabelItems,
+                                    totalRangeMs: Number.isFinite(minDate) && Number.isFinite(maxDate) ? Math.max(1, maxDate - minDate) : 1,
+                                    compactThreshold: 0.72,
+                                    compactMaxPerLane: 2
+                                }
                             }
                         }
                     });
@@ -810,7 +968,7 @@
                             borderColor: colors[idx],
                             borderWidth: 2,
                             borderDash: [5, 4],
-                            drawTime: 'afterDraw',
+                            drawTime: 'beforeDatasetsDraw',
                             z: 5
                         };
 
@@ -824,6 +982,7 @@
 
             function buildAlarmLabelItems(data, minDate, axisMap) {
                 const items = [];
+                const laneSlotMap = {};
                 data.forEach((sensorItem, i) => {
                     if (!sensorItem || sensorItem.length === 0) {
                         return;
@@ -852,22 +1011,34 @@
 
                     const yScaleId = (axisMap && axisMap[sensorItem[0].senstype_no]) ? axisMap[sensorItem[0].senstype_no] : ('y' + i);
                     const labelTextBase = sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? '-' + sensorItem[0].sens_chnl_id : '');
-                    const labelXOffset = 72 + ((i % 6) * 18);
-                    const labelYOffsetSeed = (Math.floor(i / 6) % 4) * 6;
 
                     const pushLabel = (levelValue, idx, levelType) => {
                         if (!isVisibleAlarmLevel(levelValue)) {
                             return;
                         }
 
-                        const directionOffset = (i % 2 === 0 ? 1 : -1) * (6 + labelYOffsetSeed);
-                        const levelStackOffset = (idx + 1) * 10;
+                        // Group labels by exact warning line to avoid collapsing labels from different y-levels.
+                        const laneKey = [
+                            String(yScaleId),
+                            String(levelType),
+                            String(idx),
+                            Number(levelValue).toFixed(3)
+                        ].join('|');
+                        const slotIndex = Number(laneSlotMap[laneKey] || 0);
+                        laneSlotMap[laneKey] = slotIndex + 1;
+                        const rowYAdjust = 0;
                         items.push({
                             xValue: firstTs,
                             yValue: levelValue,
                             yScaleID: yScaleId,
-                            xAdjust: labelXOffset + (idx * 6),
-                            yAdjust: (levelType === 'min' ? -(8 + levelStackOffset) : (8 + levelStackOffset)) + directionOffset,
+                            xAdjust: 10 + (slotIndex * 70),
+                            yAdjust: rowYAdjust,
+                            lockToYAxis: true,
+                            preserveRow: true,
+                            laneKey: laneKey,
+                            slotIndex: slotIndex,
+                            levelType: levelType,
+                            levelIndex: idx,
                             backgroundColor: colors[idx],
                             borderColor: lineColors[idx],
                             content: [

@@ -114,6 +114,16 @@
             tai."3rd_lvl_min" AS min3,
             tai."4th_lvl_max" AS max4,
             tai."4th_lvl_min" AS min4,
+            tad.alarm_fin_dt,
+            CASE
+                WHEN tad.meas_dt IS NULL THEN NULL
+                ELSE
+                    LPAD((GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(tad.alarm_fin_dt, NOW()) - tad.meas_dt)))::bigint / 3600)::TEXT, 2, '0')
+                    || ':' ||
+                    LPAD(((GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(tad.alarm_fin_dt, NOW()) - tad.meas_dt)))::bigint % 3600) / 60)::TEXT, 2, '0')
+                    || ':' ||
+                    LPAD((GREATEST(0, EXTRACT(EPOCH FROM (COALESCE(tad.alarm_fin_dt, NOW()) - tad.meas_dt)))::bigint % 60)::TEXT, 2, '0')
+            END AS alarm_duration,
             (SELECT COUNT(*)
             FROM tb_sms_details
             WHERE alarm_mgnt_no = tad.mgnt_no) AS sms_cnt,

@@ -46,6 +46,18 @@
 		</if>
 	</select>
 
+	<select id="getCctvRtspCheckList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		/* CctvMapper.getCctvRtspCheckList */
+		SELECT
+			A.cctv_no,
+			A.cctv_ip,
+			A.rtsp_port,
+			A.cctv_conn_id,
+			A.cctv_conn_pwd
+		FROM tb_cctv_info A
+		WHERE A.del_yn = 'N'
+	</select>
+
 	<sql id="getCctvList-where">
 		/* getCctvList-where */
 		WHERE 1=1
@@ -141,6 +153,15 @@
 		</trim>
 		WHERE 1 = 1
 		AND cctv_no = #{cctv_no}
+	</update>
+
+	<update id="udtRtspConnStatus" parameterType="java.util.HashMap">
+		/* CctvMapper.udtRtspConnStatus */
+		UPDATE tb_cctv_info
+		SET
+			rtsp_conn_yn = #{rtsp_conn_yn},
+			rtsp_last_check_dt = CURRENT_TIMESTAMP
+		WHERE cctv_no = #{cctv_no}
 	</update>
 
 	<delete id="delCctv" parameterType="java.util.HashMap">

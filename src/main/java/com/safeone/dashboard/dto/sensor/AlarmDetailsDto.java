@@ -62,4 +62,10 @@ public class AlarmDetailsDto implements Serializable {
 
     @FieldLabel(title = "min4", type = "hidden")
     private String min4;
+
+    @FieldLabel(title = "알람 종료 일시")
+    private String alarm_fin_dt;
+
+    @FieldLabel(title = "알람 지속 시간")
+    private String alarm_duration;
 }

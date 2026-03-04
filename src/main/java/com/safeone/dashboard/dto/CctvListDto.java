@@ -24,6 +24,12 @@ public class CctvListDto implements Serializable {
     @FieldLabel(title="rtsp_status", width = 180, type="hidden")
     String rtsp_status;
 
+    @FieldLabel(title="RTSP 연결 여부", type="hidden")
+    String rtsp_conn_yn;
+
+    @FieldLabel(title="RTSP 마지막 확인", type="hidden")
+    String rtsp_last_check_dt;
+
     @FieldLabel(title="협력업체 ID", type="hidden")
     String partner_comp_id;
 
