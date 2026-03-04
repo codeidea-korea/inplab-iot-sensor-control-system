@@ -457,8 +457,27 @@
                             return;
                         }
 
+                        const filteredData = [];
+                        const groupBySensNo = validData.reduce((acc, curr) => {
+                            const sensNo = curr[0].sens_no;
+                            if (!acc[sensNo]) acc[sensNo] = [];
+                            acc[sensNo].push(curr);
+                            return acc;
+                        }, {});
+
+                        Object.values(groupBySensNo).forEach(sensorDatasets => {
+
+                            const hasChannel = sensorDatasets.some(ds => ds[0].sens_chnl_id !== '');
+                            if (hasChannel) {
+                                filteredData.push(...sensorDatasets.filter(ds => ds[0].sens_chnl_id !== ''));
+                            } else {
+                                filteredData.push(...sensorDatasets);
+                            }
+                        });
+
                         chartDataArray.length = 0;
-                        validData.forEach((item) => chartDataArray.push(item));
+                        //validData.forEach((item) => chartDataArray.push(item));
+                        filteredData.forEach((item) => chartDataArray.push(item));
                         updateChart(chartDataArray);
                     }).catch((e) => {
                         console.log('error', e);
