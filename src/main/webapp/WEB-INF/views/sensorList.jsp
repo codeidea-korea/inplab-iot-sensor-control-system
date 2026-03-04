@@ -686,7 +686,7 @@
                     requests.push(getChartData(selectSensor, startDateTime, endDateTime, '', selectType));
                 }
 
-                
+
                 Promise.all(requests)
                     .then((responses) => {
                         const hasError = responses.some((item) => !item.ok);

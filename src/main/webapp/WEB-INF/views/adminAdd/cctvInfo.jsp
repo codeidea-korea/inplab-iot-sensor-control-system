@@ -38,7 +38,7 @@
             {name: 'cctv_no', index: 'cctv_no', width: 100, align: 'center', hidden: false},
             {name: 'cctv_nm', index: 'cctv_nm', align: 'center', hidden: false},
             {name: 'model_nm', index: 'model_nm', align: 'center', hidden: false},
-            {name: 'cctv_make', index: 'cctv_make', align: 'center', hidden: false},
+            {name: 'cctv_maker', index: 'cctv_maker', align: 'center', hidden: false},
             {name: 'inst_ymd', index: 'inst_ymd', width: 120, align: 'center', hidden: false},
             {name: 'cctv_ip', index: 'cctv_ip', align: 'center', hidden: false},
             {name: 'web_port', index: 'web_port', width: 80, align: 'center', hidden: false},
