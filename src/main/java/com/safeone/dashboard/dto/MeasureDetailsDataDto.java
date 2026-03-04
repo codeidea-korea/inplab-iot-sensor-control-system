@@ -8,31 +8,31 @@ import java.io.Serializable;
 @Data
 public class MeasureDetailsDataDto implements Serializable {
 
-    @FieldLabel(title = "계측일시", type = "editable")
+    @FieldLabel(title = "계측일시", width = 200, type = "editable")
     private String meas_dt;
 
-    @FieldLabel(title = "Raw Data", type = "editable")
+    @FieldLabel(title = "Raw Data", width = 150, type = "editable")
     private String raw_data;
 
-    @FieldLabel(title = "보정(Deg)", type = "editable")
+    @FieldLabel(title = "보정(Deg)", width = 150, type = "editable")
     private String formul_data;
 
-    @FieldLabel(title = "Raw Data(X)", type = "editable")
+    @FieldLabel(title = "Raw Data(X)", width = 150, type = "editable")
     private String raw_data_x;
 
-    @FieldLabel(title = "X 보정(Deg)", type = "editable")
+    @FieldLabel(title = "X 보정(Deg)", width = 150, type = "editable")
     private String formul_data_x;
 
-    @FieldLabel(title = "Raw Data(Y)", type = "editable")
+    @FieldLabel(title = "Raw Data(Y)", width = 150, type = "editable")
     private String raw_data_y;
 
-    @FieldLabel(title = "Y 보정(Deg)", type = "editable")
+    @FieldLabel(title = "Y 보정(Deg)", width = 150, type = "editable")
     private String formul_data_y;
 
-    @FieldLabel(title = "Raw Data(Z)", type = "editable")
+    @FieldLabel(title = "Raw Data(Z)", width = 150, type = "editable")
     private String raw_data_z;
 
-    @FieldLabel(title = "Z 보정(Deg)", type = "editable")
+    @FieldLabel(title = "Z 보정(Deg)", width = 150, type = "editable")
     private String formul_data_z;
 
     @FieldLabel(title = "sens_chnl_id", type = "hidden")

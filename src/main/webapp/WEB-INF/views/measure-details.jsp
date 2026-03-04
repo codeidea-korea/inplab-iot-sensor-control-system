@@ -608,8 +608,10 @@
             initGrid($rightGrid, rightPath, $('#right-grid-wrapper'), {
                 multiselect: true,
                 multiboxonly: false,
+                shrinkToFit: false,
                 custom: {
                     useFilterToolbar: false,
+                    useColumnWidth: true,
                     multiSelect: true,
                 }
             }, () => {
@@ -1292,15 +1294,17 @@
                 myChart.data.labels = labels;
                 myChart.data.datasets = datasets;
                 if (!myChart.options.plugins.annotation) {
-                    myChart.options.plugins.annotation = {annotations: {}};
+                    myChart.options.plugins.annotation = {clip: false, annotations: {}};
                 }
+                myChart.options.plugins.annotation.clip = false;
                 myChart.options.plugins.annotation.annotations = {}; // 기존 annotation 초기화
 
                 myBarChart.data.labels = [];
                 myBarChart.data.datasets = barDatasets;
                 if (!myBarChart.options.plugins.annotation) {
-                    myBarChart.options.plugins.annotation = {annotations: {}};
+                    myBarChart.options.plugins.annotation = {clip: false, annotations: {}};
                 }
+                myBarChart.options.plugins.annotation.clip = false;
                 myBarChart.options.plugins.annotation.annotations = {}; // 기존 annotation 초기화
 
                 const dataValues = data
@@ -1454,22 +1458,29 @@
                                 borderDash: [5, 4]
                             };
 
-                            if (Number.isFinite(firstX)) {
-                                annotations[chartLabelKey] = {
-                                    type: 'label',
-                                    xValue: firstX,
-                                    yValue: levelValue,
-                                    xAdjust: 72, // 좌측 경계에서 라벨이 잘리지 않도록 안쪽으로 이동
-                                    backgroundColor: colors[index],
-                                    content: [
-                                        labelTextBase,
-                                        (Number(index) + 1) + '차 ' + (levelType === 'min' ? '최소' : '최대') + ' 경고'
-                                    ],
-                                    font: {
-                                        size: 8
+                            annotations[chartLabelKey] = {
+                                type: 'label',
+                                // 줌/팬 시 현재 보이는 x축의 시작값(좌측 경계)에 라벨을 고정
+                                xValue: function (ctx) {
+                                    const xScale = ctx && ctx.chart && ctx.chart.scales
+                                        ? (ctx.chart.scales.x || Object.values(ctx.chart.scales).find(s => s.axis === 'x'))
+                                        : null;
+                                    if (xScale && Number.isFinite(xScale.min)) {
+                                        return xScale.min;
                                     }
-                                };
-                            }
+                                    return Number.isFinite(firstX) ? firstX : undefined;
+                                },
+                                yValue: levelValue,
+                                xAdjust: 29,
+                                backgroundColor: colors[index],
+                                content: [
+                                    labelTextBase,
+                                    (Number(index) + 1) + '차 ' + (levelType === 'min' ? '최소' : '최대') + ' 경고'
+                                ],
+                                font: {
+                                    size: 8
+                                }
+                            };
                         });
                     };
 
