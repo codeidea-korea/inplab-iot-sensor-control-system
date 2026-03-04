@@ -15,9 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AlarmSchedulerService {
     private final AlarmSchedulerMapper mapper;
-    public List<Map> selectCommDelayAlarm(String comm_delay) {
-        return mapper.selectCommDelayAlarm(comm_delay);
-    }
     public List<Map> selectThresholdAlarm(Map param) {
         return mapper.selectThresholdAlarm(param);
     }

@@ -14,21 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AlarmListService implements JqGridService<AlarmListDto> {
+public class AlarmListService {
 
   private final AlarmListMapper mapper;
 
-  @Override
   public List<AlarmListDto> getList(Map param) {
     return mapper.selectAlarmList(param);
   }
 
-  @Override
   public int getTotalCount(Map param) {
     return mapper.selectAlarmListTotal(param);
   }
 
-  @Override
   public boolean create(Map param) {
     // if (param.get("alarm_title").equals("") || param.isEmpty()) {
     //   return false;
@@ -36,18 +33,15 @@ public class AlarmListService implements JqGridService<AlarmListDto> {
 	  return mapper.insertAlarm(param);
   }
 
-  @Override
   public AlarmListDto read(int id) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'read'");
   }
 
-  @Override
   public boolean update(Map param) {
 	  throw new UnsupportedOperationException("Unimplemented method 'update'");
   }
 
-  @Override
   public int delete(Map param) {
 	  throw new UnsupportedOperationException("Unimplemented method 'delete'");
   }

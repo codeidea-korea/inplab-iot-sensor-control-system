@@ -60,12 +60,6 @@ public class DashboardController {
     public Object getAlarmList(@RequestParam Map param) {
         return alarmService.getList(param);
     }
-    
-    @ResponseBody
-    @GetMapping(value="/getAssetList", produces="application/json; charset=utf8")
-    public Object getAssetList(@RequestParam Map param) {
-        return assetService.getList(param);
-    }
 
     @ResponseBody
     @GetMapping(value="/getMarkerList", produces="application/json; charset=utf8")
@@ -83,12 +77,6 @@ public class DashboardController {
     @GetMapping(value="/getZoneList", produces="application/json; charset=utf8")
     public Object getZoneList(@RequestParam Map param) {
         return zoneService.getList(param);
-    }
-
-    @ResponseBody
-    @GetMapping(value="/setAssetLocation", produces="application/json; charset=utf8")
-    public Object setAssetLocation(@RequestParam Map param) {
-        return assetService.updateLocation(param);
     }
 
     @ResponseBody

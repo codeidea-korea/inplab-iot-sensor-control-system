@@ -30,37 +30,6 @@ public class AlarmScheduler {
     private final SmsAlarmService smsAlarmService;
 
     /**
-     * 계측기 통신 장애 관련 알람 스케쥴러(1분)
-     * 수집이 현재시간보다 1분 초과하는 계측기는 통신장애로 간주(type= 1)
-     * 장애시, 해당 자산의 상태값은 비정상(2)으로 update
-     * 구조물 경사계인 경우, 센서가 2개이므로, 한개라도 장애 있을시, 비정상
-     */
-//    @Scheduled(fixedDelay = DELAY_MS)
-    public void insertCommDelayScheduler() {
-        if (env.getProperty("dev").equalsIgnoreCase("true"))   // 개발모드이면 실행안함
-            return;
-
-        try {
-            // 센서만 상태값 초기화
-            alarmSchedulerService.defaultStatusSensor();
-            List<Map> result = alarmSchedulerService.selectCommDelayAlarm(env.getProperty("`최근 전송 현황`"));
-            for (Map param : result) {
-                Map map = new HashMap();
-                map.put("asset_id", param.get("asset_id").toString());
-                map.put("status_hid", "2");
-                assetListService.update(map);
-
-                // 알람설정에서 사용여부에 따라 알람 insert
-                if (param.get("use_flag").equals("Y")) {
-                    alarmListService.create(param);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * CCTV 통신 상태는 tb_cctv_info 기준으로 갱신됨.
      * 기존 tb_asset / tb_alarm_kind 기반 로직은 사용하지 않음.
      * 실제 업데이트는 CctvRtspStatusScheduler에서 수행.
