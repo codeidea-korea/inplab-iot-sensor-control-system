@@ -1,5 +1,6 @@
 package com.safeone.dashboard.dao;
 
+import com.safeone.dashboard.dto.DistrictInfoDto;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,5 +18,7 @@ public interface NewDashboardMapper {
     int getCctvsCount(Map<String, Object> map);
 
     List<Map<String, Object>> getCctvs(Map<String, Object> map);
+
+    DistrictInfoDto getDistrictInfo();
 
 }

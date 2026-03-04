@@ -39,17 +39,21 @@ public class DashboardController {
     private CommonCodeService commonCodeService;
     @Autowired
     private DashboardService dashboardService;
-
     @Autowired
     private NewDashboardService newDashboardService;
     @Autowired
     private EmergencyContactService emergencyContactService;
+    @Autowired
+    private DistrictInfoService districtInfoService;
+    @Autowired
+    private SensorTypeService sensorTypeService;
 
     @GetMapping(value = "dashboard")
     public String main(Model model) {
+        Map<String,Object> map = new HashMap<>();
         model.addAttribute("assetTypes", (new Gson()).toJson(newDashboardService.getAssetTypes()));
-        model.addAttribute("assetKind", (new Gson()).toJson(commonCodeService.getAssetKindList()));
-        model.addAttribute("areaInfo", (new Gson()).toJson(areaService.getList(null).get(0)));
+//        model.addAttribute("assetKind", (new Gson()).toJson(commonCodeService.getAssetKindList()));
+        model.addAttribute("areaInfo", (new Gson()).toJson(newDashboardService.getDistrictInfo()));
         return "dashboard";
     }
 

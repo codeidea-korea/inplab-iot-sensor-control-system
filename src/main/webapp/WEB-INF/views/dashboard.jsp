@@ -506,9 +506,9 @@
             mapId: "map",
             initPosition: {
                 center: [
-                    _areaInfo.lng, _areaInfo.lat
+                    _areaInfo.dist_lon, _areaInfo.dist_lat
                 ],
-                zoom: _areaInfo.zoom,
+                zoom: _areaInfo.dist_zoom,
                 rotation: 0.5
             }
         });

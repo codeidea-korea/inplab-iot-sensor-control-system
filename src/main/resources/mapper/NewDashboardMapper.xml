@@ -45,4 +45,8 @@
         select *
         from tb_sensor_type
     </select>
+
+    <select id="getDistrictInfo" resultType="com.safeone.dashboard.dto.DistrictInfoDto">
+        select district_no, site_no, district_nm, dist_addr, dist_lon, dist_lat, dist_zoom from tb_district_info order by district_no limit 1
+    </select>
 </mapper>

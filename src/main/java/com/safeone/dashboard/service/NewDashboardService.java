@@ -1,6 +1,7 @@
 package com.safeone.dashboard.service;
 
 import com.safeone.dashboard.dao.NewDashboardMapper;
+import com.safeone.dashboard.dto.DistrictInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,4 +38,6 @@ public class NewDashboardService {
     public List<Map<String, Object>> getCctvs(Map<String, Object> map) {
         return mapper.getCctvs(map);
     }
+
+    public DistrictInfoDto getDistrictInfo() { return mapper.getDistrictInfo(); }
 }
