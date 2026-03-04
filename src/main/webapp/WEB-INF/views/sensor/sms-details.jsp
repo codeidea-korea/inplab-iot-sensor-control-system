@@ -47,6 +47,32 @@
         color: #47474c;
         text-align: center;
     }
+
+    .sms-detail-search input[type="date"] {
+        width: 18rem;
+        height: 3.6rem;
+        padding: 0 1.2rem;
+        background-color: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.2);
+        font-weight: 300;
+        font-size: 1.4rem;
+        line-height: 3.4rem;
+        color: #47474c;
+        text-align: center;
+    }
+
+    .ui-search-toolbar input,
+    .ui-search-toolbar select {
+        border: none !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* jqGrid 검색 필터 셀(td) 테두리 제거 */
+    .ui-jqgrid .ui-search-toolbar td {
+        border-bottom: none !important;
+        border-right: none !important;
+    }
 </style>
 
 <div id="lay-sensor-message" class="layer-base">
@@ -61,7 +87,7 @@
 
             <div class="search-top" style="margin-bottom: 0; display: flex; align-items: center; gap: 5px;">
                 <div style="display: flex; align-items: center;">
-                    <p class="search-top-label" style="margin: 0;">조회기간</p>
+                    <p class="search-top-label" style="margin: 0; color: #fff;">조회기간</p>
                     <input id="sms-start-date" type="date"/>
                 </div>
                 <div style="display: flex; align-items: center;">
