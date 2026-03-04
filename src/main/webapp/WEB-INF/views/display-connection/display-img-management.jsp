@@ -147,6 +147,32 @@
             align-items: center;
             cursor: pointer;
         }
+
+        /* 전송그룹 관리 팝업 입력 UI를 다른 관리 페이지와 동일 톤으로 정렬 */
+        #lay-form-write2 .bTable select,
+        #lay-form-write2 .bTable input[type="text"],
+        #lay-form-write2 .bTable textarea {
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            color: #47474c;
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+
+        #lay-form-write2 .bTable select,
+        #lay-form-write2 .bTable input[type="text"] {
+            height: 3.6rem;
+            line-height: 3.4rem;
+            padding: 0 1rem;
+        }
+
+        #lay-form-write2 .bTable textarea {
+            min-height: 8rem;
+            padding: 0.8rem 1rem;
+            resize: vertical;
+        }
     </style>
     <script>
         let canvas, ctx;
@@ -417,9 +443,61 @@
         }; // 그리드의 다중선택기능을 on, multiboxonly 를 true 로 하는 경우 무조건 1건만 선택
 
         var _popupClearData;
+        function normalizeSelectCodeValue($form, fieldName, rawValue) {
+            if (rawValue === null || typeof rawValue === 'undefined') {
+                return rawValue;
+            }
+
+            const value = String(rawValue).trim();
+            if (value === '') {
+                return '';
+            }
+
+            const $select = $form.find('select[name="' + fieldName + '"]');
+            if ($select.length === 0) {
+                return value;
+            }
+
+            const hasDirectValue = $select.find('option').filter(function () {
+                return String($(this).val()).trim() === value;
+            }).length > 0;
+            if (hasDirectValue) {
+                return value;
+            }
+
+            const matchedOption = $select.find('option').filter(function () {
+                return String($(this).text()).trim() === value;
+            }).first();
+
+            return matchedOption.length > 0 ? String(matchedOption.val()).trim() : value;
+        }
+
+        function toggleAlarmLevelSelectable($form) {
+            const eventValue = String($form.find('select[name="dispbd_evnt_flag"]').val() || '');
+            const isSensorAlarm = eventValue === '3';
+            const $alarmLevel = $form.find('select[name="alarm_lvl_cd"]');
+            if (!isSensorAlarm) {
+                $alarmLevel.val('');
+            }
+            $alarmLevel.prop('disabled', !isSensorAlarm);
+        }
+
+        function buildGroupFormPayload($formSelector) {
+            const payload = getSerialize($formSelector);
+            const eventValue = String(payload.dispbd_evnt_flag || '');
+            if (eventValue !== '3') {
+                payload.alarm_lvl_cd = '';
+            }
+            return payload;
+        }
 
         $(function () {
             _popupClearData = getSerialize('#lay-form-write2');
+            const $groupForm = $('#lay-form-write2');
+            $groupForm.find('select[name="dispbd_evnt_flag"]').on('change', function () {
+                toggleAlarmLevelSelectable($groupForm);
+            });
+            toggleAlarmLevelSelectable($groupForm);
 
             // 삭제
             $('.deleteBtn').on('click', function () {
@@ -453,6 +531,7 @@
 
                 setSerialize('#lay-form-write2', _popupClearData);
                 $('#lay-form-write2 .btn-btm .deleteBtn').hide();
+                toggleAlarmLevelSelectable($('#lay-form-write2'));
 
                 popFancy('#lay-form-write2');
 
@@ -464,7 +543,7 @@
                     $.ajax({
                         url: '/display-connection/display-img-management/add-group',
                         type: 'POST',
-                        data: getSerialize('#lay-form-write2'),
+                        data: buildGroupFormPayload('#lay-form-write2'),
                         success: function (_res) {
                             alert('저장되었습니다.', function () {
                                 popFancyClose('#lay-form-write2');
@@ -496,15 +575,13 @@
                 }
 
                 const data = targetArr[0];
-                // formatter 적용된 텍스트를 원본 값으로 역변환
-                const evntMap = {'평시': '1', '긴급': '2', '센서경보': '3'};
-                const alarmMap = {'관심': 'ARM001', '주의': 'ARM002', '경계': 'ARM003', '심각': 'ARM004'};
-                const useMap = {'사용': 'Y', '사용중지': 'N'};
-                if (evntMap[data.dispbd_evnt_flag]) data.dispbd_evnt_flag = evntMap[data.dispbd_evnt_flag];
-                if (alarmMap[data.alarm_lvl_cd]) data.alarm_lvl_cd = alarmMap[data.alarm_lvl_cd];
-                if (useMap[data.use_yn]) data.use_yn = useMap[data.use_yn];
+                const $form = $('#lay-form-write2');
+                data.dispbd_evnt_flag = normalizeSelectCodeValue($form, 'dispbd_evnt_flag', data.dispbd_evnt_flag);
+                data.alarm_lvl_cd = normalizeSelectCodeValue($form, 'alarm_lvl_cd', data.alarm_lvl_cd);
+                data.use_yn = normalizeSelectCodeValue($form, 'use_yn', data.use_yn);
                 setSerialize('#lay-form-write2', data); // 선택값 세팅
                 $('#lay-form-write2 .btn-btm .deleteBtn').show();
+                toggleAlarmLevelSelectable($form);
 
                 popFancy('#lay-form-write2');
 
@@ -513,7 +590,7 @@
                     if (!validate())
                         return;
 
-                    $.get('/display-connection/display-img-management/mod', getSerialize('#lay-form-write2'), function (res) {
+                    $.get('/display-connection/display-img-management/mod', buildGroupFormPayload('#lay-form-write2'), function (res) {
                         alert('저장되었습니다.', function () {
                             popFancyClose('#lay-form-write2');
                         });
@@ -611,7 +688,7 @@
                 </div>
             </div>
             <div class="contents-re" style="flex: 1.5">
-                <h3 class="txt">생성 이미지 및 문구 디자인 <span id="canvasSizeLabel" style="font-weight:normal; font-size:13px; color:#888;"></span></h3>
+                <h3 class="txt">생성 이미지 및 문구 디자인 <span id="canvasSizeLabel" style="font-weight:normal; font-size:2rem; color:#00000;"></span></h3>
                 <div class="btn-group asd canvasBtn" style="background: none">
                     <button type="button" class="btnSave" style="margin: 0 10px 0 0; width: 140px">이미지 저장</button>
                     <button type="button" class="btnCancel" style="margin: 0">취소</button>

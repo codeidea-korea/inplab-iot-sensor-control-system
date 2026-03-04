@@ -4,10 +4,10 @@
 <mapper namespace="com.safeone.dashboard.dao.displayconnection.DisplaySendManagementMapper">
     <sql id="rowSearch">
         <if test="dispbd_imgfile_nm != null and dispbd_imgfile_nm != ''">
-            and COALESCE(tbi.dispbd_imgfile_nm, tdm.dispbd_imgfile_nm) ilike '%' || #{dispbd_imgfile_nm} || '%'
+            and tdm.dispbd_imgfile_nm ilike '%' || #{dispbd_imgfile_nm} || '%'
         </if>
         <if test="use_yn != null and use_yn != ''">
-            and COALESCE(tbi.use_yn, tdi.use_yn) = #{use_yn}
+            and tdi.use_yn = #{use_yn}
         </if>
     </sql>
 
@@ -48,14 +48,14 @@
     <select id="selectDisplaySendManagementList" parameterType="java.util.Map"
             resultType="com.safeone.dashboard.dto.displayconnection.DisplaySendManagementDto">
         SELECT tdm.mgnt_no
-        , COALESCE(tbi.dispbd_imgfile_nm, tdm.dispbd_imgfile_nm) as dispbd_imgfile_nm
-        , COALESCE(tbi.img_file_path, tdi.img_file_path) as img_file_path
+        , tdi.dispbd_imgfile_nm as dispbd_imgfile_nm
+        , tdi.img_file_path as img_file_path
         , tdm.dispbd_evnt_flag
         , tdm.img_grp_nm
         , tdm.img_effect_cd
         , tcc.code_nm as img_effect_nm
         , tdm.img_disp_min
-        , COALESCE(tbi.use_yn, tdi.use_yn) as use_yn
+        , tdi.use_yn as use_yn
         , tdi.img_size
         , tdi.img_bg_color
         , tdi.font_size
@@ -64,12 +64,9 @@
         , tdm.mod_dt
         , tdm.mgnt_no as detail
         FROM tb_dispbd_mapping tdm
-                 LEFT OUTER JOIN tb_dispbd_image tbi
-                                 ON tdm.dispbd_evnt_flag = tbi.dispbd_evnt_flag
-                                     AND tdm.img_grp_nm = tbi.img_grp_nm
-                                     AND tdm.dispbd_imgfile_nm = tbi.dispbd_imgfile_nm
                  LEFT OUTER JOIN tb_dispbd_image_new tdi
                                  ON tdm.dispbd_imgfile_nm = tdi.dispbd_imgfile_nm
+                                    and tdm.mgnt_no = tdi.mgnt_no
                  LEFT OUTER JOIN tb_common_code tcc
                                  ON tdm.img_effect_cd = tcc.code_id
         WHERE 1=1
@@ -85,10 +82,6 @@
     <select id="selectDisplaySendManagementListTotal" parameterType="java.util.Map" resultType="int">
         SELECT count(tdm.mgnt_no)
         FROM tb_dispbd_mapping tdm
-                 LEFT OUTER JOIN tb_dispbd_image tbi
-                                 ON tdm.dispbd_evnt_flag = tbi.dispbd_evnt_flag
-                                     AND tdm.img_grp_nm = tbi.img_grp_nm
-                                     AND tdm.dispbd_imgfile_nm = tbi.dispbd_imgfile_nm
                  LEFT OUTER JOIN tb_dispbd_image_new tdi
                                  ON tdm.dispbd_imgfile_nm = tdi.dispbd_imgfile_nm
                  LEFT OUTER JOIN tb_common_code tcc
@@ -169,7 +162,7 @@
     </update>
 
     <update id="updateDisplayImageUseYnLegacy" parameterType="java.util.Map">
-        UPDATE tb_dispbd_image
+        UPDATE tb_dispbd_image_new
         SET use_yn = #{use_yn}
         WHERE dispbd_evnt_flag = #{dispbd_evnt_flag}
           AND img_grp_nm = #{img_grp_nm}

@@ -46,7 +46,7 @@
         , tdd.dispbd_rslt_yn
         , tdd.reg_dt
         FROM tb_dispbd_details_new tdd
-        LEFT OUTER JOIN tb_dispboard_info tdispi ON tdd.dispbd_no = tdispi.dispbd_no
+        LEFT OUTER JOIN tb_dispboard_info_new tdispi ON tdd.dispbd_no = tdispi.dispbd_no
         LEFT OUTER JOIN tb_district_info tdi ON tdispi.district_no = tdi.district_no
         WHERE 1=1
         <include refid="rowSearch"/>

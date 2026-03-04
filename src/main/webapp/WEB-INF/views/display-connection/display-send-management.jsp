@@ -559,6 +559,26 @@
             });
         }
 
+        function resetWriteModalFields() {
+            $("#event_flag").val('');
+            $("#image_file").val('');
+            $("#send_group").val('');
+            $("#effect").val('');
+            $("#effect_sec").val('');
+            $("#use_yn").val('');
+        }
+
+        function resetDetailModalFields() {
+            $("#detail_mgnt_no").val('');
+            $("#detail_event_flag").val('');
+            $("#detail_img_grp_nm").val('');
+            $("#detail_dispbd_imgfile_nm").val('');
+            $("#detail_effect").val('');
+            $("#detail_effect_sec").val('');
+            $("#detail_use_yn").val('Y');
+            $("#detail-modal-title").text("이미지 상세정보");
+        }
+
         function parsePositiveInt(value) {
             const parsed = parseInt(value, 10);
             if (Number.isNaN(parsed) || parsed <= 0) {
@@ -670,6 +690,7 @@
                 }),
                 success: function (_res) {
                     alert('이미지가 등록되었습니다.');
+                    resetWriteModalFields();
                     popFancyClose('#lay-form-write');
                     reloadAllImageGrids();
                 },
@@ -719,6 +740,7 @@
                 },
                 success: function () {
                     alert("수정되었습니다.");
+                    resetDetailModalFields();
                     popFancyClose('#lay-form-detail');
                     reloadAllImageGrids();
                 },
@@ -745,9 +767,27 @@
                     },
                     success: function (res) {
                         if (Number(res) > 0) {
-                            alert("삭제되었습니다.");
-                            popFancyClose('#lay-form-detail');
-                            reloadAllImageGrids();
+                            $.ajax({
+                                url: '/display-connection/display-img-management/del',
+                                type: 'GET',
+                                cache: false,
+                                data: {
+                                    mgnt_no: detailMgntNo
+                                },
+                                success: function (res) {
+                                    if (Number(res) > 0) {
+                                        alert("삭제 완료되었습니다.");
+                                        resetDetailModalFields();
+                                        popFancyClose('#lay-form-detail');
+                                        reloadAllImageGrids();
+                                    } else {
+                                        alert("삭제 대상이 없습니다.");
+                                    }
+                                },
+                                error: function () {
+                                    alert("삭제 중 오류가 발생했습니다.");
+                                }
+                            });
                         } else {
                             alert("삭제 대상이 없습니다.");
                         }
