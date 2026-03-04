@@ -15,10 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommonCodeService{
     private final CommonCodeMapper mapper;
-
-    public List<Map> getCommonCodeList(Map param) {
-        return mapper.selectCommonCodeList(param);
-    }
     
     public List<Map> getAssetKindList() {
         return mapper.selectAssetKindList();

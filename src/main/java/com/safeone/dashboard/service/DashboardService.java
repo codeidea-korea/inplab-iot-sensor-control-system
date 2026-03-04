@@ -36,10 +36,6 @@ public class DashboardService {
         return dashboardMapper.selectAreaInfo(param);
     }
 
-    public List<Map> selectAlarm(Map param) {
-        return dashboardMapper.selectAlarm(param);
-    }
-
     public Map selectSensorCountByStatus(Map param) { return dashboardMapper.selectSensorCountByStatus(param); }
 
     public List<Map> selectSensorChartData(Map param) {
@@ -48,18 +44,7 @@ public class DashboardService {
 
     public Map selectCCTVCountByStatus(Map param) { return dashboardMapper.selectCCTVCountByStatus(param); }
 
-    public List<Map> selectSystemCountByStatus(Map param) { return dashboardMapper.selectSystemCountByStatus(param);
-    }
-
     public Map selectDeviceCount(Map param) { return dashboardMapper.selectDeviceCount(param);
-    }
-
-    public List<Map> selectDetailSystemCountByStatus(Map param) {
-        return dashboardMapper.selectDetailSystemCountByStatus(param);
-    }
-
-    public List<Map> selectMaintenanceInfo(Map param) {
-        return dashboardMapper.selectMaintenanceInfo(param);
     }
 
     public List<Map> selectSensorChartRealData(Map param) {

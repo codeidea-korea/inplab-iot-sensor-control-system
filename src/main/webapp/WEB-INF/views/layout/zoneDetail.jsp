@@ -241,7 +241,6 @@ ${district}
             loadAlarmCount();           // 알람현황 횟수
             loadDeviceCount();          // 장비현황 횟수
             loadAlarmHistory();         // 알람 이력
-            loadSystemCount();          // 시스템 상태
             loadMaintenance();          // 유지보수 이력
             loadEmergency();            // 비상 연락망
         };
@@ -642,17 +641,6 @@ ${district}
                     contents += '</tr>';
 
                     $('.site-status-details_re .alarm-list tbody').append(contents);
-                });
-            });
-        }
-
-        function loadSystemCount() {
-            $.get('/detailSystemCount', param, function (res) {
-                $.each(res, function (i) {
-                    let listItem = $('.site-status-details_re .system-status li:eq(' + i + ')');
-                    listItem.find('strong:eq(0)').html(res[i].total_count);
-                    listItem.find('strong:eq(1)').html(res[i].status_1_count);
-                    listItem.find('strong:eq(2)').html(res[i].status_2_count);
                 });
             });
         }

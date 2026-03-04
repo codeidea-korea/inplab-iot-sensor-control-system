@@ -7,7 +7,6 @@ import java.util.Map;
 
 @Repository
 public interface CommonCodeMapper {
-    List<Map> selectCommonCodeList(Map param);
     List<Map> selectAssetKindList();
     List<Map> selectAreaList();
     List<Map> selectSensorList();

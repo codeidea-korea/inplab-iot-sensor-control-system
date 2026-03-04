@@ -353,31 +353,31 @@
         SELECT MG.*
         FROM (
         SELECT ass.asset_id
-        , ass.asset_kind_id
-        , ass.asset_kind_id as asset_kind_id_hid
-        , ass.name
-        -- , '' ch_name
-        -- , '' sensor_id
-        , ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') as ch_name_sensor_keys
-        -- , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id),',') sensor_ids
-        , ass.zone_id
-        , ass.status
-        , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
-        , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as
-        ch_collect_date
-        , MAX(dbc.real_value) real_value
-        , (select name from tb_zone WHERE zone_id = ass.zone_id) as zone_name
-        FROM tb_asset ass
-        LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
-        LEFT JOIN (SELECT *
-        FROM tb_dps_basecollection
-        WHERE (sensor_id, zone_id, collect_date)
-        IN ( SELECT sensor_id, zone_id, MAX(collect_date)
-        FROM tb_dps_basecollection
-        GROUP BY sensor_id, zone_id )
-        ) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
-        WHERE ass.asset_kind_id IN ('2','3','4','6','7')
-        GROUP BY ass.asset_id, ass.asset_kind_id,ass.name, ass.zone_id, ass.status, ass.install_date
+            , ass.asset_kind_id
+            , ass.asset_kind_id as asset_kind_id_hid
+            , ass.name
+            -- , '' ch_name
+            -- , '' sensor_id
+            , ARRAY_TO_STRING(ARRAY_AGG(ch.name||':'||ch.sensor_id||':'||ch.zone_id),',') as ch_name_sensor_keys
+            -- , ARRAY_TO_STRING(ARRAY_AGG(ch.sensor_id),',') sensor_ids
+            , ass.zone_id
+            , ass.status
+            , TO_CHAR(ass.install_date::timestamp, 'YYYY-MM-DD') AS install_date
+            , TO_CHAR(TO_TIMESTAMP(MAX(dbc.collect_date) , 'YYYY/MM/DD HH24:MI:SS'), 'YYYY/MM/DD HH24:MI:SS') as
+            ch_collect_date
+            , MAX(dbc.real_value) real_value
+            , (select name from tb_zone WHERE zone_id = ass.zone_id) as zone_name
+            FROM tb_asset ass
+                LEFT JOIN tb_channel ch ON ass.asset_id = ch.asset_id
+                LEFT JOIN (SELECT *
+                    FROM tb_dps_basecollection
+                        WHERE (sensor_id, zone_id, collect_date)
+                        IN ( SELECT sensor_id, zone_id, MAX(collect_date)
+                        FROM tb_dps_basecollection
+                        GROUP BY sensor_id, zone_id )
+                    ) dbc ON ch.sensor_id = dbc.sensor_id and ch.zone_id = dbc.zone_id
+            WHERE ass.asset_kind_id IN ('2','3','4','6','7')
+            GROUP BY ass.asset_id, ass.asset_kind_id,ass.name, ass.zone_id, ass.status, ass.install_date
         ) MG
         LEFT JOIN tb_zone zo ON zo.zone_id = MG.zone_id
         WHERE 1=1

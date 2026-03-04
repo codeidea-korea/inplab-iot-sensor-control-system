@@ -50,19 +50,6 @@ public class AlarmSettingController extends JqGridAbstract<AlarmSettingDto> {
 		((FieldDetails)result.get("asset_kind_id")).type = assetKindListStr;//asset_kind
 		
 		return result;
-	}    
-	
-	private String getCommonCodeListStr(String cat){
-		String result = ":";
-		Map<String,Object> pm = new HashMap<String,Object>();
-		pm.put("category", cat);
-		
-		List<Map> rList = commonCodeService.getCommonCodeList(pm);
-		for(Map m : rList) {
-			result += ";"+String.valueOf(m.get("code"))+":"+String.valueOf(m.get("name"));
-		}
-		
-		return result;
 	}
     
     @Override

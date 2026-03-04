@@ -37,7 +37,6 @@ public class AssetListController extends JqGridAbstract<AssetListDto> {
 	@Override
 	public Map<String, FieldDetails> getColumnDataJson() {
 		Map<String, FieldDetails> result = super.getColumnDataJson();
-		((FieldDetails)result.get("status")).type = this.getCommonCodeListStr("센서상태");//status
 		((FieldDetails)result.get("asset_kind_id")).type = this.getCommonListStr("asset_kind_id");
 //		((FieldDetails)result.get("area_id")).type = this.getCommonListStr("area_id");
 		((FieldDetails)result.get("zone_id")).type = this.getCommonListStr("zone_id");
@@ -59,19 +58,6 @@ public class AssetListController extends JqGridAbstract<AssetListDto> {
 		}
 		
 		return listStr;
-	}
-	
-	private String getCommonCodeListStr(String cat){
-		String result = ":";
-		Map<String,Object> pm = new HashMap<String,Object>();
-		pm.put("category", cat);
-		
-		List<Map> rList = commonCodeService.getCommonCodeList(pm);
-		for(Map m : rList) {
-			result += ";"+String.valueOf(m.get("code"))+":"+String.valueOf(m.get("name"));
-		}
-		
-		return result;
 	}
 	
     @Override

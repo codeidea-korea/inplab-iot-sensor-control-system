@@ -2,42 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
     
 <mapper namespace="com.safeone.dashboard.dao.DashboardMapper">
-    <select id="selectAlarm" parameterType="java.util.Map" resultType="java.util.Map">
-        select
-            alarm_uid,
-            ta.reg_date,
-            ta.risk_level,
-            fn_common(ta.risk_level::integer, '위험레벨') as risk_name,
-            fn_common(ta.alarm_type::integer, '알람종류타입') as alarm_type,
-            ta.alarm_desc,
-            ta.alarm_title,
-            fn_common(tak2.status::integer, '센서상태') as asset_status,
-            tak2.asset_id,
-            tak2."name" as asset_name,
-            tak3."name" as asset_kind_name,
-            tak2.etc1,
-            tak2.x,
-            tak2.y,
-            tz.zone_id,
-            tz."name" as zone_name,
-            tz.etc1 as zone_etc1,
-            tz.lat,
-            tz.lng,
-            tz.file1,
-            tz.file2
-        from tb_alarm ta, tb_asset tak2, tb_asset_kind tak3, tb_zone tz 
-        where ta.asset_id = tak2.asset_id 
-          and tak2.zone_id = tz.zone_id     
-          and tak2.asset_kind_id = tak3.asset_kind_id 
-        <if test="reg_date != null and reg_date != ''">
-            <![CDATA[
-            and ta.reg_date > to_timestamp(#{reg_date}::numeric / 1000)
-            ]]>
-        </if>
-        order by reg_date desc
-        limit 5
-    </select>
-
     <select id="selectAreaInfo" parameterType="java.util.Map" resultType="java.util.Map">
         SELECT
             tdi.district_no,
@@ -140,27 +104,6 @@
              , count(CASE WHEN status = '2' THEN 1 END) AS not_receive_cnt
         FROM tb_asset
         WHERE asset_kind_id = '8'
-    </select>
-
-    <select id="selectSystemCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT
-            CASE
-                WHEN ta.asset_kind_id IN ('2', '3', '4', '6', '7') THEN '2-7'
-                ELSE ta.asset_kind_id
-                END AS grouped_asset_kind_id,
-            COUNT(*) AS total_count,
-            COUNT(CASE WHEN ta.status = '1' THEN 1 END) AS status_1_count,
-            COUNT(CASE WHEN ta.status = '2' THEN 1 END) AS status_2_count
-        FROM
-            tb_asset ta
-        left join tb_zone tz on (ta.zone_id = tz.zone_id)
-        WHERE 1=1
-            and ta.asset_kind_id IN ('2', '3', '4', '6', '7', '8')
-            and tz.use_flag = 'Y'
-        GROUP BY
-            grouped_asset_kind_id
-        ORDER BY
-            grouped_asset_kind_id
     </select>
 
     <select id="selectSensorChartData" parameterType="java.util.Map" resultType="java.util.Map">
@@ -376,46 +319,6 @@
                 join tb_logger_info tli on tsi.logr_no = tli.logr_no and tli.district_no= #{district_no}
             </if>
         ) s;
-    </select>
-
-    <select id="selectDetailSystemCountByStatus" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT
-            ta.asset_kind_id,
-            COUNT(*) AS total_count,
-            COUNT(CASE WHEN ta.status = '1' THEN 1 END) AS status_1_count,
-            COUNT(CASE WHEN ta.status = '2' THEN 1 END) AS status_2_count
-        FROM
-            tb_asset ta
-        left join tb_zone tz on (ta.zone_id = tz.zone_id)
-        WHERE 1=1
-            and ta.asset_kind_id IN ('2','3','4','6','7','8')
-            and tz.use_flag = 'Y'
-        <if test="zone_id != null and zone_id != ''">
-            and ta.zone_id = #{zone_id}
-        </if>
-        GROUP BY
-            ta.asset_kind_id
-        order by
-            ta.asset_kind_id
-    </select>
-
-    <select id="selectMaintenanceInfo" parameterType="java.util.Map" resultType="java.util.Map">
-        SELECT MG.*
-        FROM (
-             SELECT
-                 A.manager_name
-                  , (select "name" from tb_common_code_old where category = '유지보수종류' and code = A.type::int  ) AS type_name
-                  , asset.name as asset_name
-                  , asset.zone_id
-                  , A.reg_date
-             FROM tb_maintenance A
-                      LEFT OUTER JOIN tb_asset asset ON A.asset_id = asset.asset_id
-             ) MG
-        WHERE 1=1
-        <if test="zone_id != null and zone_id != ''">
-            and MG.zone_id = #{zone_id}
-        </if>
-        order by MG.reg_date desc
     </select>
 
     <select id="getAlarmHistory" parameterType="java.util.Map" resultType="java.util.Map">

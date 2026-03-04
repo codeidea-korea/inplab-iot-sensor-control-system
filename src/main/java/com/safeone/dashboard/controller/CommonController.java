@@ -40,12 +40,6 @@ public class CommonController{
 
     @Value("${upload.dppath}")
     private String upload_dppath;
-
-    @ResponseBody
-    @GetMapping("/code/list")
-    public List list(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        return commonCodeService.getCommonCodeList(param);
-    }
     
     @ResponseBody
     @GetMapping("/code/assetKindList")

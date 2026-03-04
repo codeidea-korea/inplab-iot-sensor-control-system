@@ -109,18 +109,6 @@ public class DashboardController {
         return dashboardService.selectCCTVCountByStatus(param);
     }
 
-    @ResponseBody
-    @GetMapping(value = "/systemCount", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getSystemCountByStatus(@RequestParam Map param) {
-        return dashboardService.selectSystemCountByStatus(param);
-    }
-
-    @ResponseBody
-    @GetMapping(value = "/detailSystemCount", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getDetailSystemCountByStatus(@RequestParam Map param) {
-        return dashboardService.selectDetailSystemCountByStatus(param);
-    }
-
     @GetMapping(value = "/popup/zoneDetail")
     public String popupZoneDetail(Model model, @RequestParam Map param) {        
         model.addAttribute("district", dashboardService.selectAreaInfo(param).get(0));
@@ -178,21 +166,9 @@ public class DashboardController {
     }
 
     @ResponseBody
-    @GetMapping(value = "/getAlarm", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getAlarm(@RequestParam Map param) {
-        return dashboardService.selectAlarm(param);
-    }
-
-    @ResponseBody
     @GetMapping(value = "/emergencyInfo", produces = MediaType.APPLICATION_JSON_VALUE)
     public Object getEmergencyInfo(@RequestParam Map param) {
         return emergencyContactService.getList(param);
-    }
-
-    @ResponseBody
-    @GetMapping(value = "/maintenanceInfo", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Object getMaintenanceInfo(@RequestParam Map param) {
-        return dashboardService.selectMaintenanceInfo(param);
     }
 
     @GetMapping(value = "/vwsearch/{query}", produces="application/json; charset=utf8")

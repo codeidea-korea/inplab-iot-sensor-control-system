@@ -10,8 +10,6 @@ import java.util.Map;
 
 @Repository
 public interface SendContrMapper {
-
-    List<SendContrDto> selectSendContrList(Map param);
     int insertSendContr(Map param);
     int updateSendContr(Map param);
     int deleteSendContr(Map param);

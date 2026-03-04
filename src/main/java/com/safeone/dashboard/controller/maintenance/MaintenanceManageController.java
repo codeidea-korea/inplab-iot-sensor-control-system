@@ -36,38 +36,6 @@ public class MaintenanceManageController extends JqGridAbstract<MaintenanceManag
     @Override
     public Map<String, FieldDetails> getColumnDataJson() {
         Map<String, FieldDetails> result = super.getColumnDataJson();
-        result.get("type").type = this.getCommonCodeListStr("유지보수종류");//status
-        result.get("asset_id").type = this.getCommonListStr("asset_id");
-        result.get("zone_id").type = this.getCommonListStr("zone_id");
-
-        return result;
-    }
-
-    private String getCommonListStr(String type) {
-        String listStr = ":";
-
-        List<Map> list = null;
-        if ("asset_kind_id".equals(type)) list = commonCodeService.getAssetKindList();
-        else if ("area_id".equals(type)) list = commonCodeService.getAreaList();
-        else if ("asset_id".equals(type)) list = commonCodeService.getSensorList();
-        else if ("zone_id".equals(type)) list = commonCodeService.getZoneList();
-
-        for (Map m : list) {
-            listStr += ";" + m.get("code") + ":" + m.get("name");
-        }
-
-        return listStr;
-    }
-
-    private String getCommonCodeListStr(String cat) {
-        String result = ":";
-        Map<String, Object> pm = new HashMap();
-        pm.put("category", cat);
-
-        List<Map> rList = commonCodeService.getCommonCodeList(pm);
-        for (Map m : rList) {
-            result += ";" + m.get("code") + ":" + m.get("name");
-        }
 
         return result;
     }

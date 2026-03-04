@@ -54,23 +54,9 @@ public class AlarmListController extends JqGridAbstract<AlarmListDto> {
         }
 
         Map<String, FieldDetails> result = super.getColumnDataJson();
-        result.get("risk_level").type = this.getCommonCodeListStr("위험레벨");//risk_level
 //        result.get("alarm_kind_id").type = alarmKindListStr;
 //        result.get("asset_kind_name").type = assetKindListStr;
         result.get("zone_id").type = zoneIdListStr;
-
-        return result;
-    }
-
-    private String getCommonCodeListStr(String cat) {
-        String result = ":";
-        Map<String, Object> pm = new HashMap<String, Object>();
-        pm.put("category", cat);
-
-        List<Map> rList = commonCodeService.getCommonCodeList(pm);
-        for (Map m : rList) {
-            result += ";" + m.get("code") + ":" + m.get("name");
-        }
 
         return result;
     }

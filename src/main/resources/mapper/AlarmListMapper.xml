@@ -185,7 +185,6 @@
 		            , ak.risk_level
 					, (SELECT NAME FROM tb_asset_kind WHERE asset_kind_id = A.asset_kind_id) as asset_kind_name
 					, asset.name as asset_name
-<!-- 					, ( SELECT NAME FROM tb_zone WHERE zone_id = asset.zone_id ) zone_name -->
 					, ( SELECT district_nm FROM tb_district_info WHERE district_no = asset.area_id ) as area_name
 					, TO_CHAR(A.reg_date::timestamp, 'YYYY-MM-DD') AS reg_day
 					, TO_CHAR(A.reg_date::timestamp, 'HH24:MI:SS') AS reg_time

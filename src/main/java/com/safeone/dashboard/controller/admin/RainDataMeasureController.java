@@ -1,9 +1,7 @@
 package com.safeone.dashboard.controller.admin;
 
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
-import com.safeone.dashboard.dto.ManageDto;
 import com.safeone.dashboard.dto.OtherDataMeasureDto;
-import com.safeone.dashboard.service.ManageService;
 import com.safeone.dashboard.service.RainDataMeasureService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -11,8 +9,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,8 +28,6 @@ import java.util.Map;
 public class RainDataMeasureController extends JqGridAbstract<OtherDataMeasureDto> {
 	@Autowired
     private RainDataMeasureService rainDataMeasureService;
-	@Autowired
-	private ManageService manageService;
 
     protected RainDataMeasureController() {
         super(OtherDataMeasureDto.class);
@@ -114,7 +108,6 @@ public class RainDataMeasureController extends JqGridAbstract<OtherDataMeasureDt
     	param.put("zone_id", field[2]);
     	
     	List<OtherDataMeasureDto> rList = rainDataMeasureService.getList(param);
-		List<ManageDto> mList = manageService.getList(param);
     	
     	List chartData = new ArrayList<>();
     	
@@ -122,8 +115,6 @@ public class RainDataMeasureController extends JqGridAbstract<OtherDataMeasureDt
     		double[] db = {(Double.parseDouble(dto.getTimestamp())*1000), Double.parseDouble(dto.getDeg())};
     		chartData.add(db);
     	}
-
-		chartData.add(mList.get(0));
 
     	return chartData;
     }

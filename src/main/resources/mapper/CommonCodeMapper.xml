@@ -2,13 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
     
 <mapper namespace="com.safeone.dashboard.dao.CommonCodeMapper">
-    <select id="selectCommonCodeList" parameterType="java.util.Map" resultType="java.util.Map">
-	    SELECT * 
-	    FROM tb_common_code_old cc
-	    WHERE cc.category = #{category}
-		ORDER BY cc.code
-    </select>
-    
     <select id="selectAssetKindList" resultType="java.util.Map">
 	    SELECT ak.asset_kind_id as code
 	    		, ak.name 

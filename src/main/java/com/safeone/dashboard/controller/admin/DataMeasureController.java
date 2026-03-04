@@ -6,8 +6,6 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.safeone.dashboard.dto.ManageDto;
-import com.safeone.dashboard.service.ManageService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -37,8 +35,6 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 public class DataMeasureController extends JqGridAbstract<DataMeasureDto> {
 	@Autowired
 	private DataMeasureService dataMeasureService;
-	@Autowired
-	private ManageService manageService;
 
 	protected DataMeasureController() {
 		super(DataMeasureDto.class);
@@ -139,7 +135,6 @@ public class DataMeasureController extends JqGridAbstract<DataMeasureDto> {
 
 
 		List<DataMeasureDto> rList = dataMeasureService.getList(param);
-		List<ManageDto> mList = manageService.getList(param);
 
 		List chartData = new ArrayList<>();
 		List chartData2 = new ArrayList<>();
@@ -163,10 +158,6 @@ public class DataMeasureController extends JqGridAbstract<DataMeasureDto> {
 		}
 		chartData.add(chartData2);
 		chartData.add(chartData3);
-//		System.out.println("chartData :"+chartData);
-//		System.out.println("chartData2 :"+chartData2);
-//		System.out.println("chartData3 :"+chartData3);
-		chartData.add(mList.get(0));
 
 		return chartData;
 	}

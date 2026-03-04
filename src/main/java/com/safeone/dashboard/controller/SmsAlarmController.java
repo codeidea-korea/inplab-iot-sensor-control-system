@@ -36,24 +36,9 @@ public class SmsAlarmController extends JqGridAbstract<SmsAlarmListDto> {
 	@Override
 	public Map<String, FieldDetails> getColumnDataJson() {
 		Map<String, FieldDetails> result = super.getColumnDataJson();
-        result.get("threshold").type = this.getCommonCodeListStr("임계치알람");
         result.get("auto_send_flag").type = ":;ON:ON;OFF:OFF";
 		return result;
 	}
-
-    private String getCommonCodeListStr(String cat){
-        String result = ":";
-        Map<String,Object> pm = new HashMap<String,Object>();
-        pm.put("category", cat);
-
-        List<Map> rList = commonCodeService.getCommonCodeList(pm);
-        for(Map m : rList) {
-            result += ";"+ m.get("code") +":"+ m.get("name");
-        }
-
-        return result;
-    }
-
 
     @Override
     protected List getList(Map param) {

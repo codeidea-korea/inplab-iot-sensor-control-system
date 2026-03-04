@@ -42,20 +42,9 @@ public class SendContrController {
 
         model.addAttribute("columns", (new Gson()).toJson(ExcelUtils.getPojoFieldNamesAndLabels(SendContrDto.class)));
 		model.addAttribute("sendGroups", sendGroupService.getList(param));
-		model.addAttribute("types", getCommonCodeList("표시효과"));
 		model.addAttribute("assetList", service.assetList(param));
 		model.addAttribute("log", service.getSendLog());
 		return "admin/sendContr";
-	}
-
-
-	@ResponseBody
-	@GetMapping("/list")
-	public List<SendContrDto> list(@RequestParam Map<String, Object> param) {
-		log.info("{}", param);
-		List<SendContrDto> list = service.getList(param);
-
-		return list;
 	}
 
 
@@ -78,31 +67,5 @@ public class SendContrController {
 	@GetMapping("/del")
 	public boolean delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
 		return service.delete(param);
-	}
-
-	@ResponseBody
-	@GetMapping("/send")
-	public HashMap send(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-		return service.send(param);
-	}
-
-	private String getCommonCodeListStr(String cat){
-		StringBuilder result = new StringBuilder();
-		Map<String,Object> pm = new HashMap<String,Object>();
-		pm.put("category", cat);
-
-		List<Map> rList = commonCodeService.getCommonCodeList(pm);
-		for(Map m : rList) {
-			result.append(m.get("code")).append(":").append(m.get("name"));
-		}
-
-		return result.toString();
-	}
-
-	private List<Map> getCommonCodeList (String cat){
-		Map<String,Object> pm = new HashMap<String,Object>();
-		pm.put("category", cat);
-
-		return commonCodeService.getCommonCodeList(pm);
 	}
 }
