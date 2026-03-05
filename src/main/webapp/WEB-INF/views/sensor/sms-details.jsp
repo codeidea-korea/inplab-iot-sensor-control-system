@@ -66,11 +66,13 @@
         <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
     </div>
 
-    <div class="layer-base-title" style="display: flex; justify-content: space-between; align-items: center; padding-right: 5rem;">
-        <span>문자 전송 상세내역</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 5rem; margin-bottom: 1.6rem;">
+
+        <div class="layer-base-title" style="margin-bottom: 0; border-bottom: none;">
+            문자 전송 상세내역
+        </div>
 
         <div class="sms-detail-search" style="margin-bottom: 0; display: flex; align-items: center; gap: 10px;">
-
             <div class="search-top" style="margin-bottom: 0; display: flex; align-items: center; gap: 5px;">
                 <div style="display: flex; align-items: center;">
                     <p class="search-top-label" style="margin: 0; color: #fff;">조회기간</p>
@@ -85,8 +87,8 @@
             <div class="search-top_">
                 <a id="sms-search-btn" class="btns" style="cursor: pointer; padding: 0 1.5rem; height: 3.6rem; line-height: 3.6rem; display: inline-block; margin-top: 20px;">조회</a>
             </div>
-
         </div>
+
     </div>
 
 
