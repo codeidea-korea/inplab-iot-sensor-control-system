@@ -8,35 +8,35 @@ import java.io.Serializable;
 @Data
 public class AlarmDetailsDto implements Serializable {
 
-    @FieldLabel(title = "발생일시")
+    @FieldLabel(title = "발생일시", width = 170)
     private String meas_dt;
 
-    @FieldLabel(title = "현장명")
+    @FieldLabel(title = "현장명", width = 120)
     private String district_nm;
 
-    @FieldLabel(title = "센서명")
+    @FieldLabel(title = "센서명", width = 120)
     private String sens_nm;
 
-    @FieldLabel(title = "채널명")
+    @FieldLabel(title = "채널명", width = 110)
     private String sens_chnl_nm;
 
-    @FieldLabel(title = "알림상태")
+    @FieldLabel(title = "알림상태", width = 90)
     private String alarm_lvl_cd;
 
-    @FieldLabel(title = "계측값")
+    @FieldLabel(title = "계측값", width = 95)
     private String formul_data;
 
     // ?
-    @FieldLabel(title = "관리기준 범위")
+    @FieldLabel(title = "관리기준 범위", width = 280)
     private String standard;
 
-    @FieldLabel(title = "센서상태")
+    @FieldLabel(title = "센서상태", width = 90)
     private String maint_sts_cd;
 
-    @FieldLabel(title = "통신상태")
+    @FieldLabel(title = "통신상태", width = 90)
     private String net_err_yn;
 
-    @FieldLabel(title = "문자(성공/대상)(명)")
+    @FieldLabel(title = "문자(성공/대상)(명)", width = 120)
     private String sms_cnt;
 
     @FieldLabel(title = "max1", type = "hidden")
@@ -63,9 +63,9 @@ public class AlarmDetailsDto implements Serializable {
     @FieldLabel(title = "min4", type = "hidden")
     private String min4;
 
-    @FieldLabel(title = "알람 종료 일시")
+    @FieldLabel(title = "알람 종료 일시", width = 170)
     private String alarm_fin_dt;
 
-    @FieldLabel(title = "알람 지속 시간")
+    @FieldLabel(title = "알람 지속 시간", width = 130)
     private String alarm_duration;
 }

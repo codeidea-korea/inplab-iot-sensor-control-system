@@ -482,6 +482,11 @@
             $alarmLevel.prop('disabled', !isSensorAlarm);
         }
 
+        function setGroupFormMode($form, isModifyMode) {
+            $form.find('select[name="dispbd_evnt_flag"]').prop('disabled', isModifyMode);
+            $form.find('input[name="img_grp_nm"]').prop('disabled', isModifyMode);
+        }
+
         function buildGroupFormPayload($formSelector) {
             const payload = getSerialize($formSelector);
             const eventValue = String(payload.dispbd_evnt_flag || '');
@@ -497,6 +502,7 @@
             $groupForm.find('select[name="dispbd_evnt_flag"]').on('change', function () {
                 toggleAlarmLevelSelectable($groupForm);
             });
+            setGroupFormMode($groupForm, false);
             toggleAlarmLevelSelectable($groupForm);
 
             // 삭제
@@ -531,7 +537,8 @@
 
                 setSerialize('#lay-form-write2', _popupClearData);
                 $('#lay-form-write2 .btn-btm .deleteBtn').hide();
-                toggleAlarmLevelSelectable($('#lay-form-write2'));
+                setGroupFormMode($groupForm, false);
+                toggleAlarmLevelSelectable($groupForm);
 
                 popFancy('#lay-form-write2');
 
@@ -581,6 +588,7 @@
                 data.use_yn = normalizeSelectCodeValue($form, 'use_yn', data.use_yn);
                 setSerialize('#lay-form-write2', data); // 선택값 세팅
                 $('#lay-form-write2 .btn-btm .deleteBtn').show();
+                setGroupFormMode($form, true);
                 toggleAlarmLevelSelectable($form);
 
                 popFancy('#lay-form-write2');

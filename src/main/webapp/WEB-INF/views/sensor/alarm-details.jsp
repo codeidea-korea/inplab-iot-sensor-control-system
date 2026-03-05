@@ -131,13 +131,25 @@
                const startDate = new Date(today);
                startDate.setMonth(startDate.getMonth() - 1);
 
+               $(window).off('beforeLoadGrid.alarmDetailsWidth').on('beforeLoadGrid.alarmDetailsWidth', function (_e, data) {
+                   if (!Array.isArray(data?.model)) return;
+                   data.model.forEach(function (col) {
+                       if (col && col.width !== undefined) {
+                           col.fixed = false;
+                       }
+                   });
+               });
+
                const $grid = $("#jq-grid");
                const path = "/sensor/alarm-details"
                initGrid($grid, path, $('#grid-wrapper'), {
                    multiselect: true,
                    multiboxonly: true,
+                   autowidth: true,
+                   shrinkToFit: true,
                    custom: {
                        useFilterToolbar: false,
+                       useColumnWidth: true
                    },
                    loadComplete: function () {
                        var $grid = $("#jq-grid");
@@ -238,17 +250,23 @@
                    standard: {
                        formatter: function (cellValue, options, rowObject) {
                            const standard = rowObject?.alarm_lvl_cd;
+                           const formatRange = (min, max) => {
+                               if (min === undefined || min === null || max === undefined || max === null || min === '' || max === '') {
+                                   return '-';
+                               }
+                               return "변위차 ≤ " + min + " 또는 변위차 ≥ " + max;
+                           };
                            if (standard === 'ARM001') {
-                               return rowObject.min1 + " ~ " + rowObject.max1
+                               return formatRange(rowObject.min1, rowObject.max1);
                            }
                            else if (standard === 'ARM002') {
-                               return rowObject.min2 + " ~ " + rowObject.max2
+                               return formatRange(rowObject.min2, rowObject.max2);
                            }
                            else if (standard === 'ARM003') {
-                               return rowObject.min3 + " ~ " + rowObject.max3
+                               return formatRange(rowObject.min3, rowObject.max3);
                            }
                            else if (standard === 'ARM004') {
-                               return rowObject.min4 + " ~ " + rowObject.max4
+                               return formatRange(rowObject.min4, rowObject.max4);
                            }
                            else {
                                return "-"

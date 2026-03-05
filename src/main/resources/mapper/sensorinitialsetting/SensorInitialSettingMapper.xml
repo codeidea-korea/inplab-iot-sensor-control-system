@@ -34,32 +34,25 @@
             concat(#{last_apply_dt_end},' 23:59:59')::timestamp
         </if>
         <if test="emer_status != null and emer_status != ''">
-            <!--AND <![CDATA[
-                (CASE
+            <![CDATA[
+            and (
+                CASE
                     WHEN (tai."4th_lvl_min"::numeric != 0 OR tai."4th_lvl_max"::numeric != 0) AND
-                    ((COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) < tai."4th_lvl_min"::numeric OR
-                    (COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) > tai."4th_lvl_max"::numeric)
-                    THEN tai."4th_lvl_nm"
-
+                         (calc.calc_val < tai."4th_lvl_min"::numeric OR calc.calc_val > tai."4th_lvl_max"::numeric)
+                        THEN tai."4th_lvl_nm"
                     WHEN (tai."3rd_lvl_min"::numeric != 0 OR tai."3rd_lvl_max"::numeric != 0) AND
-                    ((COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) < tai."3rd_lvl_min"::numeric OR
-                    (COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) > tai."3rd_lvl_max"::numeric)
-                    THEN tai."3rd_lvl_nm"
-
+                         (calc.calc_val < tai."3rd_lvl_min"::numeric OR calc.calc_val > tai."3rd_lvl_max"::numeric)
+                        THEN tai."3rd_lvl_nm"
                     WHEN (tai."2nd_lvl_min"::numeric != 0 OR tai."2nd_lvl_max"::numeric != 0) AND
-                    ((COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) < tai."2nd_lvl_min"::numeric OR
-                    (COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) > tai."2nd_lvl_max"::numeric)
-                    THEN tai."2nd_lvl_nm"
-
+                         (calc.calc_val < tai."2nd_lvl_min"::numeric OR calc.calc_val > tai."2nd_lvl_max"::numeric)
+                        THEN tai."2nd_lvl_nm"
                     WHEN (tai."1st_lvl_min"::numeric != 0 OR tai."1st_lvl_max"::numeric != 0) AND
-                    ((COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) < tai."1st_lvl_min"::numeric OR
-                    (COALESCE(tmd.raw_data::numeric, 0) - COALESCE(tsi.init_raw_data::numeric, 0)) > tai."1st_lvl_max"::numeric)
-                    THEN tai."1st_lvl_nm"
-
+                         (calc.calc_val < tai."1st_lvl_min"::numeric OR calc.calc_val > tai."1st_lvl_max"::numeric)
+                        THEN tai."1st_lvl_nm"
                     ELSE '정상'
-                END)
-            ]]> = #{emer_status} -->
-            and tsi.emer_status = #{emer_status}
+                END
+            ) = #{emer_status}
+            ]]>
         </if>
         <if test="sens_status != null and sens_status != ''">
             and tcc.code_nm = #{sens_status}
@@ -261,13 +254,33 @@
             limit 1
         ) dist on true
         left join lateral (
-            select sens_no, formul_data, sens_chnl_id
+            select sens_no, formul_data, raw_data, sens_chnl_id
             from tb_measure_details tmd2
             where tmd2.sens_no = tsi.sens_no
             and tmd2.sens_chnl_id = tsi.sens_chnl_id
             order by tmd2.meas_dt desc
             limit 1
         ) tmd on true
+        LEFT JOIN LATERAL (
+            SELECT
+            CASE
+            WHEN tst.senstype_no = '015' THEN COALESCE(tmd.raw_data::numeric, 0)
+            WHEN tst.senstype_no = '016' THEN COALESCE(tmd.raw_data::numeric, 0) / 100.0
+            WHEN tst.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(tmd.raw_data::numeric, 0)) / 1000.0
+            WHEN tst.senstype_no IN ('001', '002') THEN COALESCE(tmd.raw_data::numeric, 0) * 0.5
+            ELSE COALESCE(tmd.raw_data::numeric, 0)
+            END AS conv_tmd,
+            CASE
+            WHEN tst.senstype_no = '015' THEN COALESCE(tsi.init_raw_data::numeric, 0)
+            WHEN tst.senstype_no = '016' THEN COALESCE(tsi.init_raw_data::numeric, 0) / 100.0
+            WHEN tst.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(tsi.init_raw_data::numeric, 0)) / 1000.0
+            WHEN tst.senstype_no IN ('001', '002') THEN COALESCE(tsi.init_raw_data::numeric, 0) * 0.5
+            ELSE COALESCE(tsi.init_raw_data::numeric, 0)
+            END AS conv_tsi
+        ) conv ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT (conv.conv_tmd - conv.conv_tsi) AS calc_val
+        ) calc ON TRUE
 
         LEFT JOIN tb_alarm_info tai
             ON tai.sens_no = tsi.sens_no

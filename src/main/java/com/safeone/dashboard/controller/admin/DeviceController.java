@@ -1,10 +1,7 @@
 package com.safeone.dashboard.controller.admin;
 
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
-import com.safeone.dashboard.dto.AssetKindDto;
 import com.safeone.dashboard.dto.DeviceDto;
-import com.safeone.dashboard.dto.UserDto;
-import com.safeone.dashboard.service.AssetKindService;
 import com.safeone.dashboard.service.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
