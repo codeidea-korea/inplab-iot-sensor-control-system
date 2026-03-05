@@ -166,9 +166,11 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                 Cell dateCell = row.getCell(9);
                 String instYmd = "";
                 if (dateCell != null) {
-                    if (DateUtil.isCellDateFormatted(dateCell)) {
+                    // 💡 수정된 부분: 셀 타입이 NUMERIC(숫자)인지 먼저 확인합니다.
+                    if (dateCell.getCellType() == org.apache.poi.ss.usermodel.Cell.CELL_TYPE_NUMERIC && DateUtil.isCellDateFormatted(dateCell)) {
                         instYmd = new SimpleDateFormat("yyyy-MM-dd").format(dateCell.getDateCellValue());
                     } else {
+                        // 셀이 문자열(STRING) 등 숫자 타입이 아니라면 기존에 작성하신 이 로직을 안전하게 타게 됩니다.
                         String val = formatter.formatCellValue(dateCell);
                         if (val != null && val.matches("^\\d{1,2}/\\d{1,2}/\\d{2,4}$")) {
                             try {
@@ -183,6 +185,15 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                     }
                 }
                 sensorInfo.put("inst_ymd", instYmd);
+
+                sensorInfo.put("disp_prior_yn", formatter.formatCellValue(row.getCell(10)));
+                sensorInfo.put("multi_senstype_no", formatter.formatCellValue(row.getCell(11)));
+                sensorInfo.put("multi_sens_no", formatter.formatCellValue(row.getCell(12)));
+                sensorInfo.put("sens_lon", formatter.formatCellValue(row.getCell(13)));
+                sensorInfo.put("sens_lat", formatter.formatCellValue(row.getCell(14)));
+                sensorInfo.put("sens_maker", formatter.formatCellValue(row.getCell(15)));
+                sensorInfo.put("model_nm", formatter.formatCellValue(row.getCell(16)));
+
 
                 // 로거 인덱스 관련 매핑 번호 생성
                 Map<String, Object> newMap2 = new HashMap<>();
@@ -208,12 +219,20 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                     chnlCnt = Integer.parseInt((String) chnlCntObj);
                 }
 
-                IntStream.rangeClosed(1, chnlCnt).forEach(ch -> {
-                    String mappedId = mapChannelId(ch);
 
+                final int finalChnlCnt = chnlCnt;
+
+                IntStream.rangeClosed(1, finalChnlCnt).forEach(ch -> {
                     Map<String, Object> perChParam = new HashMap<>(sensorInfo);
-                    perChParam.put("sens_chnl_id", mappedId);
-                    perChParam.put("sens_chnl_nm", sensorInfo.get("sens_chnl_nm").toString() + "-" + mappedId);
+
+                    if (finalChnlCnt == 1) {
+                        perChParam.put("sens_chnl_id", ""); // 또는 DB 설계에 맞는 기본값
+                        perChParam.put("sens_chnl_nm", sensorInfo.get("sens_chnl_nm").toString());
+                    } else {
+                        String mappedId = mapChannelId(ch);
+                        perChParam.put("sens_chnl_id", mappedId);
+                        perChParam.put("sens_chnl_nm", sensorInfo.get("sens_chnl_nm").toString() + "-" + mappedId);
+                    }
 
                     sensorInitialSettingService.create(perChParam);
                     alertStandardManagementService.create(perChParam);

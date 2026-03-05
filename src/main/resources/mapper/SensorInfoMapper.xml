@@ -253,6 +253,7 @@
             <if test="model_nm != null">model_nm,</if>
             <if test="multi_senstype_no != null">multi_senstype_no,</if>
             <if test="multi_sens_no != null">multi_sens_no,</if>
+            <if test="disp_prior_yn != null">disp_prior_yn,</if>
             reg_dt
         </trim>
         )
@@ -275,6 +276,7 @@
             <if test="model_nm != null">#{model_nm},</if>
             <if test="multi_senstype_no != null">#{multi_senstype_no},</if>
             <if test="multi_sens_no != null">#{sens_nm},</if>
+            <if test="disp_prior_yn != null">#{disp_prior_yn},</if>
             now()
         </trim>
         )

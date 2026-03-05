@@ -379,6 +379,7 @@
             } else {
                 alert("No file selected.");
             }
+            var $grid = $('#jq-grid');
             reloadJqGrid($grid);
         }
     </script>
