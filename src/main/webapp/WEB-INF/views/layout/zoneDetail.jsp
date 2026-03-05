@@ -323,49 +323,128 @@ ${district}
             });
         });
 
+        const alarmCdFormatter = (cellValue) => {
+            if (cellValue === 'ARM001') return "관심";
+            if (cellValue === 'ARM002') return "주의";
+            if (cellValue === 'ARM003') return "경계";
+            if (cellValue === 'ARM004') return "심각";
+            return cellValue || '';
+        };
+
+        const maintCdFormatter = (cellValue) => {
+            if (cellValue === 'MTN001') return '정상';
+            if (cellValue === 'MTN002') return '망실';
+            if (cellValue === 'MTN003') return '점검';
+            if (cellValue === 'MTN004') return '철거';
+            return cellValue || '';
+        };
+
+        const columnAlarm = [
+            {
+                name: 'checkbox',
+                index: 'checkbox',
+                width: 10,
+                align: 'center',
+                sortable: false,
+                hidden: false,
+                formatter: checkboxFormatter
+            },
+            {name:'district_nm', index:'district_nm', width:100, align:'center', hidden:false},
+            {name:'sens_nm', index:'sens_nm', width:100, align:'center', hidden:false},
+            {name:'sens_chnl_id', index:'sens_chnl_id', width:100, align:'center', hidden:false},
+            {name:'alarm_lvl_cd', index:'alarm_lvl_cd', width:100, align:'center', hidden:false, formatter: alarmCdFormatter},
+            {name:'formul_data', index:'formul_data', width:100, align:'center', hidden:false},
+            {name:'maint_sts_cd', index:'maint_sts_cd', width:100, align:'center', hidden:false, formatter: maintCdFormatter},
+        ];
+
+        const headerAlarm = ['', '현장명', '센서명', '센서채널명', '알람 상태', '계측값', '센서상태'];
+        const alarmGridKeyArray = ['sens_no', 'sens_chnl_id', 'meas_dt'];
+        const alarmPageSize = 50;
+        let alarmOffset = 0;
+
+        const getAlarmByLevel = (obj) => {
+            const requestData = Object.assign({ district_no: "${district.district_no}" }, obj);
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'GET',
+                    url: '/alarmDataByLevel/list_by_level',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    async: true,
+                    data: requestData
+                }).done(resolve).fail((fail) => {
+                    reject(fail);
+                    console.log('getAlarmByLevel fail > ', fail);
+                    alert2('알람 정보를 가져오는데 실패했습니다.', function () {});
+                });
+            });
+        };
+
         // 각 알람 현황 클릭시
         $('.site-status-details_re .donutty-area li').off().on('click', function () {
-            let level = $(this).attr('level');
-            $.get('/alarmDataByLevel/columns', function (res) {
-                delete res.risk_level;
-                res.zone_id.width = 150;
-                res.asset_kind_name.width = 150;
-                res.asset_name.width = 150;
-                $alarmGrid = jqgridUtil($('.gridAlarm'), {
-                    listPathUrl: "/alarmDataByLevel",
-                    risk_level: level,
-                    zone_id: zone_id,
-                    district_no: "${district.district_no}",
-                    view_flag: 'Y'
-                }, res, true, null, null);
+            const level = String($(this).attr('level') || '');
+            let alarmLevel = '';
 
-                $alarmGrid.jqGrid('setGridParam', {
-                    beforeRequest: function () {
-                        let currentParams = {
-                            listPathUrl: "/alarmDataByLevel",
-                            risk_level: level,
-                            zone_id: zone_id,
-                            district_no: "${district.district_no}",
-                            view_flag: 'Y'
-                        };
+            if (level === '1') {
+                $('#lay-alarm-info .layer-base-title').html("관심 센서 리스트");
+                alarmLevel = 'ARM001';
+            } else if (level === '2') {
+                $('#lay-alarm-info .layer-base-title').html("주의 센서 리스트");
+                alarmLevel = 'ARM002';
+            } else if (level === '3') {
+                $('#lay-alarm-info .layer-base-title').html("경계 센서 리스트");
+                alarmLevel = 'ARM003';
+            } else {
+                $('#lay-alarm-info .layer-base-title').html("심각 센서 리스트");
+                alarmLevel = 'ARM004';
+            }
 
-                        let p = Object.assign($alarmGrid.jqGrid('getGridParam', 'postData'), $('.ui-search-input input').filter(function () {
-                            return !!this.value;
-                        }).serializeObject());
+            alarmOffset = 0;
+            getAlarmByLevel({ limit: alarmPageSize, offset: alarmOffset, alarmLevel: alarmLevel }).then((res) => {
+                const rows = res || [];
+                const gridId = 'gridAlarm';
+                const $g = $('#' + gridId);
 
-                        $alarmGrid.setGridParam({
-                            postData: Object.assign(p, currentParams)
-                        });
-                    },
-                    ondblClickRow: function (rowId) {
-                        $alarmGrid.find('tr').removeClass('custom_selected');
-                        let rowData = $(this).getRowData(rowId);
-                        openSensorInfo(rowData);
-                    }
-                });
-                $alarmGrid.trigger('reloadGrid');
+                if ($g[0] && $g[0].grid) {
+                    const addData = actFormattedData(rows, alarmGridKeyArray);
+                    $g.jqGrid('clearGridData', true);
+                    addData.forEach(row => $g.jqGrid('addRowData', row.id, row));
+                    $g.jqGrid('setGridParam', {
+                        search: false,
+                        postData: { filters: '' },
+                        page: 1
+                    }).trigger('reloadGrid');
+                } else {
+                    setJqGridTable(
+                        rows,
+                        columnAlarm,
+                        headerAlarm,
+                        null,
+                        null,
+                        alarmGridKeyArray,
+                        gridId,
+                        alarmPageSize,
+                        alarmOffset,
+                        getAlarmByLevel,
+                        null,
+                        null
+                    );
+                }
+            }).catch((fail) => {
+                console.log('setJqGridTable fail > ', fail);
             });
-            popFancy('#lay-alarm-info');
+
+            popFancy('#lay-alarm-info', {
+                dragToClose: false, touch: false,
+                afterShow: function () {
+                    const $g = $("#gridAlarm");
+                    const $wrap = $g.closest('.bTable');
+                    const $cont = $g.closest('.layer-base-conts');
+                    const h = Math.max(300, ($cont.innerHeight() || 520) - 120);
+                    $g.jqGrid('setGridWidth', $wrap.width());
+                    $g.jqGrid('setGridHeight', h);
+                }
+            });
         });
 
         // 장비 현황 클릭시
@@ -570,7 +649,7 @@ ${district}
                     if (value > 0) {
                         $('.site-status-details_re .donutty-area li:eq(' + index + ')').css("cursor", "pointer");
                     } else {
-                        $('.site-status-details_re .donutty-area li:eq(' + index + ')').off('click');
+                        $('.site-status-details_re .donutty-area li:eq(' + index + ')').css("cursor", "default");
                     }
                     $('.site-status-details_re .donutty-area li:eq(' + index + ') div').attr('data-value', value);
                     let offset = totalLength - (totalLength * (value / 100));

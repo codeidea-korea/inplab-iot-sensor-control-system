@@ -15,5 +15,6 @@ public interface LoggerInfoMapper {
     int deleteLoggerInfo(Map param);
 
     LoggerInfoDto getLoggerInfo(Map param);
+    String getLogrNoByEtc1(String name);
 }
     

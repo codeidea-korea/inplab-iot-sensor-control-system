@@ -10,9 +10,6 @@ public interface CommonCodeMapper {
     List<Map> selectAssetKindList();
     List<Map> selectAreaList();
     List<Map> selectSensorList();
-    List<Map> selectZoneList();
-    List<Map> selectAlarmKindList();
-    List<Map> selectAssetKindBySensorList();
     List<Map> selectSensorListByZone(Map param);
     List<Map> selectMappingList();
 }

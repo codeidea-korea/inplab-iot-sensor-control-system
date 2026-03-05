@@ -27,24 +27,14 @@ import java.util.Map;
 public class DashboardController {
     @Autowired
     private AlarmListService alarmService;
-    @Autowired
-    private AssetListService assetService;
-    @Autowired
-    private EmergencyCallService emergencyCallService;
-    @Autowired
-    private ZoneService zoneService;
-    @Autowired
-    private CommonCodeService commonCodeService;
+//    @Autowired
+//    private ZoneService zoneService;
     @Autowired
     private DashboardService dashboardService;
     @Autowired
     private NewDashboardService newDashboardService;
     @Autowired
     private EmergencyContactService emergencyContactService;
-    @Autowired
-    private DistrictInfoService districtInfoService;
-    @Autowired
-    private SensorTypeService sensorTypeService;
 
     @GetMapping(value = "dashboard")
     public String main(Model model) {
@@ -73,17 +63,17 @@ public class DashboardController {
         return dashboardService.selectAssetAlarm(param);
     }
 
-    @ResponseBody
-    @GetMapping(value="/getZoneList", produces="application/json; charset=utf8")
-    public Object getZoneList(@RequestParam Map param) {
-        return zoneService.getList(param);
-    }
-
-    @ResponseBody
-    @GetMapping(value="/setZoneLocation", produces="application/json; charset=utf8")
-    public Object setZoneLocation(@RequestParam Map param) {
-        return zoneService.updateZoneLocation(param);
-    }
+//    @ResponseBody
+//    @GetMapping(value="/getZoneList", produces="application/json; charset=utf8")
+//    public Object getZoneList(@RequestParam Map param) {
+//        return zoneService.getList(param);
+//    }
+//
+//    @ResponseBody
+//    @GetMapping(value="/setZoneLocation", produces="application/json; charset=utf8")
+//    public Object setZoneLocation(@RequestParam Map param) {
+//        return zoneService.updateZoneLocation(param);
+//    }
 
     @ResponseBody
     @GetMapping(value = "/sensorCount", produces = MediaType.APPLICATION_JSON_VALUE)

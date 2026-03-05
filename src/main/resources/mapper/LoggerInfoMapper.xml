@@ -235,4 +235,10 @@
         FROM tb_logger_info A
         WHERE logr_no = #{logr_no}
     </select>
+
+    <select id="getLogrNoByEtc1" parameterType="string" resultType="string">
+        SELECT logr_no
+        FROM tb_logger_info
+        WHERE logr_nm = #{device_id}
+    </select>
 </mapper>

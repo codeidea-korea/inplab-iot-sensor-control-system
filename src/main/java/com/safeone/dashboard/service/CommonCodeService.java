@@ -20,23 +20,12 @@ public class CommonCodeService{
         return mapper.selectAssetKindList();
     }
 
-    public List<Map> getAssetKindBySensorList() {
-        return mapper.selectAssetKindBySensorList();
-    }
-
     public List<Map> getAreaList() {
         return mapper.selectAreaList();
     }
     
     public List<Map> getSensorList() {
         return mapper.selectSensorList();
-    }
-    
-    public List<Map> getZoneList() {
-        return mapper.selectZoneList();
-    }
-
-    public List<Map> getAlarmKindList() { return mapper.selectAlarmKindList();
     }
 
     public List<Map> getSensorListByZone(Map param) {

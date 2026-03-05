@@ -150,5 +150,8 @@ public class LoggerInfoService implements JqGridService<LoggerInfoDto> {
         return message;
     }
 
+    public String getLogrNoByEtc1(String name) {
+        return mapper.getLogrNoByEtc1(name);
+    }
 
 }

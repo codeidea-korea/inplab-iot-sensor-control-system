@@ -66,12 +66,6 @@ public class CommonController{
     }
 
     @ResponseBody
-    @GetMapping("/code/zoneList")
-    public List zoneList(HttpServletRequest request) {
-        return commonCodeService.getZoneList();
-    }
-
-    @ResponseBody
     @GetMapping("/code/mappingList")
     public List mappingList(HttpServletRequest request) {
         return commonCodeService.getMappingList();

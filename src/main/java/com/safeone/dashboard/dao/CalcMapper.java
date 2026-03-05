@@ -8,10 +8,6 @@ import java.util.Map;
 
 @Repository
 public interface CalcMapper {
-    int selectCalcListTotal(Map param);
-    List<CalcDto> selectCalcList(Map param);
-    int updateCalc(Map param);
     String selectCalcByDeviceId(Map param);
-    int initCalc();
 }
     

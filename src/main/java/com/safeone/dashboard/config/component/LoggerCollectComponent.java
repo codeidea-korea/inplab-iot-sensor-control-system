@@ -3,7 +3,7 @@ package com.safeone.dashboard.config.component;
 import com.safeone.dashboard.dto.RawData;
 import com.safeone.dashboard.service.CalcService;
 import com.safeone.dashboard.service.DataMeasureService; // (2026-02-26) - REST 호출 대신 직접 DB insert 방식으로 변경
-import com.safeone.dashboard.service.ZoneService;
+import com.safeone.dashboard.service.LoggerInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +35,7 @@ public class LoggerCollectComponent {
     private CalcService calcService;
 
     @Autowired
-    private ZoneService zoneService;
+    private LoggerInfoService loggerInfoService;
 
     @Autowired
     private DataMeasureService dataMeasureService; // (2026-02-26)
@@ -233,7 +233,7 @@ public class LoggerCollectComponent {
         Matcher m = p.matcher(data);
         if (m.find()) {
             if (m.group(1) != null){
-                String zone_id = zoneService.getZoneIdByEtc1(m.group(1));
+                String zone_id = loggerInfoService.getLogrNoByEtc1(m.group(1));
                 rawData.setZone_id(zone_id);
             } else {
                 rawData.setZone_id(m.group(1));
