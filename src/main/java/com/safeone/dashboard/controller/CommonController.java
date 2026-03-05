@@ -42,12 +42,6 @@ public class CommonController{
     private String upload_dppath;
     
     @ResponseBody
-    @GetMapping("/code/assetKindList")
-    public List assetKindList(HttpServletRequest request) {
-        return commonCodeService.getAssetKindList();
-    }
-    
-    @ResponseBody
     @GetMapping("/code/areaList")
     public List areaList(HttpServletRequest request) {
         return commonCodeService.getAreaList();

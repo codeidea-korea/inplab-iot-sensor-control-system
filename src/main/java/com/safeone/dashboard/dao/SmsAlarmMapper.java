@@ -16,8 +16,5 @@ public interface SmsAlarmMapper {
     boolean insertSmsLog(Map param);
     int updateSmsAlarm(Map param);
     int deleteSmsAlarm(Map param);
-
-    List<Map> selectAlarmInfo(Map param);
-    List<Map> selectRainGaugeInfo(Map param);
 }
     

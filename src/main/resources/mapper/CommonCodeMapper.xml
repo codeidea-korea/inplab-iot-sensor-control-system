@@ -2,12 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
     
 <mapper namespace="com.safeone.dashboard.dao.CommonCodeMapper">
-    <select id="selectAssetKindList" resultType="java.util.Map">
-	    SELECT ak.asset_kind_id as code
-	    		, ak.name 
-	    FROM tb_asset_kind ak
-		ORDER BY ak.asset_kind_id::integer
-    </select>
     
     <select id="selectAreaList" resultType="java.util.Map">
 	    SELECT a.district_no as code

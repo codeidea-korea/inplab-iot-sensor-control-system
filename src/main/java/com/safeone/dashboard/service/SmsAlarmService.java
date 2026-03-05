@@ -52,15 +52,4 @@ public class SmsAlarmService implements JqGridService<SmsAlarmListDto> {
       return mapper.deleteSmsAlarm(param);
     }
 
-    public List<Map> selectAlarmInfo(Map param) {
-      return mapper.selectAlarmInfo(param);
-    }
-
-    public Map selectRainGaugeInfo(Map param) {
-      try {
-          return mapper.selectRainGaugeInfo(param).get(0);
-      } catch(Exception e) {
-          return null;
-      }
-    }
 }

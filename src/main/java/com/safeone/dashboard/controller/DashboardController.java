@@ -52,12 +52,6 @@ public class DashboardController {
     }
 
     @ResponseBody
-    @GetMapping(value="/getMarkerList", produces="application/json; charset=utf8")
-    public Object getMarkerList(@RequestParam Map param) {
-        return dashboardService.selectMarkerList(param);
-    }
-
-    @ResponseBody
     @GetMapping(value="/getAssetAlarm", produces="application/json; charset=utf8")
     public Object selectAssetAlarm(@RequestParam Map param) {
         return dashboardService.selectAssetAlarm(param);
@@ -91,50 +85,6 @@ public class DashboardController {
     public String popupZoneDetail(Model model, @RequestParam Map param) {        
         model.addAttribute("district", dashboardService.selectAreaInfo(param).get(0));
         return "layout/zoneDetail";
-    }
-
-    /**
-     * 센서모니터링 - 캔들차트
-     * min : 간격(분)
-     * asset_id : 자산id
-     * start_date : 시작일자 (일시 가능)
-     * end_date : 종료일                       
-     * @param param
-     * @return
-     */
-    @ResponseBody
-    @GetMapping(value="/getSensorChartData", produces="application/json; charset=utf8")
-    public Object getSensorChartData(@RequestParam Map param) {
-        String[] asset_ids = (new Gson()).fromJson(param.get("asset_ids").toString(), String[].class);
-        param.put("asset_ids", asset_ids);
-        return dashboardService.selectSensorChartData(param);
-    }
-
-    /**
-     * 센서모니터링 - 라인차트
-     * @param param
-     * @return
-     */
-    @ResponseBody
-    @GetMapping(value="/getSensorChartRealData", produces="application/json; charset=utf8")
-    public Object getSensorChartRealData(@RequestParam Map param) {
-        String[] asset_ids = (new Gson()).fromJson(param.get("asset_ids").toString(), String[].class);
-        param.put("asset_ids", asset_ids);
-        return dashboardService.selectSensorChartRealData(param);
-    }
-
-    @GetMapping(value = "/excel/{fileName}")
-    public void downloadExcel(HttpServletRequest request, HttpServletResponse response,
-                              @RequestParam Map<String, Object> param, @PathVariable String fileName) {
-        String[] asset_ids = (new Gson()).fromJson(param.get("asset_ids").toString(), String[].class);
-        param.put("asset_ids", asset_ids);
-        param.put("page", "0");
-        List<Map> list = dashboardService.selectSensorChartData(param);
-
-        String[] fields = new String[]{"asset_kind_name", "asset_name", "channel_name", "data_time", "avg_value"};
-        String[] headers = new String[]{"센서종류", "센서명", "채널명", "데이터시간", "센서값"};
-
-        ExcelUtils.downloadExcel(request, response, list, fields, headers, fileName + ".xls");
     }
 
     @ResponseBody
