@@ -290,11 +290,16 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                     sendChnlId = "";
             }
 
-            newMap.put("sens_chnl_id", sendChnlId);
+            if (channelCnt == 1) {
+                newMap.put("sens_chnl_id", ""); // 컨트롤러 로직과 통일 (DB 설정에 따라 필요시 "1" 등으로 변경)
+                newMap.put("sens_chnl_nm", param.get("sens_chnl_nm").toString()); // "-X" 제외
+            } else {
+                newMap.put("sens_chnl_id", sendChnlId);
+                newMap.put("sens_chnl_nm", param.get("sens_chnl_nm").toString() + "-" + sendChnlId);
+            }
+
             newMap.put("logr_chnl_seq", i - 1);
             newMap.put("senstype_no", senstypeNo);
-            newMap.put("sens_chnl_nm", param.get("sens_chnl_nm").toString() + "-" + sendChnlId);
-
             logrIdxMapService.create(newMap);
         }
     }
