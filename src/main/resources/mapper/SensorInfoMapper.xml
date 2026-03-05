@@ -349,6 +349,26 @@
         WHERE sens_no = #{sens_no}
     </delete>
 
+    <delete id="deleteSensorChnlBySensNo" parameterType="java.util.Map">
+        DELETE FROM tb_sensor_chnl
+        WHERE sens_no = #{sens_no}
+    </delete>
+
+    <delete id="deleteSensorInitBySensNo" parameterType="java.util.Map">
+        DELETE FROM tb_sensor_init
+        WHERE sens_no = #{sens_no}
+    </delete>
+
+    <delete id="deleteAlarmInfoBySensNo" parameterType="java.util.Map">
+        DELETE FROM tb_alarm_info
+        WHERE sens_no = #{sens_no}
+    </delete>
+
+    <delete id="deleteLogrIdxMapBySensNo" parameterType="java.util.Map">
+        DELETE FROM tb_logr_idx_map
+        WHERE sens_no = #{sens_no}
+    </delete>
+
     <select id="getMaxLogrIdxNo" parameterType="string" resultType="Integer">
         SELECT
             MAX(logr_idx_no)
@@ -389,3 +409,4 @@
         WHERE sens_no= #{sensNo}
     </select>
 </mapper>
+

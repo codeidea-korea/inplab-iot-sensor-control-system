@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 public class SmsSender {
 
     private final SmsSenderService service;
-    private static final int SMS_SEND_TERM_MINUTE = 5;
+    private static final int SMS_SEND_TERM_MINUTE = 1;
 
     // 5분마다 실행
-//    @Scheduled(fixedRate = 1000 * 60 * SMS_SEND_TERM_MINUTE)
-//    @Scheduled(fixedRate = 4000)
+    @Scheduled(fixedRate = 1000 * 60 * SMS_SEND_TERM_MINUTE)
+//    @Scheduled(fixedRate = 10000)
     public void logMessage() {
         service.run();
     }

@@ -114,21 +114,47 @@
         let offset = 0;
         let isCheckedAll = false;
 
-        // WebSocket 종료 + 재연결 타이머 정리
+        // WebSocket 종료 + 리소스 정리
         const closeCctvWs = (cctvNo) => {
+            const key = 'vid_' + cctvNo;
+            const ws = window.videoWs[key];
+            if (!ws) return;
+
+            if (ws._reconnectTimer) {
+                clearInterval(ws._reconnectTimer);
+            }
+            if (ws._prevUrl) {
+                URL.revokeObjectURL(ws._prevUrl);
+                ws._prevUrl = null;
+            }
+
             try {
-                const ws = window.videoWs['vid_' + cctvNo];
-                if (!ws) return;
-                if (ws._reconnectTimer) clearInterval(ws._reconnectTimer);
-                if (ws._prevUrl) URL.revokeObjectURL(ws._prevUrl);
-                ws.send(JSON.stringify({type: "close"}));
-                ws.close();
-                console.log('socket close - vid_' + cctvNo);
-            } catch (e) {}
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({type: "close"}));
+                }
+            } catch (e) {
+                console.log('socket close message failed - ' + key, e);
+            }
+
+            try {
+                ws.onmessage = null;
+                ws.onerror = null;
+                ws.onclose = null;
+                if (ws.readyState !== WebSocket.CLOSED && ws.readyState !== WebSocket.CLOSING) {
+                    ws.close();
+                }
+            } catch (e) {
+                console.log('socket close failed - ' + key, e);
+            } finally {
+                delete window.videoWs[key];
+                console.log('socket closed - ' + key);
+            }
         };
 
         // WebSocket 연결 생성
         const connectCctvStream = (cctvNo, rtspUrl) => {
+            closeCctvWs(cctvNo);
+
             const ws = new WebSocket(wsUrl + '/video/stream?url=' + rtspUrl);
             ws._latestData = null;
             ws._renderScheduled = false;
@@ -151,6 +177,17 @@
                     video.src = url;
                     ws._prevUrl = url;
                 });
+            };
+
+            ws.onclose = function () {
+                if (ws._prevUrl) {
+                    URL.revokeObjectURL(ws._prevUrl);
+                    ws._prevUrl = null;
+                }
+            };
+
+            ws.onerror = function (e) {
+                console.log('socket error - vid_' + cctvNo, e);
             };
 
             window.videoWs['vid_' + cctvNo] = ws;
@@ -314,17 +351,27 @@
         };
 
 
-        const reloadCctvList = () => {
+const reloadCctvList = () => {
             if (cctvArray.length % 6 === 0 && currentPage > 1) {
                 currentPage = currentPage - 1;
             }
 
-            removeAllCctvVideo();
-            cctvArray.forEach((data, idx) => {
-                if (idx >= (currentPage - 1) * 6 && idx < currentPage * 6) {
-                    if ($('.cctv-list li[cctvno=' + data.cctv_no + ']').length === 0) {
-                        setCctvVideoList(data);
-                    }
+            const startIdx = (currentPage - 1) * 6;
+            const endIdx = currentPage * 6;
+            const pageItems = cctvArray.filter((_data, idx) => idx >= startIdx && idx < endIdx);
+            const pageNos = new Set(pageItems.map(item => String(item.cctv_no)));
+
+            $('.cctv-list li[cctvno]').each(function () {
+                const cctvNo = String($(this).attr('cctvno'));
+                if (!pageNos.has(cctvNo)) {
+                    closeCctvWs(cctvNo);
+                    $(this).remove();
+                }
+            });
+
+            pageItems.forEach((data) => {
+                if ($('.cctv-list li[cctvno=' + data.cctv_no + ']').length === 0) {
+                    setCctvVideoList(data);
                 }
             });
         };
@@ -566,7 +613,18 @@
             // wsUrl = 'ws://localhost:8080';
             // dev / prod
             wsUrl = "wss://goldencity.codeidea.io";
+            if (window.location.href.indexOf('106.245') > -1) { // 테스트서버
+                wsUrl = 'ws://106.245.95.116:6099';
+            } else if (window.location.href.indexOf('121.159') > -1) { // 진천서버
+                wsUrl = 'ws://121.159.33.107:9090';
+            }
 
+            $(window).on('beforeunload', function () {
+                Object.keys(window.videoWs).forEach((key) => {
+                    const cctvNo = key.replace('vid_', '');
+                    closeCctvWs(cctvNo);
+                });
+            });
             $(window).on('onSelectRow', function (e, data) {
                 console.log('onSelectRow', data);
 
@@ -869,3 +927,4 @@
 </section>
 </body>
 </html>
+

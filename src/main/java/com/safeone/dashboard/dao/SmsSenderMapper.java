@@ -24,5 +24,14 @@ public interface SmsSenderMapper {
     DistrictInfoDto getDistrictInfo(Map<String, Object> param);
 
     SensInfoDto getSensInfo(String sensNo);
+
+    Map<String, Object> getMaintCompInfo(String partnerCompId);
+
+    int getAlarmSendCount(Map<String, Object> param);
+
+    Map<String, Object> getReceiveRate(Map<String, Object> param);
+
+    Map<String, Object> getLatestRainData(Map<String, Object> param);
 }
-    
+
+

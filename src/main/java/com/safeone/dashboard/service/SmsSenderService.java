@@ -37,91 +37,51 @@ public class SmsSenderService {
             DistrictInfoDto districtInfo = mapper.getDistrictInfo(Collections.singletonMap("district_no", districtNo));
 
             alertStandardList.forEach(alertStandard -> {
-
-                // 3. 경보기준으로 경보기준이 넘는 데이터가 있는지 확인한다
+                // 3. 경보기준이 넘는 데이터가 있는지 확인
                 MeasureDataDto data = getMeasuredData(alertStandard, now);
                 if (data != null) {
                     alertStandard.setAdditionalData(data);
                 }
             });
 
-            // 4. 문자를 발송할 후보군을 조회한다
+            List<AlertStandardDto> overAlerts = alertStandardList.stream()
+                    .filter(item -> item.getOver() != null)
+                    .collect(Collectors.toList());
+
+            if (overAlerts.isEmpty()) {
+                return;
+            }
+
+            // 4. 문자를 발송할 후보군 조회
             List<SmsTargetDto> candidates = getSmsTargetList(districtNo);
-            int maxOver = getMaxOver(alertStandardList);
+            int maxOver = getMaxOver(overAlerts);
 
-            // 5. 후보군을 필터링하여 문자를 발송할 대상을 선정한다
-            candidates.get(0).setAlarm_lvl_nm("1차 초과 이상");
-            maxOver = 1;
+            // 5. 후보군 필터링
             List<SmsTargetDto> smsTargets = filterToTarget(candidates, maxOver);
+            if (smsTargets.isEmpty()) {
+                return;
+            }
 
-            HashMap<String, List<SensInfoDto>> sensInfos = getSensInfos(alertStandardList);
+            Map<String, Object> maintCompInfo = getMaintCompInfo(districtInfo.getMeas_comp_id1());
 
-            alertStandardList.stream().filter(item -> item.getOver() != null).forEach(item -> {
-
-                // 6. 알람이력을 저장한다
+            // 6. 알람이력 저장 + 문자 상세내역 저장
+            overAlerts.forEach(item -> {
                 int insertedMgntNo = saveAlarmDetails(item);
-
-
-                // 7. 알람이력 > 문자 전송 상세내역을 저장한다
                 smsTargets.forEach(smsTarget -> {
-                    String msg = makeMessage(smsTarget, districtInfo, sensInfos);
-                    msg = msg.replace("[$MOBILE]", smsTarget.getSms_recv_ph());
-                    msg = msg.replace("[$NAME]", smsTarget.getSms_chgr_nm());
-
+                    String msg = makeMessage(smsTarget, districtInfo, maintCompInfo, overAlerts);
                     saveSmsDetails(smsTarget, insertedMgntNo, msg);
                 });
-
             });
 
-            System.out.println("smsTargets = " + smsTargets);
-            System.out.println("alertStandardList = " + alertStandardList);
-
-            // 8. 문자를 발송한다
+            // 7. 문자 발송
             smsTargets.forEach(smsTarget -> {
                 try {
-                    sendSms(smsTarget, districtInfo, sensInfos);
+                    sendSms(smsTarget, districtInfo, maintCompInfo, overAlerts);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             });
         });
-    }
-
-//    private HashMap<String, List<SensInfoDto>> getSensInfos(List<AlertStandardDto> alertStandardList) {
-//        HashMap<String, List<SensInfoDto>> sensInfos = new HashMap<>();
-//
-//        for (AlertStandardDto alertStandard : alertStandardList) {
-//            SensInfoDto sensInfo = mapper.getSensInfo(alertStandard.getSens_no());
-//            if (alertStandard.getOver() != null) {
-//                sensInfo.setOver(true);
-//            }
-//            if (sensInfos.containsKey(sensInfo.getSens_tp_nm())) {
-//                List<SensInfoDto> test = sensInfos.get(sensInfo.getSens_tp_nm());
-//                sensInfos.get(sensInfo.getSens_tp_nm()).add(sensInfo);
-//            } else {
-//                sensInfos.put(sensInfo.getSens_tp_nm(), Collections.singletonList(sensInfo));
-//            }
-//        }
-//
-//        return sensInfos;
-//    }
-
-    private HashMap<String, List<SensInfoDto>> getSensInfos(List<AlertStandardDto> alertStandardList) {
-        HashMap<String, List<SensInfoDto>> sensInfos = new HashMap<>();
-
-        for (AlertStandardDto alertStandard : alertStandardList) {
-            SensInfoDto sensInfo = mapper.getSensInfo(alertStandard.getSens_no());
-
-            if (alertStandard.getOver() != null) {
-                sensInfo.setOver(true);
-            }
-
-            sensInfos
-                    .computeIfAbsent(sensInfo.getSens_tp_nm(), k -> new ArrayList<>())
-                    .add(sensInfo);
-        }
-
-        return sensInfos;
     }
 
     private void saveSmsDetails(SmsTargetDto smsTarget, int insertedMgntNo, String sms) {
@@ -206,99 +166,193 @@ public class SmsSenderService {
         param.put("meas_dt_start", now.minusMinutes(SMS_SEND_TERM_MINUTE).format(formatter));
         param.put("meas_dt_end", now.format(formatter));
 
-//        param.put("meas_dt_start", now.withHour(0).withMinute(0).withSecond(0).format(formatter));
-//        param.put("meas_dt_end", now.withHour(23).withMinute(59).withSecond(59).format(formatter));
-
-        param.put("formul_data", alertStandard.getMax4());
-        MeasureDataDto data = mapper.getMeasuredData(param);
+        MeasureDataDto data = queryByLevel(param, alertStandard.getMin4(), alertStandard.getMax4(), "4");
         if (data != null) {
-            data.setOver("4");
             return data;
         }
 
-        param.put("formul_data", alertStandard.getMax3());
-        data = mapper.getMeasuredData(param);
+        data = queryByLevel(param, alertStandard.getMin3(), alertStandard.getMax3(), "3");
         if (data != null) {
-            data.setOver("3");
             return data;
         }
 
-        param.put("formul_data", alertStandard.getMax2());
-        data = mapper.getMeasuredData(param);
+        data = queryByLevel(param, alertStandard.getMin2(), alertStandard.getMax2(), "2");
         if (data != null) {
-            data.setOver("2");
             return data;
         }
 
-        param.put("formul_data", alertStandard.getMax1());
-        data = mapper.getMeasuredData(param);
-        if (data != null) {
-            data.setOver("1");
-            return data;
-        }
-        return null;
+        return queryByLevel(param, alertStandard.getMin1(), alertStandard.getMax1(), "1");
     }
 
+    private MeasureDataDto queryByLevel(Map<String, Object> param, String minThreshold, String maxThreshold, String over) {
+        boolean hasMin = minThreshold != null && !minThreshold.trim().isEmpty();
+        boolean hasMax = maxThreshold != null && !maxThreshold.trim().isEmpty();
+
+        if (!hasMin && !hasMax) {
+            return null;
+        }
+
+        param.put("min_formul_data", hasMin ? minThreshold : null);
+        param.put("max_formul_data", hasMax ? maxThreshold : null);
+
+        MeasureDataDto data = mapper.getMeasuredData(param);
+        if (data != null) {
+            data.setOver(over);
+        }
+        return data;
+    }
 
     private List<AlertStandardDto> getAlertStandards() {
         return mapper.getAlertStandards();
     }
 
-    private String makeSensorMessage(HashMap<String, List<SensInfoDto>> sensInfos) {
-        StringBuilder sb = new StringBuilder();
-
-        for (String key : sensInfos.keySet()) {
-            sb.append("\n").append("[").append(key).append("]");
-            sb.append("\n").append("설치수량 : ").append(sensInfos.get(key).size()).append("EA ").append("/ 초과수량 : ").append(
-                    sensInfos.get(key).stream().filter(SensInfoDto::isOver).count()
-            ).append("EA ").append("/ 미측정 : 0EA");
-
+    private Map<String, Object> getMaintCompInfo(String partnerCompId) {
+        if (partnerCompId == null || partnerCompId.trim().isEmpty()) {
+            return Collections.emptyMap();
         }
-
-        return sb.toString();
+        Map<String, Object> info = mapper.getMaintCompInfo(partnerCompId);
+        return info == null ? Collections.emptyMap() : info;
     }
 
-    private String makeErrorSensorMessage(HashMap<String, List<SensInfoDto>> sensInfos) {
+    private int getAlarmSendCount(AlertStandardDto alert) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("sens_no", alert.getSens_no());
+        param.put("sens_chnl_id", alert.getSens_chnl_id());
+        return mapper.getAlarmSendCount(param);
+    }
+
+    private String getSensorName(AlertStandardDto alert) {
+        SensInfoDto sensInfo = mapper.getSensInfo(alert.getSens_no());
+        if (sensInfo == null || sensInfo.getSens_nm() == null || sensInfo.getSens_nm().trim().isEmpty()) {
+            return alert.getSens_no();
+        }
+        return sensInfo.getSens_nm();
+    }
+
+    private String mapAlarmLevelName(String levelCode) {
+        if (levelCode == null) {
+            return "-";
+        }
+        switch (levelCode.trim()) {
+            case "1":
+            case "ARM001":
+                return "관심";
+            case "2":
+            case "ARM002":
+                return "주의";
+            case "3":
+            case "ARM003":
+                return "경계";
+            case "4":
+            case "ARM004":
+                return "심각";
+            default:
+                return levelCode;
+        }
+    }
+
+    private String getOverallAlarmLevelName(List<AlertStandardDto> overAlerts) {
+        int maxLevel = overAlerts.stream()
+                .map(AlertStandardDto::getOver)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(v -> !v.isEmpty())
+                .mapToInt(v -> {
+                    try {
+                        return Integer.parseInt(v);
+                    } catch (NumberFormatException e) {
+                        return 0;
+                    }
+                })
+                .max()
+                .orElse(0);
+        return mapAlarmLevelName(String.valueOf(maxLevel));
+    }
+
+    private String getReceiveRateText(String districtNo) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("district_no", districtNo);
+        Map<String, Object> row = mapper.getReceiveRate(param);
+        if (row == null || row.get("receive_rate") == null) {
+            return "0%";
+        }
+        return String.valueOf(row.get("receive_rate")) + "%";
+    }
+
+    private String getLatestRainText(String districtNo) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("district_no", districtNo);
+        Map<String, Object> row = mapper.getLatestRainData(param);
+        if (row == null || row.get("formul_data") == null) {
+            return "0";
+        }
+        return String.valueOf(row.get("formul_data"));
+    }
+
+    private String makeSensorAlarmStatus(List<AlertStandardDto> overAlerts) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n");
-        for (String key : sensInfos.keySet()) {
-            for (SensInfoDto sensInfo : sensInfos.get(key)) {
-                if (sensInfo.isOver()) {
-                    sb.append(sensInfo.getSens_nm()).append(" ");
-                }
+        for (AlertStandardDto alert : overAlerts) {
+            if (sb.length() > 0) {
+                sb.append("\n");
             }
+            sb.append(getSensorName(alert))
+              .append(" : 기준치 초과 (")
+              .append(mapAlarmLevelName(alert.getOver()))
+              .append(") : 변위값 (")
+              .append(alert.getFormul_data())
+              .append(")");
+        }
+        return sb.toString();
+    }
+
+    private String makeSendCountSection(List<AlertStandardDto> overAlerts) {
+        StringBuilder sb = new StringBuilder();
+        Set<String> seen = new HashSet<>();
+
+        for (AlertStandardDto alert : overAlerts) {
+            String key = String.valueOf(alert.getSens_no()) + "|" + String.valueOf(alert.getSens_chnl_id());
+            if (!seen.add(key)) {
+                continue;
+            }
+
+            if (sb.length() > 0) {
+                sb.append("\n");
+            }
+
+            sb.append(getSensorName(alert))
+              .append(" : ")
+              .append(getAlarmSendCount(alert))
+              .append(" 회차");
         }
 
         return sb.toString();
     }
 
-    private String makeMessage(SmsTargetDto target, DistrictInfoDto district, HashMap<String, List<SensInfoDto>> sensInfos) {
-        return "<<<현장 상태 이상 경보 문자>>>" +
-                "\n수신정보 전화번호 : [$MOBILE] [$NAME](" + target.getSms_recv_dept() + ")" +
-                "\n" +
-                "\n전송정보 : 비탈면 IoT 통합 시스템 경보문자" +
-                "\n**현장명 정보 :" +
-                "\n[" + district.getDistrict_nm() + "]" +
-                "\n" + district.getDist_road_addr() +
-                "\n" +
-                "\n**시공업체정보 :" +
-                "\n아주엔지니어링 / 권순기 이사" +
-                "\n010-6207-9185" +
-                "\n" +
-                "\n**24시간내 전송된 회차 :" +
-                "\n1회차" +
-                "\n" +
-                "\n**현장 요약:" +
-                "\n관리기준상태 / 수신 100% / 누적강수량: 0mm" +
-                "\n" +
-                "\n**센서 상태 통계 :" +
-                makeSensorMessage(sensInfos) +
-                "\n" +
-                "\n**이상센서 리스트 :" +
-                makeErrorSensorMessage(sensInfos);
+    private String makeMessage(SmsTargetDto target, DistrictInfoDto district, Map<String, Object> maintCompInfo, List<AlertStandardDto> overAlerts) {
+        String partnerCompNm = String.valueOf(maintCompInfo.getOrDefault("partner_comp_nm", "-"));
+        String maintRepNm = String.valueOf(maintCompInfo.getOrDefault("maint_rep_nm", "-"));
+        String sendCountSection = makeSendCountSection(overAlerts);
+        String receiveRate = getReceiveRateText(district.getDistrict_no());
+        String siteNm = district.getSite_nm() == null || district.getSite_nm().trim().isEmpty()
+                ? district.getSite_no()
+                : district.getSite_nm();
+
+        return "IOT센서 상시계측 시스템 경보문자" +
+                "\n[현장명]" +
+                "\n" + siteNm + " / " + district.getDistrict_nm() +
+                "\n[시공업체정보]" +
+                "\n" + partnerCompNm + " / " + maintRepNm +
+                "\n[24시간내 전송된 회차]" +
+                "\n" + sendCountSection +
+                "\n[현장요약]" +
+                "\n관리기준상태:" + " / 수신율 : " + receiveRate + " / 누적강우량:" + getLatestRainText(district.getDistrict_no()) + "mm" +
+                "\n[센서알람상태]" +
+                "\n" + makeSensorAlarmStatus(overAlerts) +
+                "\n[연락처]" +
+                "\n" + target.getSms_recv_dept() + " : " + target.getSms_chgr_nm() + " : " + target.getSms_recv_ph();
     }
 
-    private void sendSms(SmsTargetDto target, DistrictInfoDto district, HashMap<String, List<SensInfoDto>> sensInfos) throws IOException {
+    private void sendSms(SmsTargetDto target, DistrictInfoDto district, Map<String, Object> maintCompInfo, List<AlertStandardDto> overAlerts) throws IOException {
         String url = "https://directsend.co.kr/index.php/api_v2/sms_change_word";
 
         java.net.URL obj;
@@ -309,7 +363,7 @@ public class SmsSenderService {
         con.setRequestProperty("Accept", "application/json");
 
         String title = "코드아이디어";
-        String message = makeMessage(target, district, sensInfos);
+        String message = makeMessage(target, district, maintCompInfo, overAlerts);
 
         String sender = "01054405414";
         String username = "codeidea";
@@ -355,27 +409,7 @@ public class SmsSenderService {
         in.close();
 
         System.out.println(response);
-		/*
-			status code
-			0   : 정상발송 (성공코드는 다이렉트센드 DB서버에 정상수신됨을 뜻하며 발송성공(실패)의 결과는 발송완료 이후 확인 가능합니다.)
-			100 : POST validation 실패
-			101 : sender 유효한 번호가 아님
-			102 : recipient 유효한 번호가 아님
-			103 : 회원정보가 일치하지 않음
-			104 : 받는 사람이 없습니다
-			105 : message length = 0, message length >= 2000, title >= 20
-			106 : message validation 실패
-			107 : 이미지 업로드 실패
-			108 : 이미지 갯수 초과
-			109 : return_url이 유효하지 않습니다
-			110 : 이미지 용량 300kb 초과
-			111 : 이미지 확장자 오류
-			112 : euckr 인코딩 에러 발생
-			114 : 예약정보가 유효하지 않습니다.
-			200 : 동일 예약시간으로는 200회 이상 API 호출을 할 수 없습니다.
-			201 : 분당 300회 이상 API 호출을 할 수 없습니다.
-			205 : 잔액부족
-			999 : Internal Error.
-		 */
     }
 }
+
+

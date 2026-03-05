@@ -72,7 +72,17 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
     }
 
     @Override
+    @Transactional
     public int delete(Map param) {
+        return deleteCascadeBySensNo(param);
+    }
+
+    @Transactional
+    public int deleteCascadeBySensNo(Map param) {
+        mapper.deleteSensorInitBySensNo(param);
+        mapper.deleteAlarmInfoBySensNo(param);
+        mapper.deleteSensorChnlBySensNo(param);
+        mapper.deleteLogrIdxMapBySensNo(param);
         return mapper.deleteSensorInfo(param);
     }
 
@@ -332,3 +342,4 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
         }
     }
 }
+

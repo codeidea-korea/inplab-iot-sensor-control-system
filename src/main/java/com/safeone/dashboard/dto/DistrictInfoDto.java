@@ -10,6 +10,9 @@ public class DistrictInfoDto implements Serializable {
     @FieldLabel(title = "기관 ID", type = "hidden")
     String site_no;
 
+    @FieldLabel(title = "기관명")
+    String site_nm;
+
     @FieldLabel(title = "ID")
     String district_no;
 

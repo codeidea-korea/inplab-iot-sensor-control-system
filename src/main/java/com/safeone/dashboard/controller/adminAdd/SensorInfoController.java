@@ -127,14 +127,7 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
     @ResponseBody
     @GetMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        boolean exists = commonCodeEditService.isLogrIdxNoExists(param);
-        if (!exists) {
-            logrIdxMapService.delete(param);
-//            return -1; // -1은 삭제 불가 상태를 의미함.
-        }
-
-        // 삭제 수행
-        return sensorInfoService.delete(param); // 1: 성공, 0: 실패 (삭제할 항목이 없거나 삭제 실패)
+        return sensorInfoService.deleteCascadeBySensNo(param);
     }
 
     @ResponseBody
@@ -238,3 +231,4 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
 
 
 }
+

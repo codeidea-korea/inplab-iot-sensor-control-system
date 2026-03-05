@@ -18,7 +18,7 @@ public class VideoStreamingHandler extends BinaryWebSocketHandler {
     private final Map<String, StreamThread> streamThreads = new ConcurrentHashMap<>();
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) {
         URI uri = session.getUri();
         MultiValueMap<String, String> parameters = UriComponentsBuilder.fromUri(uri).build().getQueryParams();
         String url = parameters.getFirst("url");
@@ -31,11 +31,21 @@ public class VideoStreamingHandler extends BinaryWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        StreamThread streamThread = streamThreads.remove(session.getId());
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        stopThread(session.getId());
+        System.out.println("⚠️ Stream closed for session: " + session.getId());
+    }
+
+    @Override
+    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+        stopThread(session.getId());
+        super.handleTransportError(session, exception);
+    }
+
+    private void stopThread(String sessionId) {
+        StreamThread streamThread = streamThreads.remove(sessionId);
         if (streamThread != null) {
-            streamThread.interrupt();
-            System.out.println("⚠️ Stream closed for session: " + session.getId());
+            streamThread.shutdown();
         }
     }
 }

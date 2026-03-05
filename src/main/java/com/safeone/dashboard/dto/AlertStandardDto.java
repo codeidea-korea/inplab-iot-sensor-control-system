@@ -10,9 +10,13 @@ public class AlertStandardDto implements Serializable {
     private String district_no;
     private String sens_no;
     private String sens_chnl_id;
+    private String min1;
     private String max1;
+    private String min2;
     private String max2;
+    private String min3;
     private String max3;
+    private String min4;
     private String max4;
 
 

@@ -16,8 +16,9 @@
              , tai."4th_lvl_max" as max4
              , tai.lvl_apply_dt
         from tb_alarm_info tai
-        left join tb_sensor_info tsi
-        on tai.sens_no = tsi.sens_no and tsi.sms_snd_yn ='Y'
+        join tb_sensor_info tsi
+          on tai.sens_no = tsi.sens_no
+         and tsi.sms_snd_yn = 'Y'
     </select>
 
     <select id="getMeasuredData" resultType="com.safeone.dashboard.dto.MeasureDataDto">
@@ -26,10 +27,19 @@
              , tmd.meas_dt
              , tmd.formul_data
         from tb_measure_details tmd
+                 join tb_sensor_init tsi
+                      on tsi.sens_no = tmd.sens_no
+                     and coalesce(tsi.sens_chnl_id, '') = coalesce(tmd.sens_chnl_id, '')
         where tmd.sens_no = #{sens_no}
-          and tmd.sens_chnl_id = #{sens_chnl_id}
+          and coalesce(tmd.sens_chnl_id, '') = coalesce(#{sens_chnl_id}, '')
           and tmd.meas_dt between TO_TIMESTAMP(#{meas_dt_start}, 'yyyy-mm-dd hh24:mi:ss.ff6') and TO_TIMESTAMP(#{meas_dt_end}, 'yyyy-mm-dd hh24:mi:ss.ff6')
-          and tmd.formul_data >= #{formul_data}::double precision
+          and (
+            (#{min_formul_data} is not null and (tmd.formul_data - tsi.formul_data) <![CDATA[ <= ]]> #{min_formul_data}::double precision)
+                or
+            (#{max_formul_data} is not null and (tmd.formul_data - tsi.formul_data) <![CDATA[ >= ]]> #{max_formul_data}::double precision)
+          )
+        order by tmd.meas_dt desc
+        limit 1
     </select>
 
     <select id="getSmsTargetList" resultType="com.safeone.dashboard.dto.SmsTargetDto">
@@ -100,28 +110,31 @@
     </insert>
 
     <select id="getDistrictInfo" resultType="com.safeone.dashboard.dto.DistrictInfoDto">
-        select district_no
-             , site_no
-             , district_nm
-             , dist_addr
-             , dist_zip
-             , dist_road_addr
-             , dist_type_cd
-             , dist_abbr
-             , dist_pic
-             , dist_view_pic
-             , dist_lon
-             , dist_lat
-             , dist_zoom
-             , inst_comp_id1
-             , meas_comp_id1
-             , inst_comp_id2
-             , meas_comp_id2
-             , meas_str_ymd
-             , meas_end_ymd
-             , dist_offi_nm
-        from tb_district_info
-        where district_no = #{district_no}
+        select tdi.district_no
+             , tdi.site_no
+             , tsi.site_nm
+             , tdi.district_nm
+             , tdi.dist_addr
+             , tdi.dist_zip
+             , tdi.dist_road_addr
+             , tdi.dist_type_cd
+             , tdi.dist_abbr
+             , tdi.dist_pic
+             , tdi.dist_view_pic
+             , tdi.dist_lon
+             , tdi.dist_lat
+             , tdi.dist_zoom
+             , tdi.inst_comp_id1
+             , tdi.meas_comp_id1
+             , tdi.inst_comp_id2
+             , tdi.meas_comp_id2
+             , tdi.meas_str_ymd
+             , tdi.meas_end_ymd
+             , tdi.dist_offi_nm
+        from tb_district_info tdi
+                 left join tb_site_info tsi
+                           on tsi.site_no = tdi.site_no
+        where tdi.district_no = #{district_no}
     </select>
 
     <select id="getSensInfo" resultType="com.safeone.dashboard.dto.SensInfoDto">
@@ -133,4 +146,80 @@
                  left join tb_sensor_type tst on tsi.senstype_no = tst.senstype_no
         where sens_no = #{sens_no}
     </select>
+
+    <select id="getMaintCompInfo" parameterType="string" resultType="java.util.HashMap">
+        select partner_comp_nm
+             , maint_rep_nm
+        from tb_maintcomp_info
+        where partner_comp_id = #{partnerCompId}
+        limit 1
+    </select>
+
+    <select id="getAlarmSendCount" parameterType="java.util.Map" resultType="int">
+        select count(*)
+        from tb_alarm_details
+        where sens_no = #{sens_no}
+          and coalesce(sens_chnl_id, '') = coalesce(#{sens_chnl_id}, '')
+          and meas_dt >= now() - interval '24 hours'
+    </select>
+
+    <select id="getReceiveRate" parameterType="java.util.Map" resultType="java.util.HashMap">
+        WITH comm AS (
+            SELECT
+                a.sens_no,
+                CASE
+                    WHEN BOOL_OR(COALESCE(lmd.err_cnt, 999999) >= COALESCE(a.nonrecv_limit_min, 1)) THEN 0
+                    ELSE 1
+                END AS is_received
+            FROM tb_sensor_info a
+                     LEFT JOIN tb_sensor_chnl e
+                               ON a.sens_no = e.sens_no
+                     LEFT JOIN LATERAL (
+                SELECT
+                    EXTRACT(EPOCH FROM (now() - m.meas_dt)) / 60 - 1 AS err_cnt
+                FROM tb_measure_details m
+                WHERE m.sens_no = e.sens_no
+                  AND m.sens_chnl_id = e.sens_chnl_id
+                ORDER BY m.meas_dt DESC
+                LIMIT 1
+            ) AS lmd ON TRUE
+            WHERE a.sms_snd_yn = 'Y'
+              AND a.sens_no IN (
+                SELECT tlim.sens_no
+                FROM tb_logr_idx_map tlim
+                WHERE tlim.logr_no IN (
+                    SELECT tli.logr_no
+                    FROM tb_logger_info tli
+                    WHERE tli.district_no = #{district_no}
+                )
+            )
+            GROUP BY a.sens_no
+        )
+        SELECT
+            COALESCE(COUNT(*), 0) AS total_cnt,
+            COALESCE(SUM(is_received), 0) AS receive_cnt,
+            CASE
+                WHEN COUNT(*) = 0 THEN 0
+                ELSE ROUND((SUM(is_received)::numeric / COUNT(*)::numeric) * 100, 1)
+            END AS receive_rate
+        FROM comm
+    </select>
+
+    <select id="getLatestRainData" parameterType="java.util.Map" resultType="java.util.HashMap">
+        SELECT m.formul_data
+        FROM tb_sensor_info s
+                 JOIN tb_logr_idx_map lim
+                      ON lim.sens_no = s.sens_no
+                 JOIN tb_logger_info li
+                      ON li.logr_no = lim.logr_no
+                 JOIN tb_measure_details m
+                      ON m.sens_no = s.sens_no
+        WHERE li.district_no = #{district_no}
+          AND s.senstype_no = '001'
+        ORDER BY m.meas_dt DESC
+        LIMIT 1
+    </select>
 </mapper>
+
+
+

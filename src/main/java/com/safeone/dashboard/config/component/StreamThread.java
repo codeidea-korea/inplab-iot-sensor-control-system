@@ -6,7 +6,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import javax.imageio.ImageIO;
 
-import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegLogCallback;
 import org.bytedeco.javacv.Frame;
@@ -18,10 +17,29 @@ public class StreamThread extends Thread {
     private final WebSocketSession session;
     private final String rawUrl;
     private final Java2DFrameConverter converter = new Java2DFrameConverter();
+    private volatile boolean running = true;
+    private volatile FFmpegFrameGrabber grabber;
 
     public StreamThread(WebSocketSession session, String url) {
         this.session = session;
         this.rawUrl = url;
+    }
+
+    public void shutdown() {
+        running = false;
+        interrupt();
+
+        FFmpegFrameGrabber localGrabber = this.grabber;
+        if (localGrabber != null) {
+            try {
+                localGrabber.stop();
+            } catch (Exception ignored) {
+            }
+            try {
+                localGrabber.release();
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Override
@@ -35,36 +53,36 @@ public class StreamThread extends Thread {
             throw new RuntimeException("URL decoding failed", e);
         }
 
-        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(url)) {
-            grabber.setOption("rtsp_transport", "tcp");
-            grabber.setOption("stimeout", "8000000");
-            grabber.setOption("fflags", "nobuffer");
-            grabber.setOption("flags", "low_delay");
-            grabber.setOption("an", "1");
-            grabber.setOption("rw_timeout", "8000000");
+        try (FFmpegFrameGrabber localGrabber = new FFmpegFrameGrabber(url)) {
+            this.grabber = localGrabber;
 
-            grabber.start();
+            localGrabber.setOption("rtsp_transport", "tcp");
+            localGrabber.setOption("stimeout", "8000000");
+            localGrabber.setOption("fflags", "nobuffer");
+            localGrabber.setOption("flags", "low_delay");
+            localGrabber.setOption("an", "1");
+            localGrabber.setOption("rw_timeout", "8000000");
+
+            localGrabber.start();
 
             // 초기 RTSP 버퍼 드레인 - 버퍼된 과거 프레임 제거
             long drainStart = System.currentTimeMillis();
-            while (System.currentTimeMillis() - drainStart < 2000) {
+            while (running && session.isOpen() && System.currentTimeMillis() - drainStart < 2000) {
                 long t = System.currentTimeMillis();
-                Frame drainFrame = grabber.grabImage();
+                Frame drainFrame = localGrabber.grabImage();
                 long elapsed = System.currentTimeMillis() - t;
 
                 if (drainFrame == null) break;
                 if (elapsed > 30) break;
             }
 
-            int emptyFrameCount = 0;
             long lastSendTime = 0;
             final long MIN_FRAME_INTERVAL = 100;
 
-            while (session.isOpen() && !Thread.currentThread().isInterrupted()) {
-                Frame frame = grabber.grabImage();
+            while (running && session.isOpen() && !Thread.currentThread().isInterrupted()) {
+                Frame frame = localGrabber.grabImage();
 
                 if (frame == null) {
-                    emptyFrameCount++;
                     Thread.sleep(10);
                     continue;
                 }
@@ -84,12 +102,16 @@ public class StreamThread extends Thread {
                     }
                 }
             }
-
-            grabber.stop();
-            converter.close();
-
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            this.grabber = null;
+            try {
+                converter.close();
+            } catch (Exception ignored) {
+            }
         }
     }
 }
