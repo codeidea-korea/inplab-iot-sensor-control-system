@@ -18,5 +18,6 @@ public interface SensorInfoMapper {
     List<Map<String, Object>> getSensorTypesByLogrNo(Map<String, Object> param);
     Integer getMaxLogrIdxNo(String senstypeNo);
     int countBySensNm(String sensNm);
+    int countBySensNo(String sensNo);
 }
     

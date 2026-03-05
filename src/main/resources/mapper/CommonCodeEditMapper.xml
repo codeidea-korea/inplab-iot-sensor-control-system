@@ -160,6 +160,7 @@
         FROM MaxSensorSeq
     </select>
 
+
     <select id="selectSiteInfo" resultType="java.util.Map">
         SELECT site_no as code
              , site_nm as name

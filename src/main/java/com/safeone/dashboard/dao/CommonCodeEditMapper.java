@@ -24,6 +24,8 @@ public interface CommonCodeEditMapper {
 
     List<Map> selectNewSensorSeq(Map param);
 
+    List<Map> selectNewSensorSeqNo(Map param);
+
     List<Map> selectDistrictInfoDistAbbr(Map param);
 
     String selectSensorInfoNm(Map param);

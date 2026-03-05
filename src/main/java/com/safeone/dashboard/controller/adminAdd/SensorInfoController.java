@@ -222,15 +222,15 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
 
     @Override
     @GetMapping(value = "/excel/{fileName}")
-    public void downloadExcel(HttpServletRequest request, HttpServletResponse response,
-                              @RequestParam Map<String, Object> param, @PathVariable String fileName) {
-        param.put("page", "0");
+        public void downloadExcel(HttpServletRequest request, HttpServletResponse response,
+                @RequestParam Map<String, Object> param, @PathVariable String fileName) {
+            param.put("page", "0");
 
-        Map<String, FieldDetails> result = getColumnDataJson();
+            Map<String, FieldDetails> result = getColumnDataJson();
 
-        List<Map<Object, Object>> list = ExcelUtils.convertListToMap((List<Object>)(List<?>) getList(param));
+            List<Map<Object, Object>> list = ExcelUtils.convertListToMap((List<Object>)(List<?>) getList(param));
 
-        List<Map<Object, Object>> excellist = this.getDownloadExcelDataList(result, list);
+            List<Map<Object, Object>> excellist = this.getDownloadExcelDataList(result, list);
 
         ExcelUtils.downloadExcel(request, response, excellist, ExcelUtils.getPojoFieldNamesAndLabels(SensorInfoDto.class), fileName + ".xls", true);
     }
