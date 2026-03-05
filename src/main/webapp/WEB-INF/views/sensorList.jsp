@@ -314,6 +314,41 @@
                         $searchRow.append($cell);
                     });
                     $thead.append($searchRow);
+                    $searchRow.find('input[type="text"]').each(function() {
+                        let $input = $(this);
+
+                        if ($input.data('daterangepicker')) {
+                                $input.css({
+                                    'outline': 'none',
+                                    'border': 'none'
+                                });
+                                return;
+                            }
+
+
+                        $input.wrap('<div style="position: relative; display: inline-block; width: 98%;"></div>');
+
+                        $input.css({
+                            'width': '100%',
+                            'padding-right': '20px',
+                            'box-sizing': 'border-box',
+                            'border': 'none'
+
+                        });
+
+                        let $clearBtn = $('<span style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%) scaleY(1.4); display: inline-block; cursor: pointer; color: #555555; font-size: 16px; font-weight: 300; z-index: 10;">&times;</span>');
+
+                        $input.after($clearBtn);
+
+
+                        $clearBtn.on('click', function() {
+                            $input.val('');
+
+                            let e = $.Event("keydown");
+                            e.key = "Enter";
+                            $input.trigger(e);
+                        });
+                    });
                 }).catch((fail) => {
                     console.log('getDistinct fail > ', fail);
                 });

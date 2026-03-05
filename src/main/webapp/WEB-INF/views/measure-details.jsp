@@ -769,7 +769,7 @@
                 if (!dateText) {
                     return '';
                 }
-       
+
                 if (dateText.includes('T')) return dateText;
                 return dateText + "T23:59";
             }
