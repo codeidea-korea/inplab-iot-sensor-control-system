@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import javax.servlet.http.HttpServletResponse;
+import com.safeone.dashboard.util.ExcelUtils;
+import com.safeone.dashboard.util.ExcelUtils.FieldDetails;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -216,6 +219,22 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
             return new ResponseEntity<>("Error processing the file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Override
+    @GetMapping(value = "/excel/{fileName}")
+    public void downloadExcel(HttpServletRequest request, HttpServletResponse response,
+                              @RequestParam Map<String, Object> param, @PathVariable String fileName) {
+        param.put("page", "0");
+
+        Map<String, FieldDetails> result = getColumnDataJson();
+
+        List<Map<Object, Object>> list = ExcelUtils.convertListToMap((List<Object>)(List<?>) getList(param));
+
+        List<Map<Object, Object>> excellist = this.getDownloadExcelDataList(result, list);
+
+        ExcelUtils.downloadExcel(request, response, excellist, ExcelUtils.getPojoFieldNamesAndLabels(SensorInfoDto.class), fileName + ".xls", true);
+    }
+
 
 
 }

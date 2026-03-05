@@ -33,10 +33,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExcelUtils {
     public static void downloadExcel(HttpServletRequest request, HttpServletResponse response, List<?> list, Map<String, FieldDetails> columnData, String fileName) {
+        downloadExcel(request, response, list, columnData, fileName, false); // 기본값은 hidden 제외(false)
+    }
+
+    // 새로운 메서드 생성 (includeHidden 플래그 추가)
+    public static void downloadExcel(HttpServletRequest request, HttpServletResponse response, List<?> list, Map<String, FieldDetails> columnData, String fileName, boolean includeHidden) {
         List<String> fieldList = new ArrayList<>();
         List<String> headerList = new ArrayList<>();
         for (Map.Entry<String, FieldDetails> entry : columnData.entrySet()) {
-            String[] excArray = {"hidden", "password"};
+
+            // includeHidden이 true면 "password"만 제외, false면 "hidden", "password" 둘 다 제외
+            String[] excArray = includeHidden ? new String[]{"password"} : new String[]{"hidden", "password"};
+
             String type = entry.getValue().type;
             String lowerType = NVL(type).toString().toLowerCase();
 

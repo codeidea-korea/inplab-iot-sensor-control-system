@@ -313,7 +313,17 @@
             });
 
             $('.excelBtn').on('click', function () {
-                downloadExcel('sensors', $("#jq-grid"), '/adminAdd/sensorInfo');
+                const url = '/adminAdd/sensorInfo/excel/sensors';
+
+                    const hiddenIFrameId = 'hiddenDownloader';
+                    let iframe = document.getElementById(hiddenIFrameId);
+                    if (iframe === null) {
+                        iframe = document.createElement('iframe');
+                        iframe.id = hiddenIFrameId;
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                    }
+                    iframe.src = url;
             });
 
 
