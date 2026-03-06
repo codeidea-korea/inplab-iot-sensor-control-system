@@ -472,7 +472,7 @@
                             <td colspan="3"><input type="text" name="dist_abbr" class="required abbr"/></td>
                         </tr>
                         <tr>
-                            <th class="required_th">현장사진</th>
+                            <th>현장사진</th>
                             <td colspan="3">
                                 <div style="display: flex; align-items: center;">
                                     <input type="file" id="dist_pic" name="dist_pic" class="file1"
@@ -532,7 +532,7 @@
                         </tr>
 
                         <tr>
-                            <th class="required_th">계측사 1</th>
+                            <th>계측사 1</th>
                             <td colspan="3">
                                 <select id="meas_comp_id1" name="meas_comp_id1" class="required">
                                     <option value="">선택</option>
