@@ -16,6 +16,8 @@ public interface SensorInitialSettingMapper {
 
     int updateSensorInitialSetting(Map param);
 
+    int updateSensorInitialSetting2(Map param);
+
     int deleteSensorInitialSetting(Map param);
 }
     

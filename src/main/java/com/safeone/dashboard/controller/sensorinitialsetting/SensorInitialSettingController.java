@@ -120,4 +120,16 @@ public class SensorInitialSettingController extends JqGridAbstract<SensorInitial
         }
         return true;
     }
+
+    @ResponseBody
+    @PostMapping("/mod2")
+    public boolean update2(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+        JsonArray jArray = ((new JsonParser()).parse(param.get("jsonData").toString())).getAsJsonArray();
+        for(JsonElement el : jArray) {
+            Map m = (new Gson()).fromJson(el, Map.class);
+
+            sensorInitialSettingService.update2(m);
+        }
+        return true;
+    }
 }

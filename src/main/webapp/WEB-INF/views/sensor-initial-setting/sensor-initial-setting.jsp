@@ -166,6 +166,33 @@
                         }
                     });
                 });
+
+                $('.save-btn-2').on('click',function(){
+                    const selectedIds = $grid.jqGrid("getGridParam","selarrrow");
+
+                    if(selectedIds.length === 0){
+                        alert("선택된 데이터가 없습니다.");
+                        return;
+                    }
+
+                    const selectedData = selectedIds.map(id => $grid.jqGrid("getRowData", id));
+
+                    $.ajax({
+                        method: 'POST',
+                        url: '/sensor-initial-setting/mod2',
+                        traditional: true,
+                        data: {jsonData: JSON.stringify(selectedData)},
+                        dataType: 'json',
+                        success: (_res) => {
+                            alert('저장되었습니다.')
+                            $grid.trigger('reloadGrid');
+                            },
+                            error: () => {
+                                alert('입력 값이 올바르지 않습니다.');
+                        }
+                    });
+                });
+
             });
         });
     </script>
@@ -183,7 +210,8 @@
             <div class="contents-re">
                 <h3 class="txt">초기치설정관리</h3>
                 <div class="btn-group">
-                    <a class="save-btn">저장</a>
+                    <a class="save-btn">동기화</a>
+                    <a class="save-btn-2">저장</a>
                 </div>
                 <div id="grid-wrapper" class="contents-in">
                     <table id="jq-grid"></table>

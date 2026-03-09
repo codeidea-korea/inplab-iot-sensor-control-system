@@ -312,6 +312,19 @@
         and sens_chnl_id = #{og_sens_chnl_id}
     </update>
 
+    <update id="updateSensorInitialSetting2" parameterType="java.util.Map">
+        UPDATE tb_sensor_init
+        SET
+        <if test="formul_data != null and formul_data != ''">
+            init_raw_data = #{formul_data}::float ,
+        </if>
+        emer_status = #{emer_status}
+        , init_apply_dt = now()
+        , mod_dt = now()
+        WHERE sens_no = #{sens_no}
+        AND sens_chnl_id = #{og_sens_chnl_id}
+    </update>
+
     <insert id="insertSensorInitialSetting" parameterType="java.util.Map">
         INSERT INTO tb_sensor_init
         (sens_no, sens_chnl_id)

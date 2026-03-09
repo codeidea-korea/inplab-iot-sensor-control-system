@@ -42,6 +42,10 @@ public class SensorInitialSettingService implements JqGridService<SensorInitialS
         return mapper.updateSensorInitialSetting(param) > 0;
     }
 
+    public boolean update2(Map param) {
+        return mapper.updateSensorInitialSetting2(param) > 0;
+    }
+
     @Override
     public int delete(Map param) {
         return mapper.deleteSensorInitialSetting(param);
