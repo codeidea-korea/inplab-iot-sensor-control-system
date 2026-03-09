@@ -109,7 +109,10 @@
                 popFancy('#lay-form-write');
 
                 // 저장버튼 클릭시
-                $('#lay-form-write input[type=submit]').off().on('click', function () {
+                $('#lay-form-write input[type=submit]').off().on('click', function (e) {
+
+                    e.preventDefault();
+
                     if (!validate()) return;
                     $('#site_no').prop('disabled', false);
                     const form = $('#lay-form-write')[0]; // 폼 요소 선택

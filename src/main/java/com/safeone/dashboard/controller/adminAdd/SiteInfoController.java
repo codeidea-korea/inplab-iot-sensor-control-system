@@ -103,6 +103,7 @@ public class SiteInfoController extends JqGridAbstract<SiteInfoDto> {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Thumbnails.of(file.getInputStream())
                         .size(143, 133)
+                        .outputFormat("jpg")
                         .keepAspectRatio(false) // 권장 사이즈에 딱 맞게 강제 조정
                         .toOutputStream(baos);
 
@@ -115,6 +116,7 @@ public class SiteInfoController extends JqGridAbstract<SiteInfoDto> {
                 ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
                 Thumbnails.of(file2.getInputStream())
                         .size(460, 310)
+                        .outputFormat("jpg")
                         .keepAspectRatio(false) // 권장 사이즈에 딱 맞게 강제 조정
                         .toOutputStream(baos2);
 
