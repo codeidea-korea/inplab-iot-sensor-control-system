@@ -125,6 +125,7 @@
         FROM (
         SELECT z.district_no
         , z.site_no
+        , tsi.site_nm
         , z.district_nm
         , z.dist_addr
         , z.dist_zip
@@ -147,6 +148,7 @@
         , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.inst_comp_id1) as inst_comp_id1_nm
         , (select partner_comp_nm from tb_maintcomp_info where partner_comp_id = z.meas_comp_id1) as meas_comp_id1_nm
         FROM tb_district_info z
+        LEFT JOIN tb_site_info tsi ON z.site_no = tsi.site_no
         ) MG
         WHERE 1=1
         <include refid="rowSearch"/>

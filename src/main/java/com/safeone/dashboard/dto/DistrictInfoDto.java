@@ -13,7 +13,7 @@ public class DistrictInfoDto implements Serializable {
     @FieldLabel(title = "기관명")
     String site_nm;
 
-    @FieldLabel(title = "ID")
+    @FieldLabel(title = "현장 ID")
     String district_no;
 
     @FieldLabel(title = "현장명")
