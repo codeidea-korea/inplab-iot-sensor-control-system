@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.coobird.thumbnailator.Thumbnails; // 추가됨
+import java.io.ByteArrayOutputStream; // 추가됨
 
 @Controller
 @RequestMapping("/adminAdd/siteInfo")
@@ -98,19 +100,26 @@ public class SiteInfoController extends JqGridAbstract<SiteInfoDto> {
                           @RequestParam("site_title_logo") MultipartFile file2) {
         try {
             if (!file.isEmpty()) {
-                byte[] fileBytes = file.getBytes(); // 파일을 byte 배열로 변환
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                Thumbnails.of(file.getInputStream())
+                        .size(143, 133)
+                        .keepAspectRatio(false) // 권장 사이즈에 딱 맞게 강제 조정
+                        .toOutputStream(baos);
 
-                // 파일 데이터를 파라미터 맵에 추가
-                param.put("site_logo", fileBytes);
+                // 기존 file.getBytes() 대신 리사이징된 baos.toByteArray()를 넣습니다.
+                param.put("site_logo", baos.toByteArray());
                 param.put("site_logo_nm", file.getOriginalFilename());
-
             }
 
             if (!file2.isEmpty()) {
-                byte[] fileBytes2 = file2.getBytes(); // 파일을 byte 배열로 변환
+                ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+                Thumbnails.of(file2.getInputStream())
+                        .size(460, 310)
+                        .keepAspectRatio(false) // 권장 사이즈에 딱 맞게 강제 조정
+                        .toOutputStream(baos2);
 
-                // 파일 데이터를 파라미터 맵에 추가
-                param.put("site_title_logo", fileBytes2);
+                // 기존 file.getBytes() 대신 리사이징된 baos2.toByteArray()를 넣습니다.
+                param.put("site_title_logo", baos2.toByteArray());
                 param.put("site_title_logo_nm", file2.getOriginalFilename());
             }
 
