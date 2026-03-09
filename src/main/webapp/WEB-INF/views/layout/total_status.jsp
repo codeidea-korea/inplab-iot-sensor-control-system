@@ -141,7 +141,7 @@
             },
             {name:'district_nm', index:'district_nm', width:100, align:'center', hidden:false},
             {name:'sens_nm', index:'sens_nm', width:100, align:'center', hidden:false},
-            {name:'sens_chnl_id', index:'sens_chnl_id', width:100, align:'center', hidden:false},
+            {name:'sens_chnl_nm', index:'sens_chnl_nm', width:100, align:'center', hidden:false},
             {name:'alarm_lvl_cd', index:'alarm_lvl_cd', width:100, align:'center', hidden:false, formatter: alarmCdFormatter},
             {name:'formul_data', index:'formul_data', width:100, align:'center', hidden:false},
             {name:'maint_sts_cd', index:'maint_sts_cd', width:100, align:'center', hidden:false, formatter: maintCdFormatter},

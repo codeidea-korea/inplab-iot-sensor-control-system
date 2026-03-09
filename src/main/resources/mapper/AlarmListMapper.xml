@@ -159,6 +159,7 @@
             tsi.sens_nm,
             tdi.district_nm,
             mg.sens_chnl_id,
+            tai.sens_chnl_nm,
             mg.alarm_level AS alarm_lvl_cd,
             mg.formul_data,
             mg.net_err_yn,
