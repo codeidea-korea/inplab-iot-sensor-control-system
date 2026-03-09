@@ -143,6 +143,12 @@
         };
 
         const validCheck = () => {
+
+            if (!validate()) {
+                    return { isValid: true, obj: null };
+            }
+
+
             let result = false;
             const brdcast_no = $('input[name=brdcast_no]').val();
             const brdcast_nm = $('input[name=brdcast_nm]').val();
@@ -508,48 +514,48 @@
                     <tr id="tr_brdcast_no">
                         <th>방송장비 ID <span style="color: red">*</span></th>
                         <td colspan="3">
-                            <input type="text" name="brdcast_no" value="" readonly>
+                            <input type="text" name="brdcast_no" value="" readonly">
                         </td>
                     </tr>
                     <tr>
                         <th>방송장비명 <span style="color: red">*</span></th>
                         <td colspan="3">
-                            <input type="text" name="brdcast_nm"/>
+                            <input type="text" name="brdcast_nm" class="required"/>
                         </td>
                     </tr>
                     <tr>
                         <th>현장명 <span style="color: red">*</span></th>
                         <td colspan="3">
-                            <select id="district_no" name="district_no">
+                            <select id="district_no" name="district_no" class="required">
                                 <option value="">선택</option>
                             </select>
                         </td>
                     </tr>
                     <tr>
                         <th>장비 IP <span style="color: red">*</span></th>
-                        <td><input type="text" name="brdcast_svr_ip"/></td>
+                        <td><input type="text" name="brdcast_svr_ip" class="required"/></td>
                         <th>접속Port <span style="color: red">*</span></th>
-                        <td><input type="text" name="brdcast_svr_port"/></td>
+                        <td><input type="text" name="brdcast_svr_port" class="required"/></td>
                     </tr>
                     <tr>
                         <th>접속ID <span style="color: red">*</span></th>
-                        <td><input type="text" name="brdcast_conn_id"/></td>
+                        <td><input type="text" name="brdcast_conn_id" class="required"/></td>
                         <th>접속PWD <span style="color: red">*</span></th>
-                        <td><input type="text" name="brdcast_conn_pwd"/></td>
+                        <td><input type="text" name="brdcast_conn_pwd" class="required"/></td>
                     </tr>
                     <tr>
                         <th>ioT 단말번호<span style="color: red">*</span></th>
-                        <td colspan="3"><input type="text" name="iot_no"/></td>
+                        <td colspan="3"><input type="text" name="iot_no" class="required"/></td>
                     </tr>
                     <tr>
                         <th>설치일자 <span style="color: red">*</span></th>
                         <td>
                             <input type="text" id="inst_ymd" name="inst_ymd" value="" placeholder="" datepicker=""
-                                   class="flatpickr-input" readonly="readonly"/>
+                                   class="flatpickr-input required" readonly="readonly"/>
                         </td>
                         <th>설치상태 <span style="color: red">*</span></th>
                         <td>
-                            <select name="maint_sts_cd">
+                            <select name="maint_sts_cd" class="required">
                                 <option value="">선택</option>
                                 <option value="MTN001">정상</option>
                                 <option value="MTN002">망실</option>
@@ -566,7 +572,7 @@
                         </td>
                         <th>경도 <span style="color: red">*</span></th>
                         <td>
-                            <input type="text" name="brdcast_lon"/>
+                            <input type="text" name="brdcast_lon" class="required"/>
                         </td>
                     </tr>
                     <tr>

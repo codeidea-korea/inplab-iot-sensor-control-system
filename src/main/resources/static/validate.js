@@ -121,7 +121,7 @@ function validate() {
         }
 
         if (value === '') {
-            var thText = $(this).closest('td').prev('th').text();  // 해당 <th>의 텍스트를 가져옴
+            var thText = $(this).closest('td').prev('th').text().replace(/[*＊]/g, '').trim();  // 해당 <th>의 텍스트를 가져옴
             alert(thText + "은(는) 필수값입니다.");
             $(this).focus();  // 포커스를 현재 요소에 맞춤
             isValid = false;  // 검증 실패

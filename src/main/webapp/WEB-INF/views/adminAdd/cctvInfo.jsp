@@ -110,8 +110,26 @@
             });
         };
 
+        const deleteCctvApi = (array) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'DELETE', // 컨트롤러의 RequestMethod.DELETE와 연결됨
+                    url: `/adminAdd/cctv/cctv`,
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    async: true,
+                    data: JSON.stringify(array) // List<DelAdminAddCctvDto> 형태로 전달
+                }).done(function (res) {
+                    resolve(res);
+                }).fail(function (fail) {
+                    reject(fail);
+                    alert2('CCTV 정보를 삭제하는 중 서버 오류가 발생했습니다.');
+                });
+            });
+        };
+
         const actionDelCctv = (cctv_no) => {
-            udtCctv([{cctv_no: cctv_no, del_yn: 'Y'}]).then((res) => {
+            deleteCctvApi([{ cctv_no: cctv_no }]).then((res) => {
                 if (res.count?.pass > 0) {
                     alert2(res?.pass_list[0]?.message, function () {
                     });
@@ -146,6 +164,11 @@
         };
 
         const validCheck = () => {
+
+            if (!validate()) {
+                    return { isValid: true, obj: null };
+            }
+
             let result = false;
             const cctv_no = $('input[name=cctv_no]').val();
             const cctv_nm = $('input[name=cctv_nm]').val();
@@ -582,58 +605,58 @@
                     <tr id="tr_cctv_no">
                         <th>CCTV ID <span style="color: red">*</span></th>
                         <td colspan="3">
-                            <input type="text" name="cctv_no" value="" readonly>
+                            <input type="text" name="cctv_no" value="" readonly class="required">
                         </td>
                     </tr>
                     <tr>
                         <th>CCTV 명 <span style="color: red">*</span></th>
                         <td colspan="3">
-                            <input type="text" name="cctv_nm"/>
+                            <input type="text" name="cctv_nm" class="required"/>
                         </td>
                     </tr>
                     <tr>
                         <th>현장명 <span style="color: red">*</span></th>
                         <td colspan="3">
-                            <select id="district_no" name="district_no">
+                            <select id="district_no" name="district_no" class="required">
                                 <option value="">선택</option>
                             </select>
                         </td>
                     </tr>
                     <tr>
                         <th>접속ID <span style="color: red">*</span></th>
-                        <td><input type="text" name="cctv_conn_id"/></td>
+                        <td><input type="text" name="cctv_conn_id" class="required"/></td>
                         <th>접속PWD <span style="color: red">*</span></th>
-                        <td><input type="text" name="cctv_conn_pwd"/></td>
+                        <td><input type="text" name="cctv_conn_pwd" class="required"/></td>
                     </tr>
                     <tr>
                         <th>IP(DDNS) <span style="color: red">*</span></th>
-                        <td colspan="3"><input type="text" name="cctv_ip"/></td>
+                        <td colspan="3"><input type="text" name="cctv_ip" class="required"/></td>
                     </tr>
                     <tr>
                         <th>WEB Port <span style="color: red">*</span></th>
-                        <td><input type="text" name="web_port"/></td>
+                        <td><input type="text" name="web_port" class="required"/></td>
                         <th>RTSP Port <span style="color: red">*</span></th>
-                        <td><input type="text" name="rtsp_port"/></td>
+                        <td><input type="text" name="rtsp_port" class="required"/></td>
                     </tr>
                     <tr>
                         <th>릴레이명 <span style="color: red">*</span></th>
-                        <td colspan="3"><input type="text" name="relay_nm"/></td>
+                        <td colspan="3"><input type="text" name="relay_nm" class="required"/></td>
                     </tr>
                     <tr>
                         <th>릴레이 IP <span style="color: red">*</span></th>
-                        <td><input type="text" name="relay_ip"/></td>
+                        <td><input type="text" name="relay_ip" class="required"/></td>
                         <th>릴레이 Port <span style="color: red">*</span></th>
-                        <td><input type="text" name="relay_port"/></td>
+                        <td><input type="text" name="relay_port" class="required"/></td>
                     </tr>
                     <tr>
                         <th>설치일자 <span style="color: red">*</span></th>
                         <td>
                             <input type="text" id="inst_ymd" name="inst_ymd" value="" placeholder="" datepicker=""
-                                   class="flatpickr-input" readonly="readonly"/>
+                                   class="flatpickr-input required" readonly="readonly"/>
                         </td>
                         <th>설치상태 <span style="color: red">*</span></th>
                         <td>
-                            <select name="maint_sts_cd">
+                            <select name="maint_sts_cd" class="required">
                                 <option value="">선택</option>
                                 <option value="MTN001">정상</option>
                                 <option value="MTN002">망실</option>
@@ -650,17 +673,17 @@
                         </td>
                         <th>경도 <span style="color: red">*</span></th>
                         <td>
-                            <input type="text" name="cctv_lon"/>
+                            <input type="text" name="cctv_lon" class="required"/>
                         </td>
                     </tr>
                     <tr>
                         <th>모델명 <span style="color: red">*</span></th>
                         <td>
-                            <input type="text" name="model_nm"/>
+                            <input type="text" name="model_nm" class="required"/>
                         </td>
                         <th>제조사 <span style="color: red">*</span></th>
                         <td>
-                            <input type="text" name="cctv_maker"/>
+                            <input type="text" name="cctv_maker" class="required"/>
                         </td>
                     </tr>
                     <tr>
