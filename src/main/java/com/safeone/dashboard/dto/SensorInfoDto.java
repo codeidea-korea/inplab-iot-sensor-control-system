@@ -20,7 +20,7 @@ public class SensorInfoDto implements Serializable {
     @FieldLabel(title="로거번호", type="hidden")
     String logr_no;
 
-    @FieldLabel(title="센서 ID")
+    @FieldLabel(title="센서명")
     String sens_nm;
 
     @FieldLabel(title="센서타입번호", type="hidden")
