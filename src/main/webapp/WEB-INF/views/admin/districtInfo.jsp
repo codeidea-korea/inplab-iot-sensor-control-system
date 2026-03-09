@@ -447,9 +447,9 @@
                             </td>
                         </tr>
                         <tr>
-                            <th class="required_th">시공사 1</th>
+                            <th>시공사 1</th>
                             <td colspan="3">
-                                <select id="inst_comp_id1" name="inst_comp_id1" class="required">
+                                <select id="inst_comp_id1" name="inst_comp_id1">
                                     <option value="">선택</option>
                                 </select>
                             </td>
@@ -534,7 +534,7 @@
                         <tr>
                             <th>계측사 1</th>
                             <td colspan="3">
-                                <select id="meas_comp_id1" name="meas_comp_id1" class="required">
+                                <select id="meas_comp_id1" name="meas_comp_id1">
                                     <option value="">선택</option>
                                 </select>
                             </td>
