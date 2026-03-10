@@ -27,12 +27,12 @@ public class ModifyCctvController {
         return modifyCctvService.operation(param);
     }
 
-    @GetMapping("/preset/list")
+    @GetMapping(value = "/preset/list", produces = "text/plain; charset=UTF-8")
     public String getPresetList(@RequestParam Map<String, Object> param) {
         return modifyCctvService.getPresetList(param);
     }
 
-    @GetMapping("/preset/change")
+    @GetMapping(value = "/preset/change", produces = "text/plain; charset=UTF-8")
     public String changePreset(@RequestParam Map<String, Object> param) {
         return modifyCctvService.changePreset(param);
     }

@@ -21,10 +21,13 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -164,7 +167,7 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
 
             try (CloseableHttpResponse response = httpClient.execute(new HttpHost(ipAddress, Integer.parseInt(port)), request, context)) {
                 if (response.getCode() == 200) {
-                    return EntityUtils.toString(response.getEntity());
+                    return decodeCctvResponse(response.getEntity());
                 } else {
                     return "FAIL";
                 }
@@ -193,7 +196,7 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
 
             try (CloseableHttpResponse response = httpClient.execute(new HttpHost(ipAddress, Integer.parseInt(port)), request, context)) {
                 if (response.getCode() == 200) {
-                    return EntityUtils.toString(response.getEntity());
+                    return decodeCctvResponse(response.getEntity());
                 } else {
                     return "FAIL";
                 }
@@ -202,5 +205,36 @@ public class ModifyCctvServiceImpl implements ModifyCctvService {
             e.printStackTrace();
             return "FAIL";
         }
+    }
+
+    private String decodeCctvResponse(HttpEntity entity) throws Exception {
+        byte[] body = EntityUtils.toByteArray(entity);
+        if (body == null || body.length == 0) {
+            return "";
+        }
+
+        String utf8 = new String(body, StandardCharsets.UTF_8);
+        String eucKr = new String(body, Charset.forName("EUC-KR"));
+
+        int utf8Broken = countReplacementChar(utf8);
+        int eucKrBroken = countReplacementChar(eucKr);
+
+        if (utf8Broken == 0 && eucKrBroken == 0) {
+            return utf8;
+        }
+        if (eucKrBroken < utf8Broken) {
+            return eucKr;
+        }
+        return utf8;
+    }
+
+    private int countReplacementChar(String text) {
+        int count = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '\uFFFD') {
+                count++;
+            }
+        }
+        return count;
     }
 }
