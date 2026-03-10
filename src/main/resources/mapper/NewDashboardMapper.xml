@@ -12,6 +12,7 @@
                                                 from tb_district_info tdi
                                                          left outer join tb_logger_info tli on tli.district_no = tdi.district_no
                                                 where tdi.district_no = #{district_no}))
+          and COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         order by tsi.senstype_no, tsi.sens_nm;
     </select>
 
@@ -24,7 +25,8 @@
                               where logr_no in (select tli.logr_no
                                                 from tb_district_info tdi
                                                          left outer join tb_logger_info tli on tli.district_no = tdi.district_no
-                                                where tdi.district_no = #{district_no}));
+                                                where tdi.district_no = #{district_no}))
+          and COALESCE(tsi.sens_disp_yn, 'Y') = 'Y';
     </select>
 
     <select id="getCctvsCount" parameterType="java.util.Map" resultType="int">

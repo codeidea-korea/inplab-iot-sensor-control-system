@@ -12,11 +12,11 @@ public interface SensorInitialSettingMapper {
 
     List<SensorInitialSettingDto> selectSensorInitialSettingList(Map param);
 
+    Map<String, Object> selectLatestConvertedMeasureFormulData(Map<String, Object> param);
+
     int insertSensorInitialSetting(Map param);
 
     int updateSensorInitialSetting(Map param);
-
-    int updateSensorInitialSetting2(Map param);
 
     int deleteSensorInitialSetting(Map param);
 }

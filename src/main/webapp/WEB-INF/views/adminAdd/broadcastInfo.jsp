@@ -242,6 +242,23 @@
             $('input[name=brdcast_maker]').val(data.brdcast_maker);
         };
 
+        const getNewBroadcastNo = () => {
+            return new Promise((resolve, reject) => {
+                $.get('/adminAdd/common/code/getNewGenerationKey', {
+                    table_nm: 'tb_broadcast_info',
+                    column_nm: 'brdcast_no'
+                }, function (res) {
+                    if (res && res.length > 0 && res[0].new_id) {
+                        resolve(res[0].new_id);
+                        return;
+                    }
+                    reject(new Error('new broadcast no is empty'));
+                }).fail(function (fail) {
+                    reject(fail);
+                });
+            });
+        };
+
         $(function () {
             window.vworld = new vwutil({
                 mapId: "map",
@@ -305,21 +322,24 @@
 
             $('.insertBtn').on('click', function () {
                 initForm();
-                getDistrictInfo().then((res2) => {
+                Promise.all([getDistrictInfo(), getNewBroadcastNo()]).then(([res2, newBroadcastNo]) => {
                     let district_nm = $('select[name=district_no]');
                     district_nm.empty();
                     district_nm.append('<option value="">선택</option>');
                     $.each(res2.rows, function (index, item) {
                         district_nm.append('<option value="' + item.district_no + '">' + item.district_nm + '</option>');
                     });
+                    $('input[name=brdcast_no]').val(newBroadcastNo);
                     $("#form_sub_title").html('신규 등록');
                     $('#ins_broadcast').show();
                     $('#udt_broadcast').hide();
                     $('#del_broadcast').hide();
-                    $('#tr_brdcast_no').hide();
+                    // $('#tr_brdcast_no').hide();
                     popFancy('#lay-form-write08');
                 }).catch((fail) => {
                     console.log('fail > ', fail);
+                    alert2('방송장비 ID 채번에 실패했습니다.', function () {
+                    });
                 });
             });
 
@@ -514,7 +534,7 @@
                     <tr id="tr_brdcast_no">
                         <th>방송장비 ID <span style="color: red">*</span></th>
                         <td colspan="3">
-                            <input type="text" name="brdcast_no" value="" readonly">
+                            <input type="text" name="brdcast_no" value="" readonly>
                         </td>
                     </tr>
                     <tr>

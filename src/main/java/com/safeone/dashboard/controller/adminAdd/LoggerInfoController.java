@@ -6,6 +6,7 @@ import com.safeone.dashboard.dto.LoggerInfoDto;
 import com.safeone.dashboard.service.CommonCodeEditService;
 import com.safeone.dashboard.service.LoggerInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,34 +87,51 @@ public class LoggerInfoController extends JqGridAbstract<LoggerInfoDto> {
 
     @ResponseBody
     @GetMapping("/add")
-    public synchronized boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+    public synchronized Map<String, Object> insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
+        Map<String, Object> response = new HashMap<>();
+        String logrNm = param.get("logr_nm") == null ? "" : param.get("logr_nm").toString().trim();
+        param.put("logr_nm", logrNm);
 
-//        Map<String, Object> newMapLogrNm = new HashMap<>();
-//        newMapLogrNm.put("district_no", param.get("district_no").toString());
-//        List<Map> distAbbr = commonCodeEditService.getDistrictInfoDistAbbr(newMapLogrNm);
+        if (logrNm.isEmpty()) {
+            response.put("success", false);
+            response.put("code", "INVALID_LOGR_NM");
+            response.put("message", "로거명을 입력해주세요.");
+            return response;
+        }
 
-        List<Map> distAbbr = commonCodeEditService.getDistrictInfoDistAbbr(Collections.singletonMap("district_no", param.get("district_no").toString()));
+        if (loggerInfoService.getLoggerInfoNmChk(param) > 0) {
+            response.put("success", false);
+            response.put("code", "DUPLICATE_LOGR_NM");
+            response.put("message", "로거명이 중복됩니다.");
+            return response;
+        }
 
         Map<String, Object> newMap = new HashMap<>();
         newMap.put("table_nm", "tb_logger_info");
         newMap.put("column_nm", "logr_no");
-        String logr_nm_type;
-        if (param.containsKey("logr_flag") && param.get("logr_flag").toString().equals("G")) {
+        if (param.containsKey("logr_flag") && "G".equals(param.get("logr_flag").toString())) {
             newMap.put("pre_type", "GNSS");
         }
 
         ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-
         String newId = generationKeyOn.get("newId").asText();
-        String newIdNo = newId.replaceAll("^[A-Za-z]", "");
-
-        String prefix = "G".equals(param.get("logr_flag").toString()) ? "GNS" : "LOG";
-        logr_nm_type = distAbbr.get(0).get("dist_abbr") + prefix + newIdNo;
-
         param.put("logr_no", newId);
-        param.put("logr_nm", logr_nm_type);
 
-        return loggerInfoService.create(param);
+        try {
+            boolean createResult = loggerInfoService.create(param);
+            response.put("success", createResult);
+            response.put("message", createResult ? "저장되었습니다." : "저장에 실패했습니다.");
+            return response;
+        } catch (DuplicateKeyException e) {
+            response.put("success", false);
+            response.put("code", "DUPLICATE_LOGR_NM");
+            response.put("message", "로거명이 중복됩니다.");
+            return response;
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "오류가 발생했습니다.");
+            return response;
+        }
     }
 
     @ResponseBody

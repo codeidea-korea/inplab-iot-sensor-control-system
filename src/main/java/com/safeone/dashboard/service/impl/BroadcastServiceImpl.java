@@ -57,16 +57,19 @@ public class BroadcastServiceImpl implements BroadcastService {
         int passCount = 0;
 
         for (InsAdminAddBroadcastDto dto : insAdminAddBroadcastDtoList) {
-            Map<String, Object> newMap = new HashMap<>();
-            newMap.put("table_nm", "tb_broadcast_info");
-            newMap.put("column_nm", "brdcast_no");
-            ObjectNode generationKeyOn = cctvService.newGenerationKey(newMap);
-            String newBroadcastNo = generationKeyOn.get("newId").asText();
-
             Map<String, Object> map = CommonUtils.dtoToMap(dto);
+            String brdcastNo = map.get("brdcast_no") == null ? "" : map.get("brdcast_no").toString().trim();
+            if (brdcastNo.isEmpty()) {
+                Map<String, Object> newMap = new HashMap<>();
+                newMap.put("table_nm", "tb_broadcast_info");
+                newMap.put("column_nm", "brdcast_no");
+                ObjectNode generationKeyOn = cctvService.newGenerationKey(newMap);
+                brdcastNo = generationKeyOn.get("newId").asText();
+            }
+            map.put("brdcast_no", brdcastNo);
+
             Map<String, Object> getMap = new HashMap<>();
-            map.put("brdcast_no", newBroadcastNo);
-            getMap.put("brdcast_no", newBroadcastNo);
+            getMap.put("brdcast_no", brdcastNo);
             List<HashMap<String, Object>> list = broadcastMapper.getBroadcastList(getMap);
             getMap.clear();
             getMap.put("brdcast_nm", map.get("brdcast_nm"));

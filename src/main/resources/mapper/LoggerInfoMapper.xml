@@ -133,6 +133,12 @@
         <include refid="rowSearch"/>
     </select>
 
+    <select id="selectLoggerInfoCountByLogrNm" parameterType="java.util.Map" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_logger_info
+        WHERE logr_nm = #{logr_nm}
+    </select>
+
     <insert id="insertLoggerInfo" parameterType="java.util.Map">
         INSERT INTO tb_logger_info (
         <trim suffixOverrides=",">

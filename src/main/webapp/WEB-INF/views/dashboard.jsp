@@ -333,6 +333,47 @@
             min-width: 14px;
             justify-content: center;
         }
+
+        .tab-container {
+            display: flex;
+            justify-content: flex-start;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+
+        .tab-button {
+            padding: 10px 40px;
+            cursor: pointer;
+            background-color: #555;
+            color: #fff;
+            border: none;
+            outline: none;
+            transition: background-color 0.3s;
+            width: 150px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin-right: 10px;
+            font-size: 1.4rem;
+        }
+
+        .tab-button.active {
+            background-color: #4682B4;
+            color: #000;
+        }
+
+        .tab-button:hover {
+            background-color: #666;
+        }
+
+        .chart-content {
+            display: none;
+            border-radius: 10px;
+        }
+
+        .chart-content.active {
+            display: block;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <script type="text/javascript" src="/admin_add.js"></script>
@@ -668,17 +709,35 @@
             }
         });
 
-        const currentYear = new Date().getFullYear();
+        function formatLocalDateTimeForInput(date) {
+            const pad = (n) => n.toString().padStart(2, '0');
+            return date.getFullYear() + '-'
+                + pad(date.getMonth() + 1) + '-'
+                + pad(date.getDate()) + 'T'
+                + pad(date.getHours()) + ':'
+                + pad(date.getMinutes());
+        }
 
-        const startDate = new Date(currentYear, 0, 1, 23, 59); // 0은 1월
-        $('#start-date').val(startDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+        const endDate = new Date();
+        endDate.setHours(23, 59, 0, 0);
+        const startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - 2);
+        startDate.setHours(0, 0, 0, 0);
 
-        const endDate = new Date(currentYear, 11, 31, 23, 59); // 11은 12월
-        $('#end-date').val(endDate.toISOString().slice(0, 16)); // ISO 형식으로 설정
+        $('#start-date').val(formatLocalDateTimeForInput(startDate));
+        $('#end-date').val(formatLocalDateTimeForInput(endDate));
 
         const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
         let sensNo = ''
         let chartRequestSeq = 0;
+
+        $('.tab-button').on('click', function () {
+            $('.tab-button').removeClass('active');
+            $(this).addClass('active');
+            $('.chart-content').removeClass('active').hide();
+            $('#' + $(this).data('chart')).addClass('active').show();
+        });
+        $('#chart1').show();
 
         async function getDashboardChartSensors(districtNo, sensorTypeNo, preferredSensorNo) {
             $("#sensor-name-select").empty().append("<option value=''>선택</option>");
@@ -872,7 +931,7 @@
                 const endDate = new Date(today);
                 endDate.setHours(23, 59, 0, 0);
 
-                // 3. 시작일 설정 = 7일 전 00:00 (숫자 '7'을 바꾸면 기간 조절 가능)
+                // 3. 시작일 설정 = 2일 전 00:00
                 const startDate = new Date(today);
                 startDate.setDate(startDate.getDate() - 2);
                 startDate.setHours(0, 0, 0, 0);
@@ -921,6 +980,9 @@
             myChart.data.labels = [];
             myChart.data.datasets = [];
             myChart.update();
+            myBarChart.data.labels = [];
+            myBarChart.data.datasets = [];
+            myBarChart.update();
             //const case_ = ['', 'X', 'Y', 'Z'];
             const case_ = ['X', 'Y', 'Z', ''];
             let checkedData = case_.flatMap((item) => {
@@ -1005,6 +1067,9 @@
                     myChart.data.labels = [];
                     myChart.data.datasets = [];
                     myChart.update();
+                    myBarChart.data.labels = [];
+                    myBarChart.data.datasets = [];
+                    myBarChart.update();
                     alert(hasError ? '조회할 수 없는 데이터 입니다.' : '조회 결과가 존재하지 않습니다.');
                     return;
                 }
@@ -1054,7 +1119,7 @@
             });
         }
 
-        const ctx = document.getElementById('myChart').getContext('2d');
+        const ctx = document.getElementById('myChart1').getContext('2d');
         const myChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -1109,12 +1174,82 @@
             }
         });
 
+        const ctxBar = document.getElementById('myChart2').getContext('2d');
+        const myBarChart = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: []
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'xy',
+                            threshold: 10
+                        },
+                        zoom: {
+                            drag: {
+                                enabled: true,
+                                backgroundColor: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            wheel: {enabled: true},
+                            pinch: {enabled: true},
+                            mode: 'xy'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'minute',
+                            displayFormats: {
+                                minute: 'YYYY-MM-DD HH:mm'
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
 
         function getRandomHSL() {
             const hue = Math.floor(Math.random() * 360); // 0~359 범위의 색상
             const saturation = 100; // 채도 고정
             const lightness = 50; // 밝기 고정
             return 'hsl(' + hue + ', ' + saturation + '%, ' + lightness + '%)';
+        }
+
+        function preprocessDataForBarChart(series) {
+            if (!Array.isArray(series) || series.length === 0) {
+                return {ranges: []};
+            }
+
+            const toNum = function (v) {
+                const n = Number(v);
+                return Number.isFinite(n) ? n : null;
+            };
+
+            const ranges = series
+                .map((point) => {
+                    const min = toNum(point.min_data);
+                    const max = toNum(point.max_data);
+                    const x = new Date(point.meas_dt);
+                    if (!Number.isFinite(x.getTime()) || min === null || max === null) {
+                        return null;
+                    }
+                    return {x: x, y: [min, max]};
+                })
+                .filter(Boolean);
+
+            return {ranges: ranges};
         }
 
         function updateChart(data) {
@@ -1125,11 +1260,19 @@
                     console.warn('resetZoom skipped', e);
                 }
             }
+            if (typeof myBarChart.resetZoom === 'function') {
+                try {
+                    myBarChart.resetZoom();
+                } catch (e) {
+                    console.warn('bar resetZoom skipped', e);
+                }
+            }
 
             const allLabels = [];
             const labelSet = new Set();
             const labelIndexMap = new Map();
             const datasets = [];
+            const seriesColors = data.map(() => getRandomHSL());
 
             data.forEach((item) => {
                 if (!Array.isArray(item) || item.length === 0 || !item[0]) {
@@ -1199,19 +1342,34 @@
                 datasets.push({
                     label: datasetLabel,
                     data: mappedData,
-                    borderColor: getRandomHSL(),
+                    borderColor: seriesColors[datasets.length] || getRandomHSL(),
                     fill: false,
                     pointRadius: 0,
                     borderWidth: 1,
                 });
             });
 
+            const barDatasets = data.map((series, index) => {
+                const processed = preprocessDataForBarChart(series);
+                const baseColor = seriesColors[index] || getRandomHSL();
+                const labelBase = series[0] ? ((series[0].sens_nm || series[0].sens_no || 'sensor') + (series[0].sens_chnl_id ? "-" + series[0].sens_chnl_id : "")) : "sensor";
+                return {
+                    type: 'bar',
+                    label: labelBase,
+                    data: processed.ranges,
+                    backgroundColor: baseColor.replace('hsl(', 'hsla(').replace(')', ', 0.20)'),
+                    borderColor: baseColor,
+                    borderWidth: 1.5,
+                    borderSkipped: false,
+                    borderRadius: 0,
+                    barPercentage: 0.42,
+                    categoryPercentage: 0.8,
+                    maxBarThickness: 18
+                };
+            });
+
             myChart.data.labels = allLabels;
             myChart.data.datasets = datasets;
-            const currentPlugins = myChart.options.plugins || {};
-            myChart.options.plugins = Object.assign({}, currentPlugins, {
-                annotation: false
-            });
 
             const currentScales = myChart.options.scales || {};
             const currentXScale = currentScales.x || {};
@@ -1235,7 +1393,204 @@
                     ticks: nextTicks
                 })
             });
+
+            myBarChart.data.labels = [];
+            myBarChart.data.datasets = barDatasets;
+            const currentBarScales = myBarChart.options.scales || {};
+            const currentBarXScale = currentBarScales.x || {};
+            myBarChart.options.scales = Object.assign({}, currentBarScales, {
+                x: Object.assign({}, currentBarXScale, {
+                    time: Object.assign({}, currentBarXScale.time || {}, {
+                        unit: dynamicUnit
+                    }),
+                    ticks: Object.assign({}, currentBarXScale.ticks || {}, {
+                        autoSkip: true,
+                        maxTicksLimit: 25
+                    })
+                })
+            });
+
+            if (!myChart.options.plugins.annotation) {
+                myChart.options.plugins.annotation = {clip: false, annotations: {}};
+            }
+            myChart.options.plugins.annotation.clip = false;
+            myChart.options.plugins.annotation.annotations = {};
+
+            if (!myBarChart.options.plugins.annotation) {
+                myBarChart.options.plugins.annotation = {clip: false, annotations: {}};
+            }
+            myBarChart.options.plugins.annotation.clip = false;
+            myBarChart.options.plugins.annotation.annotations = {};
+
+            const dataValues = data
+                .flatMap(d => d.map(p => Number(p.formul_data)))
+                .filter(v => Number.isFinite(v));
+            const alarmValues = data
+                .flatMap(item => ([
+                    Number(item[0].lvl_min1),
+                    Number(item[0].lvl_min2),
+                    Number(item[0].lvl_min3),
+                    Number(item[0].lvl_min4),
+                    Number(item[0].lvl_max1),
+                    Number(item[0].lvl_max2),
+                    Number(item[0].lvl_max3),
+                    Number(item[0].lvl_max4)
+                ]))
+                .filter(v => Number.isFinite(v));
+
+            const axisCandidates = [...dataValues, ...alarmValues, 0];
+            const selectedSensorType = ($("#sensor-type-select option:selected").text() || '').trim();
+            const isRainType = selectedSensorType.includes('강우');
+            const unitMap = {
+                '지표경사계': 'deg',
+                '지표변위계': 'mm',
+                '강우량계': 'mm',
+            };
+            const sensorTypeRaw = selectedSensorType;
+            let yAxisTitle = (sensorTypeRaw === '선택' || sensorTypeRaw === '') ? 'Value' : sensorTypeRaw;
+            const unit = unitMap[sensorTypeRaw];
+            if (unit) {
+                yAxisTitle = sensorTypeRaw + ' (' + unit + ')';
+            }
+            const lineAbsMax = Math.max(...axisCandidates.map(v => Math.abs(v || 0)), 0.1);
+            const linePadding = Math.max(lineAbsMax * 0.1, 0.1);
+            const lineMin = isRainType ? 0 : -(lineAbsMax + linePadding);
+            const lineMax = lineAbsMax + linePadding;
+
+            myChart.options.scales.y = {
+                beginAtZero: false,
+                suggestedMin: lineMin,
+                suggestedMax: lineMax,
+                grid: {
+                    color: function (ctx) {
+                        const tickValue = Number(ctx && ctx.tick ? ctx.tick.value : NaN);
+                        return tickValue === 0 ? 'rgba(255,0,0,0.35)' : 'rgba(0,0,0,0.05)';
+                    },
+                    lineWidth: function (ctx) {
+                        const tickValue = Number(ctx && ctx.tick ? ctx.tick.value : NaN);
+                        return tickValue === 0 ? 1.2 : 1;
+                    }
+                },
+                ticks: {
+                    color: '#555',
+                    callback: v => Number(v.toFixed(2))
+                },
+                title: {
+                    display: true,
+                    text: yAxisTitle,
+                    color: '#555'
+                }
+            };
+
+            const candleRangeValues = data
+                .flatMap(series => series.flatMap(point => [Number(point.min_data), Number(point.max_data)]))
+                .filter(v => Number.isFinite(v));
+            const candleCandidates = [...candleRangeValues, 0];
+            const candleAbsMax = Math.max(...candleCandidates.map(v => Math.abs(v || 0)), 0.1);
+            const candlePadding = Math.max(candleAbsMax * 0.1, 0.1);
+            const candleMin = isRainType ? 0 : -(candleAbsMax + candlePadding);
+            const candleMax = candleAbsMax + candlePadding;
+
+            myBarChart.options.scales.y = {
+                beginAtZero: false,
+                suggestedMin: candleMin,
+                suggestedMax: candleMax,
+                grid: {
+                    color: function (ctx) {
+                        const tickValue = Number(ctx && ctx.tick ? ctx.tick.value : NaN);
+                        return (Number.isFinite(tickValue) && tickValue === 0) ? 'rgba(60, 90, 160, 0.55)' : 'rgba(0, 0, 0, 0.06)';
+                    },
+                    lineWidth: function (ctx) {
+                        const tickValue = Number(ctx && ctx.tick ? ctx.tick.value : NaN);
+                        return (Number.isFinite(tickValue) && tickValue === 0) ? 1.4 : 1;
+                    }
+                },
+                ticks: {
+                    color: '#555',
+                    callback: v => Number(v.toFixed(2))
+                },
+                title: {
+                    display: true,
+                    text: yAxisTitle,
+                    color: '#555'
+                }
+            };
+
+            data.forEach((item, i) => {
+                if (!item || item.length === 0) {
+                    return;
+                }
+
+                const colors = ['#EFDDCB', '#CBEFD8', '#F0DD7F', '#A3B4ED'];
+                const minLevels = [
+                    parseFloat(item[0].lvl_min1),
+                    parseFloat(item[0].lvl_min2),
+                    parseFloat(item[0].lvl_min3),
+                    parseFloat(item[0].lvl_min4)
+                ];
+                const maxLevels = [
+                    parseFloat(item[0].lvl_max1),
+                    parseFloat(item[0].lvl_max2),
+                    parseFloat(item[0].lvl_max3),
+                    parseFloat(item[0].lvl_max4)
+                ];
+
+                const firstX = Date.parse(item[0].meas_dt);
+                const labelTextBase = (item[0].sens_nm || item[0].sens_no || 'sensor') + (item[0].sens_chnl_id ? "-" + item[0].sens_chnl_id : "");
+
+                const addAlarmAnnotation = (levelValue, index, levelType) => {
+                    if (isNaN(levelValue)) {
+                        return;
+                    }
+
+                    const lineKey = 'line_' + levelType + '_' + (item[0].sens_no || 'sensor') + '_' + (item[0].sens_chnl_id || 'single') + '_' + index + '_' + i;
+                    const labelKey = 'label_' + levelType + '_' + (item[0].sens_no || 'sensor') + '_' + (item[0].sens_chnl_id || 'single') + '_' + index + '_' + i;
+
+                    [myChart, myBarChart].forEach((targetChart, chartIdx) => {
+                        const annotations = targetChart.options.plugins.annotation.annotations;
+                        const chartLineKey = lineKey + '_' + chartIdx;
+                        const chartLabelKey = labelKey + '_' + chartIdx;
+
+                        annotations[chartLineKey] = {
+                            type: 'line',
+                            yMin: levelValue,
+                            yMax: levelValue,
+                            borderColor: colors[index],
+                            borderWidth: 1.5,
+                            borderDash: [5, 4]
+                        };
+
+                        annotations[chartLabelKey] = {
+                            type: 'label',
+                            xValue: function (ctx) {
+                                const xScale = ctx && ctx.chart && ctx.chart.scales
+                                    ? (ctx.chart.scales.x || Object.values(ctx.chart.scales).find(s => s.axis === 'x'))
+                                    : null;
+                                if (xScale && Number.isFinite(xScale.min)) {
+                                    return xScale.min;
+                                }
+                                return Number.isFinite(firstX) ? firstX : undefined;
+                            },
+                            yValue: levelValue,
+                            xAdjust: 29,
+                            backgroundColor: colors[index],
+                            content: [
+                                labelTextBase,
+                                (Number(index) + 1) + '차 ' + (levelType === 'min' ? '최소' : '최대') + ' 경고'
+                            ],
+                            font: {
+                                size: 8
+                            }
+                        };
+                    });
+                };
+
+                minLevels.forEach((minLevel, index) => addAlarmAnnotation(minLevel, index, 'min'));
+                maxLevels.forEach((maxLevel, index) => addAlarmAnnotation(maxLevel, index, 'max'));
+            });
+
             myChart.update();
+            myBarChart.update();
         }
 
 
@@ -1454,6 +1809,55 @@
             });
         }
 
+        function getValidDistrictCoords(districts) {
+            const coords = [];
+            $.each(districts || [], function (_idx, district) {
+                const lon = parseFloat(district.dist_lon);
+                const lat = parseFloat(district.dist_lat);
+                if (Number.isFinite(lon) && Number.isFinite(lat)) {
+                    coords.push([lon, lat]);
+                }
+            });
+            return coords;
+        }
+
+        function fitMapToDistricts(districts) {
+            const coords = getValidDistrictCoords(districts);
+
+            if (coords.length === 0) {
+                if (_areaInfo && Number.isFinite(parseFloat(_areaInfo.dist_lon)) && Number.isFinite(parseFloat(_areaInfo.dist_lat))) {
+                    window.vworld.setPanBy([parseFloat(_areaInfo.dist_lon), parseFloat(_areaInfo.dist_lat)], _areaInfo.dist_zoom || 18);
+                }
+                return;
+            }
+
+            if (coords.length === 1) {
+                window.vworld.setPanBy(coords[0], 18);
+                return;
+            }
+
+            if (window.vworld.getMap().type === '2D') {
+                const transformed = coords.map(function (coord) {
+                    return ol.proj.transform(coord, "EPSG:4326", "EPSG:3857");
+                });
+                const extent = ol.extent.boundingExtent(transformed);
+                window.vworld.getMap().getView().fit(extent, {
+                    padding: [80, 80, 80, 80],
+                    maxZoom: 18,
+                    duration: 500
+                });
+                return;
+            }
+
+            const lonList = coords.map(function (coord) { return coord[0]; });
+            const latList = coords.map(function (coord) { return coord[1]; });
+            const center = [
+                (Math.min.apply(null, lonList) + Math.max.apply(null, lonList)) / 2,
+                (Math.min.apply(null, latList) + Math.max.apply(null, latList)) / 2
+            ];
+            window.vworld.setPanBy(center, 13);
+        }
+
         function init() {
             initDistrictSelectZone();
             initAssetList();
@@ -1463,6 +1867,7 @@
             const $districtSelectZone = $('select.selectZone');
             $.get("/adminAdd/districtInfo/all", (res) => {
                 res = res.sort((a, b) => a.district_nm.localeCompare(b.district_nm));
+                fitMapToDistricts(res);
                 $districtSelectZone.append('<option value="">현장 선택</option>');
                 $.each(res, (_idx, district) => {
                     $districtSelectZone.append('<option value="' + district.district_no + '" lat="' + district.dist_lat + '" lng="' + district.dist_lon + '">' + district.district_nm + '</option>');
@@ -1841,6 +2246,9 @@
             <a href="javascript:void(0);"><img src="/images/btn_lay_close.png" data-fancybox-close alt="닫기"></a>
         </div>
         <div class="modal-header" style="margin-bottom: 10px">
+            <div style="margin-bottom: 10px">
+                <h3 class="txt">계측 이력 그래프</h3>
+            </div>
             <div class="filter-area" style="margin-right: 150px; margin-bottom: 10px">
                 <div style="display:flex;">
                     <p class="search-top-label" style="margin-right: 13px;">현장명</p>
@@ -1883,9 +2291,16 @@
                 </div>
             </div>
         </div>
+        <div class="tab-container">
+            <button class="tab-button active" data-chart="chart1">라인차트</button>
+            <button class="tab-button" data-chart="chart2">캔들차트</button>
+        </div>
         <div class="layer-base-conts min bTable">
-            <div class="graph-area" style="height: 500px">
-                <canvas id="myChart"></canvas>
+            <div id="chart1" class="chart-content active">
+                <canvas id="myChart1"></canvas>
+            </div>
+            <div id="chart2" class="chart-content">
+                <canvas id="myChart2"></canvas>
             </div>
         </div>
     </div>

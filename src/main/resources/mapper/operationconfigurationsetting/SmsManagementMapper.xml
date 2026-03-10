@@ -42,7 +42,7 @@
                     tsr.sms_autosnd_yn ${sord}
                 </when>
                 <otherwise>
-                    tsr.reg_dt desc
+                    district_no
                 </otherwise>
             </choose>
         </trim>

@@ -38,7 +38,7 @@ public class DatabaseConfig {
     public static void main(String[] args) {
         System.out.println("jdbc :: " + encryptor().encrypt("jdbc:log4jdbc:postgresql://59.23.50.20:5432"));
         System.out.println("user :: " + encryptor().encrypt("postgres"));
-        System.out.println("pass :: " + encryptor().encrypt("kyungwoo1999"));
+        System.out.println("pass :: " + encryptor().encrypt("dps2026#"));
     }
 
     public static StringEncryptor encryptor() {

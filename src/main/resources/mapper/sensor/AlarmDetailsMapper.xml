@@ -88,7 +88,7 @@
                     sms_cnt ${sord}
                 </when>
                 <otherwise>
-                    tad.reg_dt desc
+                    alarm_fin_dt, meas_dt desc, district_no, sens_chnl_nm asc
                 </otherwise>
             </choose>
         </trim>
@@ -127,7 +127,8 @@
             (SELECT COUNT(*)
             FROM tb_sms_details
             WHERE alarm_mgnt_no = tad.mgnt_no) AS sms_cnt,
-            tad.reg_dt
+            tad.reg_dt,
+            tad.district_no
         FROM tb_alarm_details tad
         LEFT JOIN tb_district_info tdi
             ON tad.district_no = tdi.district_no
@@ -138,6 +139,7 @@
         LEFT JOIN tb_sensor_chnl tsc
             ON tad.sens_no = tsc.sens_no and tad.sens_chnl_id = tsc.sens_chnl_id
         WHERE 1=1
+        AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
@@ -154,6 +156,7 @@
         left join tb_sensor_chnl tsc
             on tad.sens_no = tsc.sens_no and tad.sens_chnl_id = tsc.sens_chnl_id
         WHERE 1=1
+        AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         <include refid="rowSearch"/>
     </select>
 
@@ -213,6 +216,7 @@
         LEFT JOIN tb_alarm_info tai
         ON tad.sens_no = tai.sens_no
         WHERE 1=1
+        AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         <include refid="rowSearch"/>
     </select>
 </mapper>

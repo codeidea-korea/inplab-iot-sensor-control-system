@@ -167,7 +167,9 @@
             $.get('/adminAdd/common/code/loggerInfo', null, function (res) {
                 let option = '<option value="">선택</option>';
                 $.each(res, function (idx) {
-                    option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
+                    const lon = res[idx].lon ?? '';
+                    const lat = res[idx].lat ?? '';
+                    option += '<option value="' + res[idx].code + '" data-lon="' + lon + '" data-lat="' + lat + '">' + res[idx].name + '</option>';
                 });
                 $('#logr_no').html(option);
             });
@@ -334,8 +336,15 @@
                     } catch (e) {
                     }
                 }else{
-                    /* 빈 칸 default 처리 */
-                    window.vworld.setPanBy([127.449482276989, 36.9317789946793], 18);
+                    const $selectedLogger = $('#logr_no option:selected');
+                    const loggerLon = parseFloat($selectedLogger.data('lon'));
+                    const loggerLat = parseFloat($selectedLogger.data('lat'));
+                    if (Number.isFinite(loggerLon) && Number.isFinite(loggerLat)) {
+                        window.vworld.setPanBy([loggerLon, loggerLat], 18);
+                    } else {
+                        /* 빈 칸 default 처리 */
+                        window.vworld.setPanBy([127.449482276989, 36.9317789946793], 18);
+                    }
                 }
 
                 popFancy('#lay-form-address', {dragToClose: false, touch: false});
@@ -446,7 +455,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>센서 ID</th>
+                        <th>센서명</th>
                         <td colspan="3">
                             <input type="text" name="sens_nm" readonly/>
                         </td>

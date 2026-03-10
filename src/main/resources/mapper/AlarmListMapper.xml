@@ -97,6 +97,7 @@
                  LEFT JOIN tb_sensor_type tst
                            ON tsi.senstype_no = tst.senstype_no
         WHERE 1=1
+        AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         order by tad.reg_dt desc limit 4
     </select>
 
@@ -135,6 +136,7 @@
             LEFT JOIN tb_sensor_info tsi2
             ON tai.sens_no = tsi2.sens_no and tsi2.alarm_use_yn ='Y'
             WHERE tmd.reg_dt > NOW() - INTERVAL '1 minute'
+              AND COALESCE(tsi2.sens_disp_yn, 'Y') = 'Y'
         ) AS MG
         WHERE 1=1
         <include refid="rowSearch"/>
@@ -213,6 +215,7 @@
                            ON mg.sens_no = tai.sens_no
                                AND mg.sens_chnl_id = tai.sens_chnl_id
         WHERE mg.alarm_level = #{alarmLevel}
+          AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         <if test="district_no != null and district_no != ''">
             AND mg.district_no = #{district_no}
         </if>

@@ -9,6 +9,9 @@ import lombok.Setter;
 @Setter
 public class InsAdminAddBroadcastDto {
 
+    @Schema(example = "B001", description = "방송장비 아이디")
+    private String brdcast_no;
+
     @Schema(example = "TM01", description = "방송장비명")
     private String brdcast_nm;
 

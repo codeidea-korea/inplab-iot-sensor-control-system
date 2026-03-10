@@ -97,7 +97,7 @@
                     MG.mod_dt ${sord}
                 </when>
                 <otherwise>
-                    MG.logr_no, MG.sens_no, MG.sens_nm
+                    MG.district_no, MG.logr_no, MG.senstype_no, MG.sens_nm
                 </otherwise>
             </choose>
         </trim>
@@ -109,6 +109,7 @@
         FROM (
         SELECT
         A.sens_no
+        , (SELECT B.district_no FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS district_no
         , A.logr_no
         , (SELECT B.sens_tp_nm FROM tb_sensor_type B WHERE B.senstype_no = A.senstype_no) AS senstype_nm
         , (SELECT B.logr_nm FROM tb_logger_info B WHERE B.logr_no = A.logr_no) AS logr_nm

@@ -90,7 +90,7 @@
                     tcc.code_nm ${sord}
                 </when>
                 <otherwise>
-                    tst.senstype_no, tsi.sens_no, tsi.sens_chnl_id asc
+                    district_nm, senstype_no, sens_chnl_nm
                 </otherwise>
             </choose>
         </trim>
@@ -125,8 +125,9 @@
 <!--        </if>-->
 
          SELECT
-            TO_CHAR(ROUND(tsi.init_raw_data::numeric, 2), 'FM9999999999999999990.00') AS formul_data,
+            tsi.formul_data,
             tsi.init_apply_dt,
+            tst.senstype_no,
             tst.sens_tp_nm,
             tsi.last_apply_dt,
             <![CDATA[
@@ -223,6 +224,7 @@
             AND COALESCE(tai.sens_chnl_id, '') = COALESCE(tsi.sens_chnl_id,'')
 
         WHERE 1 = 1
+            AND COALESCE(tsinfo.sens_disp_yn, 'Y') = 'Y'
             AND tsi.sens_no IN (
             SELECT tlim.sens_no
             FROM tb_logr_idx_map tlim
@@ -287,6 +289,7 @@
             AND COALESCE(tai.sens_chnl_id, '') = COALESCE(tsi.sens_chnl_id,'')
 
         WHERE 1 = 1
+        AND COALESCE(tsinfo.sens_disp_yn, 'Y') = 'Y'
         AND tsi.sens_no IN (
             SELECT tlim.sens_no
             FROM tb_logr_idx_map tlim
@@ -299,30 +302,40 @@
         <include refid="rowSearch"/>
     </select>
 
+    <select id="selectLatestConvertedMeasureFormulData" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+            CASE
+                WHEN tst.senstype_no = '015' THEN COALESCE(tmd.raw_data::numeric, 0)
+                WHEN tst.senstype_no = '016' THEN COALESCE(tmd.raw_data::numeric, 0) / 100.0
+                WHEN tst.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(tmd.raw_data::numeric, 0)) / 1000.0
+                WHEN tst.senstype_no IN ('001', '002') THEN COALESCE(tmd.raw_data::numeric, 0) * 0.5
+                ELSE COALESCE(tmd.raw_data::numeric, 0)
+            END AS formul_data
+        FROM tb_sensor_info tsinfo
+                 LEFT JOIN tb_sensor_type tst ON tsinfo.senstype_no = tst.senstype_no
+                 LEFT JOIN LATERAL (
+            SELECT raw_data
+            FROM tb_measure_details
+            WHERE sens_no = tsinfo.sens_no
+              AND COALESCE(sens_chnl_id, '') = COALESCE(#{og_sens_chnl_id}, '')
+            ORDER BY meas_dt DESC
+            LIMIT 1
+        ) tmd ON TRUE
+        WHERE tsinfo.sens_no = #{sens_no}
+        LIMIT 1
+    </select>
+
     <update id="updateSensorInitialSetting" parameterType="java.util.Map">
         UPDATE tb_sensor_init
         SET
         <if test="formul_data != null and formul_data != ''">
-            init_raw_data = #{formul_data}::float ,
+            formul_data = #{formul_data}::float ,
         </if>
         emer_status = #{emer_status}
         , init_apply_dt = now()
         , mod_dt = now()
         WHERE sens_no = #{sens_no}
         and sens_chnl_id = #{og_sens_chnl_id}
-    </update>
-
-    <update id="updateSensorInitialSetting2" parameterType="java.util.Map">
-        UPDATE tb_sensor_init
-        SET
-        <if test="formul_data != null and formul_data != ''">
-            init_raw_data = #{formul_data}::float ,
-        </if>
-        emer_status = #{emer_status}
-        , init_apply_dt = now()
-        , mod_dt = now()
-        WHERE sens_no = #{sens_no}
-        AND sens_chnl_id = #{og_sens_chnl_id}
     </update>
 
     <insert id="insertSensorInitialSetting" parameterType="java.util.Map">

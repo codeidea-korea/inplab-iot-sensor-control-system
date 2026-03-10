@@ -54,7 +54,7 @@
                     tec.e_mail ${sord}
                 </when>
                 <otherwise>
-                    tec.reg_dt desc
+                    district_no
                 </otherwise>
             </choose>
         </trim>

@@ -88,7 +88,7 @@
                     tai.lvl_apply_dt ${sord}
                 </when>
                 <otherwise>
-                    tdi.district_nm, tst.senstype_no, tai.sens_no, tai.sens_chnl_nm asc
+                    tdi.district_no, tst.senstype_no, tai.sens_chnl_nm asc
                 </otherwise>
             </choose>
         </trim>
@@ -117,6 +117,7 @@
         left join tb_district_info tdi on tai.district_no = tdi.district_no
         left join tb_sensor_chnl tsc on  tai.sens_no = tsc.sens_no and tai.sens_chnl_id = tsc.sens_chnl_id
         WHERE 1=1
+        AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
         <if test="page != null and page > 0">
@@ -131,6 +132,7 @@
         left join tb_sensor_type tst on tsi.senstype_no = tst.senstype_no
         left join tb_district_info tdi on tai.district_no = tdi.district_no
         WHERE 1=1
+        AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         <include refid="rowSearch"/>
     </select>
 

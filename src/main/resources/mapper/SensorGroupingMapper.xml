@@ -129,6 +129,7 @@
             GROUP BY m.sens_no
         ) AS lmd ON lmd.sens_no = tsinfo.sens_no
         WHERE 1 = 1
+        AND COALESCE(tsinfo.sens_disp_yn, 'Y') = 'Y'
         <include refid="rowSearch"/>
         AND tsinfo.sens_no IN (
             SELECT tlim.sens_no
@@ -159,6 +160,7 @@
         LEFT JOIN tb_sensor_type tst
         ON tsinfo.senstype_no = tst.senstype_no
         WHERE 1 = 1
+        AND COALESCE(tsinfo.sens_disp_yn, 'Y') = 'Y'
         <include refid="rowSearch"/>
         and tsinfo.sens_no IN (SELECT tlim.sens_no
         FROM tb_logr_idx_map tlim
@@ -200,6 +202,9 @@
                                AND COALESCE(tsit.sens_chnl_id, '') = COALESCE(tmd.sens_chnl_id, '')
         WHERE tmd.meas_dt BETWEEN (#{start_date_time}::timestamp) AND (#{end_date_time}::timestamp)
           AND tmd.sens_no = #{sens_no}
+        <if test="include_hidden == null or include_hidden != 'Y'">
+            AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
+        </if>
         <if test="sens_chnl_id != null and sens_chnl_id != ''">
             AND tmd.sens_chnl_id = #{sens_chnl_id}
         </if>

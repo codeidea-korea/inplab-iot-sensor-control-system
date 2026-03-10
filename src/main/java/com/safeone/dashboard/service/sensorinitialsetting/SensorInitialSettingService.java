@@ -27,6 +27,10 @@ public class SensorInitialSettingService implements JqGridService<SensorInitialS
         return mapper.selectSensorInitialSettingListTotal(param);
     }
 
+    public Map<String, Object> getLatestConvertedMeasureFormulData(Map<String, Object> param) {
+        return mapper.selectLatestConvertedMeasureFormulData(param);
+    }
+
     @Override
     public boolean create(Map param) {
         return mapper.insertSensorInitialSetting(param) > 0;
@@ -40,10 +44,6 @@ public class SensorInitialSettingService implements JqGridService<SensorInitialS
     @Override
     public boolean update(Map param) {
         return mapper.updateSensorInitialSetting(param) > 0;
-    }
-
-    public boolean update2(Map param) {
-        return mapper.updateSensorInitialSetting2(param) > 0;
     }
 
     @Override

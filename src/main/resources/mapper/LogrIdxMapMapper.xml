@@ -74,7 +74,7 @@
                     MG.mod_dt ${sord}
                 </when>
                 <otherwise>
-                    district_nm, senstype_no, sens_no, sens_chnl_nm asc
+                    MG.district_no, MG.logr_no, MG.senstype_no, MG.sens_chnl_nm asc
                 </otherwise>
             </choose>
         </trim>

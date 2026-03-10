@@ -165,10 +165,21 @@
                         return;
 
                     $.get('/adminAdd/loggerInfo/add', getSerialize('#lay-form-write'), function (res) {
-                        alert('저장되었습니다.', function () {
-                            popFancyClose('#lay-form-write');
-                        });
-                        reloadJqGrid();
+                        if (res && res.success) {
+                            alert(res.message || '저장되었습니다.', function () {
+                                popFancyClose('#lay-form-write');
+                            });
+                            reloadJqGrid();
+                            return;
+                        }
+
+                        if (res && res.code === 'DUPLICATE_LOGR_NM') {
+                            alert('로거명이 중복됩니다.');
+                            $('#lay-form-write input[name="logr_nm"]').focus();
+                            return;
+                        }
+
+                        alert((res && res.message) || '저장에 실패했습니다.');
                     });
                 });
             });
@@ -352,7 +363,7 @@
                     <tr>
                         <th>로거명</th>
                         <td colspan="3">
-                            <input type="text" name="logr_nm" readonly/>
+                            <input type="text" name="logr_nm" class="required"/>
                         </td>
                     </tr>
 

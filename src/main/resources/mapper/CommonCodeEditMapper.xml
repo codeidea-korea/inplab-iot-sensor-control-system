@@ -91,6 +91,8 @@
     <select id="selectLoggerInfo" resultType="java.util.Map">
         SELECT logr_no as code
              , logr_nm as name
+             , logr_lon as lon
+             , logr_lat as lat
         FROM tb_logger_info
         ORDER BY logr_no
     </select>

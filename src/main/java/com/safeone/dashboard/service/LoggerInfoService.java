@@ -35,6 +35,10 @@ public class LoggerInfoService implements JqGridService<LoggerInfoDto> {
         return mapper.selectLoggerInfoListTotal(param);
     }
 
+    public int getLoggerInfoNmChk(Map param) {
+        return mapper.selectLoggerInfoCountByLogrNm(param);
+    }
+
     @Override
     public boolean create(Map param) {
         return mapper.insertLoggerInfo(param) > 0;

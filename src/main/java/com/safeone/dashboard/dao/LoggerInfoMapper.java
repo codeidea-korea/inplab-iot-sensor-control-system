@@ -10,6 +10,7 @@ import java.util.Map;
 public interface LoggerInfoMapper {
     int selectLoggerInfoListTotal(Map param);
     List<LoggerInfoDto> selectLoggerInfoList(Map param);
+    int selectLoggerInfoCountByLogrNm(Map param);
     int insertLoggerInfo(Map param);
     int updateLoggerInfo(Map param);
     int deleteLoggerInfo(Map param);

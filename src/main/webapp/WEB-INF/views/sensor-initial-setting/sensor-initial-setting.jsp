@@ -153,7 +153,7 @@
 
                     $.ajax({
                         method: 'POST',
-                        url: '/sensor-initial-setting/mod',
+                        url: '/sensor-initial-setting/mod_measure',
                         traditional: true,
                         data: {jsonData: JSON.stringify(selectedData)},
                         dataType: 'json',
@@ -179,7 +179,7 @@
 
                     $.ajax({
                         method: 'POST',
-                        url: '/sensor-initial-setting/mod2',
+                        url: '/sensor-initial-setting/mod_input',
                         traditional: true,
                         data: {jsonData: JSON.stringify(selectedData)},
                         dataType: 'json',

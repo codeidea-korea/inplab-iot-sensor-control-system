@@ -114,6 +114,7 @@
             <if test="district_no != null and district_no != ''">
                 join tb_logger_info tli on tsi.logr_no = tli.logr_no and tli.district_no= #{district_no}
             </if>
+            WHERE COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         ) s;
     </select>
 
@@ -152,6 +153,7 @@
                            ON tad.sens_no = tsc.sens_no
                            AND tad.sens_chnl_id = tsc.sens_chnl_id
         WHERE 1=1
+            and COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
             <if test="district_no != null and district_no != ''">
                 and tad.district_no = #{district_no}
             </if>
@@ -194,6 +196,7 @@
                                ON tsi.senstype_no = tst.senstype_no
             WHERE 1=1
               AND tad.view_flag = #{view_flag}
+              AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
             ORDER BY tad.sens_no, tad.sens_chnl_id, tad.alarm_lvl_cd, tad.reg_dt DESC
         ) dedup
         ORDER BY dedup.reg_dt DESC
@@ -256,6 +259,7 @@
             LIMIT 1
         ) m ON TRUE
         WHERE 1=1
+        AND COALESCE(a.sens_disp_yn, 'Y') = 'Y'
         ORDER BY c.district_nm, a.senstype_no, a.sens_no
         <if test="limit != null and !limit.equals('') and offset != null and !offset.equals('')">
             LIMIT ${limit} OFFSET ${offset}
