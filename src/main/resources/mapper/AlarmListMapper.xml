@@ -98,7 +98,7 @@
                            ON tsi.senstype_no = tst.senstype_no
         WHERE 1=1
         AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
-        AND COALESCE(tsi.alarm_use_yn, 'N') <![CDATA[ <> ]]> 'Y'
+        AND COALESCE(tsi.alarm_use_yn, 'N') = 'Y'
         order by tad.reg_dt desc limit 4
     </select>
 
@@ -138,7 +138,7 @@
             ON tai.sens_no = tsi2.sens_no
             WHERE tmd.reg_dt > NOW() - INTERVAL '1 minute'
               AND COALESCE(tsi2.sens_disp_yn, 'Y') = 'Y'
-              AND COALESCE(tsi2.alarm_use_yn, 'N') <![CDATA[ <> ]]> 'Y'
+              AND COALESCE(tsi2.alarm_use_yn, 'N') = 'Y'
         ) AS MG
         WHERE 1=1
         <include refid="rowSearch"/>
@@ -218,7 +218,7 @@
                                AND mg.sens_chnl_id = tai.sens_chnl_id
         WHERE mg.alarm_level = #{alarmLevel}
           AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
-          AND COALESCE(tsi.alarm_use_yn, 'N') <![CDATA[ <> ]]> 'Y'
+          AND COALESCE(tsi.alarm_use_yn, 'N') = 'Y'
         <if test="district_no != null and district_no != ''">
             AND mg.district_no = #{district_no}
         </if>
