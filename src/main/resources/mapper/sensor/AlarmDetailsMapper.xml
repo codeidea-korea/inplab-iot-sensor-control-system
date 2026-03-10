@@ -88,7 +88,7 @@
                     sms_cnt ${sord}
                 </when>
                 <otherwise>
-                    alarm_fin_dt, meas_dt desc, district_no, sens_chnl_nm asc
+                    alarm_fin_dt nulls first, meas_dt desc, district_no, sens_chnl_nm asc
                 </otherwise>
             </choose>
         </trim>

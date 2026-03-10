@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class SmsSenderService {
 
     private final SmsSenderMapper mapper;
-    private static final int SMS_SEND_TERM_MINUTE = 5;
+    private static final int SMS_SEND_TERM_MINUTE = 1;
 
     @Transactional
     public void run() {
