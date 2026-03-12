@@ -282,20 +282,33 @@ function popFancyClose(target) {
 }
 
 function alert(msg, callbackYes) {
-    $("#alert").remove();
-    $("body").append(
-        '<div id="alert" class="layer-alarm"><div class="layer-alarm-btns"><a href="#" data-fancybox-close><img src="/images/btn_lay_close.png" alt="닫기" /></a></div><div class="layer-base-title">안내</div><div class="layer-alarm-conts"><p class="txt">' +
-        msg +
-        '</p><p class="btn"><a href="#" blue data-fancybox-close class="confirm">확인</a></p></div></div>'
-    );
-    popFancy("#alert");
 
-    $("#alert .confirm").on("click", function () {
-        try {
-            callbackYes();
-        } catch (e) {
+    if ($("#alert_only_pop").length === 0) {
+        $("body").append(
+            '<div id="alert_only_pop" class="layer-alarm" style="display:none;">' +
+            '<div class="layer-alarm-btns"><a href="#" data-fancybox-close><img src="/images/btn_lay_close.png" alt="닫기" /></a></div>' +
+            '<div class="layer-base-title">안내</div>' +
+            '<div class="layer-alarm-conts">' +
+            '<p class="txt"></p>' +
+            '<p class="btn"><a href="#" blue data-fancybox-close class="confirm">확인</a></p>' +
+            '</div></div>'
+        );
+    }
+
+
+    $("#alert_only_pop .txt").html(msg);
+
+    $("#alert_only_pop .confirm").off("click").on("click", function () {
+        if (typeof callbackYes === 'function') {
+            try {
+                callbackYes();
+            } catch (e) {
+                console.error("Alert callback error:", e);
+            }
         }
     });
+
+    popFancy("#alert_only_pop");
 }
 
 function confirm(msg, callbackYes) {
