@@ -181,6 +181,49 @@
                 });
             });
 
+            $('.selectMappingBtn').on('click', function (e) {
+                const $grid = $("#jq-grid");
+
+                // 1. 선택된 행의 데이터 가져오기 (배열 형태)
+                const targetArr = getSelectedCheckData($grid);
+
+                if (targetArr.length === 0) {
+                    alert('매핑할 데이터를 선택해주세요.');
+                    return;
+                }
+
+                // 2. 고유 키(예: mapping_no 또는 sens_no) 목록 추출
+                // 백엔드 mapping 메서드가 처리할 수 있는 식별자를 수집합니다.
+                const selectedSensNos = targetArr.map(function(item) {
+                    return item.sens_no; // 또는 item.sens_no (테이블 PK에 따라 선택)
+                });
+
+                confirm(targetArr.length + '건의 선택된 데이터에 대해 매핑을 진행하시겠습니까?', function () {
+                    $.ajax({
+                        url: '/adminAdd/logrIdxMap/mapping',
+                        type: 'GET',
+                        // 중요: 배열 데이터를 서버에서 받을 수 있도록 설정
+                        data: {
+                            sens_nos: selectedSensNos.join(','), // "1,2,3" 형태의 문자열로 변환
+                            logr_no: $('#logr-filter-no').val() || ''
+                        },
+                        beforeSend: function () {
+                            $('#loading').show();
+                        },
+                        complete: function () {
+                            $('#loading').hide();
+                        },
+                        success: function (_res) {
+                            alert("선택된 데이터가 매핑되었습니다.");
+                            reloadJqGrid();
+                        },
+                        error: function (_err) {
+                            alert('매핑에 실패했습니다. 다시 시도해 주세요.');
+                        }
+                    });
+                });
+            });
+
             function getSenstypeAbbr(senstypeNo, callback) {
                 $.get('/adminAdd/common/code/sensorAbbr', {senstype_no: senstypeNo}, function (res) {
                     console.log(res[0])
@@ -450,6 +493,7 @@
                         </select>
                     </span>
                     <a class="mappingBtn">매핑</a>
+                    <a class="selectMappingBtn">저장</a>
                 </div>
                 <div id="grid-wrapper" class="contents-in">
                     <table id="jq-grid"></table>

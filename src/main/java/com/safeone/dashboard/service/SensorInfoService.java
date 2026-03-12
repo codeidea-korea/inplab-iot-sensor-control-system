@@ -300,7 +300,7 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
             Map<String, Object> newMap = new HashMap<>(param);
 
             // 현재 DB에서 max(logr_idx_no) 조회
-            Integer maxIdx = mapper.getMaxLogrIdxNo(senstypeNo);
+            /*Integer maxIdx = mapper.getMaxLogrIdxNo(senstypeNo);
             if (maxIdx == null) {
                 try {
                     maxIdx = Integer.parseInt(sensorTypeDto.getLogr_idx_str());
@@ -310,7 +310,8 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                 }
             }else{
                 newMap.put("logr_idx_no", ++maxIdx);
-            }
+            }*/
+            newMap.put("logr_idx_no", "");
 
             // send_chnl_id 매핑
             String sendChnlId;
