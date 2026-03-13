@@ -15,5 +15,6 @@ public interface LogrIdxMapMapper {
     int deleteLogrIdxMap(Map param);
 
     void updateLogrIdx(LogrIdxMapDto dto);
+    int updateLogrIdxSelect(List<Map<String, Object>> list);
 }
     

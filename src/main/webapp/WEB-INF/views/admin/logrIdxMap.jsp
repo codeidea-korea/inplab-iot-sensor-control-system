@@ -188,25 +188,28 @@
                 const targetArr = getSelectedCheckData($grid);
 
                 if (targetArr.length === 0) {
-                    alert('매핑할 데이터를 선택해주세요.');
+                    alert('저장할 데이터를 선택해주세요.');
                     return;
                 }
 
-                // 2. 고유 키(예: mapping_no 또는 sens_no) 목록 추출
-                // 백엔드 mapping 메서드가 처리할 수 있는 식별자를 수집합니다.
-                const selectedSensNos = targetArr.map(function(item) {
-                    return item.sens_no; // 또는 item.sens_no (테이블 PK에 따라 선택)
+                // 2. 전송할 데이터 가공
+                // 백엔드의 updateLogrIdx 쿼리에서 필요로 하는 키값(조건 및 수정할 값)들만 추출하여
+                // 새로운 배열로 만듭니다. (그리드에 입력된 값이 item에 담겨있다고 가정)
+                const requestData = targetArr.map(function(item) {
+                    return {
+                        sens_no: item.sens_no,
+                        logr_no: item.logr_no,
+                        logr_chnl_seq: item.logr_chnl_seq,
+                        logr_idx_no: item.logr_idx_no // 사용자가 그리드에서 수정한 인덱스 번호
+                    };
                 });
 
-                confirm(targetArr.length + '건의 선택된 데이터에 대해 매핑을 진행하시겠습니까?', function () {
+                confirm(targetArr.length + '건의 수정된 데이터를 저장하시겠습니까?', function () {
                     $.ajax({
-                        url: '/adminAdd/logrIdxMap/mapping',
-                        type: 'GET',
-                        // 중요: 배열 데이터를 서버에서 받을 수 있도록 설정
-                        data: {
-                            sens_nos: selectedSensNos.join(','), // "1,2,3" 형태의 문자열로 변환
-                            logr_no: $('#logr-filter-no').val() || ''
-                        },
+                        url: '/adminAdd/logrIdxMap/saveMapping', // 새로 만들 POST 주소
+                        type: 'POST',                            // POST 방식으로 변경
+                        contentType: 'application/json',         // 데이터를 JSON 형식으로 전송
+                        data: JSON.stringify(requestData),       // 자바스크립트 배열을 JSON 문자열로 변환
                         beforeSend: function () {
                             $('#loading').show();
                         },
@@ -214,11 +217,11 @@
                             $('#loading').hide();
                         },
                         success: function (_res) {
-                            alert("선택된 데이터가 매핑되었습니다.");
+                            alert("선택된 데이터가 저장되었습니다.");
                             reloadJqGrid();
                         },
                         error: function (_err) {
-                            alert('매핑에 실패했습니다. 다시 시도해 주세요.');
+                            alert('저장에 실패했습니다. 다시 시도해 주세요.');
                         }
                     });
                 });

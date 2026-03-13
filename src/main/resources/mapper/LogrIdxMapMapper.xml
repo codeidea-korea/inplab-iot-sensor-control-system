@@ -234,4 +234,17 @@
             and logr_no = #{logr_no}
             and logr_chnl_seq = CAST (#{logr_chnl_seq} AS INTEGER);
     </update>
+
+    <update id="updateLogrIdxSelect" parameterType="java.util.List">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE tb_logr_idx_map
+            SET
+            mod_dt = now()
+            , mapping_dt = now()
+            , logr_idx_no = #{item.logr_idx_no}
+            WHERE sens_no = #{item.sens_no}
+            AND logr_no = #{item.logr_no}
+            AND logr_chnl_seq = CAST(#{item.logr_chnl_seq} AS INTEGER)
+        </foreach>
+    </update>
 </mapper>

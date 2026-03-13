@@ -35,7 +35,7 @@ public class LogrIdxMapDto implements Serializable {
     @FieldLabel(title="채널seq")
     String logr_chnl_seq;
 
-    @FieldLabel(title="로거_Idx")
+    @FieldLabel(title="로거_Idx", type="editable")
     String logr_idx_no;
 
     @FieldLabel(title="단면번호")

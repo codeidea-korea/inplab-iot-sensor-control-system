@@ -192,6 +192,13 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
         }
     }
 
+    public void saveMapping(List<Map<String, Object>> paramList) throws Exception {
+        // 넘어온 리스트가 비어있지 않은지 체크 후, 매퍼의 다건 업데이트 쿼리 실행
+        if (paramList != null && !paramList.isEmpty()) {
+            mapper.updateLogrIdxSelect(paramList);
+        }
+    }
+
     /* mapping helper */
     private static String nullToEmpty(String s) { return s == null ? "" : s.trim(); }
     private static boolean isEmpty(String s) { return s == null || s.trim().isEmpty(); }

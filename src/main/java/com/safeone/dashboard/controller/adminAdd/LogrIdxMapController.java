@@ -123,4 +123,17 @@ public class LogrIdxMapController extends JqGridAbstract<LogrIdxMapDto> {
             return new ResponseEntity<>("Error mapping: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @ResponseBody
+    @PostMapping("/saveMapping")
+    public ResponseEntity<String> saveMapping(@RequestBody List<Map<String, Object>> paramList) {
+        try {
+            // Service 계층으로 넘어온 데이터 리스트를 전달
+            logrIdxMapService.saveMapping(paramList);
+            return new ResponseEntity<>("success", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error saving mapping: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
