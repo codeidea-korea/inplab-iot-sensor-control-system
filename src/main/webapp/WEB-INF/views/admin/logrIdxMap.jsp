@@ -149,6 +149,13 @@
                     return;
                 }
 
+                var targetArr = getSelectedCheckData($grid);
+
+                if (targetArr.length > 0) {
+                        alert('매핑은 로거단위로 처리됩니다. 체크박스를 해제해 주세요.');
+                        return;
+                 }
+
                 const records = Number($grid.jqGrid('getGridParam', 'records') || 0);
                 if (records === 0) {
                     alert('현재 목록에 매핑할 데이터가 없습니다.');
