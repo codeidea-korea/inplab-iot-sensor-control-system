@@ -1,10 +1,10 @@
 package com.safeone.dashboard.controller.adminAdd;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.LogrIdxMapDto;
 import com.safeone.dashboard.service.CommonCodeEditService;
 import com.safeone.dashboard.service.LogrIdxMapService;
+import com.safeone.dashboard.service.SensorInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +26,8 @@ public class LogrIdxMapController extends JqGridAbstract<LogrIdxMapDto> {
     private CommonCodeEditService commonCodeEditService;
     @Autowired
     private LogrIdxMapService logrIdxMapService;
+    @Autowired
+    private SensorInfoService sensorInfoService;
 
     protected LogrIdxMapController() {
         super(LogrIdxMapDto.class);
@@ -81,11 +83,8 @@ public class LogrIdxMapController extends JqGridAbstract<LogrIdxMapDto> {
 
         List<Map> sensAbbr = commonCodeEditService.getSensorAbbr(Collections.singletonMap("senstype_no", param.get("senstype_no").toString()));
 
-        Map<String, Object> newMap = new HashMap<>();
-        newMap.put("table_nm", "tb_sensor_info");
-        newMap.put("column_nm", "sens_no");
-        ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-        param.put("sens_no", generationKeyOn.get("newId").asText());
+        param.put("sens_no", sensorInfoService.getNextSensNo());
+        param.put("mapping_no", logrIdxMapService.getNextMappingNo());
 
         Map<String, Object> sens = new HashMap<>();
         sens.put("sensor_seq",sensAbbr.get(0).get("sens_abbr"));

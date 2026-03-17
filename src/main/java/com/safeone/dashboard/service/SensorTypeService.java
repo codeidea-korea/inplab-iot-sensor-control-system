@@ -1,6 +1,5 @@
 package com.safeone.dashboard.service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dao.SensorTypeMapper;
 import com.safeone.dashboard.dto.SensorTypeDto;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +13,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -113,11 +114,7 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
 
                 Map<String, Object> sensorType = new HashMap<>();
 
-                Map<String, Object> newMap = new HashMap<>();
-                newMap.put("table_nm", "tb_sensor_type");
-                newMap.put("column_nm", "senstype_no");
-                ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-                sensorType.put("senstype_no", generationKeyOn.get("newId").asText());
+                sensorType.put("senstype_no", getNextSensorTypeNo());
 
                 List<Map> siteInfo = commonCodeEditService.getSiteInfo();
 
@@ -165,5 +162,20 @@ public class SensorTypeService implements JqGridService<SensorTypeDto> {
 
     public String getMaxNo() {
         return mapper.getMaxNo();
+    }
+
+    public String getNextSensorTypeNo() {
+        String maxNo = mapper.getMaxNo();
+        if (maxNo == null || maxNo.trim().isEmpty()) {
+            return "001";
+        }
+        Matcher matcher = Pattern.compile("^(.*?)(\\d+)$").matcher(maxNo.trim());
+        if (!matcher.matches()) {
+            return maxNo.trim() + "001";
+        }
+        String prefix = matcher.group(1);
+        String numericPart = matcher.group(2);
+        int number = Integer.parseInt(numericPart) + 1;
+        return prefix + String.format("%0" + numericPart.length() + "d", number);
     }
 }

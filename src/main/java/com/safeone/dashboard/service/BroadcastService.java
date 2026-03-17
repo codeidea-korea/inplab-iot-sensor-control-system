@@ -20,4 +20,6 @@ public interface BroadcastService {
 
   ObjectNode delBroadcast(List<DelAdminAddBroadcastDto> delAdminAddBroadcastDtoList);
 
+  String getNextBroadcastNo();
+
 }

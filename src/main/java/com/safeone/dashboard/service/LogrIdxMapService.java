@@ -1,6 +1,5 @@
 package com.safeone.dashboard.service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dao.LogrIdxMapMapper;
 import com.safeone.dashboard.dto.LogrIdxMapDto;
 import com.safeone.dashboard.dto.SensorTypeDto;
@@ -72,15 +71,8 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) continue;
 
-
-                Map<String, Object> newMap = new HashMap<>();
-                newMap.put("table_nm", "tb_logr_idx_map");
-                newMap.put("column_nm", "mapping_no");
-                ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-
                 Map<String, Object> logrIdxMap = new HashMap<>();
-
-                logrIdxMap.put("mapping_no", generationKeyOn.get("newId").asText());//관리_no
+                logrIdxMap.put("mapping_no", getNextMappingNo());//관리_no
 
                 List<Map> districtInfoNmAbbr = commonCodeEditService.getDistrictInfoNmAbbr(formatter.formatCellValue(row.getCell(0)));
                 logrIdxMap.put("district_no", districtInfoNmAbbr.get(0).get("district_no").toString());//현장_no
@@ -118,6 +110,11 @@ public class LogrIdxMapService implements JqGridService<LogrIdxMapDto> {
         // 메시지 생성 및 리턴
         String message = "success: " + successCount + ", fail: " + failureCount;
         return message;
+    }
+
+    public int getNextMappingNo() {
+        Integer maxNo = mapper.selectMaxMappingNo();
+        return maxNo == null ? 1 : maxNo + 1;
     }
 
     public void mapping(Map<String, Object> param) throws Exception {

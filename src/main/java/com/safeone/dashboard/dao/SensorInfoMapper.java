@@ -8,6 +8,7 @@ import java.util.Map;
 
 @Repository
 public interface SensorInfoMapper {
+    String selectMaxSensNo();
     int selectSensorInfoListTotal(Map param);
     List<SensorInfoDto> selectSensorInfoList(Map param);
     int insertSensorInfo(Map param);

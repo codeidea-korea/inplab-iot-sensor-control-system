@@ -36,4 +36,8 @@ public class BroadcastMapper {
         return sqlSession.delete("delBroadcast", map);
     }
 
+    public String getMaxBroadcastNo() {
+        return sqlSession.selectOne("getMaxBroadcastNo");
+    }
+
 }

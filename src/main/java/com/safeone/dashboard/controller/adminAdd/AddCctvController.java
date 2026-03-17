@@ -47,8 +47,8 @@ public class AddCctvController {
         return ResponseEntity.ok(cctvService.getMaintComp(getAdminAddDistrictDto));
     }
 
-    @GetMapping(value = "/max-no")
-    public String newGenerationKey() {
-        return cctvService.getMaxNo();
+    @GetMapping(value = "/next-no")
+    public String getNextCctvNo() {
+        return cctvService.getNextCctvNo();
     }
 }

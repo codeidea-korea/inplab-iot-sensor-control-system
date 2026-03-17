@@ -1,6 +1,5 @@
 package com.safeone.dashboard.controller.adminAdd;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.SensorInfoDto;
 import com.safeone.dashboard.service.*;
@@ -139,11 +138,7 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
 
         int chnlCnt = (int) sensAbbr.get(0).get("sens_chnl_cnt");
 
-        Map<String, Object> newMap = new HashMap<>();
-        newMap.put("table_nm", "tb_sensor_info");
-        newMap.put("column_nm", "sens_no");
-        ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-        param.put("sens_no", generationKeyOn.get("newId").asText());
+        param.put("sens_no", sensorInfoService.getNextSensNo());
 
         Map<String, Object> sens = new HashMap<>();
         sens.put("sensor_seq", sensAbbr.get(0).get("sens_abbr"));
@@ -152,11 +147,7 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
         param.put("sens_nm", sensNm.get(0).get("new_sensor_seq"));
 
         //로거 인덱스 관련
-        Map<String, Object> newMap2 = new HashMap<>();
-        newMap2.put("table_nm", "tb_logr_idx_map");
-        newMap2.put("column_nm", "mapping_no");
-        ObjectNode generationKeyOn2 = commonCodeEditService.newGenerationKey(newMap2);
-        param.put("mapping_no", generationKeyOn2.get("newId").asText());
+        param.put("mapping_no", logrIdxMapService.getNextMappingNo());
         String district_no = districtInfoService.getDistrictInfoIdByEtc1(param.get("logr_no").toString());
         param.put("sens_chnl_nm", param.get("sens_nm"));
         param.put("district_no", district_no);

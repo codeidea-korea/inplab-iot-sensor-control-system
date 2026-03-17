@@ -2,6 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
     
 <mapper namespace="com.safeone.dashboard.dao.LogrIdxMapMapper">
+    <select id="selectMaxMappingNo" resultType="Integer">
+        SELECT MAX(mapping_no)
+        FROM tb_logr_idx_map
+    </select>
+
     <sql id="rowSearch">
 
         <if test="sens_nos != null and sens_nos != ''">
@@ -158,6 +163,7 @@
 
     <insert id="insertLogrIdxMap" parameterType="java.util.Map">
         INSERT INTO tb_logr_idx_map (
+            <if test="mapping_no != null">mapping_no,</if>
             <if test="sens_no != null">sens_no</if>
             <if test="sens_chnl_id != null">, sens_chnl_id</if>
             <if test="logr_no != null">, logr_no</if>
@@ -170,6 +176,7 @@
             , reg_dt
             , mapping_dt
         ) VALUES (
+            <if test="mapping_no != null">#{mapping_no}::int,</if>
             <if test="sens_no != null">#{sens_no}</if>
             <if test="sens_chnl_id != null">, #{sens_chnl_id}</if>
             <if test="logr_no != null">, #{logr_no}</if>

@@ -13,5 +13,6 @@ public interface SiteInfoMapper {
     int insertSiteInfo(Map param);
     int updateSiteInfo(Map param);
     int deleteSiteInfo(Map param);
+    String selectMaxSiteNo();
 }
     

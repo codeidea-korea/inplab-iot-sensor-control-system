@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dto.*;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CctvService {
 
@@ -20,7 +19,5 @@ public interface CctvService {
 
   ObjectNode getMaintComp(GetAdminAddMaintCompDto getAdminAddDistrictDto);
 
-  ObjectNode newGenerationKey(Map<String, Object> map);
-
-  String getMaxNo();
+  String getNextCctvNo();
 }

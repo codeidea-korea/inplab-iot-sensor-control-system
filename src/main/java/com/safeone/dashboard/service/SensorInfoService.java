@@ -1,6 +1,5 @@
 package com.safeone.dashboard.service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dao.SensorInfoMapper;
 import com.safeone.dashboard.dto.SensorInfoDto;
 import com.safeone.dashboard.dto.SensorTypeDto;
@@ -17,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.text.SimpleDateFormat;
 import java.io.InputStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 @Service
@@ -209,19 +210,8 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                     mapper.updateSensorInfo(sensorInfo);
 
                 } else {
-                    // 신규 고유 키 생성
-                    Map<String, Object> newMap = new HashMap<>();
-                    newMap.put("table_nm", "tb_sensor_info");
-                    newMap.put("column_nm", "sens_no");
-                    ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-                    sensorInfo.put("sens_no", generationKeyOn.get("newId").asText());
-
-                    // 매핑 번호 생성
-                    Map<String, Object> newMap2 = new HashMap<>();
-                    newMap2.put("table_nm", "tb_logr_idx_map");
-                    newMap2.put("column_nm", "mapping_no");
-                    ObjectNode generationKeyOn2 = commonCodeEditService.newGenerationKey(newMap2);
-                    sensorInfo.put("mapping_no", generationKeyOn2.get("newId").asText());
+                    sensorInfo.put("sens_no", getNextSensNo());
+                    sensorInfo.put("mapping_no", logrIdxMapService.getNextMappingNo());
 
                     // 로거 정보 인서트
                     this.logrInfoInsert(sensorInfo);
@@ -283,6 +273,24 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
 
     public List<Map<String, Object>> getSensorTypesByLogrNo(Map<String, Object> param) {
         return mapper.getSensorTypesByLogrNo(param);
+    }
+
+    public String getNextSensNo() {
+        String maxNo = mapper.selectMaxSensNo();
+        if (maxNo == null || maxNo.trim().isEmpty()) {
+            return "S0001";
+        }
+
+        String trimmed = maxNo.trim();
+        Matcher matcher = Pattern.compile("^(.*?)(\\d+)$").matcher(trimmed);
+        if (!matcher.matches()) {
+            return trimmed + "0001";
+        }
+
+        String prefix = matcher.group(1);
+        String numericPart = matcher.group(2);
+        int next = Integer.parseInt(numericPart) + 1;
+        return prefix + String.format("%0" + numericPart.length() + "d", next);
     }
 
     public void logrInfoInsert(Map<String, Object> param) {

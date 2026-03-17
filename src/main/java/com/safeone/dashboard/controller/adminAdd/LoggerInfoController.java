@@ -1,6 +1,5 @@
 package com.safeone.dashboard.controller.adminAdd;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.LoggerInfoDto;
 import com.safeone.dashboard.service.CommonCodeEditService;
@@ -86,6 +85,12 @@ public class LoggerInfoController extends JqGridAbstract<LoggerInfoDto> {
     }
 
     @ResponseBody
+    @GetMapping("/next-no")
+    public String getNextLoggerNo(@RequestParam(value = "gnss", defaultValue = "false") boolean gnss) {
+        return loggerInfoService.getNextLoggerNo(gnss);
+    }
+
+    @ResponseBody
     @GetMapping("/add")
     public synchronized Map<String, Object> insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         Map<String, Object> response = new HashMap<>();
@@ -106,15 +111,8 @@ public class LoggerInfoController extends JqGridAbstract<LoggerInfoDto> {
             return response;
         }
 
-        Map<String, Object> newMap = new HashMap<>();
-        newMap.put("table_nm", "tb_logger_info");
-        newMap.put("column_nm", "logr_no");
-        if (param.containsKey("logr_flag") && "G".equals(param.get("logr_flag").toString())) {
-            newMap.put("pre_type", "GNSS");
-        }
-
-        ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-        String newId = generationKeyOn.get("newId").asText();
+        boolean gnss = param.containsKey("logr_flag") && "G".equals(param.get("logr_flag").toString());
+        String newId = loggerInfoService.getNextLoggerNo(gnss);
         param.put("logr_no", newId);
 
         try {

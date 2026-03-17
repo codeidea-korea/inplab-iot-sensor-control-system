@@ -1,6 +1,5 @@
 package com.safeone.dashboard.controller.adminAdd;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.SensorTypeDto;
 import com.safeone.dashboard.service.CommonCodeEditService;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,14 +85,7 @@ public class SensorTypeController extends JqGridAbstract<SensorTypeDto> {
     @ResponseBody
     @GetMapping("/add")
     public synchronized boolean insert(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-
-        // 생성
-        Map<String, Object> newMap = new HashMap<>();
-        newMap.put("table_nm", "tb_sensor_type");
-        newMap.put("column_nm", "senstype_no");
-
-        ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-        param.put("senstype_no", generationKeyOn.get("newId").asText());
+        param.put("senstype_no", sensorTypeService.getNextSensorTypeNo());
 
         return sensorTypeService.create(param);
     }

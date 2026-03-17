@@ -107,8 +107,28 @@
             });
         };
 
+        const deleteBroadcastApi = (array) => {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: 'DELETE',
+                    url: `/adminAdd/broadcast/broardcast`,
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    async: true,
+                    data: JSON.stringify(array)
+                }).done(function (res) {
+                    resolve(res);
+                }).fail(function (fail) {
+                    reject(fail);
+                    console.log('delBroadcast fail > ', fail);
+                    alert2('방송장비 정보를 삭제하는 중 서버 오류가 발생했습니다.', function () {
+                    });
+                });
+            });
+        };
+
         const actionDelBroadcast = (brdcast_no) => {
-            udtBroadcast([{brdcast_no: brdcast_no, del_yn: 'Y'}]).then((res) => {
+            deleteBroadcastApi([{brdcast_no: brdcast_no}]).then((res) => {
                 if (res.count?.pass > 0) {
                     alert2(res?.pass_list[0]?.message, function () {
                     });
@@ -244,12 +264,9 @@
 
         const getNewBroadcastNo = () => {
             return new Promise((resolve, reject) => {
-                $.get('/adminAdd/common/code/getNewGenerationKey', {
-                    table_nm: 'tb_broadcast_info',
-                    column_nm: 'brdcast_no'
-                }, function (res) {
-                    if (res && res.length > 0 && res[0].new_id) {
-                        resolve(res[0].new_id);
+                $.get('/adminAdd/broadcast/next-no', function (res) {
+                    if (res) {
+                        resolve(res);
                         return;
                     }
                     reject(new Error('new broadcast no is empty'));
@@ -423,9 +440,14 @@
 
             // 수정 팝업
             $('.modifyBtn').on('click', function () {
-                const brdcast_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+                let brdcast_no = $("#jqGrid").jqGrid('getGridParam', 'selrow');
+                const checkedBrdcastNo = $("#jqGrid tbody").find(".row-checkbox:checked").first()
+                    .closest("tr").find("td[aria-describedby='jqGrid_brdcast_no']").text().trim();
+                if (checkedBrdcastNo) {
+                    brdcast_no = checkedBrdcastNo;
+                }
 
-                if (brdcast_no === null) {
+                if (!brdcast_no) {
                     alert2('방송장비를 선택해주세요.', function () {
                     });
                     return;

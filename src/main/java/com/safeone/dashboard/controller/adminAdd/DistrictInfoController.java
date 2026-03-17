@@ -1,6 +1,5 @@
 package com.safeone.dashboard.controller.adminAdd;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.DistrictInfoDto;
 import com.safeone.dashboard.service.CommonCodeEditService;
@@ -97,12 +96,7 @@ public class DistrictInfoController extends JqGridAbstract<DistrictInfoDto> {
                 param.put("dist_view_pic", fileBytes2);
             }
 
-            // district_no 생성
-            Map<String, Object> newMap = new HashMap<>();
-            newMap.put("table_nm", "tb_district_info");
-            newMap.put("column_nm", "district_no");
-            ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-            param.put("district_no", generationKeyOn.get("newId").asText());
+            param.put("district_no", districtInfoService.getNextDistrictNo());
 
             // 서비스 호출하여 데이터베이스에 데이터 저장
             boolean createResult = districtInfoService.create(param);

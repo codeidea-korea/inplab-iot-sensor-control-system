@@ -8,6 +8,7 @@ import java.util.Map;
 
 @Repository
 public interface LogrIdxMapMapper {
+    Integer selectMaxMappingNo();
     int selectLogrIdxMapListTotal(Map param);
     List<LogrIdxMapDto> selectLogrIdxMapList(Map param);
     int insertLogrIdxMap(Map param);

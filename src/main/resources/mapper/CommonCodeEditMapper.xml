@@ -3,57 +3,6 @@
 
 <mapper namespace="com.safeone.dashboard.dao.CommonCodeEditMapper">
 
-    <select id="getGenerationKey" parameterType="java.util.Map" resultType="java.util.Map">
-        /* CommonCodeEditMapper.getGenerationKey */
-        SELECT
-        A.table_nm
-        ,A.column_nm
-        ,A.pre_code
-        ,A.pre_type
-        ,A.length
-        ,A.max
-        ,CONCAT(A.pre_code, RIGHT(CONCAT(REPEAT('0',LENGTH),A.max+1),LENGTH)) AS new_id
-        FROM generation_key A
-        WHERE 1=1
-        AND table_nm = #{table_nm}
-        AND column_nm = #{column_nm}
-        <if test="pre_type != null">
-            AND pre_type = #{pre_type}
-        </if>
-        <if test="pre_type == null">
-            AND pre_type = ''
-        </if>
-    </select>
-
-    <update id="incMaxGenerationKey" parameterType="java.util.Map">
-        /* CommonCodeEditMapper.incMaxGenerationKey */
-        UPDATE generation_key
-        SET max = max+1
-        WHERE table_nm = #{table_nm}
-        AND column_nm = #{column_nm}
-        <if test="pre_type != null">
-            AND pre_type = #{pre_type}
-        </if>
-        <if test="pre_type == null">
-            AND pre_type = ''
-        </if>
-    </update>
-
-    <update id="nextPreCodeGenerationKey" parameterType="java.util.Map">
-        /* CommonCodeEditMapper.nextPreCodeGenerationKey */
-        UPDATE generation_key
-        SET pre_code = CHAR(ASCII(pre_code)+1)
-        WHERE table_nm = #{table_nm}
-        AND column_nm = #{column_nm}
-        <if test="pre_type != null">
-            AND pre_type = #{pre_type}
-        </if>
-        <if test="pre_type == null">
-            AND pre_type = ''
-        </if>
-    </update>
-
-
     <select id="selectCommonCodeEditList" parameterType="java.util.Map" resultType="java.util.Map">
         SELECT cc.code_id as code
         , cc.code_nm as name

@@ -1,6 +1,5 @@
 package com.safeone.dashboard.service;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dao.LoggerInfoMapper;
 import com.safeone.dashboard.dto.LoggerInfoDto;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +13,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -92,19 +93,9 @@ public class LoggerInfoService implements JqGridService<LoggerInfoDto> {
                 Map<String, Object> loggerInfo = new HashMap<>();
                 String logr_nm_type;
 
-                Map<String, Object> newMap = new HashMap<>();
-                newMap.put("table_nm", "tb_logger_info");
-                newMap.put("column_nm", "logr_no");
-
                 // GNSS 값 검증 및 처리
                 String typeValue = formatter.formatCellValue(row.getCell(0));
-                if ("GNSS".equals(typeValue)) {
-                    newMap.put("pre_type", typeValue);
-                }
-
-                ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-
-                String newId = generationKeyOn.get("newId").asText();
+                String newId = getNextLoggerNo("GNSS".equals(typeValue));
                 String newIdNo = newId.replaceAll("^[A-Za-z]", "");
 
 //                String prefix = "GNSS".equals(typeValue) ? "GNS" : "LOG";
@@ -156,6 +147,22 @@ public class LoggerInfoService implements JqGridService<LoggerInfoDto> {
 
     public String getLogrNoByEtc1(String name) {
         return mapper.getLogrNoByEtc1(name);
+    }
+
+    public String getNextLoggerNo(boolean gnss) {
+        String prefix = gnss ? "G" : "L";
+        String maxNo = gnss ? mapper.selectMaxGnssLoggerNo() : mapper.selectMaxLoggerNo();
+        if (maxNo == null || maxNo.trim().isEmpty()) {
+            return prefix + "01";
+        }
+        Matcher matcher = Pattern.compile("^(.*?)(\\d+)$").matcher(maxNo.trim());
+        if (!matcher.matches()) {
+            return prefix + "01";
+        }
+        prefix = matcher.group(1);
+        String numericPart = matcher.group(2);
+        int number = Integer.parseInt(numericPart) + 1;
+        return prefix + String.format("%0" + numericPart.length() + "d", number);
     }
 
 }

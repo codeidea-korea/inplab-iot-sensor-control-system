@@ -69,20 +69,10 @@ COMMENT ON COLUMN generation_key.length IS 'pre_code 뒤에 붙는 숫자길이'
 COMMENT ON COLUMN generation_key.max IS '현재 max값';
 
 INSERT INTO generation_key(table_nm, column_nm, pre_code, pre_type, length, max) VALUES
-                                                                                     ('tb_site_info', 'site_no', 'S', '', 2, 0),
-                                                                                     ('tb_district_info', 'district_no', 'D', '', 2, 0),
-                                                                                     ('tb_logger_info', 'logr_no', 'L', '', 2, 0),
-                                                                                     ('tb_logger_info', 'logr_no', 'L', 'GNSS', 2, 90),
-                                                                                     ('tb_sensor_type', 'senstype_no', '', '', 3, 0),
-                                                                                     ('tb_sensor_info', 'sens_no', 'S', '', 4, 0),
-                                                                                     ('tb_logr_idx_map', 'mapping_no', '', '', 1, 0),
                                                                                      ('tb_measure_details', 'mgnt_no', '', '', 1, 0),
                                                                                      ('tb_alarm_details', 'mgnt_no', '', '', 1, 0),
-                                                                                     ('tb_CCTV_info', 'cctv_no', 'T', '', 2, 0),
                                                                                      ('tb_CCTV_details', 'mgnt_no', '', '', 1, 0),
-                                                                                     ('tb_broadcast_info', 'brdcast_no', 'B', '', 2, 0),
                                                                                      ('tb_broadcast_details', 'mgnt_no', '', '', 1, 0),
-                                                                                     ('tb_dispboard_info', 'dispbd_no', 'P', '', 2, 0),
                                                                                      ('tb_dispbd_image', 'mgnt_no', '', '', 1, 0),
                                                                                      ('tb_dispbd_group', 'mgnt_no', '', '', 1, 0),
                                                                                      ('tb_dispbd_details', 'mgnt_no', '', '', 1, 0),

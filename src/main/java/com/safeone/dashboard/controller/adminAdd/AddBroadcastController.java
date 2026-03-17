@@ -3,10 +3,10 @@ package com.safeone.dashboard.controller.adminAdd;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.dto.*;
 import com.safeone.dashboard.service.BroadcastService;
-import com.safeone.dashboard.service.CctvService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,5 +39,10 @@ public class AddBroadcastController {
     @RequestMapping(value = "/broardcast", produces = MediaType.APPLICATION_JSON_VALUE, method = { RequestMethod.DELETE })
     public ResponseEntity<ObjectNode> delBroadcast(@RequestBody List<DelAdminAddBroadcastDto> delAdminAddBroadcastDtoList) {
         return ResponseEntity.ok(broadcastvService.delBroadcast(delAdminAddBroadcastDtoList));
+    }
+
+    @GetMapping(value = "/next-no")
+    public String getNextBroadcastNo() {
+        return broadcastvService.getNextBroadcastNo();
     }
 }

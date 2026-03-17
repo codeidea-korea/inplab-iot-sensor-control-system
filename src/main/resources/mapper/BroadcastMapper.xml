@@ -123,4 +123,10 @@
 		WHERE 1=1
 		AND brdcast_no = #{brdcast_no}
 	</delete>
+
+	<select id="getMaxBroadcastNo" resultType="String">
+		SELECT MAX(brdcast_no) as brdcast_no
+		FROM tb_broadcast_info
+		WHERE COALESCE(del_yn, 'N') = 'N'
+	</select>
 </mapper>

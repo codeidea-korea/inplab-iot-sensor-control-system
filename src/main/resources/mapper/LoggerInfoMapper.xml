@@ -247,4 +247,16 @@
         FROM tb_logger_info
         WHERE logr_nm = #{device_id}
     </select>
+
+    <select id="selectMaxLoggerNo" resultType="string">
+        SELECT MAX(logr_no)
+        FROM tb_logger_info
+        WHERE COALESCE(logr_flag, 'L') != 'G'
+    </select>
+
+    <select id="selectMaxGnssLoggerNo" resultType="string">
+        SELECT MAX(logr_no)
+        FROM tb_logger_info
+        WHERE logr_flag = 'G'
+    </select>
 </mapper>

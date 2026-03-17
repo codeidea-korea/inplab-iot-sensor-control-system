@@ -17,5 +17,7 @@ public interface LoggerInfoMapper {
 
     LoggerInfoDto getLoggerInfo(Map param);
     String getLogrNoByEtc1(String name);
+    String selectMaxLoggerNo();
+    String selectMaxGnssLoggerNo();
 }
     

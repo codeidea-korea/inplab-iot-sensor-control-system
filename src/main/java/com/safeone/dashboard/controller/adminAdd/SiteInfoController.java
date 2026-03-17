@@ -1,9 +1,7 @@
 package com.safeone.dashboard.controller.adminAdd;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.safeone.dashboard.controller.extend.JqGridAbstract;
 import com.safeone.dashboard.dto.SiteInfoDto;
-import com.safeone.dashboard.service.CommonCodeEditService;
 import com.safeone.dashboard.service.SiteInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.coobird.thumbnailator.Thumbnails; // 추가됨
@@ -23,9 +20,6 @@ import java.io.ByteArrayOutputStream; // 추가됨
 public class SiteInfoController extends JqGridAbstract<SiteInfoDto> {
     @Autowired
     private SiteInfoService siteInfoService;
-
-    @Autowired
-    private CommonCodeEditService commonCodeEditService;
 
     @Value("${upload.path}")
     private String upload_path;
@@ -78,12 +72,7 @@ public class SiteInfoController extends JqGridAbstract<SiteInfoDto> {
                 param.put("site_title_logo_nm", file2.getOriginalFilename());
             }
 
-            //site_no 생성
-            Map<String, Object> newMap = new HashMap<>();
-            newMap.put("table_nm", "tb_site_info");
-            newMap.put("column_nm", "site_no");
-            ObjectNode generationKeyOn = commonCodeEditService.newGenerationKey(newMap);
-            param.put("site_no", generationKeyOn.get("newId").asText());
+            param.put("site_no", siteInfoService.getNextSiteNo());
 
             // 서비스 호출하여 데이터베이스에 데이터 저장
             return siteInfoService.create(param);

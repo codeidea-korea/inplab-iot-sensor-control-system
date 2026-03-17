@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +47,20 @@ public class SiteInfoService implements JqGridService<SiteInfoDto> {
 	public int delete(Map param) {
 		return mapper.deleteSiteInfo(param);
 	}
+
+    public String getNextSiteNo() {
+        String maxNo = mapper.selectMaxSiteNo();
+        if (maxNo == null || maxNo.trim().isEmpty()) {
+            return "S01";
+        }
+        Matcher matcher = Pattern.compile("^(.*?)(\\d+)$").matcher(maxNo.trim());
+        if (!matcher.matches()) {
+            return maxNo.trim() + "01";
+        }
+        String prefix = matcher.group(1);
+        String numericPart = matcher.group(2);
+        int number = Integer.parseInt(numericPart) + 1;
+        return prefix + String.format("%0" + numericPart.length() + "d", number);
+    }
 
 }

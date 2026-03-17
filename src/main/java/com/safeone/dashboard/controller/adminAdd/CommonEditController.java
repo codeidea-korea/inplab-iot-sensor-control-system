@@ -94,12 +94,6 @@ public class CommonEditController {
         return commonCodeEditService.getSiteInfo();
     }
 
-    @ResponseBody
-    @GetMapping("/code/getNewGenerationKey")
-    public List getNewGenerationKey(HttpServletRequest request, @RequestParam Map<String, Object> param) {
-        return commonCodeEditService.getNewGenerationKey(param);
-    }
-
     @GetMapping("/img/view")
     public ResponseEntity<Resource> imgView(@RequestParam Map<String, Object> param) {
 

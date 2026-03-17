@@ -146,4 +146,9 @@
         DELETE FROM tb_site_info
          WHERE site_no = #{site_no}
     </delete>
+
+    <select id="selectMaxSiteNo" resultType="String">
+        SELECT MAX(site_no)
+        FROM tb_site_info
+    </select>
 </mapper>

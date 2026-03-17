@@ -158,9 +158,27 @@
             });
         };
 
+        const getNewCctvNo = () => {
+            return new Promise((resolve, reject) => {
+                $.get('/adminAdd/cctv/next-no', function (res) {
+                    if (res) {
+                        resolve(res);
+                        return;
+                    }
+                    reject(new Error('new cctv no is empty'));
+                }).fail(function (fail) {
+                    reject(fail);
+                });
+            });
+        };
+
         const initForm = () => {
             $('#lay-form-write08').find('input').not('#ins_cctv, #udt_cctv, #del_cctv').val('');
             $('#lay-form-write08').find('select').prop('selectedIndex', 0);
+        };
+
+        const closeCctvFormModal = () => {
+            $('#lay-form-write08 [data-fancybox-close]').first().trigger('click');
         };
 
         const validCheck = () => {
@@ -372,14 +390,7 @@
             $('.insertBtn').on('click', function () {
                 initForm();
 
-                $.get('/adminAdd/cctv/max-no', null, (res) => {
-                    if (res !== null && res !== undefined) {
-                        const newId = 'CCTV' + (parseInt(res.substring(4)) + 1).toString().padStart(2, '0');
-                        $('input[name=cctv_no]').val(newId)
-                    }
-                });
-
-                Promise.all([getMaintCompInfo({partner_type_flag: '1'}), getDistrictInfo()]).then(([res1, res2]) => {
+                Promise.all([getMaintCompInfo({partner_type_flag: '1'}), getDistrictInfo(), getNewCctvNo()]).then(([res1, res2, newCctvNo]) => {
                     let partner_comp_id = $('select[name=partner_comp_id]');
                     partner_comp_id.empty();
                     partner_comp_id.append('<option value="">선택</option>');
@@ -393,6 +404,7 @@
                     $.each(res2.rows, function (index, item) {
                         district_nm.append('<option value="' + item.district_no + '">' + item.district_nm + '</option>');
                     });
+                    $('input[name=cctv_no]').val(newCctvNo);
                     $("#form_sub_title").html('신규 등록');
                     $('#ins_cctv').show();
                     $('#udt_cctv').hide();
@@ -430,6 +442,7 @@
                         getCctv({cctv_nm: search_cctv_nm, limit: limit, offset: offset}).then((res) => {
                             $("#jqGrid").jqGrid('clearGridData');
                             $("#jqGrid").jqGrid('setGridParam', {data: res.rows}).trigger('reloadGrid');
+                            closeCctvFormModal();
                         }).catch((fail) => {
                             console.log('setJqGridTable fail > ', fail);
                         });
@@ -468,6 +481,7 @@
                         getCctv({cctv_nm: search_cctv_nm, limit: limit, offset: offset}).then((res) => {
                             $("#jqGrid").jqGrid('clearGridData');
                             $("#jqGrid").jqGrid('setGridParam', {data: res.rows}).trigger('reloadGrid');
+                            closeCctvFormModal();
                         }).catch((fail) => {
                             console.log('setJqGridTable fail > ', fail);
                         });
@@ -486,9 +500,9 @@
                     const cctv_no = $(this).closest("tr").find("td[aria-describedby='jqGrid_cctv_no']").text().trim();
                     selectedDispbdNos.push(cctv_no);
                 });
-                const cctv_no = selectedDispbdNos[0]
+                const cctv_no = selectedDispbdNos[0];
 
-                if (cctv_no === null) {
+                if (!cctv_no) {
                     alert2('CCTV를 선택해주세요.', function () {
                     });
                     return;

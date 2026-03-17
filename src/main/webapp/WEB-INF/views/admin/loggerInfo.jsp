@@ -112,13 +112,11 @@
 
                     // logr_no 값 새로 조회하여 설정
                     if (preType !== undefined) {
-                        $.get('/adminAdd/common/code/getNewGenerationKey', {
-                            table_nm: "tb_logger_info",
-                            column_nm: "logr_no",
-                            pre_type: preType
+                        $.get('/adminAdd/loggerInfo/next-no', {
+                            gnss: logrFlag === 'G'
                         }, function (res) {
-                            if (res.length > 0) {
-                                $('#lay-form-write input[name="logr_no"]').val(res[0].new_id);
+                            if (res) {
+                                $('#lay-form-write input[name="logr_no"]').val(res);
                                 $('#lay-form-write select[name="district_no"]').val('');
                                 $('#lay-form-write input[name="logr_nm"]').val('');
                             }

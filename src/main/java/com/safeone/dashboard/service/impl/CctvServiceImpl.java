@@ -17,6 +17,8 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Transactional
@@ -54,13 +56,12 @@ public class CctvServiceImpl implements CctvService {
         int passCount = 0;
 
         for (InsAdminAddCctvDto dto : insAdminAddCctvDtoList) {
-            Map<String, Object> newMap = new HashMap<>();
-            newMap.put("table_nm", "tb_cctv_info");
-            newMap.put("column_nm", "cctv_no");
-            ObjectNode generationKeyOn = newGenerationKey(newMap);
-            String newCctvNo = generationKeyOn.get("newId").asText();
-
             Map<String, Object> map = CommonUtils.dtoToMap(dto);
+            String newCctvNo = map.get("cctv_no") == null ? "" : map.get("cctv_no").toString().trim();
+            if (newCctvNo.isEmpty()) {
+                newCctvNo = getNextCctvNo();
+            }
+
             Map<String, Object> getMap = new HashMap<>();
             map.put("cctv_no", newCctvNo);
             getMap.put("cctv_no", newCctvNo);
@@ -183,48 +184,19 @@ public class CctvServiceImpl implements CctvService {
         return on;
     }
 
-    public ObjectNode newGenerationKey(Map<String, Object> map) {
-        ObjectMapper om = new ObjectMapper();
-        ObjectNode on = om.createObjectNode();
-
-        String newId = "";
-        String preCode = "";
-
-        int count = 0;
-        int length = 0;
-
-        List<HashMap<String, Object>> list = cctvMapper.getGenerationKey2(map);
-
-        if (list.size() == 1) {
-            newId = CommonUtils.isNull(list.get(0).get("new_id"));
-            length = Integer.parseInt(CommonUtils.isNull(list.get(0).get("length")));
-            preCode = CommonUtils.isNull(list.get(0).get("pre_code"));
-
-            if(newId.length() - preCode.length() > length) {
-                // id값을 화면에서 미리 만들어서 주기에 사용안함
-                if(CommonUtils.isNull(map.get("table_name")).equals("common_code_list")
-                        && CommonUtils.isNull(map.get("columne_name")).equals("code_id")) {
-                    cctvMapper.nextPreCodeGenerationKey2(map);
-                    newGenerationKey(map);
-                } else {
-                    on.put("code", "OVER_NUM");
-                    return on;
-                }
-            }
-
-            count = cctvMapper.incMaxGenerationKey2(map);
-
-            on.put("newId", newId);
-        } else {
-            on.put("code", "EMPTY");
-        }
-
-        CommonUtils.setCountInfo("udt", count, on);
-        return on;
-    }
-
     @Override
-    public String getMaxNo() {
-        return cctvMapper.getMaxNo();
+    public String getNextCctvNo() {
+        String maxNo = cctvMapper.getMaxNo();
+        if (maxNo == null || maxNo.trim().isEmpty()) {
+            return "CCTV01";
+        }
+        Matcher matcher = Pattern.compile("^(.*?)(\\d+)$").matcher(maxNo.trim());
+        if (!matcher.matches()) {
+            return maxNo.trim() + "01";
+        }
+        String prefix = matcher.group(1);
+        String numericPart = matcher.group(2);
+        int number = Integer.parseInt(numericPart) + 1;
+        return prefix + String.format("%0" + numericPart.length() + "d", number);
     }
 }

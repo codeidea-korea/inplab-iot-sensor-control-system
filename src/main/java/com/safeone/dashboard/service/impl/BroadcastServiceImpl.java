@@ -18,6 +18,8 @@ import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Transactional
@@ -60,11 +62,7 @@ public class BroadcastServiceImpl implements BroadcastService {
             Map<String, Object> map = CommonUtils.dtoToMap(dto);
             String brdcastNo = map.get("brdcast_no") == null ? "" : map.get("brdcast_no").toString().trim();
             if (brdcastNo.isEmpty()) {
-                Map<String, Object> newMap = new HashMap<>();
-                newMap.put("table_nm", "tb_broadcast_info");
-                newMap.put("column_nm", "brdcast_no");
-                ObjectNode generationKeyOn = cctvService.newGenerationKey(newMap);
-                brdcastNo = generationKeyOn.get("newId").asText();
+                brdcastNo = getNextBroadcastNo();
             }
             map.put("brdcast_no", brdcastNo);
 
@@ -134,5 +132,21 @@ public class BroadcastServiceImpl implements BroadcastService {
         CommonUtils.setCountInfo("del", count, on);
 
         return on;
+    }
+
+    @Override
+    public String getNextBroadcastNo() {
+        String maxNo = broadcastMapper.getMaxBroadcastNo();
+        if (maxNo == null || maxNo.trim().isEmpty()) {
+            return "B01";
+        }
+        Matcher matcher = Pattern.compile("^(.*?)(\\d+)$").matcher(maxNo.trim());
+        if (!matcher.matches()) {
+            return maxNo.trim() + "01";
+        }
+        String prefix = matcher.group(1);
+        String numericPart = matcher.group(2);
+        int number = Integer.parseInt(numericPart) + 1;
+        return prefix + String.format("%0" + numericPart.length() + "d", number);
     }
 }

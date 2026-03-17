@@ -8,12 +8,6 @@ import java.util.Map;
 
 @Repository
 public interface CommonCodeEditMapper {
-    List<Map> getGenerationKey(Map param);
-
-    int incMaxGenerationKey(Map param);
-
-    int nextPreCodeGenerationKey(Map param);
-
     List<Map> selectCommonCodeEditList(Map param);
 
     List<Map> selectDistrictInfoNmAbbr(String district_nm);
