@@ -3,7 +3,7 @@
     
 <mapper namespace="com.safeone.dashboard.dao.LogrIdxMapMapper">
     <select id="selectMaxMappingNo" resultType="Integer">
-        SELECT MAX(mapping_no)
+        SELECT MAX(logr_idx_no)
         FROM tb_logr_idx_map
     </select>
 
@@ -163,7 +163,6 @@
 
     <insert id="insertLogrIdxMap" parameterType="java.util.Map">
         INSERT INTO tb_logr_idx_map (
-            <if test="mapping_no != null">mapping_no,</if>
             <if test="sens_no != null">sens_no</if>
             <if test="sens_chnl_id != null">, sens_chnl_id</if>
             <if test="logr_no != null">, logr_no</if>
@@ -176,7 +175,6 @@
             , reg_dt
             , mapping_dt
         ) VALUES (
-            <if test="mapping_no != null">#{mapping_no}::int,</if>
             <if test="sens_no != null">#{sens_no}</if>
             <if test="sens_chnl_id != null">, #{sens_chnl_id}</if>
             <if test="logr_no != null">, #{logr_no}</if>
@@ -224,7 +222,7 @@
         <if test="district_no != null">
             , district_no = #{district_no}
         </if>
-        where mapping_no = #{mapping_no}
+        where logr_idx_no = #{logr_idx_no}
     </update>
 
     <delete id="deleteLogrIdxMap" parameterType="java.util.Map">
