@@ -62,7 +62,10 @@
             $.get('/adminAdd/common/code/districtInfoList', null, function (res) {
                 let option = '<option value="">선택</option>';
                 $.each(res, function (idx) {
-                    option += '<option value="' + res[idx].code + '">' + res[idx].name + '</option>';
+                    const lon = res[idx].dist_lon || res[idx].lon || '';
+                    const lat = res[idx].dist_lat || res[idx].lat || '';
+                    option += '<option value="' + res[idx].code + '" data-lon="' + lon + '" data-lat="' + lat + '">' + res[idx].name + '</option>';
+
                 });
                 $('#district_no').html(option);
             });
@@ -234,8 +237,15 @@
                     } catch (e) {
                     }
                 }else{
-                    /* 빈 칸 default 처리 */
-                    window.vworld.setPanBy([127.449482276989, 36.9317789946793], 18);
+                    const $selectedDistrict = $('#district_no option:selected');
+                    const distLon = parseFloat($selectedDistrict.data('lon'));
+                    const distLat = parseFloat($selectedDistrict.data('lat'));
+
+                    if (Number.isFinite(distLon) && Number.isFinite(distLat)) {
+                        window.vworld.setPanBy([distLon, distLat], 18);
+                    } else {
+                        window.vworld.setPanBy([127.449482276989, 36.9317789946793], 18);
+                     }
                 }
 
                 popFancy('#lay-form-address', {dragToClose: false, touch: false});

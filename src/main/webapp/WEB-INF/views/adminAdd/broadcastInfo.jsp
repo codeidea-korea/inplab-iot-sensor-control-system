@@ -297,8 +297,17 @@
                         parseFloat($('#lay-form-write08 input[name=brdcast_lat]').val())], parseFloat($('#lay-form-write08 input[name=brdcast_zoom]').val())
                     );
                 }else{
-                    /* 빈 칸 default 처리 */
-                    window.vworld.setPanBy([127.449482276989, 36.9317789946793], 18);
+                    const $selectedDistrict = $('#district_no option:selected');
+                    const distLon = parseFloat($selectedDistrict.data('lon'));
+                    const distLat = parseFloat($selectedDistrict.data('lat'));
+
+                    if (Number.isFinite(distLon) && Number.isFinite(distLat)) {
+                        // 현장 좌표가 정상적인 숫자이면 해당 위치로 이동
+                        window.vworld.setPanBy([distLon, distLat], 18);
+                    } else {
+                        /* 빈 칸 default 처리 */
+                        window.vworld.setPanBy([127.449482276989, 36.9317789946793], 18);
+                    }
                 }
                 popFancy('#lay-form-address', {dragToClose: false, touch: false});
             });
@@ -344,7 +353,9 @@
                     district_nm.empty();
                     district_nm.append('<option value="">선택</option>');
                     $.each(res2.rows, function (index, item) {
-                        district_nm.append('<option value="' + item.district_no + '">' + item.district_nm + '</option>');
+                        const lon = item.dist_lon || item.lon || '';
+                        const lat = item.dist_lat || item.lat || '';
+                        district_nm.append('<option value="' + item.district_no + '" data-lon="' + lon + '" data-lat="' + lat + '">' + item.district_nm + '</option>');
                     });
                     $('input[name=brdcast_no]').val(newBroadcastNo);
                     $("#form_sub_title").html('신규 등록');
@@ -470,7 +481,9 @@
                     district_nm.empty();
                     district_nm.append('<option value="">선택</option>');
                     $.each(res2.rows, function (index, item) {
-                        district_nm.append('<option value="' + item.district_no + '">' + item.district_nm + '</option>');
+                        const lon = item.dist_lon || item.lon || '';
+                        const lat = item.dist_lat || item.lat || '';
+                        district_nm.append('<option value="' + item.district_no + '" data-lon="' + lon + '" data-lat="' + lat + '">' + item.district_nm + '</option>');
                     });
 
                     setBroadcast(res1.rows[0]);

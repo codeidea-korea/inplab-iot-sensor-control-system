@@ -33,6 +33,8 @@
     <select id="selectDistrictInfoList" resultType="java.util.Map">
         SELECT cc.district_no as code
              , cc.district_nm as name
+             , cc.dist_lon
+             , cc.dist_lat
         FROM tb_district_info cc
         ORDER BY cc.district_no
     </select>
