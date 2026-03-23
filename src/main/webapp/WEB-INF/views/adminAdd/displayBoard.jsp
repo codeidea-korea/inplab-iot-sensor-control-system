@@ -382,6 +382,7 @@
                         return;
                     }
                     alert2('전광판 정보가 등록되었습니다.', function () {
+                        popFancyClose('#lay-form-write08');
                         const search_text = $('input[name=search_text]').val();
                         offset = 0;
                         getDisplayBoard({search_text: search_text, limit: limit, offset: offset}).then((res) => {
@@ -420,6 +421,7 @@
                         return;
                     }
                     alert2('전광판 정보가 수정되었습니다.', function () {
+                        popFancyClose('#lay-form-write08');
                         const search_text = $('input[name=search_text]').val();
                         offset = 0;
                         getDisplayBoard({search_text: search_text, limit: limit, offset: offset}).then((res) => {

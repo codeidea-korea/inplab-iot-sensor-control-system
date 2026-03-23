@@ -189,13 +189,7 @@
             END AS conv_lmd,
 
             -- 2. 초기 원시 데이터(tsi.init_raw_data)에 동일한 보정식 적용
-            CASE
-            WHEN d.senstype_no = '015' THEN COALESCE(tsi.init_raw_data::numeric, 0)
-            WHEN d.senstype_no = '016' THEN COALESCE(tsi.init_raw_data::numeric, 0) / 100.0
-            WHEN d.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(tsi.init_raw_data::numeric, 0)) / 1000.0
-            WHEN d.senstype_no IN ('001', '002') THEN COALESCE(tsi.init_raw_data::numeric, 0) * 0.5
-            ELSE COALESCE(tsi.init_raw_data::numeric, 0)
-            END AS conv_tsi
+            COALESCE(tsi.formul_data::numeric, 0) AS conv_tsi
         ) conv ON TRUE
         LEFT JOIN (
             SELECT sens_no, maint_rslt_cd
