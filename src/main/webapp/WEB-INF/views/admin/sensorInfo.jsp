@@ -126,6 +126,16 @@
         var _popupClearData;
         $(function () {
             const $grid = $('#jq-grid');
+            const setSensNoFields = function (sensNo) {
+                $('#sens_no').val(sensNo || '');
+                $('#sens_no_display').val(sensNo || '');
+            };
+
+            const loadNextSensNo = function () {
+                $.get('/adminAdd/sensorInfo/next-no', function (res) {
+                    setSensNoFields(res);
+                });
+            };
 
             $('.deleteBtn').hide();
             window.vworld = new vwutil({
@@ -212,8 +222,10 @@
                 $('input[type="submit"]').val('저장');
 
                 setSerialize('#lay-form-write', _popupClearData);
+                setSensNoFields('');
 
                 popFancy('#lay-form-write');
+                loadNextSensNo();
 
                 $('#logr_no').prop('disabled', false);
                 $('#senstype_no').prop('disabled', false);
@@ -294,6 +306,7 @@
                 }
 
                 setSerialize('#lay-form-write', targetArr[0]); // 선택값 세팅
+                setSensNoFields(targetArr[0].sens_no);
                 $('.deleteBtn').show();
                 popFancy('#lay-form-write');
 
@@ -452,6 +465,12 @@
                             <select id="senstype_no" name="senstype_no" class="required">
                                 <option value="">선택</option>
                             </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>센서NO</th>
+                        <td colspan="3">
+                            <input type="text" id="sens_no_display" readonly/>
                         </td>
                     </tr>
                     <tr>

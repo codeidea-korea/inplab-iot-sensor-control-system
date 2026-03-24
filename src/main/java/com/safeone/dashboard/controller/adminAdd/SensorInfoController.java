@@ -124,6 +124,12 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
     }
 
     @ResponseBody
+    @GetMapping("/next-no")
+    public String getNextSensNo() {
+        return sensorInfoService.getNextSensNo();
+    }
+
+    @ResponseBody
     @GetMapping("/del")
     public int delete(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         return sensorInfoService.deleteCascadeBySensNo(param);
