@@ -364,6 +364,7 @@
                     $('#del_broadcast').hide();
                     // $('#tr_brdcast_no').hide();
                     popFancy('#lay-form-write08');
+
                 }).catch((fail) => {
                     console.log('fail > ', fail);
                     alert2('방송장비 ID 채번에 실패했습니다.', function () {
@@ -493,6 +494,12 @@
                     $('#del_broadcast').show();
                     $('#tr_brdcast_no').show();
                     popFancy('#lay-form-write08');
+
+                    $('#district_no').off('change').on('change', function () {
+                        $('#lay-form-write08 input[name=brdcast_lat]').val('');
+                        $('#lay-form-write08 input[name=brdcast_lon]').val('');
+                    });
+                    
                 }).catch((fail) => {
                     console.log('fail > ', fail);
                 });

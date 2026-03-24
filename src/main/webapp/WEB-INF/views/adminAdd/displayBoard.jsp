@@ -366,6 +366,8 @@
                     $('#udt_displayBoard').hide();
                     $('#del_displayBoard').hide();
                     popFancy('#lay-form-write08');
+
+
                 }).catch((fail) => {
                     console.log('fail > ', fail);
                 });
@@ -493,6 +495,12 @@
                     $('#del_displayBoard').show();
                     $('#tr_dispbd_no').show();
                     popFancy('#lay-form-write08');
+
+                    $('#district_no').off('change').on('change', function () {
+                        $('#lay-form-write08 input[name=dispbd_lat]').val('');
+                        $('#lay-form-write08 input[name=dispbd_lon]').val('');
+                    });
+
                 }).catch((fail) => {
                     console.log('fail > ', fail);
                 });

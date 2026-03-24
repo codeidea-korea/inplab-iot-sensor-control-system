@@ -554,6 +554,12 @@
                     $('#udt_cctv').show();
                     $('#del_cctv').show();
                     popFancy('#lay-form-write08');
+
+                    $('#district_no').off('change').on('change', function () {
+                        $('#lay-form-write08 input[name=cctv_lat]').val('');
+                        $('#lay-form-write08 input[name=cctv_lon]').val('');
+                    });
+
                 }).catch((fail) => {
                     console.log('fail > ', fail);
                 });
