@@ -310,7 +310,8 @@
                 WHEN tst.senstype_no IN ('013', '017') THEN (32767.0 - COALESCE(tmd.raw_data::numeric, 0)) / 1000.0
                 WHEN tst.senstype_no IN ('001', '002') THEN COALESCE(tmd.raw_data::numeric, 0) * 0.5
                 ELSE COALESCE(tmd.raw_data::numeric, 0)
-            END AS formul_data
+            END AS formul_data,
+            raw_data
         FROM tb_sensor_info tsinfo
                  LEFT JOIN tb_sensor_type tst ON tsinfo.senstype_no = tst.senstype_no
                  LEFT JOIN LATERAL (
@@ -328,12 +329,11 @@
     <update id="updateSensorInitialSetting" parameterType="java.util.Map">
         UPDATE tb_sensor_init
         SET
-        <if test="formul_data != null and formul_data != ''">
-            formul_data = #{formul_data}::float ,
-        </if>
-        emer_status = #{emer_status}
-        , init_apply_dt = now()
-        , mod_dt = now()
+            formul_data = #{formul_data}::float
+            , init_raw_data = #{raw_data}::float
+            , emer_status = #{emer_status}
+            , init_apply_dt = now()
+            , mod_dt = now()
         WHERE sens_no = #{sens_no}
         and sens_chnl_id = #{og_sens_chnl_id}
     </update>

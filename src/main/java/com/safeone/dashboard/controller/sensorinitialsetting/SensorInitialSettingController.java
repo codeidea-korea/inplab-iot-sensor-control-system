@@ -94,8 +94,10 @@ public class SensorInitialSettingController extends JqGridAbstract<SensorInitial
             Map<String, Object> latest = sensorInitialSettingService.getLatestConvertedMeasureFormulData(m);
             if (latest != null && latest.get("formul_data") != null) {
                 m.put("formul_data", latest.get("formul_data").toString());
+                m.put("raw_data", latest.get("raw_data").toString());
             } else {
                 m.put("formul_data", "0");
+                m.put("raw_data", "0");
             }
 
             sensorInitialSettingService.update(m);
