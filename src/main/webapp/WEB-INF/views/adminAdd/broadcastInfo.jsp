@@ -499,7 +499,7 @@
                         $('#lay-form-write08 input[name=brdcast_lat]').val('');
                         $('#lay-form-write08 input[name=brdcast_lon]').val('');
                     });
-                    
+
                 }).catch((fail) => {
                     console.log('fail > ', fail);
                 });

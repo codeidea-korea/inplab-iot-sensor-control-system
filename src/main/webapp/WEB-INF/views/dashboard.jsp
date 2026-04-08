@@ -543,13 +543,23 @@
         if (autoLogin) {
             localStorage.setItem('loginSuccess', true);
         }
+
+       //기본 좌표
+        const defaultLon = 126.9780;
+        const defaultLat = 37.5665;
+        const defaultZoom = 15;
+
+        const centerLon = (_areaInfo && _areaInfo.dist_lon) ? _areaInfo.dist_lon : defaultLon;
+        const centerLat = (_areaInfo && _areaInfo.dist_lat) ? _areaInfo.dist_lat : defaultLat;
+        const centerZoom = (_areaInfo && _areaInfo.dist_zoom) ? _areaInfo.dist_zoom : defaultZoom;
+
         window.vworld = new vwutil({
             mapId: "map",
             initPosition: {
                 center: [
-                    _areaInfo.dist_lon, _areaInfo.dist_lat
+                    centerLon, centerLat
                 ],
-                zoom: _areaInfo.dist_zoom,
+                zoom: centerZoom,
                 rotation: 0.5
             }
         });
