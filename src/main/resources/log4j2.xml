@@ -48,8 +48,9 @@
     <Loggers>
         <!-- MyBatis 관련 로그 설정-->
         <logger name="jdbc" level="OFF"/>
-        <logger name="jdbc.sqlonly" level="INFO"/>
-        <logger name="jdbc.resultsettable" level="INFO"/>
+        <logger name="jdbc.sqlonly" level="OFF"/>
+        <logger name="jdbc.resultsettable" level="OFF"/>
+        <logger name="jdbc.sqltiming" level="OFF"/>
         <logger name="jdbc.audit" level="OFF"/>
         <logger name="jdbc.resultset" level="OFF"/>
         <logger name="jdbc.connection" level="OFF"/>
@@ -63,10 +64,9 @@
             <AppenderRef ref="errorFile"/>
         </logger>
 
-        <logger name="net.sf.log4jdbc" level="DEBUG" additivity="false" >
+        <logger name="net.sf.log4jdbc" level="OFF" additivity="false" >
             <AppenderRef ref="file"/>
             <AppenderRef ref="errorFile"/>
-            <AppenderRef ref="console" />
         </logger>
     </Loggers>
 

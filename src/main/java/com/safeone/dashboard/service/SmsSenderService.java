@@ -20,11 +20,13 @@ import java.util.stream.Collectors;
 public class SmsSenderService {
 
     private final SmsSenderMapper mapper;
+    private final MoisRiskAlertService moisRiskAlertService;
     private static final int SMS_SEND_TERM_MINUTE = 1;
 
     @Transactional
     public void run() {
         LocalDateTime now = LocalDateTime.now();
+        Set<String> currentActiveAlarmKeys = new HashSet<>();
 
         List<AlertStandardDto> alertStandards = getAlertStandards();
 
@@ -58,30 +60,37 @@ public class SmsSenderService {
 
             // 5. 후보군 필터링
             List<SmsTargetDto> smsTargets = filterToTarget(candidates, maxOver);
-            if (smsTargets.isEmpty()) {
-                return;
-            }
-
-            Map<String, Object> maintCompInfo = getMaintCompInfo(districtInfo.getMeas_comp_id1());
+            Map<String, Object> maintCompInfo = smsTargets.isEmpty()
+                    ? Collections.emptyMap()
+                    : getMaintCompInfo(districtInfo.getMeas_comp_id1());
 
             // 6. 알람이력 저장 + 문자 상세내역 저장
             overAlerts.forEach(item -> {
+                currentActiveAlarmKeys.add(moisRiskAlertService.buildAlarmKey(item));
                 int insertedMgntNo = saveAlarmDetails(item);
-                smsTargets.forEach(smsTarget -> {
-                    String msg = makeMessage(smsTarget, districtInfo, maintCompInfo, overAlerts);
-                    saveSmsDetails(smsTarget, insertedMgntNo, msg);
-                });
+                SensInfoDto sensInfo = mapper.getSensInfo(item.getSens_no());
+                moisRiskAlertService.sendAlertIfNeeded(insertedMgntNo, item, districtInfo, sensInfo);
+                if (!smsTargets.isEmpty()) {
+                    smsTargets.forEach(smsTarget -> {
+                        String msg = makeMessage(smsTarget, districtInfo, maintCompInfo, overAlerts);
+                        saveSmsDetails(smsTarget, insertedMgntNo, msg);
+                    });
+                }
             });
 
             // 7. 문자 발송
-            smsTargets.forEach(smsTarget -> {
-                try {
-                    sendSms(smsTarget, districtInfo, maintCompInfo, overAlerts);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            if (!smsTargets.isEmpty()) {
+                smsTargets.forEach(smsTarget -> {
+                    try {
+                        sendSms(smsTarget, districtInfo, maintCompInfo, overAlerts);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
         });
+
+        moisRiskAlertService.reconcileActiveKeys(currentActiveAlarmKeys);
     }
 
     private void saveSmsDetails(SmsTargetDto smsTarget, int insertedMgntNo, String sms) {
@@ -411,5 +420,3 @@ public class SmsSenderService {
         System.out.println(response);
     }
 }
-
-
