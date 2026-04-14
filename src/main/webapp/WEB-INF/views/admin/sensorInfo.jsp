@@ -393,6 +393,9 @@
                     contentType: false,
                     success: function (response) {
                         alert(response);
+                        var $grid = $('#jq-grid');
+                        reloadJqGrid($grid);
+                        fileInput.value = '';
                     },
                     error: function (response) {
                         alert("Error: " + response.responseText);
@@ -401,8 +404,6 @@
             } else {
                 alert("No file selected.");
             }
-            var $grid = $('#jq-grid');
-            reloadJqGrid($grid);
         }
     </script>
 </head>
