@@ -259,17 +259,6 @@
                     $('input[name=rtsp_port]').focus();
                 });
                 result = true;
-            } else if (relay_nm === '' || relay_nm === undefined) {
-                $('input[name=relay_nm]').focus();
-                result = true;
-            } else if (relay_ip === '' || relay_ip === undefined) {
-                $('input[name=relay_ip]').focus();
-                result = true;
-            } else if (isNaN(relay_port)) {
-                alert2('릴레이 Port는 숫자만 입력해주세요.', function () {
-                    $('input[name=relay_port]').focus();
-                });
-                result = true;
             } else if (inst_ymd === '' || inst_ymd === undefined) {
                 $('input[name=inst_ymd]').focus();
                 result = true;
@@ -672,14 +661,14 @@
                         <td><input type="text" name="rtsp_port" class="required"/></td>
                     </tr>
                     <tr>
-                        <th>릴레이명 <span style="color: red">*</span></th>
-                        <td colspan="3"><input type="text" name="relay_nm" class="required"/></td>
+                        <th>릴레이명</th>
+                        <td colspan="3"><input type="text" name="relay_nm" /></td>
                     </tr>
                     <tr>
-                        <th>릴레이 IP <span style="color: red">*</span></th>
-                        <td><input type="text" name="relay_ip" class="required"/></td>
-                        <th>릴레이 Port <span style="color: red">*</span></th>
-                        <td><input type="text" name="relay_port" class="required"/></td>
+                        <th>릴레이 IP </th>
+                        <td><input type="text" name="relay_ip" /></td>
+                        <th>릴레이 Port</th>
+                        <td><input type="text" name="relay_port" /></td>
                     </tr>
                     <tr>
                         <th>설치일자 <span style="color: red">*</span></th>
