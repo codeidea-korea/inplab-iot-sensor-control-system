@@ -25,35 +25,14 @@
         </choose>
     </sql>
 
-    <sql id="chartInitBaseExpr">
-        <choose>
-            <when test="init_base != null and init_base == 'raw'">
-                COALESCE(tsit.init_raw_data, 0)
-            </when>
-            <otherwise>
-                COALESCE(tsit.formul_data, 0)
-            </otherwise>
-        </choose>
-    </sql>
-
-    <sql id="chartMeasureBaseExpr">
-        <choose>
-            <when test="measure_base != null and measure_base == 'raw'">
-                tmd.raw_data
-            </when>
-            <otherwise>
-                tmd.formul_data
-            </otherwise>
-        </choose>
-    </sql>
 
     <sql id="chartDiffExpr">
         <choose>
             <when test="diff_direction != null and diff_direction == 'init_minus_meas'">
-                (<include refid="chartInitBaseExpr"/> - <include refid="chartMeasureBaseExpr"/>)
+                (tmd.data_diff * -1)
             </when>
             <otherwise>
-                (<include refid="chartMeasureBaseExpr"/> - <include refid="chartInitBaseExpr"/>)
+                tmd.data_diff
             </otherwise>
         </choose>
     </sql>
@@ -197,9 +176,6 @@
                                AND COALESCE(tai.sens_chnl_id, '') = COALESCE(tmd.sens_chnl_id, '')
                  LEFT JOIN tb_sensor_info tsi
                            ON tmd.sens_no = tsi.sens_no
-                 LEFT JOIN tb_sensor_init tsit
-                           ON tsit.sens_no = tmd.sens_no
-                               AND COALESCE(tsit.sens_chnl_id, '') = COALESCE(tmd.sens_chnl_id, '')
         WHERE tmd.meas_dt BETWEEN (#{start_date_time}::timestamp) AND (#{end_date_time}::timestamp)
           AND tmd.sens_no = #{sens_no}
         <if test="include_hidden == null or include_hidden != 'Y'">
