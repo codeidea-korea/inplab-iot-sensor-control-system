@@ -158,10 +158,8 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
         param.put("sens_chnl_nm", param.get("sens_nm"));
         param.put("district_no", district_no);
 
-        // 🚨 [핵심 수정] 1. 메인 테이블(부모)을 가장 먼저 저장 시도합니다.
         boolean isSuccess = sensorInfoService.create(param);
 
-        // 🚨 [핵심 수정] 2. 메인 테이블 저장이 성공했을 때만 하위 테이블들을 저장합니다.
         if (isSuccess) {
 
             // 하위 테이블 1
