@@ -3,7 +3,7 @@
     
 <mapper namespace="com.safeone.dashboard.dao.LogrIdxMapMapper">
     <select id="selectMaxMappingNo" resultType="Integer">
-        SELECT MAX(logr_idx_no)
+        SELECT MAX(CAST(NULLIF(logr_idx_no, '') AS INTEGER))
         FROM tb_logr_idx_map
     </select>
 
