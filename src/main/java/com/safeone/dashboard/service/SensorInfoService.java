@@ -110,6 +110,9 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
         List<String> duplicateKeys = new ArrayList<>(); // 중복 키 저장 리스트
         DataFormatter formatter = new DataFormatter();
 
+        String currentSensNo = getNextSensNo();
+        int currentMappingNo = logrIdxMapService.getNextMappingNo();
+
         try (InputStream is = file.getInputStream()) {
             Workbook workbook = WorkbookFactory.create(is);
             Sheet sheet = workbook.getSheetAt(0);
@@ -199,19 +202,41 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                 sensorInfo.put("sens_chnl_nm", finalSensNm);
 
 
-                // ==========================================
-                // 2. 분기 처리 (기존 데이터 수정 vs 신규 데이터 등록)
-                // ==========================================
+
                 String excelSensNo = formatter.formatCellValue(row.getCell(0));
+                boolean isUpdate = false;
+                String targetSensNo = "";
+
 
                 if (excelSensNo != null && !excelSensNo.trim().isEmpty()) {
-                    // [UPDATE: 기존 센서 정보 수정]
-                    sensorInfo.put("sens_no", excelSensNo.trim());
+                    String trimmedSensNo = excelSensNo.trim();
+                    int existCount = mapper.countBySensNo(trimmedSensNo); // DB에 있는지 확인
+                    if (existCount > 0) {
+                        isUpdate = true;
+                        targetSensNo = trimmedSensNo;
+                    } else {
+                        isUpdate = false;
+                        targetSensNo = trimmedSensNo;
+
+                        if (targetSensNo.compareTo(currentSensNo) >= 0) {
+                            currentSensNo = incrementSensNo(targetSensNo);
+                        }
+                    }
+                } else {
+                    isUpdate = false;
+                    targetSensNo = currentSensNo;
+
+                    // 다음 빈칸 데이터를 위해 자동 채번 번호 1 증가
+                    currentSensNo = incrementSensNo(currentSensNo);
+                }
+
+                sensorInfo.put("sens_no", targetSensNo);
+
+                if (isUpdate) {
                     mapper.updateSensorInfo(sensorInfo);
 
                 } else {
-                    sensorInfo.put("sens_no", getNextSensNo());
-                    sensorInfo.put("mapping_no", logrIdxMapService.getNextMappingNo());
+                    sensorInfo.put("mapping_no", currentMappingNo);
 
                     // 로거 정보 인서트
                     this.logrInfoInsert(sensorInfo);
@@ -247,6 +272,10 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
 
                     // 최종 메인 테이블 인서트
                     mapper.insertSensorInfo(sensorInfo);
+
+                    // 다음 신규 등록을 위해 mapping_no 1 증가
+                    // (업데이트일 때는 굳이 증가시킬 필요가 없으므로 else 블록 안으로 이동시켰습니다)
+                    currentMappingNo++;
                 }
 
                 // 분기에 상관없이 한 행 처리가 완료되면 성공 카운트 증가
@@ -349,6 +378,21 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
             newMap.put("senstype_no", senstypeNo);
             logrIdxMapService.create(newMap);
         }
+    }
+    private String incrementSensNo(String currentNo) {
+        if (currentNo == null || currentNo.trim().isEmpty()) {
+            return "S0001";
+        }
+        String trimmed = currentNo.trim();
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("^(.*?)(\\d+)$").matcher(trimmed);
+        if (!matcher.matches()) {
+            return trimmed + "0001";
+        }
+
+        String prefix = matcher.group(1);
+        String numericPart = matcher.group(2);
+        int next = Integer.parseInt(numericPart) + 1;
+        return prefix + String.format("%0" + numericPart.length() + "d", next);
     }
 }
 
