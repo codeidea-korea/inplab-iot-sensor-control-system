@@ -158,39 +158,45 @@ public class SensorInfoController extends JqGridAbstract<SensorInfoDto> {
         param.put("sens_chnl_nm", param.get("sens_nm"));
         param.put("district_no", district_no);
 
-        sensorInfoService.logrInfoInsert(param);
+        // 🚨 [핵심 수정] 1. 메인 테이블(부모)을 가장 먼저 저장 시도합니다.
+        boolean isSuccess = sensorInfoService.create(param);
 
-//        alertStandardManagementService.create(param);
+        // 🚨 [핵심 수정] 2. 메인 테이블 저장이 성공했을 때만 하위 테이블들을 저장합니다.
+        if (isSuccess) {
 
-//        sensorInitialSettingService.create(param);
+            // 하위 테이블 1
+            sensorInfoService.logrInfoInsert(param);
 
-        Map<Integer, String> map = new HashMap<>();
-        map.put(1, "X");
-        map.put(2, "Y");
-        map.put(3, "Z");
+            Map<Integer, String> map = new HashMap<>();
+            map.put(1, "X");
+            map.put(2, "Y");
+            map.put(3, "Z");
 
-        /* chnlCnt만큼 경보기준/초기치 생성 */
-        IntStream.rangeClosed(1, chnlCnt).forEach(ch -> {
+            /* chnlCnt만큼 경보기준/초기치 생성 */
+            IntStream.rangeClosed(1, chnlCnt).forEach(ch -> {
 
-            Map<String, Object> perChParam = new HashMap<>(param);
+                Map<String, Object> perChParam = new HashMap<>(param);
 
-            if (chnlCnt == 1) {
-                // 단일 센서인 경우 (TTW, RAIN 등)
-                perChParam.put("sens_chnl_id", ""); // DB 설정에 따라 "", "1", null 중 선택
-                perChParam.put("sens_chnl_nm", param.get("sens_chnl_nm").toString()); // "-X"를 붙이지 않음
-            } else {
-                // 다채널 센서인 경우 (채널 2개 이상)
-                String mappedId = mapChannelId(ch);
-                perChParam.put("sens_chnl_id", mappedId);
-                perChParam.put("sens_chnl_nm", param.get("sens_chnl_nm").toString() + "-" + mappedId);
-            }
+                if (chnlCnt == 1) {
+                    // 단일 센서인 경우 (TTW, RAIN 등)
+                    perChParam.put("sens_chnl_id", "");
+                    perChParam.put("sens_chnl_nm", param.get("sens_chnl_nm").toString());
+                } else {
+                    // 다채널 센서인 경우 (채널 2개 이상)
+                    String mappedId = mapChannelId(ch);
+                    perChParam.put("sens_chnl_id", mappedId);
+                    perChParam.put("sens_chnl_nm", param.get("sens_chnl_nm").toString() + "-" + mappedId);
+                }
 
-            sensorInitialSettingService.create(perChParam);
-            alertStandardManagementService.create(perChParam);
-            sensorInfoService.chnlCreate(perChParam);
-        });
+                // 하위 테이블 2, 3, 4
+                sensorInitialSettingService.create(perChParam);
+                alertStandardManagementService.create(perChParam);
+                sensorInfoService.chnlCreate(perChParam);
+            });
+        }
 
-        return sensorInfoService.create(param);
+        // 성공 여부 반환
+        return isSuccess;
     }
 
     @ResponseBody
