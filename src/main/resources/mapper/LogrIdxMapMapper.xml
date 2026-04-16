@@ -124,9 +124,9 @@
         WHERE 1=1
         <include refid="rowSearch"/>
         <include refid="rowOrder"/>
-<!--        <if test="page != null and page > 0">-->
-<!--            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int-->
-<!--        </if>-->
+        <if test="page != null and page > 0">
+            limit #{rows}::int offset (#{page}::int - 1) * #{rows}::int
+        </if>
     </select>
 
     <select id="selectLogrIdxMapListTotal" parameterType="java.util.Map" resultType="int">
