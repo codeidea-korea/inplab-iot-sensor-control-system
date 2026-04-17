@@ -234,6 +234,16 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
 
                 if (isUpdate) {
                     mapper.updateSensorInfo(sensorInfo);
+
+                    mapper.deleteSensorInitBySensNo(sensorInfo);
+                    mapper.deleteAlarmInfoBySensNo(sensorInfo);
+                    mapper.deleteSensorChnlBySensNo(sensorInfo);
+                    mapper.deleteLogrIdxMapBySensNo(sensorInfo);
+
+                    sensorInfo.put("mapping_no", currentMappingNo);
+
+                    this.logrInfoInsert(sensorInfo);
+
                     int chnlCnt = 0;
                     Object chnlCntObj = sensAbbr.get(0).get("sens_chnl_cnt");
                     if (chnlCntObj instanceof Number) {
@@ -257,9 +267,12 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
                             perChParam.put("sens_chnl_nm", sensorInfo.get("sens_chnl_nm").toString() + "-" + mappedId);
                         }
 
-                        // 새로 만든 update 쿼리 호출!
-                        mapper.updateSensorChnl(perChParam);
+                        sensorInitialSettingService.create(perChParam);
+                        alertStandardManagementService.create(perChParam);
+                        this.chnlCreate(perChParam);
                     });
+
+                    currentMappingNo++;
 
                 } else {
                     sensorInfo.put("mapping_no", currentMappingNo);
