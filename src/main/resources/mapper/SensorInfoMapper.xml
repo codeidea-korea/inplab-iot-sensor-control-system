@@ -349,6 +349,16 @@
         where sens_no = #{sens_no}
     </update>
 
+    <update id="updateSensorChnl" parameterType="java.util.Map">
+        UPDATE tb_sensor_chnl
+        SET
+        senstype_no = #{senstype_no},
+        sens_chnl_nm = #{sens_chnl_nm},
+        logr_no = #{logr_no}
+        WHERE sens_no = #{sens_no}
+        AND sens_chnl_id = #{sens_chnl_id}
+    </update>
+
     <delete id="deleteSensorInfo" parameterType="java.util.Map">
         DELETE
         FROM tb_sensor_info

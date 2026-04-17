@@ -24,4 +24,5 @@ public interface SensorInfoMapper {
     Integer getMaxLogrIdxNo(String senstypeNo);
     int countBySensNm(String sensNm);
     int countBySensNo(String sensNo);
+    int updateSensorChnl(Map<String, Object> param);
 }

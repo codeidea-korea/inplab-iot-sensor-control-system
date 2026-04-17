@@ -234,6 +234,32 @@ public class SensorInfoService implements JqGridService<SensorInfoDto> {
 
                 if (isUpdate) {
                     mapper.updateSensorInfo(sensorInfo);
+                    int chnlCnt = 0;
+                    Object chnlCntObj = sensAbbr.get(0).get("sens_chnl_cnt");
+                    if (chnlCntObj instanceof Number) {
+                        chnlCnt = ((Number) chnlCntObj).intValue();
+                    } else if (chnlCntObj instanceof String) {
+                        chnlCnt = Integer.parseInt((String) chnlCntObj);
+                    }
+
+                    final int finalChnlCnt = chnlCnt;
+
+                    // 채널 개수만큼 반복하며 UPDATE 실행
+                    IntStream.rangeClosed(1, finalChnlCnt).forEach(ch -> {
+                        Map<String, Object> perChParam = new HashMap<>(sensorInfo);
+
+                        if (finalChnlCnt == 1) {
+                            perChParam.put("sens_chnl_id", "");
+                            perChParam.put("sens_chnl_nm", sensorInfo.get("sens_chnl_nm").toString());
+                        } else {
+                            String mappedId = mapChannelId(ch);
+                            perChParam.put("sens_chnl_id", mappedId);
+                            perChParam.put("sens_chnl_nm", sensorInfo.get("sens_chnl_nm").toString() + "-" + mappedId);
+                        }
+
+                        // 새로 만든 update 쿼리 호출!
+                        mapper.updateSensorChnl(perChParam);
+                    });
 
                 } else {
                     sensorInfo.put("mapping_no", currentMappingNo);
