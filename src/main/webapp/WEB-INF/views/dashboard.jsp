@@ -1139,6 +1139,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false, // 비율을 유지하지 않음 (높이 채우기)
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
                 plugins: {
                     zoom: {
                         pan: {
@@ -1194,6 +1198,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
                 plugins: {
                     zoom: {
                         pan: {
@@ -1282,9 +1290,27 @@
             const labelSet = new Set();
             const labelIndexMap = new Map();
             const datasets = [];
-            const seriesColors = data.map(() => getRandomHSL());
+            const channelColors = ['#FF0000', '#0000FF', '#008000', '#FFA500', '#800080'];
+            const sensorColorTracker = {};
 
-            data.forEach((item) => {
+            const seriesColors = data.map((item) => {
+
+                if (!Array.isArray(item) || item.length === 0 || !item[0]) {
+                    return getRandomHSL();
+                }
+
+                const sensNo = item[0].sens_no;
+
+                if (sensorColorTracker[sensNo] === undefined) {
+                    sensorColorTracker[sensNo] = 0;
+                }
+                const colorIndex = sensorColorTracker[sensNo];
+                sensorColorTracker[sensNo]++;
+
+                return channelColors[colorIndex % channelColors.length];
+            });
+
+           data.forEach((item, index) => {
                 if (!Array.isArray(item) || item.length === 0 || !item[0]) {
                     return;
                 }
@@ -1329,7 +1355,7 @@
                 }
             }
 
-            data.forEach((item) => {
+            data.forEach((item, index) => {
                 if (!Array.isArray(item) || item.length === 0 || !item[0]) {
                     return;
                 }
@@ -1352,7 +1378,7 @@
                 datasets.push({
                     label: datasetLabel,
                     data: mappedData,
-                    borderColor: seriesColors[datasets.length] || getRandomHSL(),
+                    borderColor: seriesColors[index] || getRandomHSL(),
                     fill: false,
                     pointRadius: 0,
                     borderWidth: 1,

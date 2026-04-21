@@ -748,9 +748,23 @@
 
                     const axisMap = {};
 
+                    const channelColors = ['#FF0000', '#0000FF', '#008000', '#FFA500', '#800080'];
+                    const sensorColorTracker = {};
+
                     data.forEach((sensorItem, i) => {
                         const yId = axisMap[sensorItem[0].senstype_no] || 'y' + i;
-                        const color = getRandomHSL();
+
+                        const sensNo = sensorItem[0].sens_no; // 센서 고유 번호
+
+                        // 3. 이 센서가 처음 나온 거라면 카운트를 0으로 시작합니다.
+                        if (sensorColorTracker[sensNo] === undefined) {
+                            sensorColorTracker[sensNo] = 0;
+                        }
+                        const colorIndex = sensorColorTracker[sensNo];
+                        const color = channelColors[colorIndex % channelColors.length];
+
+                        sensorColorTracker[sensNo]++;
+
                         const senstype = senstypeList[sensorItem[0].senstype_no] || sensorItem[0].senstype_no;
                         const isRain = sensorItem[0].senstype_no === '001' || (senstype || '').includes('강우');
 
@@ -855,6 +869,10 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
                             scales,
                             plugins: {
                                 legend: {

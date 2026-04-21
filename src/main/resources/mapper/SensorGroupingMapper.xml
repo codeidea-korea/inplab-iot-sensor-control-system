@@ -178,7 +178,7 @@
                            ON tmd.sens_no = tsi.sens_no
         WHERE tmd.meas_dt BETWEEN (#{start_date_time}::timestamp) AND (#{end_date_time}::timestamp)
           AND tmd.sens_no = #{sens_no}
-        <if test="include_hidden == null or include_hidden != 'Y'">
+        <if test='include_hidden == null or include_hidden != "Y"'>
             AND COALESCE(tsi.sens_disp_yn, 'Y') = 'Y'
         </if>
         <if test="sens_chnl_id != null and sens_chnl_id != ''">
