@@ -1380,7 +1380,7 @@
                     data: mappedData,
                     borderColor: seriesColors[index] || getRandomHSL(),
                     fill: false,
-                    pointRadius: 0,
+                    pointRadius: 3,
                     borderWidth: 1,
                 });
             });
@@ -1397,7 +1397,7 @@
                     borderColor: baseColor,
                     borderWidth: 1.5,
                     borderSkipped: false,
-                    borderRadius: 0,
+                    borderRadius: 3,
                     barPercentage: 0.42,
                     categoryPercentage: 0.8,
                     maxBarThickness: 18

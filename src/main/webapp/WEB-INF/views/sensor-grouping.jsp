@@ -852,7 +852,7 @@
                             borderColor: color,
                             backgroundColor: color,
                             fill: false,
-                            pointRadius: 0,
+                            pointRadius: 3,
                             borderWidth: isRain ? 0 : 1,
                             barThickness: isRain ? 8 : undefined,
                             xAxisID: 'x',

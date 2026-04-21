@@ -1074,7 +1074,26 @@
 
 
                 // 바 차트를 위한 데이터 전처리
-                const seriesColors = data.map(() => getRandomHSL());
+                const channelColors = ['#FF0000', '#0000FF', '#008000', '#FFA500', '#800080'];
+                const sensorColorTracker = {};
+
+                // 2. 랜덤 색상 대신 규칙에 따라 색상 부여
+                const seriesColors = data.map((item) => {
+                    if (!Array.isArray(item) || item.length === 0 || !item[0]) {
+                        return getRandomHSL();
+                    }
+
+                    const sensNo = item[0].sens_no; // 센서 고유 번호
+
+                    if (sensorColorTracker[sensNo] === undefined) {
+                        sensorColorTracker[sensNo] = 0;
+                    }
+
+                    const colorIndex = sensorColorTracker[sensNo];
+                    sensorColorTracker[sensNo]++; // 다음 채널을 위해 증가
+
+                    return channelColors[colorIndex % channelColors.length];
+                });
 
                 // 라인 차트를 위한 레이블 및 데이터셋 구성
                 // Chart.js의 time 스케일은 labels 배열이 필수는 아니며, datasets 내부의 x 값을 통해 처리합니다.
@@ -1088,7 +1107,7 @@
                     }), // 변위차 기준 {x, y}
                     borderColor: seriesColors[index], // 랜덤 색상
                     fill: false, // 선 아래를 채우지 않음
-                    pointRadius: 0, // 꼭짓점 원 크기 제거
+                    pointRadius: 3, // 꼭짓점 원 크기 제거
                     borderWidth: 1, // 선 두께 줄이기
                 }));
 
