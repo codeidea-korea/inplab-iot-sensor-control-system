@@ -494,9 +494,7 @@
                         const targetX = baseX + xAdjust;
                         const targetYTop = (baseY + yAdjust) - (boxHeight / 2);
                         const useFixedRow = Boolean(item.preserveRow);
-                        const rect = useFixedRow
-                            ? findNonOverlappingRectOnRow(targetX, targetYTop, boxWidth, boxHeight)
-                            : findNonOverlappingRect(targetX, targetYTop, boxWidth, boxHeight);
+                        const rect = clampRect(targetX, targetYTop, boxWidth, boxHeight);
                         const x = rect.x;
                         const yTop = rect.yTop;
                         placedRects.push(rect);
