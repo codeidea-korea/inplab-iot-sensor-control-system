@@ -1011,6 +1011,9 @@
                 const items = [];
                 const laneSlotMap = {};
 
+                const sensorOffsetXMap = {};
+                let currentOffsetX = 10;
+
                 const drawnSensorAlarms = new Set();
 
                 data.forEach((sensorItem, i) => {
@@ -1018,7 +1021,12 @@
                         return;
                     }
 
-                    const sensNo = sensorItem[0].sens_no;
+                    const baseName = sensorItem[0].sens_nm.split('-')[0];
+
+                    if (sensorOffsetXMap[baseName] === undefined) {
+                        sensorOffsetXMap[baseName] = currentOffsetX;
+                        currentOffsetX += 85;
+                    }
 
                     const colors = ['#f0dfd1', '#d4eddc', '#f4e7a3', '#cfd8fb'];
                     const lineColors = ['#c88a55', '#4ea96d', '#c9a100', '#4f6ed8'];
@@ -1043,14 +1051,14 @@
 
                     const yScaleId = (axisMap && axisMap[sensorItem[0].senstype_no]) ? axisMap[sensorItem[0].senstype_no] : ('y' + i);
 
-                    const labelTextBase = sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? '-' + sensorItem[0].sens_chnl_id : '');
+                    const labelTextBase = sensorItem[0].sens_nm.split('-')[0];
 
                     const pushLabel = (levelValue, idx, levelType) => {
                         if (!isVisibleAlarmLevel(levelValue)) {
                             return;
                         }
 
-                        const uniqueAlarmKey = sensNo + '_' + levelType + '_' + idx;
+                        const uniqueAlarmKey = baseName + '_' + levelType + '_' + idx;
                         if (drawnSensorAlarms.has(uniqueAlarmKey)) {
                             return;
                         }
