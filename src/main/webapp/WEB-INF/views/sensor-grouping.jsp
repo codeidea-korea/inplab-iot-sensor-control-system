@@ -665,6 +665,16 @@
             let chartInstance = null;
             let isUpdating = false;
 
+            Chart.Tooltip.positioners.followMouse = function(elements, eventPosition) {
+                if (!elements.length) {
+                    return false;
+                }
+                return {
+                    x: eventPosition.x,
+                    y: eventPosition.y
+                };
+            };
+
             async function updateChart(data) {
                 if (data.length === 0) {
                     alert('조회 결과가 존재하지 않습니다.');
@@ -864,11 +874,16 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             interaction: {
-                                mode: 'index',
+                                mode: 'nearest',
+                                axis: 'x',
                                 intersect: false,
                             },
                             scales,
                             plugins: {
+                                tooltip: {
+                                        position: 'followMouse', // 위에서 만든 커스텀 포지셔너 이름
+                                        yAlign: 'bottom'         // 말풍선 꼬리가 아래를 향하게 (커서 위로 박스가 뜸)
+                                },
                                 legend: {
                                     display: true,
                                     onClick: (e, legendItem, legend) => {

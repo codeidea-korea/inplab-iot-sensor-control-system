@@ -490,8 +490,10 @@
                 }
                 popFancy('#chart-popup')
                 setChartModal(selectArrary[0].district_nm, selectArrary[0].senstype_no, selectArrary[0].sens_no)
-                $("#sensor-name-select").val(selectArrary[0].sens_no).trigger('change');
-                $("#graph-search-btn").trigger('click');
+                    .then(() => {
+                        $("#sensor-name-select").val(selectArrary[0].sens_no).trigger('change');
+                        $("#graph-search-btn").trigger('click');
+                    });
             });
 
             const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
@@ -810,6 +812,11 @@
                 },
                 options: {
                     responsive: true,
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false,
+                    },
                     plugins: {
                         zoom: {
                             pan: {
