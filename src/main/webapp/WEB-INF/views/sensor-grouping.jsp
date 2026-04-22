@@ -294,7 +294,7 @@
             const chartDataArray = []; // 모든 데이터를 저장할 배열 추가
             const groupAlarmLabelOverlayPlugin = {
                 id: 'groupAlarmLabelOverlay',
-                afterDraw(chart, _args, pluginOptions) {
+                afterDatasetsDraw(chart, _args, pluginOptions) {
                     const items = (pluginOptions && Array.isArray(pluginOptions.items)) ? pluginOptions.items : [];
                     if (!items.length) return;
 
@@ -494,7 +494,9 @@
                         const targetX = baseX + xAdjust;
                         const targetYTop = (baseY + yAdjust) - (boxHeight / 2);
                         const useFixedRow = Boolean(item.preserveRow);
-                        const rect = clampRect(targetX, targetYTop, boxWidth, boxHeight);
+                        const rect = useFixedRow
+                                                    ? findNonOverlappingRectOnRow(targetX, targetYTop, boxWidth, boxHeight)
+                                                    : findNonOverlappingRect(targetX, targetYTop, boxWidth, boxHeight);
                         const x = rect.x;
                         const yTop = rect.yTop;
                         placedRects.push(rect);
@@ -747,21 +749,15 @@
                     const axisMap = {};
 
                     const channelColors = ['#FF0000', '#0000FF', '#008000', '#FFA500', '#800080'];
-                    const sensorColorTracker = {};
+                    let globalColorIndex = 0;
 
                     data.forEach((sensorItem, i) => {
                         const yId = axisMap[sensorItem[0].senstype_no] || 'y' + i;
 
                         const sensNo = sensorItem[0].sens_no; // 센서 고유 번호
 
-                        // 3. 이 센서가 처음 나온 거라면 카운트를 0으로 시작합니다.
-                        if (sensorColorTracker[sensNo] === undefined) {
-                            sensorColorTracker[sensNo] = 0;
-                        }
-                        const colorIndex = sensorColorTracker[sensNo];
-                        const color = channelColors[colorIndex % channelColors.length];
-
-                        sensorColorTracker[sensNo]++;
+                        const color = channelColors[globalColorIndex % channelColors.length];
+                        globalColorIndex++;
 
                         const senstype = senstypeList[sensorItem[0].senstype_no] || sensorItem[0].senstype_no;
                         const isRain = sensorItem[0].senstype_no === '001' || (senstype || '').includes('강우');
@@ -999,10 +995,15 @@
             function buildAlarmLabelItems(data, minDate, axisMap) {
                 const items = [];
                 const laneSlotMap = {};
+
+                const drawnSensorAlarms = new Set();
+
                 data.forEach((sensorItem, i) => {
                     if (!sensorItem || sensorItem.length === 0) {
                         return;
                     }
+
+                    const sensNo = sensorItem[0].sens_no;
 
                     const colors = ['#f0dfd1', '#d4eddc', '#f4e7a3', '#cfd8fb'];
                     const lineColors = ['#c88a55', '#4ea96d', '#c9a100', '#4f6ed8'];
@@ -1026,12 +1027,19 @@
                     }
 
                     const yScaleId = (axisMap && axisMap[sensorItem[0].senstype_no]) ? axisMap[sensorItem[0].senstype_no] : ('y' + i);
+
                     const labelTextBase = sensorItem[0].sens_nm + (sensorItem[0].sens_chnl_id ? '-' + sensorItem[0].sens_chnl_id : '');
 
                     const pushLabel = (levelValue, idx, levelType) => {
                         if (!isVisibleAlarmLevel(levelValue)) {
                             return;
                         }
+
+                        const uniqueAlarmKey = sensNo + '_' + levelType + '_' + idx;
+                        if (drawnSensorAlarms.has(uniqueAlarmKey)) {
+                            return;
+                        }
+                        drawnSensorAlarms.add(uniqueAlarmKey);
 
                         // Group labels by exact warning line to avoid collapsing labels from different y-levels.
                         const laneKey = [
