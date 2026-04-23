@@ -116,7 +116,10 @@ public class LogrIdxMapController extends JqGridAbstract<LogrIdxMapDto> {
     @GetMapping("/mapping")
     public ResponseEntity<String> mapping(HttpServletRequest request, @RequestParam Map<String, Object> param) {
         try {
-            logrIdxMapService.mapping(param);
+            Map<String, Object> pureParam = new HashMap<>();
+            pureParam.put("logr_no", param.get("logr_no"));
+
+            logrIdxMapService.mapping(pureParam);
             return new ResponseEntity<>("success", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>("Error mapping: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
