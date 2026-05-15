@@ -374,6 +374,42 @@
             display: block;
             border-radius: 10px;
         }
+
+        .marker.asset.alarm-no-receive span.title {
+            background: #fff !important;
+            border: 1px solid #999 !important;
+            color: #111 !important;
+            font-weight: 700;
+        }
+
+        .marker.asset.alarm-level-0 span.title {
+            background: #16a34a !important;
+            border: 1px solid #0f7a34 !important;
+            color: #fff !important;
+            font-weight: 700;
+        }
+
+        .marker.asset.alarm-level-1 span.title {
+            background: #f3e600 !important;
+            border: 1px solid #b9ad00 !important;
+            color: #111 !important;
+            font-weight: 700;
+        }
+
+        .marker.asset.alarm-level-2 span.title {
+            background: #f28c00 !important;
+            border: 1px solid #b76500 !important;
+            color: #fff !important;
+            font-weight: 700;
+        }
+
+        .marker.asset.alarm-level-3 span.title,
+        .marker.asset.alarm-level-4 span.title {
+            background: #e60012 !important;
+            border: 1px solid #a4000f !important;
+            color: #fff !important;
+            font-weight: 700;
+        }
     </style>
 </head>
 <script type="text/javascript" src="/admin_add.js"></script>
@@ -2036,18 +2072,31 @@
                 } else {
                     img = 'icon_sensor_tm.png';
                 }
+
+                const alarmLevelNo = Number(sensor.alarm_level_no || 0);
+                const isNoReceive = String(sensor.comm_status || '').trim() === '미수신';
+                const alarmLevelClass = isNoReceive ? ' alarm-no-receive' : ' alarm-level-' + alarmLevelNo;
+                const alarmCode = sensor.alarm_lvl_cd || 'ARM009';
+
+
                 const position = [sensor.sens_lon, sensor.sens_lat];
                 const sensorMaker = window.vworld.addOverlay(
-                    '<div class="marker asset" zoneid="' + districtNo + '" assetid="' + sensor.sens_no + '">' +
+                    '<div class="marker asset' + alarmLevelClass + '" ' +
+                    'zoneid="' + districtNo + '" ' +
+                    'assetid="' + sensor.sens_no + '" ' +
+                    'data-alarm-level="' + alarmLevelNo + '" ' +
+                    'data-alarm-code="' + alarmCode + '">' +
                     '    <img src="/images/' + img + '"/>' +
                     '    <span class="title">' + sensor.sens_nm + '</span>' +
-                    '</div>'
-                    , position,
+                    '</div>',
+                    position,
                     '/images/' + img, sensor.sens_nm, null, {
                         type: type,
                         asset_id: sensor.sens_no,
                         zone_id: districtNo,
-                        asset_category: 'sensor'
+                        asset_category: 'sensor',
+                        alarm_level_no: alarmLevelNo,
+                        alarm_lvl_cd: alarmCode
                     });
                 window.markers.assets.push(sensorMaker);
             });

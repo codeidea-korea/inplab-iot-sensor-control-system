@@ -210,7 +210,6 @@
     </div>
     <div id="login-area">
         <h2 style="max-width: 700px">
-            <span data-font="Prompt">Hello,</span><br/>
             <strong>
                 ${site_sys_nm}
             </strong>
